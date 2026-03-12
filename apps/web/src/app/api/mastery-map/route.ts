@@ -33,6 +33,19 @@ export async function GET(req: Request) {
     : [];
   const stateMap = new Map(userNodeStates.map((s) => [s.nodeId, s]));
 
+  const missions =
+    session?.user?.id
+      ? await prisma.mission.findMany({
+          where: {
+            userId: session.user.id,
+            nodeId: { in: subjects.flatMap((s) => s.conceptNodes.map((n) => n.id)) },
+            status: { in: ["not_started", "in_progress"] },
+          },
+          select: { nodeId: true, id: true },
+        })
+      : [];
+  const missionByNode = new Map(missions.map((m) => [m.nodeId, m.id]));
+
   const nodes: Node[] = [];
   const edges: Edge[] = [];
   const nodeDetails: Record<string, unknown> = {};
@@ -84,6 +97,7 @@ export async function GET(req: Request) {
           state: state?.state ?? "untouched",
           mastery: state?.mastery,
           resources,
+          missionId: missionByNode.get(n.id) ?? null,
         };
 
         x += 1;

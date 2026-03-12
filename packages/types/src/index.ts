@@ -13,7 +13,8 @@ export type ResourceType =
   | "summary"
   | "flashcard_set"
   | "diagram"
-  | "walkthrough";
+  | "walkthrough"
+  | "mini_lesson";
 
 export type ReviewStatus = "pending" | "in_progress" | "completed";
 

@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth";
 import { prisma } from "@mindorbit/db";
 import { z } from "zod";
+import { AnalyticsService, EVENT_TYPES } from "@/services/analytics-service";
 
 const schema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
-  type: z.enum(["note", "summary", "flashcard_set", "diagram", "walkthrough"]),
+  type: z.enum(["note", "summary", "flashcard_set", "diagram", "walkthrough", "mini_lesson"]),
   subjectId: z.string(),
   clusterId: z.string(),
   nodeId: z.string(),
@@ -39,6 +40,12 @@ export async function POST(req: Request) {
     await prisma.user.update({
       where: { id: session.user.id },
       data: { xp: { increment: 10 } },
+    });
+
+    await AnalyticsService.track(session.user.id, EVENT_TYPES.resource_uploaded, {
+      resourceId: resource.id,
+      type: data.type,
+      nodeId: data.nodeId,
     });
 
     return NextResponse.json({ id: resource.id });

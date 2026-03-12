@@ -3,7 +3,7 @@ import { prisma } from "@mindorbit/db";
 import { getServerSession } from "@/lib/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@mindorbit/ui";
 import { formatRelativeTime } from "@mindorbit/lib";
-import { ClipboardList } from "lucide-react";
+import { ReviewItemClient } from "./review-item-client";
 
 export default async function ReviewPage() {
   const session = await getServerSession();
@@ -44,22 +44,13 @@ export default async function ReviewPage() {
           {todayItems.length > 0 ? (
             <div className="space-y-2">
               {todayItems.map((item) => (
-                <Link
+                <ReviewItemClient
                   key={item.id}
-                  href={`/mastery-map?node=${item.nodeId}`}
-                  className="flex items-center justify-between rounded-xl border p-4 transition-colors hover:bg-muted"
-                >
-                  <div className="flex items-center gap-4">
-                    <ClipboardList className="h-10 w-10 text-primary" />
-                    <div>
-                      <p className="font-medium">{item.node.title}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Due {formatRelativeTime(item.dueAt)}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-primary">Review →</span>
-                </Link>
+                  id={item.id}
+                  nodeId={item.nodeId}
+                  nodeTitle={item.node.title}
+                  dueAt={item.dueAt}
+                />
               ))}
             </div>
           ) : (

@@ -22,20 +22,33 @@ export default async function CommunityPage({
     ? await prisma.subject.findUnique({ where: { slug: subjectSlug } })
     : null;
 
-  const resources = await prisma.resource.findMany({
+  const typeFilterValues = ["note", "summary", "flashcard_set", "diagram", "walkthrough", "mini_lesson"] as const;
+
+  let resources = await prisma.resource.findMany({
     where: {
       ...(subject && { subjectId: subject.id }),
-      ...(typeFilter && { type: typeFilter as "note" | "summary" | "flashcard_set" | "diagram" | "walkthrough" }),
+      ...(typeFilter && typeFilterValues.includes(typeFilter as (typeof typeFilterValues)[number]) && { type: typeFilter }),
     },
     include: {
-      user: { select: { name: true } },
+      user: { select: { name: true, xp: true } },
       subject: { select: { title: true } },
       node: { select: { title: true } },
       _count: { select: { likes: true, saves: true } },
     },
     orderBy: { createdAt: "desc" },
-    take: 50,
+    take: 100,
   });
+
+  if (sortBy === "popular") {
+    const withScore = resources.map((r) => ({
+      ...r,
+      _score: r._count.likes * 2 + r._count.saves * 3 + (r.user.xp ?? 0) / 10,
+    }));
+    withScore.sort((a, b) => b._score - a._score);
+    resources = withScore.slice(0, 50);
+  } else {
+    resources = resources.slice(0, 50);
+  }
 
   return (
     <div className="space-y-8">

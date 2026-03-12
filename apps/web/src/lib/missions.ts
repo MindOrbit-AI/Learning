@@ -3,7 +3,7 @@
  */
 
 import { prisma } from "@mindorbit/db";
-import { mockAIProvider } from "@mindorbit/ai";
+import { getAIProvider } from "@mindorbit/ai";
 
 export async function createMissionsForWeakNodes(
   userId: string,
@@ -26,7 +26,7 @@ export async function createMissionsForWeakNodes(
     });
     if (existing) continue;
 
-    const content = await mockAIProvider.generateMissionContent({
+    const content = await getAIProvider().generateMissionContent({
       nodeId: node.id,
       nodeSlug: node.slug,
       nodeTitle: node.title,

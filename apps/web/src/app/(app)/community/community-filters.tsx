@@ -36,6 +36,7 @@ export function CommunityFilters() {
         <option value="flashcard_set">Flashcards</option>
         <option value="diagram">Diagram</option>
         <option value="walkthrough">Walkthrough</option>
+        <option value="mini_lesson">Mini-lesson</option>
       </select>
       <select
         className="rounded-lg border bg-background px-3 py-2 text-sm"

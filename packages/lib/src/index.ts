@@ -25,6 +25,7 @@ export const RESOURCE_TYPE_LABELS = {
   flashcard_set: "Flashcards",
   diagram: "Diagram",
   walkthrough: "Walkthrough",
+  mini_lesson: "Mini-lesson",
 } as const;
 
 export function cn(...classes: (string | boolean | undefined)[]): string {

@@ -36,6 +36,7 @@ enum ResourceType {
   flashcard_set
   diagram
   walkthrough
+  mini_lesson
 }
 
 enum ReviewStatus {
@@ -76,6 +77,8 @@ model User {
   userBadges          UserBadge[]
   reviewQueueItems    ReviewQueueItem[]
   notifications       Notification[]
+  userEvents         UserEvent[]
+  uploadedSources    UploadedSource[]
 }
 
 model Account {
@@ -207,6 +210,8 @@ model DiagnosticAttempt {
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   subject         Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   responses       DiagnosticResponse[]
+
+  @@index([userId, subjectId])
 }
 
 model DiagnosticResponse {
@@ -231,12 +236,14 @@ model UserNodeState {
   mastery        Float     @default(0)
   confidence     Float     @default(0)
   stability      Float     @default(0)
+  decay          Float     @default(0)
   lastPracticedAt DateTime?
   nextReviewAt   DateTime?
   user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   node           ConceptNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
 
   @@unique([userId, subjectId, nodeId])
+  @@index([userId, nodeId])
 }
 
 model Mission {
@@ -288,6 +295,9 @@ model Resource {
   node         ConceptNode  @relation(fields: [nodeId], references: [id], onDelete: Cascade)
   likes        ResourceLike[]
   saves        ResourceSave[]
+
+  @@index([nodeId])
+  @@index([subjectId])
 }
 
 model ResourceLike {
@@ -340,6 +350,8 @@ model ReviewQueueItem {
   status     ReviewStatus @default(pending)
   user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   node       ConceptNode  @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+
+  @@index([userId, dueAt])
 }
 
 model Notification {
@@ -351,4 +363,45 @@ model Notification {
   readAt    DateTime?
   createdAt DateTime  @default(now())
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  eventType String
+  payload   String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UploadedSource {
+  id         String   @id @default(cuid())
+  userId     String
+  subjectId  String?
+  sourceType String
+  sourceUrl  String?
+  content    String?
+  summaryJson String?
+  status     String   @default("pending")
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parsedChunks ParsedChunk[]
+  conceptExtractions ConceptExtraction[]
+}
+
+model ParsedChunk {
+  id             String   @id @default(cuid())
+  sourceId       String
+  content        String
+  orderIndex     Int      @default(0)
+  source         UploadedSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+}
+
+model ConceptExtraction {
+  id         String   @id @default(cuid())
+  sourceId   String
+  nodeId     String?
+  conceptText String
+  confidence Float   @default(0)
+  source     UploadedSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
 }

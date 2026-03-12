@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth";
 import { prisma } from "@mindorbit/db";
-import { startDiagnostic } from "@/lib/diagnostic";
+import { diagnosticsService } from "@/services/diagnostics-service";
 
 export async function POST(
   _req: Request,
@@ -21,7 +21,7 @@ export async function POST(
   }
 
   try {
-    const { attempt, questions } = await startDiagnostic(subject.id, session.user.id);
+    const { attempt, questions } = await diagnosticsService.startDiagnostic(subject.id, session.user.id);
     return NextResponse.json({
       attemptId: attempt.id,
       questions: questions.map((q) => ({

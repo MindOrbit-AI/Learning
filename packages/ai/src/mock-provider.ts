@@ -3,7 +3,13 @@
  * Replace with OpenAI/Anthropic provider later
  */
 
-import type { AIProvider, MissionContent } from "./interfaces";
+import type {
+  AIProvider,
+  MissionContent,
+  ExtractedConcept,
+  ContentDiagnosticQuestion,
+  ContentSummaryJson,
+} from "./interfaces";
 import type { QuestionType } from "@mindorbit/types";
 
 const REFLECTION_PROMPTS: Record<string, string> = {
@@ -184,5 +190,107 @@ export const mockAIProvider: AIProvider = {
 
   async recommendResources(nodeId: string, _userId: string): Promise<string[]> {
     return [];
+  },
+
+  async extractConceptsFromContent(text: string): Promise<ExtractedConcept[]> {
+    // Heuristic: split by headers/sections, extract key phrases as concept titles
+    const sections = text
+      .split(/\n#{1,4}\s+|\n\n(?=[A-Z][a-z]+:)|(?:\*\*[^*]+\*\*)/)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 50);
+    const concepts: ExtractedConcept[] = [];
+    const seen = new Set<string>();
+
+    for (const section of sections.slice(0, 15)) {
+      const firstLine = section.split("\n")[0] ?? section;
+      const title = firstLine.slice(0, 60).replace(/[:#*]/g, "").trim();
+      if (!title || title.length < 3) continue;
+      const slug = title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
+      if (seen.has(slug)) continue;
+      seen.add(slug);
+      concepts.push({
+        title,
+        description: section.slice(0, 300),
+        slug,
+        confidence: 0.7 + Math.random() * 0.25,
+      });
+    }
+
+    if (concepts.length === 0 && text.length > 100) {
+      const fallback = text.slice(0, 100).replace(/\n/g, " ");
+      concepts.push({
+        title: fallback + (fallback.length >= 100 ? "..." : ""),
+        description: text.slice(0, 400),
+        slug: "main-concept",
+        confidence: 0.6,
+      });
+    }
+    return concepts;
+  },
+
+  async generateDiagnosticQuestionsFromContent(
+    conceptText: string,
+    conceptTitle: string,
+    count = 3
+  ): Promise<ContentDiagnosticQuestion[]> {
+    const excerpt = conceptText.slice(0, 500);
+    const questions: ContentDiagnosticQuestion[] = [
+      {
+        prompt: `According to the material, which best describes ${conceptTitle}?`,
+        type: "multiple_choice",
+        options: [
+          excerpt.slice(0, 80) + "...",
+          "An alternative interpretation",
+          "A related but distinct concept",
+          "None of the above",
+        ],
+        correctAnswer: excerpt.slice(0, 80) + "...",
+        explanation: `This aligns with the key points about ${conceptTitle} in the source material.`,
+      },
+      {
+        prompt: `The concept of ${conceptTitle} is fundamental to understanding this material.`,
+        type: "true_false",
+        options: null,
+        correctAnswer: "true",
+        explanation: `${conceptTitle} is a core concept covered in the content.`,
+      },
+      {
+        prompt: `In your own words, summarize the main idea about ${conceptTitle} from the material.`,
+        type: "short_answer",
+        options: null,
+        correctAnswer: excerpt.slice(0, 100),
+        explanation: `Review the section on ${conceptTitle} to verify your understanding.`,
+      },
+    ];
+    return questions.slice(0, count);
+  },
+
+  async extractTextFromImage(_buffer: Buffer, _mimeType: string): Promise<string> {
+    return "Image uploaded. Set OPENAI_API_KEY to extract text and concepts from images (e.g., diagrams, handwritten notes, textbook screenshots).";
+  },
+
+  async summarizeContentToJson(content: string): Promise<ContentSummaryJson> {
+    const excerpt = content.slice(0, 300).replace(/\n/g, " ");
+    const flashcards = [
+      { front: "Key concept from content", back: excerpt.slice(0, 100) + "..." },
+      { front: "Main idea", back: excerpt.slice(50, 150) + "..." },
+    ];
+    return {
+      flashcards,
+      shortSummary: excerpt + "...",
+      deepSummary: content.slice(0, 800).replace(/\n{3,}/g, "\n\n") + (content.length > 800 ? "\n\n..." : ""),
+      quizzes: [
+        {
+          prompt: "Which best summarizes the main idea of this content?",
+          type: "multiple_choice" as const,
+          options: [excerpt.slice(0, 80) + "...", "Alternative A", "Alternative B", "Alternative C"],
+          correctAnswer: excerpt.slice(0, 80) + "...",
+          explanation: "This aligns with the key points in the source material.",
+        },
+      ],
+    };
   },
 };

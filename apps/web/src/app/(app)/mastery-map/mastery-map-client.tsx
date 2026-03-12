@@ -17,6 +17,7 @@ import {
 import "reactflow/dist/style.css";
 import { Card, CardContent, CardHeader, CardTitle } from "@mindorbit/ui";
 import { NODE_STATE_COLORS } from "@mindorbit/lib";
+import { GenerateMissionButton } from "./generate-mission-button";
 import type { NodeState } from "@mindorbit/types";
 
 const nodeColors: Record<string, string> = {
@@ -235,6 +236,16 @@ export function MasteryMapClient() {
                     </div>
                   ) : null;
                 })()}
+                {(details as { missionId?: string | null }).missionId ? (
+                  <a
+                    href={`/missions/${(details as { missionId: string }).missionId}`}
+                    className="mt-2 block rounded-lg bg-primary px-3 py-2 text-center text-sm text-primary-foreground hover:bg-primary/90"
+                  >
+                    View Mission →
+                  </a>
+                ) : selectedNode ? (
+                  <GenerateMissionButton nodeId={selectedNode} />
+                ) : null}
               </CardContent>
             </Card>
           </div>
