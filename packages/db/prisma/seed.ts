@@ -249,8 +249,8 @@ async function seed() {
   for (const subj of SUBJECTS) {
     const subject = await prisma.subject.upsert({
       where: { slug: subj.slug },
-      create: subj,
-      update: subj,
+      create: { ...subj, status: "published" },
+      update: { ...subj, status: "published" },
     });
 
     const clusterData =
@@ -342,6 +342,9 @@ async function seed() {
   }
 
   const demoPassword = await bcrypt.hash("demo1234", 10);
+  const adminPassword = await bcrypt.hash("admin1234", 10);
+  const superAdminPassword = await bcrypt.hash("superadmin1234", 10);
+
   const demoUser = await prisma.user.upsert({
     where: { email: "demo@mindorbit.learn" },
     create: {
@@ -355,6 +358,30 @@ async function seed() {
       streakCount: 3,
     },
     update: {},
+  });
+
+  await prisma.user.upsert({
+    where: { email: "admin@mindorbit.learn" },
+    create: {
+      email: "admin@mindorbit.learn",
+      name: "Admin User",
+      passwordHash: adminPassword,
+      role: "ADMIN",
+      onboardingCompleted: true,
+    },
+    update: { role: "ADMIN" },
+  });
+
+  await prisma.user.upsert({
+    where: { email: "superadmin@mindorbit.learn" },
+    create: {
+      email: "superadmin@mindorbit.learn",
+      name: "Super Admin",
+      passwordHash: superAdminPassword,
+      role: "SUPER_ADMIN",
+      onboardingCompleted: true,
+    },
+    update: { role: "SUPER_ADMIN" },
   });
 
   await prisma.userBadge.upsert({
@@ -392,6 +419,7 @@ async function seed() {
           type: "note",
           title: "Mole Concept Quick Reference",
           description: "Essential formulas and examples for the mole concept",
+          status: "approved",
           contentJson: JSON.stringify({
             markdown: `## Mole Concept\n\n- 1 mole = 6.022 × 10²³ particles\n- Moles = mass / molar mass\n- Molar volume of gas at STP = 22.4 L`,
           }),
@@ -407,6 +435,7 @@ async function seed() {
             type: "summary",
             title: "Stoichiometry Step-by-Step",
             description: "How to solve stoichiometry problems",
+            status: "approved",
             contentJson: JSON.stringify({
               markdown: `## Stoichiometry\n\n1. Balance the equation\n2. Convert to moles\n3. Use mole ratio\n4. Convert to desired unit`,
             }),
@@ -416,7 +445,7 @@ async function seed() {
     }
   }
 
-  console.log("Demo user and resources seeded");
+  console.log("Demo user, admin users, and resources seeded");
   console.log("Seed complete.");
 }
 

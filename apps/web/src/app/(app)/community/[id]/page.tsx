@@ -51,6 +51,13 @@ export default async function ResourceDetailPage({
 
   if (!resource) notFound();
 
+  const isAdmin = session?.user?.role && ["ADMIN", "SUPER_ADMIN"].includes(session.user.role as string);
+  const canView =
+    resource.status === "approved" ||
+    resource.userId === session?.user?.id ||
+    isAdmin;
+  if (!canView) notFound();
+
   let content = "";
   let ingestSummary: ContentJson["summary"] | null = null;
   if (resource.contentJson) {

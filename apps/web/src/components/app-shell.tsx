@@ -13,6 +13,7 @@ import {
   Search,
   ClipboardList,
   Menu,
+  Shield,
 } from "lucide-react";
 import { Button } from "@mindorbit/ui";
 import { useState } from "react";
@@ -32,7 +33,7 @@ export function AppShell({
   user,
 }: {
   children: React.ReactNode;
-  user: { name?: string | null; image?: string | null };
+  user: { name?: string | null; image?: string | null; role?: string };
 }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -59,6 +60,15 @@ export function AppShell({
           </Button>
         </div>
         <nav className="space-y-1 p-4">
+          {(user?.role === "ADMIN" || user?.role === "SUPER_ADMIN") && (
+            <Link
+              href="/admin"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-amber-600 transition-colors hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-950"
+            >
+              <Shield className="h-5 w-5" />
+              Admin
+            </Link>
+          )}
           {navItems.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}

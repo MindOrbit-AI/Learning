@@ -51,6 +51,55 @@ enum RelationshipType {
   extends
 }
 
+enum UserRole {
+  STUDENT
+  CREATOR
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum SubjectStatus {
+  draft
+  published
+  archived
+}
+
+enum ClusterStatus {
+  active
+  archived
+}
+
+enum ConceptStatus {
+  draft
+  published
+  archived
+}
+
+enum EdgeStatus {
+  active
+  archived
+}
+
+enum QuestionStatus {
+  draft
+  published
+  archived
+}
+
+enum ResourceStatus {
+  pending
+  approved
+  rejected
+  flagged
+  archived
+}
+
+enum MissionTemplateStatus {
+  draft
+  published
+  archived
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -64,6 +113,8 @@ model User {
   streakCount   Int       @default(0)
   xp            Int       @default(0)
   onboardingCompleted Boolean @default(false)
+  role          UserRole  @default(STUDENT)
+  suspendedAt   DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   accounts      Account[]
@@ -77,8 +128,8 @@ model User {
   userBadges          UserBadge[]
   reviewQueueItems    ReviewQueueItem[]
   notifications       Notification[]
-  userEvents         UserEvent[]
-  uploadedSources    UploadedSource[]
+  userEvents          UserEvent[]
+  uploadedSources     UploadedSource[]
 }
 
 model Account {
@@ -116,29 +167,38 @@ model VerificationToken {
 }
 
 model Subject {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  title       String
-  description String
-  icon        String
-  color       String
-  createdAt   DateTime @default(now())
-  clusters    Cluster[]
-  conceptNodes     ConceptNode[]
-  conceptEdges     ConceptEdge[]
+  id            String        @id @default(cuid())
+  slug          String        @unique
+  title         String
+  description   String
+  icon          String
+  color         String
+  gradeBand     String?
+  status        SubjectStatus @default(draft)
+  version       Int           @default(1)
+  createdById   String?
+  updatedById   String?
+  orderIndex    Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @default(now()) @updatedAt
+  clusters      Cluster[]
+  conceptNodes  ConceptNode[]
+  conceptEdges  ConceptEdge[]
   diagnosticQuestions DiagnosticQuestion[]
   diagnosticAttempts  DiagnosticAttempt[]
-  resources   Resource[]
+  resources     Resource[]
+  missionTemplates MissionTemplate[]
 }
 
 model Cluster {
-  id          String   @id @default(cuid())
+  id          String        @id @default(cuid())
   subjectId   String
   slug        String
   title       String
   description String
-  orderIndex  Int      @default(0)
-  subject     Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  orderIndex  Int           @default(0)
+  status      ClusterStatus @default(active)
+  subject     Subject       @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   conceptNodes ConceptNode[]
   resources   Resource[]
 
@@ -146,24 +206,31 @@ model Cluster {
 }
 
 model ConceptNode {
-  id          String   @id @default(cuid())
-  subjectId   String
-  clusterId   String
-  slug        String
-  title       String
-  description String
-  difficulty  String   @default("medium")
-  orderIndex  Int      @default(0)
-  subject     Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  cluster     Cluster  @relation(fields: [clusterId], references: [id], onDelete: Cascade)
-  outEdges    ConceptEdge[] @relation("SourceNode")
-  inEdges     ConceptEdge[] @relation("TargetNode")
+  id                 String        @id @default(cuid())
+  subjectId          String
+  clusterId          String
+  slug               String
+  title              String
+  description        String
+  difficulty         String        @default("medium")
+  orderIndex         Int           @default(0)
+  status             ConceptStatus @default(draft)
+  canonicalCode      String?
+  learningObjective  String?
+  prerequisiteCount Int?
+  positionX          Float?
+  positionY          Float?
+  subject            Subject       @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  cluster            Cluster       @relation(fields: [clusterId], references: [id], onDelete: Cascade)
+  outEdges           ConceptEdge[] @relation("SourceNode")
+  inEdges            ConceptEdge[] @relation("TargetNode")
   diagnosticQuestions DiagnosticQuestion[]
   diagnosticResponses DiagnosticResponse[]
-  userNodeStates      UserNodeState[]
-  missions            Mission[]
-  resources           Resource[]
-  reviewQueueItems    ReviewQueueItem[]
+  userNodeStates     UserNodeState[]
+  missions           Mission[]
+  resources          Resource[]
+  reviewQueueItems   ReviewQueueItem[]
+  missionTemplates   MissionTemplate[]
 
   @@unique([subjectId, slug])
 }
@@ -175,6 +242,7 @@ model ConceptEdge {
   targetNodeId     String
   relationshipType RelationshipType @default(prerequisite)
   weight           Float            @default(1)
+  status           EdgeStatus       @default(active)
   subject          Subject          @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   sourceNode       ConceptNode      @relation("SourceNode", fields: [sourceNodeId], references: [id], onDelete: Cascade)
   targetNode       ConceptNode      @relation("TargetNode", fields: [targetNodeId], references: [id], onDelete: Cascade)
@@ -183,7 +251,7 @@ model ConceptEdge {
 }
 
 model DiagnosticQuestion {
-  id            String       @id @default(cuid())
+  id            String        @id @default(cuid())
   subjectId     String
   nodeId        String
   prompt        String
@@ -191,9 +259,11 @@ model DiagnosticQuestion {
   optionsJson   String?
   correctAnswer String
   explanation   String
-  difficulty    String       @default("medium")
-  subject       Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  node          ConceptNode  @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  difficulty    String        @default("medium")
+  status        QuestionStatus @default(draft)
+  tagsJson      String?
+  subject       Subject       @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  node          ConceptNode   @relation(fields: [nodeId], references: [id], onDelete: Cascade)
   responses     DiagnosticResponse[]
 }
 
@@ -278,7 +348,7 @@ model MissionTask {
 }
 
 model Resource {
-  id           String       @id @default(cuid())
+  id           String         @id @default(cuid())
   userId       String
   subjectId    String
   clusterId    String
@@ -288,16 +358,19 @@ model Resource {
   description  String?
   contentJson  String?
   thumbnailUrl String?
-  createdAt    DateTime     @default(now())
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  subject      Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  cluster      Cluster      @relation(fields: [clusterId], references: [id], onDelete: Cascade)
-  node         ConceptNode  @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  status       ResourceStatus @default(pending)
+  flagReason   String?
+  createdAt    DateTime       @default(now())
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject      Subject        @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  cluster      Cluster        @relation(fields: [clusterId], references: [id], onDelete: Cascade)
+  node         ConceptNode    @relation(fields: [nodeId], references: [id], onDelete: Cascade)
   likes        ResourceLike[]
   saves        ResourceSave[]
 
   @@index([nodeId])
   @@index([subjectId])
+  @@index([status])
 }
 
 model ResourceLike {
@@ -404,4 +477,33 @@ model ConceptExtraction {
   conceptText String
   confidence Float   @default(0)
   source     UploadedSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+}
+
+model MissionTemplate {
+  id                    String                @id @default(cuid())
+  subjectId             String
+  nodeId                String
+  title                 String
+  explanationTemplate   String
+  workedExampleTemplate String?
+  reflectionPrompt      String?
+  variationPrompt       String?
+  estimatedMinutes      Int                   @default(15)
+  difficulty            String                @default("medium")
+  status                MissionTemplateStatus @default(draft)
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  subject               Subject               @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  node                  ConceptNode           @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  actorUserId  String
+  entityType   String
+  entityId     String
+  action       String
+  beforeJson   String?
+  afterJson    String?
+  createdAt    DateTime @default(now())
 }

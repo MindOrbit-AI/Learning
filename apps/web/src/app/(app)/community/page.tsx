@@ -31,6 +31,7 @@ export default async function CommunityPage({
   const validType = typeFilter && typeFilterValues.includes(typeFilter as (typeof typeFilterValues)[number]);
 
   const where = {
+    status: "approved",
     ...(subject && { subjectId: subject.id }),
     ...(validType && { type: typeFilter as ResourceType }),
   };

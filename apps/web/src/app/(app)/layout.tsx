@@ -22,7 +22,13 @@ export default async function AppLayout({
   }
 
   return (
-    <AppShell user={{ name: user?.name ?? session.user.name, image: user?.image ?? session.user.image }}>
+    <AppShell
+      user={{
+        name: user?.name ?? session.user.name,
+        image: user?.image ?? session.user.image,
+        role: user?.role ?? session.user.role,
+      }}
+    >
       {children}
     </AppShell>
   );
