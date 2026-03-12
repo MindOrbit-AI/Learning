@@ -20,7 +20,7 @@ export default function UploadPage() {
   const [subjects, setSubjects] = useState<
     Array<{ id: string; title: string; slug: string }>
   >([]);
-  const [ingestSourceType, setIngestSourceType] = useState<IngestionMode>("text");
+  const [ingestSourceType, setIngestSourceType] = useState<IngestionMode>("youtube");
   const [ingestSubjectId, setIngestSubjectId] = useState("");
   const [ingestClusterId, setIngestClusterId] = useState("");
   const [ingestYouTubeUrl, setIngestYouTubeUrl] = useState("");
@@ -142,9 +142,9 @@ export default function UploadPage() {
               </label>
               <div className="flex flex-wrap gap-2">
                 {[
+                  { id: "youtube" as const, label: "YouTube", icon: Youtube },
                   { id: "pdf" as const, label: "PDF", icon: FileText },
                   { id: "image" as const, label: "Image", icon: ImageIcon },
-                  { id: "youtube" as const, label: "YouTube", icon: Youtube },
                   { id: "text" as const, label: "Text", icon: BookOpen },
                 ].map(({ id, label, icon: Icon }) => (
                   <button
