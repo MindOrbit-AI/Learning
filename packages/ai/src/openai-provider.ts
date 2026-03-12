@@ -247,6 +247,7 @@ function createOpenAIProvider(): AIProvider {
           {
             role: "system",
             content: `You are an educational assistant. Analyze the given content and return a JSON object with:
+- title: concise, descriptive title for the content (max ~60 chars)
 - flashcards: array of { front: string, back: string } - 5-10 key flashcards for study
 - shortSummary: 2-4 sentence concise overview
 - deepSummary: detailed 2-4 paragraph summary covering main concepts
@@ -273,6 +274,7 @@ function createOpenAIProvider(): AIProvider {
           explanation: (q as { explanation?: string }).explanation ?? "",
         }));
         return {
+          title: parsed.title ?? "",
           flashcards,
           shortSummary: parsed.shortSummary ?? "",
           deepSummary: parsed.deepSummary ?? "",

@@ -274,11 +274,13 @@ export const mockAIProvider: AIProvider = {
 
   async summarizeContentToJson(content: string): Promise<ContentSummaryJson> {
     const excerpt = content.slice(0, 300).replace(/\n/g, " ");
+    const title = excerpt.slice(0, 50).trim() + (excerpt.length > 50 ? "…" : "");
     const flashcards = [
       { front: "Key concept from content", back: excerpt.slice(0, 100) + "..." },
       { front: "Main idea", back: excerpt.slice(50, 150) + "..." },
     ];
     return {
+      title,
       flashcards,
       shortSummary: excerpt + "...",
       deepSummary: content.slice(0, 800).replace(/\n{3,}/g, "\n\n") + (content.length > 800 ? "\n\n..." : ""),

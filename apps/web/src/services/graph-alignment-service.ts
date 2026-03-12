@@ -7,11 +7,27 @@ import { prisma } from "@mindorbit/db";
 import { getAIProvider } from "@mindorbit/ai";
 import type { ConceptExtractionResult } from "./concept-extraction-service";
 
+export interface IngestSummary {
+  title?: string;
+  flashcards?: Array<{ front: string; back: string }>;
+  shortSummary?: string;
+  deepSummary?: string;
+  quizzes?: Array<{
+    prompt: string;
+    type: string;
+    options: string[] | null;
+    correctAnswer: string;
+    explanation: string;
+  }>;
+}
+
 export interface AlignOptions {
   subjectId: string;
   userId: string;
   sourceId: string;
   clusterId?: string;
+  /** Full AI summary from ingestion - stored in Resource for ingest-style display */
+  summary?: IngestSummary;
 }
 
 export const graphAlignmentService = {
@@ -19,7 +35,7 @@ export const graphAlignmentService = {
     extractions: ConceptExtractionResult[],
     options: AlignOptions
   ): Promise<{ nodeIds: string[] }> {
-    const { subjectId, userId, sourceId, clusterId: optClusterId } = options;
+    const { subjectId, userId, sourceId, clusterId: optClusterId, summary } = options;
 
     let defaultClusterId = optClusterId;
     if (!defaultClusterId) {
@@ -91,6 +107,22 @@ export const graphAlignmentService = {
           .catch(() => {});
       }
 
+      const contentJson = summary
+        ? JSON.stringify({
+            summary: {
+              title: summary.title ?? "",
+              flashcards: summary.flashcards ?? [],
+              shortSummary: summary.shortSummary ?? "",
+              deepSummary: summary.deepSummary ?? "",
+              quizzes: summary.quizzes ?? [],
+            },
+            source: "Content Ingestion Engine",
+          })
+        : JSON.stringify({
+            markdown: ext.conceptText.slice(0, 2000),
+            source: "Content Ingestion Engine",
+          });
+
       await prisma.resource
         .create({
           data: {
@@ -99,12 +131,9 @@ export const graphAlignmentService = {
           clusterId: node.clusterId,
           nodeId,
           type: "summary",
-          title: `Summary: ${node.title}`,
+          title: summary?.title?.trim() ? summary.title : node.title,
           description: ext.conceptText.slice(0, 200),
-          contentJson: JSON.stringify({
-            markdown: ext.conceptText.slice(0, 2000),
-            source: "Content Ingestion Engine",
-          }),
+          contentJson,
         },
       })
       .catch(() => {});

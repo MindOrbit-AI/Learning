@@ -50,6 +50,21 @@ export default async function CommunityPage({
     resources = resources.slice(0, 50);
   }
 
+  function getIngestShortSummary(contentJson: string | null): string | null {
+    if (!contentJson) return null;
+    try {
+      const parsed = JSON.parse(contentJson) as { summary?: { shortSummary?: string } };
+      return parsed.summary?.shortSummary?.trim() ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  const resourcesWithPreview = resources.map((r) => ({
+    ...r,
+    preview: getIngestShortSummary(r.contentJson) ?? r.description,
+  }));
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -72,7 +87,7 @@ export default async function CommunityPage({
       <CommunityFilters />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {resources.map((r) => (
+        {resourcesWithPreview.map((r) => (
           <Link key={r.id} href={`/community/${r.id}`}>
             <Card className="h-full transition-shadow hover:shadow-lg">
               <CardContent className="p-4">
@@ -85,9 +100,9 @@ export default async function CommunityPage({
                   </span>
                 </div>
                 <h3 className="font-semibold line-clamp-2">{r.title}</h3>
-                {r.description && (
+                {r.preview && (
                   <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-                    {r.description}
+                    {r.preview}
                   </p>
                 )}
                 <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">

@@ -2,10 +2,34 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@mindorbit/db";
 import { getServerSession } from "@/lib/auth";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@mindorbit/ui";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  Button,
+} from "@mindorbit/ui";
 import { RESOURCE_TYPE_LABELS } from "@mindorbit/lib";
-import { User } from "lucide-react";
+import { User, ChevronLeft } from "lucide-react";
 import { ResourceActions } from "./resource-actions";
+import { IngestSummaryDisplay } from "@/components/ingest-summary-display";
+
+type ContentJson = {
+  markdown?: string;
+  summary?: {
+    flashcards?: Array<{ front: string; back: string }>;
+    shortSummary?: string;
+    deepSummary?: string;
+    quizzes?: Array<{
+      prompt: string;
+      type: string;
+      options: string[] | null;
+      correctAnswer: string;
+      explanation: string;
+    }>;
+  };
+};
 
 export default async function ResourceDetailPage({
   params,
@@ -19,7 +43,7 @@ export default async function ResourceDetailPage({
     where: { id },
     include: {
       user: { select: { id: true, name: true, image: true } },
-      subject: { select: { title: true } },
+      subject: { select: { title: true, slug: true } },
       node: { select: { title: true, id: true } },
       _count: { select: { likes: true, saves: true } },
     },
@@ -28,9 +52,11 @@ export default async function ResourceDetailPage({
   if (!resource) notFound();
 
   let content = "";
+  let ingestSummary: ContentJson["summary"] | null = null;
   if (resource.contentJson) {
     try {
-      const parsed = JSON.parse(resource.contentJson) as { markdown?: string };
+      const parsed = JSON.parse(resource.contentJson) as ContentJson;
+      ingestSummary = parsed.summary ?? null;
       content = parsed.markdown ?? resource.contentJson;
     } catch {
       content = resource.contentJson;
@@ -52,40 +78,59 @@ export default async function ResourceDetailPage({
       })
     : null;
 
+  const hasIngestStyle =
+    !!ingestSummary &&
+    (!!ingestSummary.shortSummary ||
+      !!ingestSummary.deepSummary ||
+      (ingestSummary.flashcards?.length ?? 0) > 0 ||
+      (ingestSummary.quizzes?.length ?? 0) > 0);
+
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <span className="rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-              {RESOURCE_TYPE_LABELS[resource.type as keyof typeof RESOURCE_TYPE_LABELS] ?? resource.type}
-            </span>
-            <span className="text-sm text-muted-foreground">
-              {resource.subject.title} • {resource.node.title}
-            </span>
-          </div>
-          <CardTitle className="text-2xl">{resource.title}</CardTitle>
-          {resource.description && (
-            <CardDescription className="text-muted-foreground">
-              {resource.description}
-            </CardDescription>
-          )}
-        </CardHeader>
-        <CardContent>
-          {session?.user && (
-            <ResourceActions
-              resourceId={resource.id}
-              isLiked={!!isLiked}
-              isSaved={!!isSaved}
-              likeCount={resource._count.likes}
-              saveCount={resource._count.saves}
-            />
-          )}
-          <div className="prose prose-sm mt-6 dark:prose-invert max-w-none">
-            <pre className="whitespace-pre-wrap font-sans text-foreground">{content}</pre>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="mx-auto max-w-3xl space-y-8 pb-12">
+      <div className="flex items-center justify-between">
+        <Link
+          href="/community"
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Back to Community
+        </Link>
+        <Link href={`/subjects/${resource.subject.slug}`}>
+          <Button variant="outline" size="sm">
+            View {resource.subject.title}
+          </Button>
+        </Link>
+      </div>
+
+      <div>
+        <h1 className="mt-2 text-2xl font-bold">{resource.title}</h1>
+      </div>
+
+      {session?.user && (
+        <ResourceActions
+          resourceId={resource.id}
+          isLiked={!!isLiked}
+          isSaved={!!isSaved}
+          likeCount={resource._count.likes}
+          saveCount={resource._count.saves}
+        />
+      )}
+
+      {hasIngestStyle ? (
+        <div className="space-y-8">
+          <IngestSummaryDisplay summary={ingestSummary!} />
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="prose prose-sm dark:prose-invert max-w-none">
+              <pre className="whitespace-pre-wrap font-sans text-foreground">
+                {content}
+              </pre>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardContent className="flex items-center gap-4 p-4">
@@ -99,9 +144,7 @@ export default async function ResourceDetailPage({
             >
               {resource.user.name ?? "Anonymous"}
             </Link>
-            <p className="text-sm text-muted-foreground">
-              Creator
-            </p>
+            <p className="text-sm text-muted-foreground">Creator</p>
           </div>
         </CardContent>
       </Card>

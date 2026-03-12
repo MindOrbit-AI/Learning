@@ -53,6 +53,7 @@ export interface ContentDiagnosticQuestion {
 
 /** AI-generated summary from ingested content (no chunking) */
 export interface ContentSummaryJson {
+  title: string;
   flashcards: Array<{ front: string; back: string }>;
   shortSummary: string;
   deepSummary: string;

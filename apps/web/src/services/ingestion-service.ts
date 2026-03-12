@@ -97,17 +97,21 @@ export const ingestionService = {
       source.content
     );
 
+    // Use only the first concept extraction
+    const singleExtraction = extractions.slice(0, 1);
+
     let nodeIds: string[] = [];
-    if (extractions.length > 0 && source.subjectId) {
+    if (singleExtraction.length > 0 && source.subjectId) {
       const cluster = await prisma.cluster.findFirst({
         where: { subjectId: source.subjectId },
         orderBy: { orderIndex: "asc" },
       });
-      const result = await graphAlignmentService.alignToGraph(extractions, {
+      const result = await graphAlignmentService.alignToGraph(singleExtraction, {
         subjectId: source.subjectId,
         userId: source.userId,
         sourceId,
         clusterId: cluster?.id,
+        summary,
       });
       nodeIds = result.nodeIds;
     }
