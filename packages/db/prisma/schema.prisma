@@ -1,0 +1,354 @@
+// MindOrbit Learn - Prisma Schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum NodeState {
+  mastered
+  weak
+  missing
+  learning
+  untouched
+}
+
+enum QuestionType {
+  multiple_choice
+  short_answer
+  true_false
+}
+
+enum MissionStatus {
+  not_started
+  in_progress
+  completed
+}
+
+enum ResourceType {
+  note
+  summary
+  flashcard_set
+  diagram
+  walkthrough
+}
+
+enum ReviewStatus {
+  pending
+  in_progress
+  completed
+}
+
+enum RelationshipType {
+  prerequisite
+  related
+  extends
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  passwordHash  String?
+  image         String?
+  bio           String?
+  gradeLevel    String?
+  studyGoal     String?
+  streakCount   Int       @default(0)
+  xp            Int       @default(0)
+  onboardingCompleted Boolean @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+  diagnosticAttempts   DiagnosticAttempt[]
+  userNodeStates      UserNodeState[]
+  missions            Mission[]
+  resources           Resource[]
+  resourceLikes       ResourceLike[]
+  resourceSaves       ResourceSave[]
+  userBadges          UserBadge[]
+  reviewQueueItems    ReviewQueueItem[]
+  notifications       Notification[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token      String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Subject {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String
+  icon        String
+  color       String
+  createdAt   DateTime @default(now())
+  clusters    Cluster[]
+  conceptNodes     ConceptNode[]
+  conceptEdges     ConceptEdge[]
+  diagnosticQuestions DiagnosticQuestion[]
+  diagnosticAttempts  DiagnosticAttempt[]
+  resources   Resource[]
+}
+
+model Cluster {
+  id          String   @id @default(cuid())
+  subjectId   String
+  slug        String
+  title       String
+  description String
+  orderIndex  Int      @default(0)
+  subject     Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  conceptNodes ConceptNode[]
+  resources   Resource[]
+
+  @@unique([subjectId, slug])
+}
+
+model ConceptNode {
+  id          String   @id @default(cuid())
+  subjectId   String
+  clusterId   String
+  slug        String
+  title       String
+  description String
+  difficulty  String   @default("medium")
+  orderIndex  Int      @default(0)
+  subject     Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  cluster     Cluster  @relation(fields: [clusterId], references: [id], onDelete: Cascade)
+  outEdges    ConceptEdge[] @relation("SourceNode")
+  inEdges     ConceptEdge[] @relation("TargetNode")
+  diagnosticQuestions DiagnosticQuestion[]
+  diagnosticResponses DiagnosticResponse[]
+  userNodeStates      UserNodeState[]
+  missions            Mission[]
+  resources           Resource[]
+  reviewQueueItems    ReviewQueueItem[]
+
+  @@unique([subjectId, slug])
+}
+
+model ConceptEdge {
+  id               String           @id @default(cuid())
+  subjectId        String
+  sourceNodeId     String
+  targetNodeId     String
+  relationshipType RelationshipType @default(prerequisite)
+  weight           Float            @default(1)
+  subject          Subject          @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  sourceNode       ConceptNode      @relation("SourceNode", fields: [sourceNodeId], references: [id], onDelete: Cascade)
+  targetNode       ConceptNode      @relation("TargetNode", fields: [targetNodeId], references: [id], onDelete: Cascade)
+
+  @@unique([subjectId, sourceNodeId, targetNodeId])
+}
+
+model DiagnosticQuestion {
+  id            String       @id @default(cuid())
+  subjectId     String
+  nodeId        String
+  prompt        String
+  type          QuestionType
+  optionsJson   String?
+  correctAnswer String
+  explanation   String
+  difficulty    String       @default("medium")
+  subject       Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  node          ConceptNode  @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  responses     DiagnosticResponse[]
+}
+
+model DiagnosticAttempt {
+  id              String   @id @default(cuid())
+  userId          String
+  subjectId       String
+  startedAt      DateTime @default(now())
+  completedAt     DateTime?
+  overallScore    Float?
+  masteryScore    Float?
+  confidenceScore Float?
+  stabilityScore  Float?
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject         Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  responses       DiagnosticResponse[]
+}
+
+model DiagnosticResponse {
+  id             String   @id @default(cuid())
+  attemptId      String
+  questionId     String
+  nodeId         String
+  selectedAnswer String
+  isCorrect      Boolean
+  responseTimeMs Int?
+  attempt        DiagnosticAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question       DiagnosticQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  node           ConceptNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+}
+
+model UserNodeState {
+  id             String    @id @default(cuid())
+  userId         String
+  subjectId      String
+  nodeId         String
+  state          NodeState @default(untouched)
+  mastery        Float     @default(0)
+  confidence     Float     @default(0)
+  stability      Float     @default(0)
+  lastPracticedAt DateTime?
+  nextReviewAt   DateTime?
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  node           ConceptNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, subjectId, nodeId])
+}
+
+model Mission {
+  id               String        @id @default(cuid())
+  userId           String
+  subjectId        String
+  nodeId           String
+  title            String
+  status           MissionStatus @default(not_started)
+  explanation      String?
+  example          String?
+  reflectionPrompt String?
+  variationPrompt  String?
+  estimatedMinutes Int           @default(15)
+  xpReward         Int           @default(25)
+  createdAt        DateTime      @default(now())
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  node             ConceptNode   @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  tasks            MissionTask[]
+}
+
+model MissionTask {
+  id            String       @id @default(cuid())
+  missionId     String
+  type          QuestionType
+  prompt        String
+  optionsJson   String?
+  correctAnswer String
+  explanation   String?
+  orderIndex    Int          @default(0)
+  mission       Mission      @relation(fields: [missionId], references: [id], onDelete: Cascade)
+}
+
+model Resource {
+  id           String       @id @default(cuid())
+  userId       String
+  subjectId    String
+  clusterId    String
+  nodeId       String
+  type         ResourceType
+  title        String
+  description  String?
+  contentJson  String?
+  thumbnailUrl String?
+  createdAt    DateTime     @default(now())
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject      Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  cluster      Cluster      @relation(fields: [clusterId], references: [id], onDelete: Cascade)
+  node         ConceptNode  @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  likes        ResourceLike[]
+  saves        ResourceSave[]
+}
+
+model ResourceLike {
+  id         String   @id @default(cuid())
+  resourceId String
+  userId     String
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([resourceId, userId])
+}
+
+model ResourceSave {
+  id         String   @id @default(cuid())
+  resourceId String
+  userId     String
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([resourceId, userId])
+}
+
+model Badge {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String
+  icon        String
+  userBadges  UserBadge[]
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  badgeId   String
+  awardedAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+}
+
+model ReviewQueueItem {
+  id         String       @id @default(cuid())
+  userId     String
+  subjectId  String
+  nodeId     String
+  dueAt      DateTime
+  priority   Int          @default(1)
+  status     ReviewStatus @default(pending)
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  node       ConceptNode  @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  body      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
