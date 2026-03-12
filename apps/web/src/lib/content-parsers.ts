@@ -4,9 +4,9 @@
  */
 
 import { getAIProvider } from "@mindorbit/ai";
+import { youtubeTranscriptService } from "../services/youtube-transcript-service";
 
-const YOUTUBE_URL_REGEX =
-  /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+export type { TranscriptSegment } from "../services/youtube-transcript-service";
 
 export type ParseResult = { text: string; metadata?: Record<string, unknown> };
 
@@ -15,7 +15,7 @@ export const contentParsers = {
    * Parse PDF buffer to plain text
    */
   async parsePdf(buffer: Buffer): Promise<ParseResult> {
-    // Dynamic import - pdf-parse is CommonJS and may not work in Edge
+    // @ts-expect-error - pdf-parse has no declaration file
     const pdfParse = (await import("pdf-parse")).default;
     const data = await pdfParse(buffer);
     return {
@@ -25,23 +25,19 @@ export const contentParsers = {
   },
 
   /**
-   * Parse YouTube video URL to transcript text
+   * Parse YouTube video URL to transcript text.
+   * Delegates to youtube-transcript-service (package first, direct InnerTube fallback).
    */
   async parseYouTube(url: string): Promise<ParseResult> {
-    const match = url.match(YOUTUBE_URL_REGEX);
-    const videoId = match?.[1];
-    if (!videoId) {
-      throw new Error("Invalid YouTube URL. Use format: youtube.com/watch?v=VIDEO_ID or youtu.be/VIDEO_ID");
-    }
-
-    const { YoutubeTranscript } = await import("youtube-transcript");
-    const transcript = await YoutubeTranscript.fetchTranscript(videoId);
-    const text = transcript
-      .map((item) => (typeof item === "string" ? item : item.text))
-      .join("\n");
+    const result = await youtubeTranscriptService.getTranscript(url);
+    const videoId = youtubeTranscriptService.getVideoId(url);
     return {
-      text,
-      metadata: { videoId, segments: transcript.length },
+      text: result.text,
+      metadata: {
+        videoId,
+        segments: result.segments.length,
+        segmentTimestamps: result.segments.map((s) => ({ startMs: s.startMs, text: s.text })),
+      },
     };
   },
 
@@ -67,14 +63,13 @@ export const contentParsers = {
    * Extract YouTube video ID from URL
    */
   extractYouTubeId(url: string): string | null {
-    const match = url.match(YOUTUBE_URL_REGEX);
-    return match?.[1] ?? null;
+    return youtubeTranscriptService.getVideoId(url);
   },
 
   /**
    * Check if a string is a YouTube URL
    */
   isYouTubeUrl(url: string): boolean {
-    return YOUTUBE_URL_REGEX.test(url);
+    return youtubeTranscriptService.isYouTubeUrl(url);
   },
 };

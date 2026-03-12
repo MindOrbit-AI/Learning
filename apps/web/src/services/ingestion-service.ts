@@ -7,7 +7,7 @@ import { prisma } from "@mindorbit/db";
 import { getAIProvider } from "@mindorbit/ai";
 import { conceptExtractionService } from "./concept-extraction-service";
 import { graphAlignmentService } from "@/services/graph-alignment-service";
-import { contentParsers } from "./content-parsers";
+import { contentParsers } from "../lib/content-parsers";
 
 export type SourceType = "pdf" | "youtube" | "image" | "text" | "notes" | "textbook";
 
