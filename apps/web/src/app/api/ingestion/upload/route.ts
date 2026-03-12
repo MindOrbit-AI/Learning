@@ -7,8 +7,6 @@ const VALID_SOURCE_TYPES: SourceType[] = [
   "image",
   "youtube",
   "text",
-  "notes",
-  "textbook",
 ];
 
 const IMAGE_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -102,11 +100,11 @@ export async function POST(req: Request) {
       );
     }
     if (
-      (sourceType === "text" || sourceType === "notes" || sourceType === "textbook") &&
+      sourceType === "text" &&
       !content
     ) {
       return NextResponse.json(
-        { error: "content is required for text/notes/textbook" },
+        { error: "content is required for text" },
         { status: 400 }
       );
     }
@@ -116,7 +114,7 @@ export async function POST(req: Request) {
       subjectId,
       clusterId,
       sourceUrl: sourceType === "youtube" ? sourceUrl : undefined,
-      content: sourceType !== "youtube" ? content : undefined,
+      content: content,
     });
 
     const { nodeIds } = await ingestionService.processSource(sourceId);

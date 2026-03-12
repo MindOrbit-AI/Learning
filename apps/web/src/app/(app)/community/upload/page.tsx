@@ -13,7 +13,7 @@ import {
 } from "@mindorbit/ui";
 import { FileText, Youtube, BookOpen, Link2, Loader2, CheckCircle, Image as ImageIcon } from "lucide-react";
 
-type IngestionMode = "pdf" | "image" | "youtube" | "text" | "notes" | "textbook";
+type IngestionMode = "pdf" | "image" | "youtube" | "text";
 
 export default function UploadPage() {
   const router = useRouter();
@@ -130,7 +130,7 @@ export default function UploadPage() {
       <Card>
         <CardHeader>
           <CardDescription>
-            Upload PDFs, images, YouTube videos, lecture notes, or textbooks. The system
+            Upload PDFs, images, or YouTube videos. The system
             converts them into concept nodes, diagnostics, missions, and
             practice questions.
           </CardDescription>
@@ -146,8 +146,6 @@ export default function UploadPage() {
                   { id: "image" as const, label: "Image", icon: ImageIcon },
                   { id: "youtube" as const, label: "YouTube", icon: Youtube },
                   { id: "text" as const, label: "Text", icon: BookOpen },
-                  { id: "notes" as const, label: "Lecture Notes", icon: FileText },
-                  { id: "textbook" as const, label: "Textbook", icon: BookOpen },
                 ].map(({ id, label, icon: Icon }) => (
                   <button
                     key={id}
@@ -309,16 +307,10 @@ export default function UploadPage() {
               </div>
             )}
 
-            {(ingestSourceType === "text" ||
-              ingestSourceType === "notes" ||
-              ingestSourceType === "textbook") && (
+            {ingestSourceType === "text" && (
               <div>
                 <label className="mb-2 block text-sm font-medium">
-                  {ingestSourceType === "notes"
-                    ? "Lecture notes"
-                    : ingestSourceType === "textbook"
-                      ? "Textbook content"
-                      : "Text content"}
+                  Text content
                 </label>
                 <textarea
                   className="w-full min-h-[200px] rounded-xl border p-4"
@@ -365,9 +357,7 @@ export default function UploadPage() {
                 !ingestSubjectId ||
                 ((ingestSourceType === "pdf" || ingestSourceType === "image") && !ingestFile) ||
                 (ingestSourceType === "youtube" && !ingestYouTubeUrl.trim()) ||
-                ((ingestSourceType === "text" ||
-                  ingestSourceType === "notes" ||
-                  ingestSourceType === "textbook") &&
+                (ingestSourceType === "text" &&
                   !ingestContent.trim())
               }
             >
@@ -379,7 +369,7 @@ export default function UploadPage() {
               ) : (
                 <>
                   <Link2 className="mr-2 h-4 w-4" />
-                  Ingest Content
+                  Upload
                 </>
               )}
             </Button>

@@ -9,7 +9,7 @@ import { conceptExtractionService } from "./concept-extraction-service";
 import { graphAlignmentService } from "@/services/graph-alignment-service";
 import { contentParsers } from "../lib/content-parsers";
 
-export type SourceType = "pdf" | "youtube" | "image" | "text" | "notes" | "textbook";
+export type SourceType = "pdf" | "youtube" | "image" | "text";
 
 export const ingestionService = {
   /**
@@ -41,7 +41,7 @@ export const ingestionService = {
       const parsed = await contentParsers.parseYouTube(data.sourceUrl);
       content = parsed.text;
     } else if (
-      (data.sourceType === "text" || data.sourceType === "notes" || data.sourceType === "textbook") &&
+      data.sourceType === "text" &&
       data.content
     ) {
       const parsed = contentParsers.parseText(data.content);
