@@ -10,6 +10,7 @@ export function CommunityFilters() {
     const next = new URLSearchParams(searchParams);
     if (value) next.set(key, value);
     else next.delete(key);
+    next.delete("page"); // Reset to page 1 when filters change
     router.push(`/community?${next}`);
   }
 

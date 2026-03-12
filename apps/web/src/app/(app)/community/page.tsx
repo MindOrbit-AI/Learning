@@ -1,53 +1,83 @@
 import Link from "next/link";
-import { prisma } from "@mindorbit/db";
+import { prisma, type ResourceType } from "@mindorbit/db";
 import { getServerSession } from "@/lib/auth";
 import { Card, CardContent } from "@mindorbit/ui";
 import { RESOURCE_TYPE_LABELS } from "@mindorbit/lib";
 import { formatRelativeTime } from "@mindorbit/lib";
 import { Heart, Bookmark, Upload } from "lucide-react";
 import { CommunityFilters } from "./community-filters";
+import { CommunityPagination } from "./community-pagination";
+
+const PAGE_SIZE = 12;
 
 export default async function CommunityPage({
   searchParams,
 }: {
-  searchParams: Promise<{ subject?: string; type?: string; sort?: string }>;
+  searchParams: Promise<{ subject?: string; type?: string; sort?: string; page?: string }>;
 }) {
   const session = await getServerSession();
   const params = await searchParams;
   const subjectSlug = params.subject;
   const typeFilter = params.type;
   const sortBy = params.sort ?? "recent";
+  const page = Math.max(1, parseInt(params.page ?? "1", 10) || 1);
+  const skip = (page - 1) * PAGE_SIZE;
 
   const subject = subjectSlug
     ? await prisma.subject.findUnique({ where: { slug: subjectSlug } })
     : null;
 
   const typeFilterValues = ["note", "summary", "flashcard_set", "diagram", "walkthrough", "mini_lesson"] as const;
+  const validType = typeFilter && typeFilterValues.includes(typeFilter as (typeof typeFilterValues)[number]);
 
-  let resources = await prisma.resource.findMany({
-    where: {
-      ...(subject && { subjectId: subject.id }),
-      ...(typeFilter && typeFilterValues.includes(typeFilter as (typeof typeFilterValues)[number]) && { type: typeFilter }),
-    },
-    include: {
-      user: { select: { name: true, xp: true } },
-      subject: { select: { title: true } },
-      node: { select: { title: true } },
-      _count: { select: { likes: true, saves: true } },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 100,
-  });
+  const where = {
+    ...(subject && { subjectId: subject.id }),
+    ...(validType && { type: typeFilter as ResourceType }),
+  };
+
+  const include = {
+    user: { select: { name: true, xp: true } },
+    subject: { select: { title: true } },
+    node: { select: { title: true } },
+    _count: { select: { likes: true, saves: true } },
+  };
+
+  let resources: Awaited<
+    ReturnType<
+      typeof prisma.resource.findMany<{
+        include: typeof include;
+      }>
+    >
+  >;
+  let totalCount: number;
 
   if (sortBy === "popular") {
-    const withScore = resources.map((r) => ({
+    const allMatching = await prisma.resource.findMany({
+      where,
+      include,
+      orderBy: { createdAt: "desc" },
+      take: 500,
+    });
+    const withScore = allMatching.map((r) => ({
       ...r,
       _score: r._count.likes * 2 + r._count.saves * 3 + (r.user.xp ?? 0) / 10,
     }));
     withScore.sort((a, b) => b._score - a._score);
-    resources = withScore.slice(0, 50);
+    totalCount = withScore.length;
+    resources = withScore.slice(skip, skip + PAGE_SIZE);
   } else {
-    resources = resources.slice(0, 50);
+    const [items, count] = await Promise.all([
+      prisma.resource.findMany({
+        where,
+        include,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: PAGE_SIZE,
+      }),
+      prisma.resource.count({ where }),
+    ]);
+    resources = items;
+    totalCount = count;
   }
 
   function getIngestShortSummary(contentJson: string | null): string | null {
@@ -126,6 +156,7 @@ export default async function CommunityPage({
           </Link>
         ))}
       </div>
+      <CommunityPagination totalCount={totalCount} currentPage={page} />
     </div>
   );
 }
