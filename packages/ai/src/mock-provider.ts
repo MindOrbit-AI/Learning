@@ -6,6 +6,7 @@
 import type {
   AIProvider,
   MissionContent,
+  MissionSceneContent,
   ExtractedConcept,
   ContentDiagnosticQuestion,
   ContentSummaryJson,
@@ -172,6 +173,132 @@ export const mockAIProvider: AIProvider = {
       variationPrompt: template.variationPrompt ?? "Try a variation of the main example.",
       estimatedMinutes: template.estimatedMinutes ?? 15,
       practiceQuestions: questions,
+    };
+  },
+
+  async generateSceneMissionContent(params: {
+    nodeSlug: string;
+    nodeTitle: string;
+  }): Promise<MissionSceneContent> {
+    const slug = params.nodeSlug;
+    const title = params.nodeTitle;
+
+    const sceneTemplates: Record<string, MissionSceneContent["scenes"]> = {
+      "mole-concept": [
+        {
+          sceneType: "observe",
+          title: "The mole as a counting unit",
+          prompt: "Observe: the mole is like a dozen, but for atoms.",
+          contentJson: { visual: "🧪", description: "1 mole = 6.022 × 10²³ particles" },
+          orderIndex: 0,
+        },
+        {
+          sceneType: "micro_quiz",
+          title: "How many moles?",
+          prompt: "How many moles are in 90g of water (H₂O, 18 g/mol)?",
+          contentJson: {
+            options: [
+              { id: "a", label: "3 moles" },
+              { id: "b", label: "5 moles" },
+              { id: "c", label: "6 moles" },
+              { id: "d", label: "90 moles" },
+            ],
+          },
+          correctAnswerJson: '"b"',
+          explanation: "90 ÷ 18 = 5 moles",
+          hintLevel1: "Divide mass by molar mass",
+          orderIndex: 1,
+        },
+        {
+          sceneType: "reflect",
+          title: "Reflect",
+          prompt: "When would you use the mole in real life?",
+          contentJson: {},
+          orderIndex: 2,
+        },
+      ],
+      "linear-equations": [
+        {
+          sceneType: "observe",
+          title: "Solving linear equations",
+          prompt: "Isolate the variable step by step.",
+          contentJson: { description: "For 2x + 3 = 11, we subtract first, then divide." },
+          orderIndex: 0,
+        },
+        {
+          sceneType: "sort_sequence",
+          title: "Steps to solve",
+          prompt: "Sort the steps to solve 2x + 3 = 11",
+          contentJson: {
+            items: [
+              { id: "1", label: "Subtract 3 from both sides", correctOrder: 0 },
+              { id: "2", label: "Divide both sides by 2", correctOrder: 1 },
+              { id: "3", label: "Simplify to find x = 4", correctOrder: 2 },
+            ],
+          },
+          correctAnswerJson: ["1", "2", "3"],
+          explanation: "First subtract 3 to get 2x = 8, then divide by 2 to get x = 4.",
+          orderIndex: 1,
+        },
+      ],
+      stoichiometry: [
+        {
+          sceneType: "observe",
+          title: "Balanced equations",
+          prompt: "Coefficients give mole ratios.",
+          contentJson: { visual: "⚖️", description: "2H₂ + O₂ → 2H₂O means 2:1:2 ratio" },
+          orderIndex: 0,
+        },
+        {
+          sceneType: "sort_sequence",
+          title: "Order the steps",
+          prompt: "Arrange the stoichiometry steps in order",
+          contentJson: {
+            items: [
+              { id: "1", label: "Balance the equation", correctOrder: 0 },
+              { id: "2", label: "Identify the given and unknown", correctOrder: 1 },
+              { id: "3", label: "Convert using mole ratio", correctOrder: 2 },
+              { id: "4", label: "Convert to desired unit", correctOrder: 3 },
+            ],
+          },
+          correctAnswerJson: '["1","2","3","4"]',
+          explanation: "Balance first, then use ratios to convert.",
+          orderIndex: 1,
+        },
+      ],
+      default: [
+        {
+          sceneType: "observe",
+          title: "Introduction",
+          prompt: "Explore this concept step by step.",
+          contentJson: { description: `Learn about ${title}` },
+          orderIndex: 0,
+        },
+        {
+          sceneType: "micro_quiz",
+          title: "Check your understanding",
+          prompt: `Which best describes ${title}?`,
+          contentJson: {
+            options: [
+              { id: "a", label: "Option A" },
+              { id: "b", label: "Option B" },
+              { id: "c", label: "Option C" },
+            ],
+          },
+          correctAnswerJson: '"a"',
+          orderIndex: 1,
+        },
+      ],
+    };
+
+    const scenes = sceneTemplates[slug] ?? sceneTemplates.default;
+    const missionTitle = MISSION_TEMPLATES[slug]?.title ?? `Master ${title}`;
+
+    return {
+      title: missionTitle,
+      missionType: "discover",
+      estimatedMinutes: 15,
+      scenes,
     };
   },
 

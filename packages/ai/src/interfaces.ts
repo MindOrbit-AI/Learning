@@ -5,6 +5,42 @@
 
 import type { QuestionType } from "@mindorbit/types";
 
+export type SceneType =
+  | "observe"
+  | "manipulate"
+  | "predict"
+  | "reveal"
+  | "simulate"
+  | "drag_drop"
+  | "slider_experiment"
+  | "tap_highlight"
+  | "sort_sequence"
+  | "find_error"
+  | "construct_answer"
+  | "micro_quiz"
+  | "reflect"
+  | "transfer";
+
+export interface MissionSceneSpec {
+  sceneType: SceneType;
+  title: string;
+  prompt: string;
+  contentJson?: Record<string, unknown>;
+  correctAnswerJson?: string;
+  explanation?: string;
+  hintLevel1?: string;
+  hintLevel2?: string;
+  hintLevel3?: string;
+  orderIndex: number;
+}
+
+export interface MissionSceneContent {
+  title: string;
+  missionType: "discover" | "repair" | "simulation" | "challenge" | "review";
+  estimatedMinutes: number;
+  scenes: MissionSceneSpec[];
+}
+
 export interface ConceptExplanation {
   summary: string;
   keyPoints: string[];
@@ -69,6 +105,8 @@ export interface ContentSummaryJson {
 export interface AIProvider {
   summarizeNodeConcept(nodeTitle: string, nodeDescription: string): Promise<string>;
   generateMissionContent(params: MissionContentParams): Promise<MissionContent>;
+  /** Generate scene-based interactive mission (Brilliant-style) */
+  generateSceneMissionContent?(params: MissionContentParams): Promise<MissionSceneContent>;
   generatePracticeQuestions(nodeSlug: string, count: number): Promise<MissionContent["practiceQuestions"]>;
   generateReflectionPrompt(nodeTitle: string): Promise<string>;
   generateDiagnosticExplanation(questionPrompt: string, correctAnswer: string): Promise<string>;

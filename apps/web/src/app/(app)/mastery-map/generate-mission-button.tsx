@@ -14,7 +14,7 @@ export function GenerateMissionButton({ nodeId }: { nodeId: string }) {
       const res = await fetch("/api/missions/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nodeId }),
+        body: JSON.stringify({ nodeId, sceneBased: true }),
       });
       const data = await res.json();
       if (res.ok && data.missionId) {

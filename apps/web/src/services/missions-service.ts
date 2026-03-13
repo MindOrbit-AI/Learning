@@ -1,16 +1,23 @@
 /**
  * Missions Service - Generate learning missions for concept nodes
+ * Supports both task-based (legacy) and scene-based (Brilliant-style) missions
  */
 
 import { prisma } from "@mindorbit/db";
 import { getAIProvider } from "@mindorbit/ai";
+import { LearningStateEngine } from "./learning-state-engine";
 import { AnalyticsService, EVENT_TYPES } from "./analytics-service";
 
 export const missionsService = {
   /**
    * Generate a mission for a specific node and user
+   * @param sceneBased - if true, generates interactive scene-based mission (Brilliant-style)
    */
-  async generateMission(nodeId: string, userId: string): Promise<string | null> {
+  async generateMission(
+    nodeId: string,
+    userId: string,
+    options?: { sceneBased?: boolean }
+  ): Promise<string | null> {
     const node = await prisma.conceptNode.findUnique({
       where: { id: nodeId },
       include: { subject: true },
@@ -26,7 +33,51 @@ export const missionsService = {
     });
     if (existing) return existing.id;
 
-    const content = await getAIProvider().generateMissionContent({
+    const sceneBased = options?.sceneBased ?? false;
+    const provider = getAIProvider();
+
+    if (sceneBased && provider.generateSceneMissionContent) {
+      const sceneContent = await provider.generateSceneMissionContent({
+        nodeId: node.id,
+        nodeSlug: node.slug,
+        nodeTitle: node.title,
+      });
+
+      const mission = await prisma.mission.create({
+        data: {
+          userId,
+          subjectId: node.subjectId,
+          nodeId,
+          title: sceneContent.title,
+          missionType: sceneContent.missionType,
+          estimatedMinutes: sceneContent.estimatedMinutes,
+          status: "not_started",
+        },
+      });
+
+      for (const s of sceneContent.scenes) {
+        await prisma.missionScene.create({
+          data: {
+            missionId: mission.id,
+            sceneType: s.sceneType,
+            title: s.title,
+            prompt: s.prompt,
+            contentJson: JSON.stringify(s.contentJson ?? {}),
+            correctAnswerJson:
+              s.correctAnswerJson != null ? JSON.stringify(s.correctAnswerJson) : null,
+            explanation: s.explanation ?? null,
+            hintLevel1: s.hintLevel1 ?? null,
+            hintLevel2: s.hintLevel2 ?? null,
+            hintLevel3: s.hintLevel3 ?? null,
+            orderIndex: s.orderIndex,
+          },
+        });
+      }
+
+      return mission.id;
+    }
+
+    const content = await provider.generateMissionContent({
       nodeId: node.id,
       nodeSlug: node.slug,
       nodeTitle: node.title,
@@ -83,11 +134,38 @@ export const missionsService = {
       data: { xp: { increment: mission.xpReward } },
     });
 
-    await prisma.userNodeState.updateMany({
-      where: { userId, nodeId: mission.nodeId },
-      data: {
-        state: "learning",
-        mastery: { increment: 15 },
+    const MASTERY_DELTA = 15;
+    const existing = await prisma.userNodeState.findUnique({
+      where: {
+        userId_subjectId_nodeId: {
+          userId,
+          subjectId: mission.subjectId,
+          nodeId: mission.nodeId,
+        },
+      },
+    });
+    const newMastery = (existing?.mastery ?? 0) + MASTERY_DELTA;
+    const newState = LearningStateEngine.assignNodeState(newMastery);
+
+    await prisma.userNodeState.upsert({
+      where: {
+        userId_subjectId_nodeId: {
+          userId,
+          subjectId: mission.subjectId,
+          nodeId: mission.nodeId,
+        },
+      },
+      create: {
+        userId,
+        subjectId: mission.subjectId,
+        nodeId: mission.nodeId,
+        state: newState,
+        mastery: MASTERY_DELTA,
+        lastPracticedAt: new Date(),
+      },
+      update: {
+        state: newState,
+        mastery: { increment: MASTERY_DELTA },
         lastPracticedAt: new Date(),
       },
     });

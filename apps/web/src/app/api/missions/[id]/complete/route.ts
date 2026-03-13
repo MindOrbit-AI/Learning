@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth";
 import { missionsService } from "@/services/missions-service";
+import { completeSceneMission } from "@/services/mission-engine";
 
 export async function POST(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession();
@@ -13,7 +14,19 @@ export async function POST(
 
   const { id } = await params;
   try {
-    await missionsService.completeMission(id, session.user.id);
+    const body = await req.json().catch(() => ({}));
+    const sceneResponses = body.sceneResponses as Array<{
+      sceneId: string;
+      isCorrect: boolean;
+      attempts: number;
+      mistakeCategory?: string;
+    }> | undefined;
+
+    if (sceneResponses && Array.isArray(sceneResponses) && sceneResponses.length > 0) {
+      await completeSceneMission(id, session.user.id, sceneResponses);
+    } else {
+      await missionsService.completeMission(id, session.user.id);
+    }
     return NextResponse.json({ ok: true });
   } catch (e) {
     return NextResponse.json({ error: "Mission not found" }, { status: 404 });

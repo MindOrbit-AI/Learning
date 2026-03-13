@@ -6,6 +6,7 @@ import { z } from "zod";
 
 const schema = z.object({
   nodeId: z.string().min(1),
+  sceneBased: z.boolean().optional(),
 });
 
 export async function POST(req: Request) {
@@ -16,7 +17,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { nodeId } = schema.parse(body);
+    const { nodeId, sceneBased } = schema.parse(body);
 
     const node = await prisma.conceptNode.findUnique({
       where: { id: nodeId },
@@ -25,7 +26,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Node not found" }, { status: 404 });
     }
 
-    const missionId = await missionsService.generateMission(nodeId, session.user.id);
+    const missionId = await missionsService.generateMission(nodeId, session.user.id, {
+      sceneBased: sceneBased ?? false,
+    });
     if (!missionId) {
       return NextResponse.json(
         { error: "Mission already exists or failed to create" },

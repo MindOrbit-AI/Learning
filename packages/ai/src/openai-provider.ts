@@ -8,6 +8,7 @@ import type {
   AIProvider,
   MissionContent,
   MissionContentParams,
+  MissionSceneContent,
   ExtractedConcept,
   ContentDiagnosticQuestion,
   ContentSummaryJson,
@@ -101,6 +102,75 @@ function createOpenAIProvider(): AIProvider {
         };
       } catch {
         return mockAIProvider.generateMissionContent(params);
+      }
+    },
+
+    async generateSceneMissionContent(params: MissionContentParams): Promise<MissionSceneContent> {
+      const content = await chat(
+        [
+          {
+            role: "system",
+            content: `You generate Brilliant-style interactive mission scenes. Return JSON:
+{
+  "title": "engaging title",
+  "missionType": "discover"|"repair"|"simulation"|"challenge"|"review",
+  "estimatedMinutes": 10-25,
+  "scenes": [
+    {
+      "sceneType": "observe"|"predict"|"reveal"|"micro_quiz"|"drag_drop"|"sort_sequence"|"find_error"|"construct_answer"|"reflect"|"transfer",
+      "title": "scene title",
+      "prompt": "short prompt",
+      "contentJson": { ... scene-specific structure ... },
+      "correctAnswerJson": "optional JSON string for validation",
+      "explanation": "optional",
+      "hintLevel1": "optional",
+      "hintLevel2": "optional",
+      "hintLevel3": "optional",
+      "orderIndex": 0
+    }
+  ]
+}
+Scene types: observe (visual intro), predict (choose before reveal), micro_quiz (mcq), sort_sequence (reorder steps), find_error (tap wrong step), construct_answer (type answer), reflect (open-ended), transfer (apply to new scenario).
+For sort_sequence: contentJson MUST have "items" where EACH step is a valid, necessary step in the solution—no wrong steps (e.g. "set to zero" for linear equations), no redundant equivalents (use EITHER "divide by 2" OR "multiply by 1/2", not both). Items: [{ "id": "1", "label": "Step text", "correctOrder": 0 }, ...]. correctAnswerJson: ["1","2","3","4"] MUST be the exact correct order of item ids. The explanation MUST describe these same steps in order.
+For find_error, contentJson MUST have: "statements": [{ "id": "1", "text": "step text", "hasError": true/false }, ...]. correctAnswerJson: "2" (id of step with error).
+For micro_quiz/predict, contentJson MUST have: "options": [{ "id": "a", "label": "Answer A" }, ...]. correctAnswerJson: "a" (the option id) OR "Answer A" (the exact label).
+For construct_answer, correctAnswerJson: "13" or "x+7" (the exact expected answer as string).
+Use simple values for correctAnswerJson, not nested objects.`,
+          },
+          {
+            role: "user",
+            content: `Create a scene-based mission for: ${params.nodeTitle} (slug: ${params.nodeSlug})`,
+          },
+        ],
+        { jsonMode: true }
+      );
+      try {
+        const parsed = JSON.parse(content) as Partial<MissionSceneContent>;
+        const scenes = (parsed.scenes ?? []).map((s, i) => ({
+          sceneType: (s.sceneType ?? "observe") as MissionSceneContent["scenes"][0]["sceneType"],
+          title: s.title ?? `Step ${i + 1}`,
+          prompt: s.prompt ?? "",
+          contentJson: s.contentJson ?? {},
+          correctAnswerJson: s.correctAnswerJson,
+          explanation: s.explanation,
+          hintLevel1: s.hintLevel1,
+          hintLevel2: s.hintLevel2,
+          hintLevel3: s.hintLevel3,
+          orderIndex: i,
+        }));
+        return {
+          title: parsed.title ?? `Master ${params.nodeTitle}`,
+          missionType: (parsed.missionType ?? "discover") as MissionSceneContent["missionType"],
+          estimatedMinutes: parsed.estimatedMinutes ?? 15,
+          scenes,
+        };
+      } catch {
+        return (mockAIProvider as AIProvider).generateSceneMissionContent?.(params) ?? {
+          title: `Master ${params.nodeTitle}`,
+          missionType: "discover",
+          estimatedMinutes: 15,
+          scenes: [],
+        };
       }
     },
 

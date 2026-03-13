@@ -100,6 +100,42 @@ enum MissionTemplateStatus {
   archived
 }
 
+enum MissionType {
+  learn     // legacy, maps to discover
+  creator   // legacy
+  discover
+  repair
+  simulation
+  challenge
+  review
+}
+
+enum SceneType {
+  observe
+  manipulate
+  predict
+  reveal
+  simulate
+  drag_drop
+  slider_experiment
+  tap_highlight
+  sort_sequence
+  find_error
+  construct_answer
+  micro_quiz
+  reflect
+  transfer
+}
+
+enum MistakeCategory {
+  prerequisite_gap
+  concept_confusion
+  calculation_error
+  procedural_error
+  careless_error
+  terminology_confusion
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -322,6 +358,7 @@ model Mission {
   subjectId        String
   nodeId           String
   title            String
+  missionType      MissionType   @default(discover)
   status           MissionStatus @default(not_started)
   explanation      String?
   example          String?
@@ -329,10 +366,14 @@ model Mission {
   variationPrompt  String?
   estimatedMinutes Int           @default(15)
   xpReward         Int           @default(25)
+  currentSceneIndex Int          @default(0)
   createdAt        DateTime      @default(now())
   user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   node             ConceptNode   @relation(fields: [nodeId], references: [id], onDelete: Cascade)
   tasks            MissionTask[]
+  scenes          MissionScene[]
+  progress         MissionProgress?
+  sceneResponses   MissionSceneResponse[]
 }
 
 model MissionTask {
@@ -345,6 +386,51 @@ model MissionTask {
   explanation   String?
   orderIndex    Int          @default(0)
   mission       Mission      @relation(fields: [missionId], references: [id], onDelete: Cascade)
+}
+
+model MissionScene {
+  id                  String    @id @default(cuid())
+  missionId           String
+  sceneType           SceneType
+  title               String
+  prompt              String
+  contentJson         String?
+  interactionModel    String?
+  validationRulesJson String?
+  correctAnswerJson   String?
+  explanation         String?
+  hintLevel1          String?
+  hintLevel2          String?
+  hintLevel3          String?
+  orderIndex          Int       @default(0)
+  mission             Mission   @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  responses           MissionSceneResponse[]
+
+  @@index([missionId, orderIndex])
+}
+
+model MissionProgress {
+  id              String   @id @default(cuid())
+  missionId       String   @unique
+  completedIndices String  // JSON array of completed scene indices
+  answersJson     String?  // Partial answers for resume
+  updatedAt       DateTime @updatedAt
+  mission         Mission  @relation(fields: [missionId], references: [id], onDelete: Cascade)
+}
+
+model MissionSceneResponse {
+  id               String          @id @default(cuid())
+  missionId        String
+  sceneId          String
+  userAnswerJson   String
+  isCorrect        Boolean
+  attempts         Int             @default(1)
+  mistakeCategory  MistakeCategory?
+  respondedAt      DateTime        @default(now())
+  mission          Mission         @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  scene            MissionScene    @relation(fields: [sceneId], references: [id], onDelete: Cascade)
+
+  @@index([missionId, sceneId])
 }
 
 model Resource {
@@ -484,6 +570,7 @@ model MissionTemplate {
   subjectId             String
   nodeId                String
   title                 String
+  missionType           MissionType           @default(discover)
   explanationTemplate   String
   workedExampleTemplate String?
   reflectionPrompt      String?
@@ -495,6 +582,27 @@ model MissionTemplate {
   updatedAt             DateTime              @updatedAt
   subject               Subject               @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   node                  ConceptNode           @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  scenes                MissionTemplateScene[]
+}
+
+model MissionTemplateScene {
+  id                  String           @id @default(cuid())
+  templateId          String
+  sceneType           SceneType
+  title               String
+  prompt              String
+  contentJson         String?
+  interactionModel    String?
+  validationRulesJson String?
+  correctAnswerJson   String?
+  explanation         String?
+  hintLevel1          String?
+  hintLevel2          String?
+  hintLevel3          String?
+  orderIndex          Int              @default(0)
+  template            MissionTemplate  @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@index([templateId, orderIndex])
 }
 
 model AuditLog {

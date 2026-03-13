@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { prisma } from "@mindorbit/db";
 import { getServerSession } from "@/lib/auth";
 import { MissionRunner } from "./mission-runner";
-import { Card, CardContent, CardHeader, CardTitle, Button } from "@mindorbit/ui";
+import { SceneBasedMissionRunner } from "@/components/mission-engine";
+import { Card, CardContent, CardHeader, CardTitle } from "@mindorbit/ui";
 
 export default async function MissionDetailPage({
   params,
@@ -16,10 +16,17 @@ export default async function MissionDetailPage({
   const { id } = await params;
   const mission = await prisma.mission.findUnique({
     where: { id },
-    include: { node: true, tasks: { orderBy: { orderIndex: "asc" } } },
+    include: {
+      node: true,
+      tasks: { orderBy: { orderIndex: "asc" } },
+      scenes: { orderBy: { orderIndex: "asc" } },
+      progress: true,
+    },
   });
 
   if (!mission || mission.userId !== session.user.id) notFound();
+
+  const hasScenes = mission.scenes && mission.scenes.length > 0;
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -28,16 +35,18 @@ export default async function MissionDetailPage({
         <p className="text-muted-foreground">{mission.node.title}</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Explanation</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="whitespace-pre-wrap">{mission.explanation}</p>
-        </CardContent>
-      </Card>
+      {!hasScenes && mission.explanation && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Explanation</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="whitespace-pre-wrap">{mission.explanation}</p>
+          </CardContent>
+        </Card>
+      )}
 
-      {mission.example && (
+      {!hasScenes && mission.example && (
         <Card>
           <CardHeader>
             <CardTitle>Worked Example</CardTitle>
@@ -48,12 +57,27 @@ export default async function MissionDetailPage({
         </Card>
       )}
 
-      <MissionRunner
-        missionId={mission.id}
-        tasks={mission.tasks}
-        status={mission.status}
-        xpReward={mission.xpReward}
-      />
+      {hasScenes ? (
+        <SceneBasedMissionRunner
+          missionId={mission.id}
+          scenes={mission.scenes}
+          status={mission.status}
+          xpReward={mission.xpReward}
+          initialSceneIndex={mission.currentSceneIndex ?? 0}
+          initialAnswers={
+            mission.progress?.answersJson
+              ? (JSON.parse(mission.progress.answersJson) as Record<string, unknown>)
+              : {}
+          }
+        />
+      ) : (
+        <MissionRunner
+          missionId={mission.id}
+          tasks={mission.tasks}
+          status={mission.status}
+          xpReward={mission.xpReward}
+        />
+      )}
     </div>
   );
 }
