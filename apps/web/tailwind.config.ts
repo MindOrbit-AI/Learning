@@ -9,6 +9,7 @@ const config: Config = {
   theme: {
     fontFamily: {
       sans: [
+        "Nunito",
         "ui-sans-serif",
         "system-ui",
         "sans-serif",
@@ -52,6 +53,8 @@ const config: Config = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        "duo": "9999px",
+        "duo-lg": "1.25rem",
       },
     },
   },

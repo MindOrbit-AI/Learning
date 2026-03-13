@@ -27,6 +27,8 @@ export default async function AppLayout({
         name: user?.name ?? session.user.name,
         image: user?.image ?? session.user.image,
         role: user?.role ?? session.user.role,
+        xp: user?.xp ?? 0,
+        streakCount: user?.streakCount ?? 0,
       }}
     >
       {children}

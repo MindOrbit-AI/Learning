@@ -14,6 +14,8 @@ import {
   ClipboardList,
   Menu,
   Shield,
+  Flame,
+  Zap,
 } from "lucide-react";
 import { Button } from "@mindorbit/ui";
 import { useState } from "react";
@@ -33,7 +35,7 @@ export function AppShell({
   user,
 }: {
   children: React.ReactNode;
-  user: { name?: string | null; image?: string | null; role?: string };
+  user: { name?: string | null; image?: string | null; role?: string; xp?: number; streakCount?: number };
 }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -47,7 +49,10 @@ export function AppShell({
         }`}
       >
         <div className="flex h-16 items-center justify-between border-b px-4">
-          <Link href="/dashboard" className="font-bold">
+          <Link href="/dashboard" className="flex items-center gap-2 font-extrabold text-lg">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm">
+              M
+            </span>
             MindOrbit
           </Link>
           <Button
@@ -87,7 +92,7 @@ export function AppShell({
         </nav>
       </aside>
 
-      <div className="fixed inset-x-0 top-0 z-30 flex h-16 items-center justify-between border-b bg-background/95 px-4 backdrop-blur lg:left-64">
+      <div className="fixed inset-x-0 top-0 z-30 flex h-16 items-center justify-between border-b bg-white/95 px-4 shadow-sm backdrop-blur dark:bg-background/95 lg:left-64">
         <Button
           variant="ghost"
           size="icon"
@@ -98,13 +103,27 @@ export function AppShell({
         </Button>
         <Link
           href="/search"
-          className="mx-4 flex flex-1 items-center gap-2 rounded-xl border bg-muted/50 px-4 py-2 text-sm text-muted-foreground"
+          className="mx-4 flex flex-1 items-center gap-2 rounded-duo-lg border-2 border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:border-primary/30 hover:bg-white dark:border-gray-700 dark:bg-gray-900 dark:hover:border-primary/30"
         >
           <Search className="h-4 w-4" />
           Search...
         </Link>
-        <div className="flex items-center gap-2">
-          <span className="hidden text-sm text-muted-foreground sm:block">
+        <div className="flex items-center gap-3">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-1.5 rounded-duo-lg border-2 border-orange-200 bg-white px-3 py-1.5 text-sm font-bold text-orange-600 shadow-sm transition-colors hover:bg-orange-50 dark:border-orange-800 dark:bg-orange-950/50 dark:text-orange-400 dark:hover:bg-orange-900/30"
+          >
+            <Flame className="h-5 w-5" />
+            {user?.streakCount ?? 0}
+          </Link>
+          <Link
+            href="/profile"
+            className="flex items-center gap-1.5 rounded-duo-lg border-2 border-primary/30 bg-primary/10 px-3 py-1.5 text-sm font-bold text-primary shadow-sm transition-colors hover:bg-primary/20"
+          >
+            <Zap className="h-4 w-4" />
+            {user?.xp ?? 0} XP
+          </Link>
+          <span className="hidden text-sm font-semibold text-foreground sm:block">
             {user?.name ?? "Student"}
           </span>
           <Link href="/profile">

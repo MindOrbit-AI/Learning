@@ -4,46 +4,55 @@
 
 @layer base {
   :root {
-    --background: 220 20% 97%;
-    --foreground: 220 20% 10%;
+    /* Duolingo-inspired palette: Feather Green primary, warm backgrounds */
+    --background: 50 25% 98%;
+    --foreground: 0 0% 18%;
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 10%;
-    --primary: 262 83% 58%;
+    --card-foreground: 0 0% 18%;
+    --primary: 88 98% 40%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 220 20% 20%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 10% 46%;
-    --accent: 262 83% 96%;
-    --accent-foreground: 262 83% 30%;
-    --destructive: 0 84% 60%;
+    --secondary: 47 100% 95%;
+    --secondary-foreground: 0 0% 20%;
+    --muted: 50 20% 96%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 88 98% 95%;
+    --accent-foreground: 88 98% 30%;
+    --destructive: 0 100% 64%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 262 83% 58%;
-    --radius: 0.75rem;
+    --border: 50 15% 90%;
+    --input: 50 15% 92%;
+    --ring: 88 98% 40%;
+    --radius: 1rem;
+    --duo-gold: 47 100% 50%;
+    --duo-blue: 199 92% 53%;
+    --duo-orange: 33 100% 50%;
   }
 
   .dark {
-    --background: 220 20% 9%;
-    --foreground: 220 14% 96%;
-    --card: 220 20% 12%;
-    --card-foreground: 220 14% 96%;
-    --primary: 262 83% 65%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 220 20% 16%;
-    --secondary-foreground: 220 14% 96%;
-    --muted: 220 20% 16%;
-    --muted-foreground: 220 10% 56%;
-    --accent: 262 83% 20%;
-    --accent-foreground: 262 83% 90%;
-    --destructive: 0 62% 50%;
+    --background: 0 0% 9%;
+    --foreground: 50 20% 96%;
+    --card: 0 0% 12%;
+    --card-foreground: 50 20% 96%;
+    --primary: 88 98% 48%;
+    --primary-foreground: 0 0% 10%;
+    --secondary: 0 0% 18%;
+    --secondary-foreground: 50 20% 96%;
+    --muted: 0 0% 18%;
+    --muted-foreground: 50 10% 60%;
+    --accent: 88 98% 18%;
+    --accent-foreground: 88 98% 75%;
+    --destructive: 0 100% 55%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 20% 20%;
-    --input: 220 20% 20%;
-    --ring: 262 83% 65%;
+    --border: 0 0% 22%;
+    --input: 0 0% 22%;
+    --ring: 88 98% 48%;
+    --duo-gold: 47 100% 55%;
+    --duo-blue: 199 92% 58%;
+    --duo-orange: 33 100% 55%;
   }
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');
 
 @layer base {
   * {
@@ -51,5 +60,6 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+    font-family: 'Nunito', ui-sans-serif, system-ui, sans-serif;
   }
 }

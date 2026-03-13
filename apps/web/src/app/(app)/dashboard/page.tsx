@@ -64,14 +64,14 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold">
+        <h1 className="text-3xl font-extrabold">
           Welcome back{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
         </h1>
-        <p className="text-muted-foreground">Here's your learning overview</p>
+        <p className="text-muted-foreground mt-1">Here&apos;s your learning overview</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="rounded-3xl border-2 border-primary/10 shadow-lg transition-all hover:shadow-xl">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Mastery</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
@@ -83,7 +83,7 @@ export default async function DashboardPage() {
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="rounded-3xl border-2 border-orange-200 shadow-lg transition-all hover:shadow-xl dark:border-orange-800">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Streak</CardTitle>
             <Flame className="h-4 w-4 text-muted-foreground" />
@@ -93,7 +93,7 @@ export default async function DashboardPage() {
             <p className="text-xs text-muted-foreground">Keep it going!</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="rounded-3xl border-2 border-primary/10 shadow-lg transition-all hover:shadow-xl">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">XP</CardTitle>
           </CardHeader>
@@ -102,7 +102,7 @@ export default async function DashboardPage() {
             <p className="text-xs text-muted-foreground">Total experience</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="rounded-3xl border-2 border-primary/10 shadow-lg transition-all hover:shadow-xl">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Badges</CardTitle>
           </CardHeader>
