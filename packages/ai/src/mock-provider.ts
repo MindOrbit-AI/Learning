@@ -236,7 +236,7 @@ export const mockAIProvider: AIProvider = {
               { id: "3", label: "Simplify to find x = 4", correctOrder: 2 },
             ],
           },
-          correctAnswerJson: ["1", "2", "3"],
+          correctAnswerJson: '["1","2","3"]',
           explanation: "First subtract 3 to get 2x = 8, then divide by 2 to get x = 4.",
           orderIndex: 1,
         },

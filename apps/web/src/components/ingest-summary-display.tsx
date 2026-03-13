@@ -62,22 +62,23 @@ export function IngestSummaryDisplay({ summary }: { summary: IngestSummary }) {
       </Card>
 
       {/* Deep Summary */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-primary" />
-            Deep Summary
-          </CardTitle>
-          <CardDescription>Detailed breakdown of main concepts</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="prose prose-sm dark:prose-invert max-w-none">
-            <p className="whitespace-pre-wrap text-foreground">
-              {summary.deepSummary ?? ""}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      {summary.deepSummary && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-primary" />
+              Deep Summary
+            </CardTitle>
+            <CardDescription>Detailed breakdown of main concepts</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div
+              className="prose prose-sm dark:prose-invert max-w-none [&_h2]:mt-6 [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:mt-4 [&_h3]:text-base [&_h3]:font-medium [&_p]:my-2 [&_ul]:my-3 [&_li]:my-1"
+              dangerouslySetInnerHTML={{ __html: summary.deepSummary }}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Flashcards */}
       {flashcards.length > 0 && currentFlashcard && (
