@@ -35,6 +35,13 @@ export async function POST(
       weakMissingNodes: result.weakMissingNodes,
     });
   } catch (e) {
+    if (e instanceof Error && e.message === "Already completed") {
+      return NextResponse.json({
+        attemptId,
+        overallScore: attempt.overallScore ?? 0,
+        weakMissingNodes: 0,
+      });
+    }
     console.error(e);
     return NextResponse.json({ error: "Submission failed" }, { status: 500 });
   }

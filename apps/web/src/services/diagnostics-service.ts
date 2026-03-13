@@ -165,11 +165,15 @@ export const diagnosticsService = {
       (n) => n.state === "weak" || n.state === "missing"
     );
 
-    await createMissionsForWeakNodes(
-      attempt.userId,
-      attempt.subjectId,
-      weakMissing.slice(0, 3).map((n) => n.nodeId)
-    );
+    try {
+      await createMissionsForWeakNodes(
+        attempt.userId,
+        attempt.subjectId,
+        weakMissing.slice(0, 3).map((n) => n.nodeId)
+      );
+    } catch (missionErr) {
+      console.error("Mission creation failed (non-blocking):", missionErr);
+    }
 
     for (const { nodeId } of weakMissing) {
       await ReviewScheduler.scheduleReview(

@@ -154,7 +154,7 @@ export default function DiagnosticRunPage() {
               <button
                 type="button"
                 onClick={handleSubmit}
-                disabled={Object.keys(answers).length < questions.length}
+                disabled={!answers[q.id]}
                 className="rounded-xl bg-primary px-6 py-2 text-primary-foreground disabled:opacity-50"
               >
                 Submit

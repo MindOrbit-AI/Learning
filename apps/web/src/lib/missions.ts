@@ -32,6 +32,13 @@ export async function createMissionsForWeakNodes(
       nodeTitle: node.title,
     });
 
+    const exampleValue =
+      content.example == null
+        ? null
+        : typeof content.example === "string"
+          ? content.example
+          : JSON.stringify(content.example);
+
     const mission = await prisma.mission.create({
       data: {
         userId,
@@ -39,7 +46,7 @@ export async function createMissionsForWeakNodes(
         nodeId,
         title: content.title,
         explanation: content.explanation,
-        example: content.example,
+        example: exampleValue,
         reflectionPrompt: content.reflectionPrompt,
         variationPrompt: content.variationPrompt,
         estimatedMinutes: content.estimatedMinutes,
