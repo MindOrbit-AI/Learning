@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { prisma, type ResourceType } from "@mindorbit/db";
+import { prisma, type ResourceType, ResourceStatus } from "@mindorbit/db";
 import { getServerSession } from "@/lib/auth";
 import { Card, CardContent } from "@mindorbit/ui";
 import { RESOURCE_TYPE_LABELS } from "@mindorbit/lib";
@@ -31,7 +31,7 @@ export default async function CommunityPage({
   const validType = typeFilter && typeFilterValues.includes(typeFilter as (typeof typeFilterValues)[number]);
 
   const where = {
-    status: "approved",
+    status: ResourceStatus.approved,
     ...(subject && { subjectId: subject.id }),
     ...(validType && { type: typeFilter as ResourceType }),
   };

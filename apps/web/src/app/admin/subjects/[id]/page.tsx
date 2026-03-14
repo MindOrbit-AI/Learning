@@ -17,6 +17,7 @@ export default async function SubjectDetailPage({
       clusters: { orderBy: { orderIndex: "asc" } },
       _count: {
         select: {
+          clusters: true,
           conceptNodes: true,
           conceptEdges: true,
           diagnosticQuestions: true,

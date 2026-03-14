@@ -241,6 +241,68 @@ export const mockAIProvider: AIProvider = {
           orderIndex: 1,
         },
       ],
+      "function-basics": [
+        {
+          sceneType: "observe",
+          title: "Introduction to Functions",
+          prompt: "Look at the definition and visual representation of a function.",
+          contentJson: {
+            visual: "📐",
+            description: "A function maps each input to exactly one output. The domain is the set of inputs; the range is the set of outputs.",
+          },
+          orderIndex: 0,
+        },
+        {
+          sceneType: "micro_quiz",
+          title: "Properties of Functions",
+          prompt: "Which of the following is a property of functions?",
+          contentJson: {
+            options: [
+              { id: "a", label: "A function must have exactly one output for each input" },
+              { id: "b", label: "A function can have multiple outputs for one input" },
+              { id: "c", label: "A function must have the same number of inputs and outputs" },
+              { id: "d", label: "A function can have no outputs" },
+            ],
+          },
+          correctAnswerJson: '"a"',
+          explanation: "A function must have exactly one output for each input, which defines its basic property.",
+          orderIndex: 1,
+        },
+      ],
+      inequalities: [
+        {
+          sceneType: "observe",
+          title: "Understanding Inequalities",
+          prompt: "Look at the graphed inequalities on the number line. What do you notice about the solutions to these inequalities?",
+          contentJson: {
+            description: "The shaded regions show where x satisfies the inequality. Open circles mean the endpoint is not included; closed circles mean it is.",
+            numberLine: {
+              min: 0,
+              max: 8,
+              segments: [
+                { start: 0, end: 3, startFilled: false, endFilled: false },
+                { start: 5, end: 8, startFilled: false, endFilled: false },
+              ],
+            },
+          },
+          orderIndex: 0,
+        },
+        {
+          sceneType: "micro_quiz",
+          title: "Choose the Correct Inequality",
+          prompt: "Which inequality describes the graph you just observed?",
+          contentJson: {
+            options: [
+              { id: "a", label: "x < 3 or x > 5" },
+              { id: "b", label: "x ≤ 3 and x ≥ 5" },
+              { id: "c", label: "x < 3 and x ≥ 5" },
+            ],
+          },
+          correctAnswerJson: '"a"',
+          explanation: "The graph shows two rays: values less than 3 (open circle) and values greater than 5 (open circle).",
+          orderIndex: 1,
+        },
+      ],
       stoichiometry: [
         {
           sceneType: "observe",

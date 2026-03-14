@@ -11,7 +11,7 @@ export class ReviewScheduler {
    * Get next due date based on interval index (0 = first review, 1 = second, etc.)
    */
   static getNextDueDate(intervalIndex: number, from: Date = new Date()): Date {
-    const days = INTERVALS_DAYS[Math.min(intervalIndex, INTERVALS_DAYS.length - 1)];
+    const days = INTERVALS_DAYS[Math.min(intervalIndex, INTERVALS_DAYS.length - 1)] ?? 1;
     const next = new Date(from);
     next.setDate(next.getDate() + days);
     return next;

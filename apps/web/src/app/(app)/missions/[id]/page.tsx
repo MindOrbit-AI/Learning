@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@mindorbit/db";
 import { getServerSession } from "@/lib/auth";
 import { MissionRunner } from "./mission-runner";
-import { SceneBasedMissionRunner } from "@/components/mission-engine";
+import { MissionLessonRunner } from "@/features/lesson-runtime/components/MissionLessonRunner";
 import { Card, CardContent, CardHeader, CardTitle } from "@mindorbit/ui";
 
 export default async function MissionDetailPage({
@@ -58,8 +58,9 @@ export default async function MissionDetailPage({
       )}
 
       {hasScenes ? (
-        <SceneBasedMissionRunner
+        <MissionLessonRunner
           missionId={mission.id}
+          missionTitle={mission.title}
           scenes={mission.scenes}
           status={mission.status}
           xpReward={mission.xpReward}

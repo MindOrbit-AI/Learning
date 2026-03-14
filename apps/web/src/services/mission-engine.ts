@@ -25,11 +25,14 @@ export async function savePartialProgress(
     throw new Error("Mission not found");
   }
 
+  // Don't overwrite "completed" status – savePartialProgress is for in-progress saves only
+  const status = mission.status === "completed" ? "completed" : "in_progress";
+
   await prisma.mission.update({
     where: { id: missionId },
     data: {
       currentSceneIndex: data.currentSceneIndex ?? mission.currentSceneIndex,
-      status: "in_progress",
+      status,
     },
   });
 

@@ -82,7 +82,11 @@ export function SortSequenceScene({
     const next = [...order];
     const swap = dir === "up" ? index - 1 : index + 1;
     if (swap < 0 || swap >= next.length) return;
-    [next[index], next[swap]] = [next[swap], next[index]];
+    const a = next[index];
+    const b = next[swap];
+    if (a == null || b == null) return;
+    next[index] = b;
+    next[swap] = a;
     setOrder(next);
     onAnswer(next);
   }
