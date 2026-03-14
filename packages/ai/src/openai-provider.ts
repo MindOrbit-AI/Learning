@@ -131,9 +131,9 @@ function createOpenAIProvider(): AIProvider {
   ]
 }
 Scene types: observe (visual intro), predict (choose before reveal), micro_quiz (mcq), sort_sequence (reorder steps), find_error (tap wrong step), construct_answer (type answer), reflect (open-ended), transfer (apply to new scenario).
-For sort_sequence: contentJson MUST have "items" where EACH step is a valid, necessary step in the solution—no wrong steps (e.g. "set to zero" for linear equations), no redundant equivalents (use EITHER "divide by 2" OR "multiply by 1/2", not both). Items: [{ "id": "1", "label": "Step text", "correctOrder": 0 }, ...]. correctAnswerJson: ["1","2","3","4"] MUST be the exact correct order of item ids. The explanation MUST describe these same steps in order.
+For sort_sequence: contentJson MUST have "items" where EACH step is a valid, necessary step in the solution—no wrong steps (e.g. "set to zero" for linear equations), no redundant equivalents (use EITHER "divide by 2" OR "multiply by 1/2", not both). Items: [{ "id": "1", "label": "Step text", "correctOrder": 0 }, ...]. correctAnswerJson: ["1","2","3","4"] MUST be the exact correct order of item ids. The explanation MUST describe these same steps in order. When the steps solve a specific equation or expression (e.g. order of operations, solving for x), contentJson MUST also include "equation" with that expression (e.g. "(5+4) × 6 × 9 ÷ 3 + 18 - 7" or "2x + 3 = 11").
 For find_error, contentJson MUST have: "statements": [{ "id": "1", "text": "step text", "hasError": true/false }, ...]. correctAnswerJson: "2" (id of step with error).
-For micro_quiz/predict, contentJson MUST have: "options": [{ "id": "a", "label": "Answer A" }, ...]. correctAnswerJson: "a" (the option id) OR "Answer A" (the exact label).
+For micro_quiz/predict, contentJson MUST have: "options": [{ "id": "a", "label": "Answer A" }, ...]. correctAnswerJson is REQUIRED: use the option id (e.g. "a") or the exact label (e.g. "5" for numeric answers). Never omit correctAnswerJson for quiz scenes.
 For construct_answer, correctAnswerJson: "13" or "x+7" (the exact expected answer as string).
 Use simple values for correctAnswerJson, not nested objects.`,
           },

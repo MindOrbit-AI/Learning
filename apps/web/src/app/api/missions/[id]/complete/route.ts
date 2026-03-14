@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getServerSession } from "@/lib/auth";
 import { missionsService } from "@/services/missions-service";
 import { completeSceneMission } from "@/services/mission-engine";
@@ -27,6 +28,7 @@ export async function POST(
     } else {
       await missionsService.completeMission(id, session.user.id);
     }
+    revalidatePath("/missions");
     return NextResponse.json({ ok: true });
   } catch (e) {
     return NextResponse.json({ error: "Mission not found" }, { status: 404 });

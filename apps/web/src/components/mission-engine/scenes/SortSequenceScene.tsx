@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { GripVertical } from "lucide-react";
 import { cn } from "@mindorbit/ui";
 
@@ -62,11 +62,19 @@ export function SortSequenceScene({
   const rawItems = content.items ?? content.steps ?? [];
   const items = useMemo(() => normalizeItems(rawItems, prompt), [rawItems, prompt]);
 
-  const [order, setOrder] = useState<string[]>(() =>
-    [...items]
-      .sort(() => Math.random() - 0.5)
-      .map((i) => i.id)
-  );
+  // Equation/expression to solve (e.g. "(5+4) × 6 × 9 ÷ 3 + 18 - 7" for order of operations)
+  const equation =
+    (content.equation ?? content.expression ?? content.problem ?? content.target) as
+      | string
+      | undefined;
+
+  // Use original order for SSR/hydration - shuffle only on client after mount
+  // to avoid hydration mismatch (Math.random differs between server and client)
+  const [order, setOrder] = useState<string[]>(() => items.map((i) => i.id));
+  useEffect(() => {
+    const ids = items.map((i) => i.id);
+    setOrder([...ids].sort(() => Math.random() - 0.5));
+  }, [items]);
   const itemMap = Object.fromEntries(items.map((i) => [i.id, i.label]));
 
   function move(index: number, dir: "up" | "down") {
@@ -81,6 +89,11 @@ export function SortSequenceScene({
 
   return (
     <div className="space-y-4">
+      {equation && (
+        <div className="rounded-xl border bg-muted/50 px-4 py-3 font-mono text-sm">
+          Solve: {equation}
+        </div>
+      )}
       <p className="text-sm text-muted-foreground">Arrange the steps in the correct order</p>
       <div className="space-y-2">
         {order.map((id, idx) => (

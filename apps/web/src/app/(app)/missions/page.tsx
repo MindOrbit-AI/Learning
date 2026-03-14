@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { prisma } from "@mindorbit/db";
 import { getServerSession } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@mindorbit/ui";
 import { Target, Clock } from "lucide-react";
 

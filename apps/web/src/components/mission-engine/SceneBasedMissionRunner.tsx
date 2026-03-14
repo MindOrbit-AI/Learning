@@ -95,7 +95,8 @@ function resolveCorrectAnswer(scene: MissionSceneData, correct: string): string 
 
 /** Validates answer against correctAnswerJson - returns true if correct */
 function validateAnswer(scene: MissionSceneData, answer: unknown): boolean {
-  if (!scene.correctAnswerJson) return true;
+  // When correctAnswerJson is missing, we cannot verify - default to incorrect to avoid false positives
+  if (!scene.correctAnswerJson?.trim()) return false;
   try {
     const parsed = JSON.parse(scene.correctAnswerJson);
     // Unwrap AI object formats: { value: "x+7" }, { expression: "x+7" }, { selectedIds: [...] }
@@ -164,6 +165,7 @@ export function SceneBasedMissionRunner({
   const [loading, setLoading] = useState(false);
   const [showSummary, setShowSummary] = useState(status === "completed");
   const [showTryAgain, setShowTryAgain] = useState(false);
+  const [completeError, setCompleteError] = useState<string | null>(null);
 
   const total = scenes.length;
   const scene = scenes[currentIndex];
@@ -294,14 +296,19 @@ export function SceneBasedMissionRunner({
       }
 
       setLoading(true);
-      await fetch(`/api/missions/${missionId}/complete`, {
+      setCompleteError(null);
+      const res = await fetch(`/api/missions/${missionId}/complete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sceneResponses }),
       });
+      setLoading(false);
+      if (!res.ok) {
+        setCompleteError("Failed to save completion. Please try again.");
+        return;
+      }
       router.refresh();
       setShowSummary(true);
-      setLoading(false);
     } else {
       setCurrentIndex((i) => i + 1);
       saveProgress({ currentSceneIndex: currentIndex + 1 });
@@ -310,12 +317,9 @@ export function SceneBasedMissionRunner({
 
   async function handleCheck() {
     if (!scene || showFeedback) return;
-    
+
     const ans = sceneAnswer;
-    console.log(ans);
-    console.log(needsValidation);
     if (needsValidation && ans === undefined && ans !== "") return;
-    console.log(validateAnswer(scene, ans));
     const isCorrect = !needsValidation || validateAnswer(scene, ans);
     setFeedback((prev) => ({ ...prev, [scene.id]: { isCorrect } }));
     setAttempts((prev) => ({ ...prev, [scene.id]: (prev[scene.id] ?? 0) + 1 }));
@@ -337,14 +341,19 @@ export function SceneBasedMissionRunner({
     }
 
     setLoading(true);
-    await fetch(`/api/missions/${missionId}/complete`, {
+    setCompleteError(null);
+    const res = await fetch(`/api/missions/${missionId}/complete`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ sceneResponses }),
     });
+    setLoading(false);
+    if (!res.ok) {
+      setCompleteError("Failed to save completion. Please try again.");
+      return;
+    }
     router.refresh();
     setShowSummary(true);
-    setLoading(false);
   }
 
   function handleNext() {
@@ -430,14 +439,19 @@ export function SceneBasedMissionRunner({
               </button>
             )
           ) : isLast ? (
-            <button
-              type="button"
-              onClick={handleComplete}
-              disabled={loading}
-              className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-            >
-              {loading ? "Completing..." : "Complete Mission"}
-            </button>
+            <div className="flex flex-col items-end gap-2">
+              {completeError && (
+                <p className="text-sm text-destructive">{completeError}</p>
+              )}
+              <button
+                type="button"
+                onClick={handleComplete}
+                disabled={loading}
+                className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+              >
+                {loading ? "Completing..." : "Complete Mission"}
+              </button>
+            </div>
           ) : (
             <button
               type="button"
