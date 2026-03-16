@@ -8,9 +8,19 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url);
   const subjectId = searchParams.get("subjectId");
+  const search = searchParams.get("search")?.trim();
+
+  const where: Parameters<typeof prisma.cluster.findMany>[0]["where"] = {};
+  if (subjectId) where.subjectId = subjectId;
+  if (search) {
+    where.OR = [
+      { title: { contains: search, mode: "insensitive" } },
+      { slug: { contains: search, mode: "insensitive" } },
+    ];
+  }
 
   const clusters = await prisma.cluster.findMany({
-    where: subjectId ? { subjectId } : undefined,
+    where,
     orderBy: [{ orderIndex: "asc" }, { title: "asc" }],
     include: {
       subject: { select: { title: true, slug: true } },

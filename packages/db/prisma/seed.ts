@@ -8,9 +8,18 @@ import {
   algebraClusters,
   algebraEdges,
   algebraNodes,
+  biologyClusters,
+  biologyEdges,
+  biologyNodes,
   chemistryClusters,
   chemistryEdges,
   chemistryNodes,
+  computerScienceClusters,
+  computerScienceEdges,
+  computerScienceNodes,
+  physicsClusters,
+  physicsEdges,
+  physicsNodes,
   satMathClusters,
   satMathEdges,
   satMathNodes,
@@ -27,11 +36,32 @@ const SUBJECTS = [
     color: "#3B82F6",
   },
   {
+    slug: "biology",
+    title: "Biology",
+    description: "Cells, genetics, evolution, and human physiology.",
+    icon: "🧬",
+    color: "#22C55E",
+  },
+  {
     slug: "chemistry",
     title: "Chemistry",
     description: "Atomic structure, reactions, stoichiometry, and energy.",
     icon: "⚗️",
     color: "#10B981",
+  },
+  {
+    slug: "computer-science",
+    title: "Computer Science",
+    description: "Programming, data structures, algorithms, and software design.",
+    icon: "💻",
+    color: "#8B5CF6",
+  },
+  {
+    slug: "physics",
+    title: "Physics",
+    description: "Mechanics, waves, electricity, and modern physics.",
+    icon: "🌌",
+    color: "#F59E0B",
   },
   {
     slug: "sat-math",
@@ -253,16 +283,27 @@ async function seed() {
       update: { ...subj, status: "published" },
     });
 
-    const clusterData =
-      subj.slug === "algebra"
-        ? algebraClusters
-        : subj.slug === "chemistry"
-          ? chemistryClusters
-          : satMathClusters;
-    const nodeData =
-      subj.slug === "algebra" ? algebraNodes : subj.slug === "chemistry" ? chemistryNodes : satMathNodes;
-    const edgeData =
-      subj.slug === "algebra" ? algebraEdges : subj.slug === "chemistry" ? chemistryEdges : satMathEdges;
+    const SUBJECT_CONTENT: Record<
+      string,
+      {
+        clusters: typeof algebraClusters;
+        nodes: typeof algebraNodes;
+        edges: typeof algebraEdges;
+      }
+    > = {
+      algebra: { clusters: algebraClusters, nodes: algebraNodes, edges: algebraEdges },
+      biology: { clusters: biologyClusters, nodes: biologyNodes, edges: biologyEdges },
+      chemistry: { clusters: chemistryClusters, nodes: chemistryNodes, edges: chemistryEdges },
+      "computer-science": {
+        clusters: computerScienceClusters,
+        nodes: computerScienceNodes,
+        edges: computerScienceEdges,
+      },
+      physics: { clusters: physicsClusters, nodes: physicsNodes, edges: physicsEdges },
+      "sat-math": { clusters: satMathClusters, nodes: satMathNodes, edges: satMathEdges },
+    };
+    const { clusters: clusterData, nodes: nodeData, edges: edgeData } =
+      SUBJECT_CONTENT[subj.slug] ?? { clusters: [], nodes: [], edges: [] };
 
     const clusterMap: Record<string, string> = {};
     for (const c of clusterData) {
