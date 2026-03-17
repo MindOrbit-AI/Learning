@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@mindorbit/ai": "*",
+    "@mindorbit/content": "*",
     "@mindorbit/db": "*",
     "@mindorbit/lib": "*",
     "@mindorbit/types": "*",

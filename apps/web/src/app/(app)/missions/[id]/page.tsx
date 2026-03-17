@@ -19,7 +19,10 @@ export default async function MissionDetailPage({
     include: {
       node: true,
       tasks: { orderBy: { orderIndex: "asc" } },
-      scenes: { orderBy: { orderIndex: "asc" } },
+      scenes: {
+        orderBy: { orderIndex: "asc" },
+        include: { responses: true },
+      },
       progress: true,
     },
   });

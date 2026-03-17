@@ -16,10 +16,14 @@ import { cn } from "@mindorbit/ui";
 
 const PASS_THRESHOLD = 0.6;
 
+interface SceneWithResponses extends MissionSceneData {
+  responses?: Array<{ isCorrect: boolean }>;
+}
+
 interface MissionLessonRunnerProps {
   missionId: string;
   missionTitle: string;
-  scenes: MissionSceneData[];
+  scenes: SceneWithResponses[];
   status: string;
   xpReward: number;
   initialSceneIndex?: number;
@@ -333,9 +337,17 @@ export function MissionLessonRunner({
   }
 
   if (showSummary || status === "completed") {
-    const correctCount = lesson.steps.filter((s) =>
+    // Use persisted responses when available (e.g. returning to completed mission).
+    // Fall back to in-memory validation when just completed in this session.
+    const correctCountFromResponses = scenes.reduce(
+      (acc, s) => acc + (s.responses?.some((r) => r.isCorrect) ? 1 : 0),
+      0
+    );
+    const correctCountFromValidation = lesson.steps.filter((s) =>
       validationByStepId[s.id]?.isCorrect
     ).length;
+    const correctCount =
+      correctCountFromResponses > 0 ? correctCountFromResponses : correctCountFromValidation;
     return (
       <CompletionSummaryCard
         xpEarned={xpReward}

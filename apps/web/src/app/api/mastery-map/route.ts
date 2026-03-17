@@ -1,7 +1,24 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth";
 import { prisma } from "@mindorbit/db";
+import {
+  algebraEdges,
+  biologyEdges,
+  chemistryEdges,
+  computerScienceEdges,
+  physicsEdges,
+  satMathEdges,
+} from "@mindorbit/content";
 import type { Node, Edge } from "reactflow";
+
+const CONTENT_EDGES: Record<string, Array<{ source: string; target: string }>> = {
+  algebra: algebraEdges,
+  biology: biologyEdges,
+  chemistry: chemistryEdges,
+  "computer-science": computerScienceEdges,
+  physics: physicsEdges,
+  "sat-math": satMathEdges,
+};
 
 export async function GET(req: Request) {
   const session = await getServerSession();
@@ -53,6 +70,9 @@ export async function GET(req: Request) {
   const clusterRows = new Map<string, number[]>();
 
   let yOffset = 0;
+  const edgeIdCounter = { count: 0 };
+  const makeEdgeId = () => `fallback-${edgeIdCounter.count++}`;
+
   for (const subject of subjects) {
     const clusters = [...new Set(subject.conceptNodes.map((n) => n.clusterId))];
     const clusterOrder = subject.conceptNodes
@@ -62,18 +82,42 @@ export async function GET(req: Request) {
       }, [])
       .filter(Boolean);
 
-    let x = 0;
-    let y = 0;
-    const padding = 180;
-    const rowHeight = 80;
+    const nodeWidth = 160;
+    const nodeHeight = 56;
+    const horizontalGap = 100;
+    const levelGap = 120;
+    const labelHeight = 40;
+    const clusterNodeIds = new Map<string, string[]>();
 
-    for (const clusterId of clusterOrder) {
-      const clusterNodes = subject.conceptNodes.filter((n) => n.clusterId === clusterId);
+    const subjectLabelId = `subject-label-${subject.id}`;
+    nodes.push({
+      id: subjectLabelId,
+      type: "subjectLabel",
+      position: { x: 0, y: yOffset },
+      data: { label: subject.title, color: subject.color, icon: subject.icon },
+      selectable: false,
+      draggable: false,
+    });
+    positions.set(subjectLabelId, { x: 0, y: yOffset });
+    yOffset += labelHeight;
+
+    for (const clusterIdx of clusterOrder.keys()) {
+      const clusterId = clusterOrder[clusterIdx];
+      if (!clusterId) continue;
+      const clusterNodes = subject.conceptNodes
+        .filter((n) => n.clusterId === clusterId)
+        .sort((a, b) => a.orderIndex - b.orderIndex);
+      clusterNodeIds.set(clusterId, clusterNodes.map((n) => n.id));
+
+      const levelY = yOffset + clusterIdx * (levelGap + nodeHeight);
+      const startX = 0;
+
       for (let i = 0; i < clusterNodes.length; i++) {
         const n = clusterNodes[i];
         if (!n) continue;
         const state = stateMap.get(n.id);
-        const pos = { x: x * padding, y: yOffset + y * rowHeight };
+        const nodeX = startX + i * (nodeWidth + horizontalGap);
+        const pos = { x: nodeX, y: levelY };
         positions.set(n.id, pos);
         nodes.push({
           id: n.id,
@@ -100,25 +144,61 @@ export async function GET(req: Request) {
           missionId: missionByNode.get(n.id) ?? null,
         };
 
-        x += 1;
-        if (x > 4) {
-          x = 0;
-          y += 1;
-        }
       }
-      y += 1;
     }
-    yOffset += (clusterOrder.length + 1) * rowHeight;
+    yOffset += clusterOrder.length * (levelGap + nodeHeight) + levelGap;
+
+    const getHandles = (sx: number, sy: number, tx: number, ty: number) => {
+      const dx = tx - sx;
+      const dy = ty - sy;
+      const absDx = Math.abs(dx);
+      const absDy = Math.abs(dy);
+      if (absDy > absDx) {
+        if (dy > 0) return { sourceHandle: "bottom-src" as const, targetHandle: "top" as const };
+        return { sourceHandle: "top-src" as const, targetHandle: "bottom" as const };
+      } else {
+        if (dx > 0) return { sourceHandle: "right-src" as const, targetHandle: "left" as const };
+        return { sourceHandle: "left-src" as const, targetHandle: "right" as const };
+      }
+    };
+
+    const pushEdge = (id: string, sourceId: string, targetId: string) => {
+      const sp = positions.get(sourceId);
+      const tp = positions.get(targetId);
+      if (!sp || !tp) return;
+      const handles = getHandles(sp.x, sp.y, tp.x, tp.y);
+      edges.push({
+        id,
+        source: sourceId,
+        target: targetId,
+        type: "smoothstep",
+        ...handles,
+      });
+    };
 
     for (const e of subject.conceptEdges) {
-      const sp = positions.get(e.sourceNodeId);
-      const tp = positions.get(e.targetNodeId);
-      if (sp && tp) {
-        edges.push({
-          id: e.id,
-          source: e.sourceNodeId,
-          target: e.targetNodeId,
-        });
+      pushEdge(e.id, e.sourceNodeId, e.targetNodeId);
+    }
+
+    // Fallback: when no edges in DB, use content-defined edges or sequential within clusters
+    if (subject.conceptEdges.length === 0) {
+      const slugToId = new Map(subject.conceptNodes.map((n) => [n.slug, n.id]));
+      const contentEdges = CONTENT_EDGES[subject.slug];
+
+      if (contentEdges?.length) {
+        for (const e of contentEdges) {
+          const sourceId = slugToId.get(e.source);
+          const targetId = slugToId.get(e.target);
+          if (sourceId && targetId) pushEdge(makeEdgeId(), sourceId, targetId);
+        }
+      } else {
+        for (const [, nodeIds] of clusterNodeIds) {
+          for (let i = 0; i < nodeIds.length - 1; i++) {
+            const source = nodeIds[i];
+            const target = nodeIds[i + 1];
+            if (source && target) pushEdge(makeEdgeId(), source, target);
+          }
+        }
       }
     }
   }

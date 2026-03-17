@@ -13,6 +13,8 @@ import {
   MiniMap,
   NodeTypes,
   BackgroundVariant,
+  Handle,
+  Position,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { Card, CardContent, CardHeader, CardTitle } from "@mindorbit/ui";
@@ -33,7 +35,7 @@ function MasteryNode({ data }: { data: { label: string; state?: NodeState } }) {
   const color = nodeColors[state] ?? nodeColors.untouched;
   return (
     <div
-      className="flex items-center justify-center rounded-duo border-2 px-5 py-3 font-semibold shadow-lg transition-transform hover:scale-105"
+      className="relative flex items-center justify-center rounded-duo border-2 px-5 py-3 font-semibold shadow-lg transition-transform hover:scale-105"
       style={{
         backgroundColor: `${color}15`,
         borderColor: color,
@@ -42,13 +44,34 @@ function MasteryNode({ data }: { data: { label: string; state?: NodeState } }) {
         boxShadow: `0 4px 14px ${color}40`,
       }}
     >
+      <Handle type="target" position={Position.Top} id="top" className="!w-2 !h-2 !border-2 !border-primary !bg-background" />
+      <Handle type="source" position={Position.Top} id="top-src" className="!w-2 !h-2 !border-2 !border-primary !bg-background" />
+      <Handle type="target" position={Position.Bottom} id="bottom" className="!w-2 !h-2 !border-2 !border-primary !bg-background" />
+      <Handle type="source" position={Position.Bottom} id="bottom-src" className="!w-2 !h-2 !border-2 !border-primary !bg-background" />
+      <Handle type="target" position={Position.Left} id="left" className="!w-2 !h-2 !border-2 !border-primary !bg-background" />
+      <Handle type="source" position={Position.Left} id="left-src" className="!w-2 !h-2 !border-2 !border-primary !bg-background" />
+      <Handle type="target" position={Position.Right} id="right" className="!w-2 !h-2 !border-2 !border-primary !bg-background" />
+      <Handle type="source" position={Position.Right} id="right-src" className="!w-2 !h-2 !border-2 !border-primary !bg-background" />
       <div className="text-center text-sm">{data.label}</div>
+    </div>
+  );
+}
+
+function SubjectLabelNode({ data }: { data: { label: string; color?: string; icon?: string } }) {
+  return (
+    <div
+      className="flex items-center gap-2 rounded-xl border-2 border-primary/30 bg-primary/10 px-4 py-2 font-bold text-foreground shadow-sm"
+      style={data.color ? { borderColor: `${data.color}60`, backgroundColor: `${data.color}20` } : undefined}
+    >
+      {data.icon && <span className="text-lg">{data.icon}</span>}
+      <span className="text-sm">{data.label}</span>
     </div>
   );
 }
 
 const nodeTypes: NodeTypes = {
   mastery: MasteryNode,
+  subjectLabel: SubjectLabelNode,
 };
 
 async function fetchMapData(subjectId?: string, userId?: string) {
@@ -87,6 +110,7 @@ export function MasteryMapClient() {
   }, [selectedNodeId]);
 
   const onNodeClick = useCallback((_e: React.MouseEvent, node: Node) => {
+    if (node.type === "subjectLabel") return;
     setSelectedNode(node.id);
   }, []);
 
@@ -170,6 +194,9 @@ export function MasteryMapClient() {
               onNodeClick={onNodeClick}
               nodeTypes={nodeTypes}
               fitView
+              defaultEdgeOptions={{
+                style: { stroke: "hsl(var(--primary))", strokeWidth: 2 },
+              }}
             >
               <Background variant={BackgroundVariant.Dots} />
               <Controls />
@@ -180,7 +207,9 @@ export function MasteryMapClient() {
 
         {viewMode === "list" && (
           <div className="flex-1 space-y-2">
-            {nodes.map((n) => {
+            {nodes
+              .filter((n) => n.type !== "subjectLabel")
+              .map((n) => {
               const state = (n.data.state as string) ?? "untouched";
               const color = nodeColors[state];
               return (
