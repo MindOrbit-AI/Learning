@@ -10,6 +10,7 @@ import type {
   ExtractedConcept,
   ContentDiagnosticQuestion,
   ContentSummaryJson,
+  GeneratedSubjectStructure,
 } from "./interfaces";
 import type { QuestionType } from "@mindorbit/types";
 
@@ -459,6 +460,32 @@ export const mockAIProvider: AIProvider = {
 
   async extractTextFromImage(_buffer: Buffer, _mimeType: string): Promise<string> {
     return "Image uploaded. Set OPENAI_API_KEY to extract text and concepts from images (e.g., diagrams, handwritten notes, textbook screenshots).";
+  },
+
+  async generateSubjectStructure(
+    title: string,
+    description: string
+  ): Promise<GeneratedSubjectStructure> {
+    const base = title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    const clusters = [
+      { slug: `${base}-foundations`, title: "Foundations", description: "Core concepts", orderIndex: 0 },
+      { slug: `${base}-core`, title: "Core Concepts", description: "Main learning area", orderIndex: 1 },
+      { slug: `${base}-advanced`, title: "Advanced", description: "Extended topics", orderIndex: 2 },
+    ];
+    const concepts = [
+      { slug: `${base}-intro`, title: "Introduction", description, clusterSlug: clusters[0].slug, orderIndex: 0, difficulty: "easy" },
+      { slug: `${base}-basics`, title: "Basics", description: "Essential building blocks", clusterSlug: clusters[0].slug, orderIndex: 1, difficulty: "easy" },
+      { slug: `${base}-key-concept-1`, title: "Key Concept 1", description: "First main concept", clusterSlug: clusters[1].slug, orderIndex: 0, difficulty: "medium" },
+      { slug: `${base}-key-concept-2`, title: "Key Concept 2", description: "Second main concept", clusterSlug: clusters[1].slug, orderIndex: 1, difficulty: "medium" },
+      { slug: `${base}-advanced-1`, title: "Advanced Topic", description: "Advanced material", clusterSlug: clusters[2].slug, orderIndex: 0, difficulty: "hard" },
+    ];
+    const edges = [
+      { sourceSlug: concepts[0].slug, targetSlug: concepts[1].slug, relationshipType: "prerequisite" as const },
+      { sourceSlug: concepts[1].slug, targetSlug: concepts[2].slug, relationshipType: "prerequisite" as const },
+      { sourceSlug: concepts[2].slug, targetSlug: concepts[3].slug, relationshipType: "prerequisite" as const },
+      { sourceSlug: concepts[3].slug, targetSlug: concepts[4].slug, relationshipType: "prerequisite" as const },
+    ];
+    return { clusters, concepts, edges };
   },
 
   async summarizeContentToJson(content: string): Promise<ContentSummaryJson> {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth";
 import { prisma } from "@mindorbit/db";
+import { canViewSubject } from "@/lib/subject-visibility";
 import { diagnosticsService } from "@/services/diagnostics-service";
 
 export async function POST(
@@ -17,6 +18,9 @@ export async function POST(
     where: { slug: subjectSlug },
   });
   if (!subject) {
+    return NextResponse.json({ error: "Subject not found" }, { status: 404 });
+  }
+  if (!canViewSubject(subject, session.user.id)) {
     return NextResponse.json({ error: "Subject not found" }, { status: 404 });
   }
 

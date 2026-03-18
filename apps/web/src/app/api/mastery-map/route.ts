@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth";
 import { prisma } from "@mindorbit/db";
+import { subjectVisibilityWhere } from "@/lib/subject-visibility";
 import {
   algebraEdges,
   biologyEdges,
@@ -25,8 +26,11 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const subjectId = searchParams.get("subjectId");
 
+  const visibilityWhere = subjectVisibilityWhere(session?.user?.id as string | undefined);
   let subjects = await prisma.subject.findMany({
-    where: subjectId ? { id: subjectId } : undefined,
+    where: subjectId
+      ? { id: subjectId, ...visibilityWhere }
+      : visibilityWhere,
     include: {
       conceptNodes: {
         include: { cluster: true },

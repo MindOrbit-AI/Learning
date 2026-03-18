@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth";
 import { prisma } from "@mindorbit/db";
+import { canViewSubject } from "@/lib/subject-visibility";
 
 export async function GET(
   _req: Request,
@@ -29,12 +30,16 @@ export async function GET(
     return NextResponse.json({ error: "Source not found" }, { status: 404 });
   }
 
-  const subject = source.subjectId
-    ? await prisma.subject.findUnique({
-        where: { id: source.subjectId },
-        select: { id: true, title: true, slug: true },
-      })
-    : null;
+  let subject: { id: string; title: string; slug: string } | null = null;
+  if (source.subjectId) {
+    const s = await prisma.subject.findUnique({
+      where: { id: source.subjectId },
+      select: { id: true, title: true, slug: true, status: true, createdById: true },
+    });
+    if (s && canViewSubject(s, session.user.id)) {
+      subject = { id: s.id, title: s.title, slug: s.slug };
+    }
+  }
 
   const summary = source.summaryJson
     ? (JSON.parse(source.summaryJson) as {

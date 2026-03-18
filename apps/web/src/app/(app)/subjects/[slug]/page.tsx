@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@mindorbit/db";
 import { getServerSession } from "@/lib/auth";
+import { canViewSubject } from "@/lib/subject-visibility";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button } from "@mindorbit/ui";
 import { Play, Map, ChevronRight } from "lucide-react";
 
@@ -26,6 +27,7 @@ export default async function SubjectDetailPage({
   });
 
   if (!subject) notFound();
+  if (!canViewSubject(subject, session?.user?.id as string | undefined)) notFound();
 
   const userNodeStates = session?.user?.id
     ? await prisma.userNodeState.findMany({

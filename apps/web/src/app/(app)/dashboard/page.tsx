@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@mindorbit/db";
 import { getServerSession } from "@/lib/auth";
+import { subjectVisibilityWhere } from "@/lib/subject-visibility";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button } from "@mindorbit/ui";
 import {
   Target,
@@ -50,6 +51,7 @@ export default async function DashboardPage() {
   });
 
   const subjects = await prisma.subject.findMany({
+    where: subjectVisibilityWhere(session.user.id),
     include: {
       _count: { select: { conceptNodes: true } },
     },

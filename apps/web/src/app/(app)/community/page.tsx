@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma, type ResourceType, ResourceStatus } from "@mindorbit/db";
 import { getServerSession } from "@/lib/auth";
+import { canViewSubject } from "@/lib/subject-visibility";
 import { Card, CardContent } from "@mindorbit/ui";
 import { RESOURCE_TYPE_LABELS } from "@mindorbit/lib";
 import { formatRelativeTime } from "@mindorbit/lib";
@@ -23,9 +24,12 @@ export default async function CommunityPage({
   const page = Math.max(1, parseInt(params.page ?? "1", 10) || 1);
   const skip = (page - 1) * PAGE_SIZE;
 
-  const subject = subjectSlug
+  let subject = subjectSlug
     ? await prisma.subject.findUnique({ where: { slug: subjectSlug } })
     : null;
+  if (subject && !canViewSubject(subject, session?.user?.id as string | undefined)) {
+    subject = null;
+  }
 
   const typeFilterValues = ["note", "summary", "flashcard_set", "diagram", "walkthrough", "mini_lesson"] as const;
   const validType = typeFilter && typeFilterValues.includes(typeFilter as (typeof typeFilterValues)[number]);

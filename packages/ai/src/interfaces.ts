@@ -87,6 +87,29 @@ export interface ContentDiagnosticQuestion {
   explanation: string;
 }
 
+/** AI-generated subject structure (clusters, concepts, edges) for preview/save */
+export interface GeneratedSubjectStructure {
+  clusters: Array<{
+    slug: string;
+    title: string;
+    description: string;
+    orderIndex: number;
+  }>;
+  concepts: Array<{
+    slug: string;
+    title: string;
+    description: string;
+    clusterSlug: string;
+    orderIndex: number;
+    difficulty?: string;
+  }>;
+  edges: Array<{
+    sourceSlug: string;
+    targetSlug: string;
+    relationshipType: "prerequisite" | "related" | "extends";
+  }>;
+}
+
 /** AI-generated summary from ingested content (no chunking) */
 export interface ContentSummaryJson {
   title: string;
@@ -127,6 +150,9 @@ export interface AIProvider {
 
   /** Content Ingestion - summarize full content to JSON (flashcards, shortSummary, deepSummary, quizzes) - no chunking */
   summarizeContentToJson(content: string): Promise<ContentSummaryJson>;
+
+  /** Subject Creation - generate clusters, concepts, and edges from subject title/description */
+  generateSubjectStructure(title: string, description: string): Promise<GeneratedSubjectStructure>;
 }
 
 /** ConceptExplainer - Node-aware concept explanation */

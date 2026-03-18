@@ -12,6 +12,7 @@ import type {
   ExtractedConcept,
   ContentDiagnosticQuestion,
   ContentSummaryJson,
+  GeneratedSubjectStructure,
 } from "./interfaces";
 import type { QuestionType } from "@mindorbit/types";
 import { mockAIProvider } from "./mock-provider";
@@ -364,6 +365,66 @@ Return only valid JSON, no markdown code fence.
         };
       } catch {
         return mockAIProvider.summarizeContentToJson(content);
+      }
+    },
+
+    async generateSubjectStructure(
+      title: string,
+      description: string
+    ): Promise<GeneratedSubjectStructure> {
+      const content = await chat(
+        [
+          {
+            role: "system",
+            content: `You are an expert curriculum designer. Given a subject title and description, generate a learning graph structure.
+
+Return JSON with exactly these keys:
+- clusters: array of { slug (URL-safe, e.g. "foundations"), title, description, orderIndex (0-based) }
+- concepts: array of { slug (URL-safe), title, description, clusterSlug (must match a cluster slug), orderIndex (0-based), difficulty?: "easy"|"medium"|"hard" }
+- edges: array of { sourceSlug, targetSlug, relationshipType: "prerequisite"|"related"|"extends" }
+
+Rules:
+- Create 3-6 clusters that logically divide the subject
+- Create 8-20 concepts distributed across clusters
+- Each concept must reference an existing clusterSlug
+- Edges use concept slugs; prerequisite = A must come before B; related = conceptually linked; extends = B builds on A
+- Ensure prerequisite edges form a sensible learning path (foundational concepts first)
+- All slugs: lowercase, hyphenated, [a-z0-9-] only`,
+          },
+          {
+            role: "user",
+            content: `Subject: ${title}\n\n${description}\n\nGenerate the full structure.`,
+          },
+        ],
+        { jsonMode: true }
+      );
+      try {
+        const parsed = JSON.parse(content) as Partial<GeneratedSubjectStructure>;
+        const clusters = (parsed.clusters ?? []).map((c, i) => ({
+          slug: (c.slug as string) ?? `cluster-${i}`,
+          title: (c.title as string) ?? "Untitled Cluster",
+          description: (c.description as string) ?? "",
+          orderIndex: (c.orderIndex as number) ?? i,
+        }));
+        const concepts = (parsed.concepts ?? []).map((c, i) => ({
+          slug: (c.slug as string) ?? `concept-${i}`,
+          title: (c.title as string) ?? "Untitled Concept",
+          description: (c.description as string) ?? "",
+          clusterSlug: (c.clusterSlug as string) ?? clusters[0]?.slug ?? "main",
+          orderIndex: (c.orderIndex as number) ?? i,
+          difficulty: (c.difficulty as string) ?? "medium",
+        }));
+        const edges = (parsed.edges ?? []).map((e) => ({
+          sourceSlug: (e.sourceSlug as string) ?? "",
+          targetSlug: (e.targetSlug as string) ?? "",
+          relationshipType: ((e.relationshipType as string) ?? "prerequisite") as
+            | "prerequisite"
+            | "related"
+            | "extends",
+        }));
+        return { clusters, concepts, edges };
+      } catch {
+        return mockAIProvider.generateSubjectStructure(title, description);
       }
     },
 

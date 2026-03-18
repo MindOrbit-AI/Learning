@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@mindorbit/db";
 import { getServerSession } from "@/lib/auth";
+import { canViewSubject } from "@/lib/subject-visibility";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button } from "@mindorbit/ui";
 import { Clock, Target } from "lucide-react";
 
@@ -18,6 +19,7 @@ export default async function DiagnosticStartPage({
     where: { slug: subjectSlug },
   });
   if (!subject) notFound();
+  if (!canViewSubject(subject, session.user.id)) notFound();
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">
