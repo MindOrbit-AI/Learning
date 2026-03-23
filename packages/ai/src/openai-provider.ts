@@ -27,7 +27,7 @@ function getClient(): OpenAI | null {
 
 async function chat(
   messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[],
-  options?: { jsonMode?: boolean }
+  options?: { jsonMode?: boolean; maxTokens?: number }
 ): Promise<string> {
   const client = getClient();
   if (!client) throw new Error("OPENAI_API_KEY is not set");
@@ -35,6 +35,7 @@ async function chat(
     model: MODEL,
     messages,
     ...(options?.jsonMode && { response_format: { type: "json_object" } }),
+    ...(options?.maxTokens != null && { max_tokens: options.maxTokens }),
   });
   const content = res.choices[0]?.message?.content?.trim();
   if (!content) throw new Error("Empty response from OpenAI");
@@ -341,7 +342,7 @@ Return only valid JSON, no markdown code fence.
             content: `Summarize this content:\n\n${truncated}`,
           },
         ],
-        { jsonMode: true }
+        { jsonMode: true, maxTokens: 16384 }
       );
       try {
         const parsed = JSON.parse(result) as Partial<ContentSummaryJson>;
@@ -366,6 +367,21 @@ Return only valid JSON, no markdown code fence.
       } catch {
         return mockAIProvider.summarizeContentToJson(content);
       }
+    },
+
+    async generateSubjectDescription(title: string): Promise<string> {
+      const content = await chat([
+        {
+          role: "system",
+          content:
+            "You are an expert curriculum designer. Given a subject title, write a brief 2-3 sentence description of the subject and what learners will master. Be concise and educational.",
+        },
+        {
+          role: "user",
+          content: `Write a brief description for the subject: ${title}`,
+        },
+      ]);
+      return content.trim();
     },
 
     async generateSubjectStructure(
@@ -450,6 +466,78 @@ Rules:
       });
       const content = res.choices[0]?.message?.content?.trim();
       return content ?? "";
+    },
+
+    async selectMostRelevantSubject(
+      subjects: Array<{ id: string; slug: string; title: string; description: string }>,
+      contentSummary: string
+    ): Promise<string | null> {
+      if (subjects.length === 0) return null;
+      if (subjects.length === 1) return subjects[0]?.id ?? null;
+      const list = subjects.map((s) => `- ${s.id}: ${s.title} (${s.slug}) - ${s.description}`).join("\n");
+      const content = await chat(
+        [
+          {
+            role: "system",
+            content: `You select the single most relevant academic subject for the given content. Return ONLY the subject id, nothing else. Match by topic (e.g. algebra video → Algebra, physics lecture → Physics). If none fits well, return the first one.`,
+          },
+          {
+            role: "user",
+            content: `Subjects:\n${list}\n\nContent summary:\n${contentSummary.slice(0, 2000)}\n\nReturn the subject id:`,
+          },
+        ],
+        {}
+      );
+      const id = content.trim();
+      return subjects.some((s) => s.id === id) ? id : subjects[0]?.id ?? null;
+    },
+
+    async selectMostRelevantCluster(
+      clusters: Array<{ id: string; title: string; description: string }>,
+      contentSummary: string
+    ): Promise<string | null> {
+      if (clusters.length === 0) return null;
+      if (clusters.length === 1) return clusters[0]?.id ?? null;
+      const list = clusters.map((c) => `- ${c.id}: ${c.title} (${c.description})`).join("\n");
+      const content = await chat(
+        [
+          {
+            role: "system",
+            content: `You select the single most relevant cluster for given content. Return ONLY the cluster id, nothing else. If none fits well, return the first one.`,
+          },
+          {
+            role: "user",
+            content: `Clusters:\n${list}\n\nContent summary:\n${contentSummary.slice(0, 1500)}\n\nReturn the cluster id:`,
+          },
+        ],
+        {}
+      );
+      const id = content.trim();
+      return clusters.some((c) => c.id === id) ? id : clusters[0]?.id ?? null;
+    },
+
+    async selectMostRelevantNode(
+      nodes: Array<{ id: string; title: string; description: string }>,
+      contentSummary: string
+    ): Promise<string | null> {
+      if (nodes.length === 0) return null;
+      if (nodes.length === 1) return nodes[0]?.id ?? null;
+      const list = nodes.map((n) => `- ${n.id}: ${n.title} (${n.description})`).join("\n");
+      const content = await chat(
+        [
+          {
+            role: "system",
+            content: `You select the single most relevant concept node for given content. Return ONLY the node id, nothing else. If none fits well, return the first one.`,
+          },
+          {
+            role: "user",
+            content: `Nodes:\n${list}\n\nContent summary:\n${contentSummary.slice(0, 1500)}\n\nReturn the node id:`,
+          },
+        ],
+        {}
+      );
+      const id = content.trim();
+      return nodes.some((n) => n.id === id) ? id : nodes[0]?.id ?? null;
     },
   };
 }

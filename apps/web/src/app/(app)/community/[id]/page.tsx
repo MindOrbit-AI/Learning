@@ -11,12 +11,14 @@ import {
   Button,
 } from "@mindorbit/ui";
 import { RESOURCE_TYPE_LABELS } from "@mindorbit/lib";
-import { User, ChevronLeft } from "lucide-react";
+import { User, ChevronLeft, ExternalLink, Youtube } from "lucide-react";
 import { ResourceActions } from "./resource-actions";
 import { IngestSummaryDisplay } from "@/components/ingest-summary-display";
 
 type ContentJson = {
   markdown?: string;
+  sourceUrl?: string;
+  originalText?: string;
   summary?: {
     flashcards?: Array<{ front: string; back: string }>;
     shortSummary?: string;
@@ -60,10 +62,14 @@ export default async function ResourceDetailPage({
 
   let content = "";
   let ingestSummary: ContentJson["summary"] | null = null;
+  let sourceUrl: string | null = null;
+  let originalText: string | null = null;
   if (resource.contentJson) {
     try {
       const parsed = JSON.parse(resource.contentJson) as ContentJson;
       ingestSummary = parsed.summary ?? null;
+      sourceUrl = parsed.sourceUrl ?? null;
+      originalText = parsed.originalText ?? null;
       content = parsed.markdown ?? resource.contentJson;
     } catch {
       content = resource.contentJson;
@@ -111,6 +117,31 @@ export default async function ResourceDetailPage({
 
       <div>
         <h1 className="mt-2 text-2xl font-bold">{resource.title}</h1>
+        {sourceUrl && (
+          <div className="mt-2 flex flex-col gap-1">
+            <a
+              href={sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex w-fit items-center gap-2 text-sm text-primary hover:underline"
+            >
+              {sourceUrl.includes("youtube.com") || sourceUrl.includes("youtu.be") ? (
+                <>
+                  <Youtube className="h-4 w-4 shrink-0" />
+                  Watch on YouTube
+                </>
+              ) : (
+                <>
+                  <ExternalLink className="h-4 w-4 shrink-0" />
+                  View original
+                </>
+              )}
+            </a>
+            <span className="truncate text-xs text-muted-foreground" title={sourceUrl}>
+              {sourceUrl}
+            </span>
+          </div>
+        )}
       </div>
 
       {session?.user && (
@@ -133,6 +164,22 @@ export default async function ResourceDetailPage({
             <div className="prose prose-sm dark:prose-invert max-w-none">
               <pre className="whitespace-pre-wrap font-sans text-foreground">
                 {content}
+              </pre>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {originalText && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Original Text</CardTitle>
+            <CardDescription>Full source content as uploaded</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="prose prose-sm dark:prose-invert max-w-none">
+              <pre className="whitespace-pre-wrap font-sans text-foreground text-sm">
+                {originalText}
               </pre>
             </div>
           </CardContent>

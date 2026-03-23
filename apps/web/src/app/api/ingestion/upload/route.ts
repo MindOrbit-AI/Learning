@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth";
 import { ingestionService, type SourceType } from "@/services/ingestion-service";
+import { prisma } from "@mindorbit/db";
+
+const UPLOAD_XP_REWARD = 10;
+
+// Ingestion involves AI summarization and can take 30-60s
+export const maxDuration = 60;
 
 const VALID_SOURCE_TYPES: SourceType[] = [
   "pdf",
   "image",
   "youtube",
   "text",
+  "url",
 ];
 
 const IMAGE_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -24,12 +31,12 @@ export async function POST(req: Request) {
       const formData = await req.formData();
       const file = formData.get("file") as File | null;
       const sourceType = formData.get("sourceType") as string;
-      const subjectId = formData.get("subjectId") as string;
+      const subjectId = (formData.get("subjectId") as string) || undefined;
       const clusterId = (formData.get("clusterId") as string) || undefined;
 
-      if (!file || !sourceType || !subjectId) {
+      if (!file || !sourceType) {
         return NextResponse.json(
-          { error: "Missing file, sourceType, or subjectId" },
+          { error: "Missing file or sourceType" },
           { status: 400 }
         );
       }
@@ -55,7 +62,7 @@ export async function POST(req: Request) {
       const buffer = Buffer.from(await file.arrayBuffer());
       const uploadData: Parameters<typeof ingestionService.uploadSource>[1] = {
         sourceType: sourceType as "pdf" | "image",
-        subjectId,
+        subjectId: subjectId || undefined,
         clusterId,
         fileBuffer: buffer,
       };
@@ -68,34 +75,47 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Upload failed" }, { status: 500 });
       }
 
-      const { nodeIds } = await ingestionService.processSource(sourceId);
+      const { nodeIds, resourceIds } = await ingestionService.processSource(sourceId);
+      const resourceId = resourceIds[0] ?? null;
+      let xpEarned = 0;
+      if (resourceId) {
+        await prisma.user.update({
+          where: { id: session.user.id },
+          data: { xp: { increment: UPLOAD_XP_REWARD } },
+        });
+        xpEarned = UPLOAD_XP_REWARD;
+      }
       return NextResponse.json({
         sourceId,
         nodeIds,
+        resourceId,
+        xpEarned,
         status: "completed",
         message: `Summary, flashcards, and quizzes generated. ${nodeIds.length} concept nodes created.`,
       });
     }
 
-    const body = await req.json();
-    const sourceType = (body.sourceType ?? "text") as SourceType;
-    const subjectId = body.subjectId as string;
-    const clusterId = body.clusterId as string | undefined;
-    const sourceUrl = body.sourceUrl as string | undefined;
-    const content = body.content as string | undefined;
-
-    if (!subjectId) {
+    let body: Record<string, unknown>;
+    try {
+      const raw = await req.json();
+      body = raw && typeof raw === "object" ? raw : {};
+    } catch {
       return NextResponse.json(
-        { error: "subjectId is required" },
+        { error: "Invalid request body (expected JSON)" },
         { status: 400 }
       );
     }
+    const sourceType = (body.sourceType ?? "text") as SourceType;
+    const subjectId = (body.subjectId as string) || undefined;
+    const clusterId = body.clusterId as string | undefined;
+    const sourceUrl = body.sourceUrl as string | undefined;
+    const content = body.content as string | undefined;
     if (!VALID_SOURCE_TYPES.includes(sourceType)) {
       return NextResponse.json({ error: "Invalid sourceType" }, { status: 400 });
     }
-    if (sourceType === "youtube" && !sourceUrl) {
+    if ((sourceType === "youtube" || sourceType === "url") && !sourceUrl) {
       return NextResponse.json(
-        { error: "sourceUrl is required for YouTube" },
+        { error: `sourceUrl is required for ${sourceType}` },
         { status: 400 }
       );
     }
@@ -111,24 +131,33 @@ export async function POST(req: Request) {
 
     const sourceId = await ingestionService.uploadSource(session.user.id, {
       sourceType,
-      subjectId,
+      subjectId: subjectId || undefined,
       clusterId,
-      sourceUrl: sourceType === "youtube" ? sourceUrl : undefined,
+      sourceUrl: sourceType === "youtube" || sourceType === "url" ? sourceUrl : undefined,
       content: content,
     });
 
-    const { nodeIds } = await ingestionService.processSource(sourceId);
+    const { nodeIds, resourceIds } = await ingestionService.processSource(sourceId);
+    const resourceId = resourceIds[0] ?? null;
+    let xpEarned = 0;
+    if (resourceId) {
+      await prisma.user.update({
+        where: { id: session.user.id },
+        data: { xp: { increment: UPLOAD_XP_REWARD } },
+      });
+      xpEarned = UPLOAD_XP_REWARD;
+    }
     return NextResponse.json({
       sourceId,
       nodeIds,
+      resourceId,
+      xpEarned,
       status: "completed",
       message: `Summary, flashcards, and quizzes generated. ${nodeIds.length} concept nodes created.`,
     });
   } catch (e) {
-    console.error("Ingestion upload error:", e);
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "Upload failed" },
-      { status: 500 }
-    );
+    const msg = e instanceof Error ? e.message : "Upload failed";
+    console.error("Ingestion upload error:", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

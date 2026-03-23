@@ -5,10 +5,10 @@ import { getAIProvider } from "@mindorbit/ai";
 
 const generateSchema = z.object({
   title: z.string().min(1),
-  description: z.string().min(1),
+  description: z.string().optional(),
 });
 
-/** POST: Generate subject structure (clusters, concepts, edges) via AI. Preview only, no DB write. */
+/** POST: Generate subject structure (clusters, concepts, edges) via AI. Description is optional; if omitted, AI generates it. */
 export async function POST(req: Request) {
   const session = await getServerSession();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -21,11 +21,12 @@ export async function POST(req: Request) {
 
   try {
     const provider = getAIProvider();
-    const structure = await provider.generateSubjectStructure(
-      parsed.data.title,
-      parsed.data.description
-    );
-    return NextResponse.json(structure);
+    let description = parsed.data.description?.trim();
+    if (!description) {
+      description = await provider.generateSubjectDescription(parsed.data.title);
+    }
+    const structure = await provider.generateSubjectStructure(parsed.data.title, description);
+    return NextResponse.json({ ...structure, description });
   } catch (err) {
     console.error("Subject generation failed:", err);
     return NextResponse.json(

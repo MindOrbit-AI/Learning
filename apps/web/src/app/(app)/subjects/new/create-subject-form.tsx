@@ -43,38 +43,42 @@ export function CreateSubjectForm() {
     if (!slug || slug === slugify(title)) setSlug(slugify(v));
   };
 
-  const canProceedFromStep1 = title.trim() && description.trim() && slug.trim();
+  const canProceedFromStep1 = title.trim() && slug.trim();
 
   const handleNextFromStep1 = () => {
     setError(null);
     if (!canProceedFromStep1) {
-      setError("Title, description, and slug are required");
+      setError("Title and slug are required");
       return;
     }
     setStep(2);
   };
 
   useEffect(() => {
-    if (step !== 2 || !title.trim() || !description.trim()) return;
+    if (step !== 2 || !title.trim()) return;
     let cancelled = false;
     setError(null);
     setGenerating(true);
     (async () => {
       try {
+        const body: { title: string; description?: string } = { title: title.trim() };
+        if (description.trim()) body.description = description.trim();
         const res = await fetch("/api/admin/subjects/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title: title.trim(), description: description.trim() }),
+          body: JSON.stringify(body),
         });
         if (cancelled) return;
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
           throw new Error(data.error ?? "Failed to generate");
         }
-        const data = (await res.json()) as GeneratedSubjectStructure;
+        const data = (await res.json()) as GeneratedSubjectStructure & { description?: string };
         if (cancelled) return;
-        setStructure(data);
-        setExpandedClusters(new Set(data.clusters.map((c) => c.slug)));
+        if (data.description) setDescription(data.description);
+        const { description: _d, ...structureOnly } = data;
+        setStructure(structureOnly);
+        setExpandedClusters(new Set(structureOnly.clusters.map((c) => c.slug)));
         setStep(3);
       } catch (e) {
         if (!cancelled) {
@@ -88,8 +92,12 @@ export function CreateSubjectForm() {
   }, [step, title, description]);
 
   const handleSave = async () => {
-    if (!title.trim() || !description.trim() || !slug.trim()) {
-      setError("Title, description, and slug are required");
+    if (!title.trim() || !slug.trim()) {
+      setError("Title and slug are required");
+      return;
+    }
+    if (!description.trim()) {
+      setError("Description is required (should have been generated in step 2)");
       return;
     }
     setError(null);
@@ -195,8 +203,7 @@ export function CreateSubjectForm() {
               <CardHeader className="px-0">
                 <CardTitle>Subject Details</CardTitle>
                 <CardDescription>
-                  Enter the subject name and description. This info is used to generate the learning
-                  graph.
+                  Enter the subject name. AI will generate a description and the learning graph structure.
                 </CardDescription>
               </CardHeader>
               <div className="mt-6 space-y-6">
@@ -217,15 +224,6 @@ export function CreateSubjectForm() {
                       onChange={(e) => setSlug(e.target.value)}
                     />
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Description</label>
-                  <textarea
-                    className="w-full min-h-[100px] rounded-lg border border-input bg-background px-3 py-2 text-sm"
-                    placeholder="Brief description of the subject and what learners will master..."
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                  />
                 </div>
                 <div className="flex flex-wrap gap-6">
                   <div className="space-y-2">

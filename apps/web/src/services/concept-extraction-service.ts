@@ -15,11 +15,11 @@ export interface ConceptExtractionResult {
 }
 
 export const conceptExtractionService = {
-  async extractConcepts(
+  async extractConcept(
     sourceId: string,
     subjectId: string | null,
     fullContent?: string
-  ): Promise<ConceptExtractionResult[]> {
+  ): Promise<ConceptExtractionResult | null> {
     let fullText: string;
     let chunks: Array<{ content: string }>;
 
@@ -113,17 +113,21 @@ export const conceptExtractionService = {
       }
     }
 
-    await prisma.conceptExtraction.createMany({
-      data: aligned
-        .filter((r) => r.nodeId)
-        .map((r) => ({
-          sourceId,
-          nodeId: r.nodeId!,
-          conceptText: r.conceptText,
-          confidence: r.confidence,
-        })),
-    });
+    // Select only the single most relevant concept (highest confidence)
+    const sorted = [...aligned].sort((a, b) => b.confidence - a.confidence);
+    const single = sorted[0] ?? null;
 
-    return aligned;
+    if (single?.nodeId) {
+      await prisma.conceptExtraction.createMany({
+        data: [{
+          sourceId,
+          nodeId: single.nodeId,
+          conceptText: single.conceptText,
+          confidence: single.confidence,
+        }],
+      });
+    }
+
+    return single;
   },
 };

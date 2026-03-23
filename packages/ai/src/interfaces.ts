@@ -151,8 +151,29 @@ export interface AIProvider {
   /** Content Ingestion - summarize full content to JSON (flashcards, shortSummary, deepSummary, quizzes) - no chunking */
   summarizeContentToJson(content: string): Promise<ContentSummaryJson>;
 
+  /** Subject Creation - generate a brief description for a subject from its title */
+  generateSubjectDescription(title: string): Promise<string>;
+
   /** Subject Creation - generate clusters, concepts, and edges from subject title/description */
   generateSubjectStructure(title: string, description: string): Promise<GeneratedSubjectStructure>;
+
+  /** Content Ingestion - AI selects the most relevant subject for given content (e.g. Algebra, Physics) */
+  selectMostRelevantSubject?(
+    subjects: Array<{ id: string; slug: string; title: string; description: string }>,
+    contentSummary: string
+  ): Promise<string | null>;
+
+  /** Content Ingestion - AI selects the most relevant cluster for given content summary */
+  selectMostRelevantCluster(
+    clusters: Array<{ id: string; title: string; description: string }>,
+    contentSummary: string
+  ): Promise<string | null>;
+
+  /** Content Ingestion - AI selects the most relevant concept node from a cluster for given content */
+  selectMostRelevantNode(
+    nodes: Array<{ id: string; title: string; description: string }>,
+    contentSummary: string
+  ): Promise<string | null>;
 }
 
 /** ConceptExplainer - Node-aware concept explanation */

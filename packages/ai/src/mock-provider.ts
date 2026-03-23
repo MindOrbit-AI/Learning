@@ -462,6 +462,10 @@ export const mockAIProvider: AIProvider = {
     return "Image uploaded. Set OPENAI_API_KEY to extract text and concepts from images (e.g., diagrams, handwritten notes, textbook screenshots).";
   },
 
+  async generateSubjectDescription(title: string): Promise<string> {
+    return `A comprehensive study of ${title}. Learners will master key concepts, build foundational skills, and develop deeper understanding.`;
+  },
+
   async generateSubjectStructure(
     title: string,
     description: string
@@ -486,6 +490,31 @@ export const mockAIProvider: AIProvider = {
       { sourceSlug: concepts[3].slug, targetSlug: concepts[4].slug, relationshipType: "prerequisite" as const },
     ];
     return { clusters, concepts, edges };
+  },
+
+  async selectMostRelevantSubject(
+    subjects: Array<{ id: string; slug: string; title: string; description: string }>,
+    contentSummary: string
+  ): Promise<string | null> {
+    const lower = contentSummary.toLowerCase();
+    const match = subjects.find(
+      (s) => lower.includes(s.slug) || lower.includes(s.title.toLowerCase())
+    );
+    return match?.id ?? subjects[0]?.id ?? null;
+  },
+
+  async selectMostRelevantCluster(
+    clusters: Array<{ id: string; title: string; description: string }>,
+    _contentSummary: string
+  ): Promise<string | null> {
+    return clusters[0]?.id ?? null;
+  },
+
+  async selectMostRelevantNode(
+    nodes: Array<{ id: string; title: string; description: string }>,
+    _contentSummary: string
+  ): Promise<string | null> {
+    return nodes[0]?.id ?? null;
   },
 
   async summarizeContentToJson(content: string): Promise<ContentSummaryJson> {

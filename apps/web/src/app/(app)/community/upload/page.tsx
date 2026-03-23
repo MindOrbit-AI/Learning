@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Card,
@@ -11,71 +11,72 @@ import {
   Button,
   Input,
 } from "@mindorbit/ui";
-import { FileText, Youtube, BookOpen, Link2, Loader2, CheckCircle, Image as ImageIcon } from "lucide-react";
+import { FileText, Youtube, BookOpen, Link2, Loader2, CheckCircle, Image as ImageIcon, Globe, Sparkles } from "lucide-react";
 
-type IngestionMode = "pdf" | "image" | "youtube" | "text";
+type IngestionMode = "pdf" | "image" | "youtube" | "text" | "url";
 
 export default function UploadPage() {
   const router = useRouter();
-  const [subjects, setSubjects] = useState<
-    Array<{ id: string; title: string; slug: string }>
-  >([]);
   const [ingestSourceType, setIngestSourceType] = useState<IngestionMode>("youtube");
-  const [ingestSubjectId, setIngestSubjectId] = useState("");
-  const [ingestClusterId, setIngestClusterId] = useState("");
   const [ingestYouTubeUrl, setIngestYouTubeUrl] = useState("");
+  const [ingestUrl, setIngestUrl] = useState("");
   const [ingestContent, setIngestContent] = useState("");
   const [ingestFile, setIngestFile] = useState<File | null>(null);
   const [ingestLoading, setIngestLoading] = useState(false);
-  const [ingestClusters, setIngestClusters] = useState<
-    Array<{ id: string; title: string }>
-  >([]);
   const [ingestResult, setIngestResult] = useState<{
     sourceId: string;
     nodeIds: string[];
+    resourceId: string | null;
     message: string;
+    xpEarned?: number;
   } | null>(null);
   const [ingestError, setIngestError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetch("/api/subjects").then(async (r) => {
-      const d = await r.json();
-      setSubjects(d.subjects ?? []);
-    });
-  }, []);
+  const showReward = ingestResult?.resourceId && (ingestResult?.xpEarned ?? 0) > 0;
+  const hasResource = !!ingestResult?.resourceId;
 
   useEffect(() => {
-    if (!ingestSubjectId) {
-      setIngestClusters([]);
-      return;
-    }
-    fetch(`/api/subjects/${ingestSubjectId}/clusters`).then(async (r) => {
-      const d = await r.json();
-      setIngestClusters(d.clusters ?? []);
-    });
-  }, [ingestSubjectId]);
+    if (!hasResource) return;
+    const t = setTimeout(() => {
+      router.push(`/community/${ingestResult!.resourceId!}`);
+    }, showReward ? 2500 : 500);
+    return () => clearTimeout(t);
+  }, [hasResource, showReward, ingestResult?.resourceId, router]);
 
   const onSubmitIngest = useCallback(async () => {
     setIngestError(null);
     setIngestResult(null);
     setIngestLoading(true);
 
+    async function parseJsonResponse(res: Response): Promise<Record<string, unknown>> {
+      const text = await res.text();
+      if (!text?.trim()) {
+        if (!res.ok) {
+          throw new Error(`Upload failed (${res.status}${res.statusText ? ` ${res.statusText}` : ""}). The server may have timed out.`);
+        }
+        throw new Error("Empty response from server");
+      }
+      try {
+        return JSON.parse(text) as Record<string, unknown>;
+      } catch {
+        throw new Error(res.ok ? "Invalid response from server" : `Upload failed (${res.status})`);
+      }
+    }
+
     try {
       if ((ingestSourceType === "pdf" || ingestSourceType === "image") && ingestFile) {
         const formData = new FormData();
         formData.set("file", ingestFile);
         formData.set("sourceType", ingestSourceType);
-        formData.set("subjectId", ingestSubjectId);
-        if (ingestClusterId) formData.set("clusterId", ingestClusterId);
 
         const res = await fetch("/api/ingestion/upload", {
           method: "POST",
           body: formData,
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error ?? "Upload failed");
-        setIngestResult(data);
-        router.push(`/community/${data?.sourceId}`)
+        const data = await parseJsonResponse(res);
+        if (!res.ok) throw new Error((data.error as string) ?? "Upload failed");
+        setIngestResult(data as Parameters<typeof setIngestResult>[0]);
+        if (!data?.resourceId) router.push("/community");
       } else if (ingestSourceType === "youtube") {
         const res = await fetch("/api/ingestion/upload", {
           method: "POST",
@@ -83,14 +84,25 @@ export default function UploadPage() {
           body: JSON.stringify({
             sourceType: "youtube",
             sourceUrl: ingestYouTubeUrl,
-            subjectId: ingestSubjectId,
-            clusterId: ingestClusterId || undefined,
           }),
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error ?? "Upload failed");
-        setIngestResult(data);
-        router.push(`/community/${data?.sourceId}`)
+        const data = await parseJsonResponse(res);
+        if (!res.ok) throw new Error((data.error as string) ?? "Upload failed");
+        setIngestResult(data as Parameters<typeof setIngestResult>[0]);
+        if (!data?.resourceId) router.push("/community");
+      } else if (ingestSourceType === "url") {
+        const res = await fetch("/api/ingestion/upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sourceType: "url",
+            sourceUrl: ingestUrl,
+          }),
+        });
+        const data = await parseJsonResponse(res);
+        if (!res.ok) throw new Error((data.error as string) ?? "Upload failed");
+        setIngestResult(data as Parameters<typeof setIngestResult>[0]);
+        if (!data?.resourceId) router.push("/community");
       } else {
         const res = await fetch("/api/ingestion/upload", {
           method: "POST",
@@ -98,14 +110,12 @@ export default function UploadPage() {
           body: JSON.stringify({
             sourceType: ingestSourceType,
             content: ingestContent,
-            subjectId: ingestSubjectId,
-            clusterId: ingestClusterId || undefined,
           }),
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error ?? "Upload failed");
-        setIngestResult(data);
-        router.push(`/community/${data?.sourceId}`)
+        const data = await parseJsonResponse(res);
+        if (!res.ok) throw new Error((data.error as string) ?? "Upload failed");
+        setIngestResult(data as Parameters<typeof setIngestResult>[0]);
+        if (!data?.resourceId) router.push("/community");
       }
     } catch (e) {
       setIngestError(e instanceof Error ? e.message : "Upload failed");
@@ -116,21 +126,48 @@ export default function UploadPage() {
     ingestSourceType,
     ingestFile,
     ingestYouTubeUrl,
+    ingestUrl,
     ingestContent,
-    ingestSubjectId,
-    ingestClusterId,
   ]);
-
-  const subjectForIngest = subjects.find((s) => s.id === ingestSubjectId);
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
+      {showReward && ingestResult && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm"
+          role="alert"
+          aria-live="polite"
+        >
+          <div className="flex flex-col items-center gap-6 px-8">
+            <div className="rounded-full bg-primary/20 p-6 animate-pulse">
+              <Sparkles className="h-16 w-16 text-primary" />
+            </div>
+            <div className="text-center">
+              <h2 className="text-2xl font-bold">Upload Complete!</h2>
+              <p className="mt-1 text-muted-foreground">Your resource is ready</p>
+            </div>
+            <div className="flex items-center gap-2 rounded-2xl border-2 border-primary/30 bg-primary/10 px-8 py-4">
+              <span className="text-3xl font-bold text-primary">+{ingestResult.xpEarned ?? 0} XP</span>
+              <Sparkles className="h-6 w-6 text-primary" />
+            </div>
+            <p className="text-sm text-muted-foreground">Redirecting to your resource...</p>
+            <Button
+              size="lg"
+              onClick={() => router.push(`/community/${ingestResult.resourceId}`)}
+              className="mt-2"
+            >
+              View now
+            </Button>
+          </div>
+        </div>
+      )}
+
       <h1 className="text-2xl font-bold">Upload Content</h1>
 
       <Card>
         <CardHeader>
           <CardDescription>
-            Upload PDFs, images, or YouTube videos. The system
+            Upload PDFs, images, YouTube videos, or extract from URLs. The system
             converts them into concept nodes, diagnostics, missions, and
             practice questions.
           </CardDescription>
@@ -143,6 +180,7 @@ export default function UploadPage() {
               <div className="flex flex-wrap gap-2">
                 {[
                   { id: "youtube" as const, label: "YouTube", icon: Youtube },
+                  { id: "url" as const, label: "URL", icon: Globe },
                   { id: "pdf" as const, label: "PDF", icon: FileText },
                   { id: "image" as const, label: "Image", icon: ImageIcon },
                   { id: "text" as const, label: "Text", icon: BookOpen },
@@ -154,6 +192,7 @@ export default function UploadPage() {
                       setIngestSourceType(id);
                       setIngestFile(null);
                       setIngestYouTubeUrl("");
+                      setIngestUrl("");
                       setIngestContent("");
                       setIngestResult(null);
                       setIngestError(null);
@@ -169,46 +208,6 @@ export default function UploadPage() {
                   </button>
                 ))}
               </div>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium">
-                Subject (required)
-              </label>
-              <select
-                value={ingestSubjectId}
-                onChange={(e) => {
-                  setIngestSubjectId(e.target.value);
-                  setIngestClusterId("");
-                }}
-                className="w-full rounded-xl border px-3 py-2"
-              >
-                <option value="">Select subject</option>
-                {subjects.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.title}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium">
-                Cluster (optional, for new concepts)
-              </label>
-              <select
-                value={ingestClusterId}
-                onChange={(e) => setIngestClusterId(e.target.value)}
-                className="w-full rounded-xl border px-3 py-2"
-                disabled={!ingestSubjectId}
-              >
-                <option value="">Use first cluster</option>
-                {ingestClusters.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.title}
-                    </option>
-                  ))}
-              </select>
             </div>
 
             {ingestSourceType === "pdf" && (
@@ -307,6 +306,22 @@ export default function UploadPage() {
               </div>
             )}
 
+            {ingestSourceType === "url" && (
+              <div>
+                <label className="mb-2 block text-sm font-medium">
+                  Web page URL
+                </label>
+                <Input
+                  placeholder="https://example.com/article"
+                  value={ingestUrl}
+                  onChange={(e) => setIngestUrl(e.target.value)}
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Text content will be extracted from the webpage
+                </p>
+              </div>
+            )}
+
             {ingestSourceType === "text" && (
               <div>
                 <label className="mb-2 block text-sm font-medium">
@@ -334,19 +349,6 @@ export default function UploadPage() {
                   <span className="font-medium">Ingestion complete</span>
                 </div>
                 <p className="mt-2 text-sm">{ingestResult.message}</p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {subjectForIngest && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        router.push(`/subjects/${subjectForIngest.slug}`)
-                      }
-                    >
-                      View {subjectForIngest.title}
-                    </Button>
-                  )}
-                </div>
               </div>
             )}
 
@@ -354,9 +356,9 @@ export default function UploadPage() {
               onClick={onSubmitIngest}
               disabled={
                 ingestLoading ||
-                !ingestSubjectId ||
                 ((ingestSourceType === "pdf" || ingestSourceType === "image") && !ingestFile) ||
                 (ingestSourceType === "youtube" && !ingestYouTubeUrl.trim()) ||
+                (ingestSourceType === "url" && !ingestUrl.trim()) ||
                 (ingestSourceType === "text" &&
                   !ingestContent.trim())
               }

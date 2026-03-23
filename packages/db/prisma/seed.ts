@@ -29,6 +29,14 @@ const prisma = new PrismaClient();
 
 const SUBJECTS = [
   {
+    slug: "community",
+    title: "Community",
+    description: "User-uploaded notes and summaries.",
+    icon: "🌐",
+    color: "#6B7280",
+    createdById: null,
+  },
+  {
     slug: "algebra",
     title: "Algebra",
     description: "Master variables, equations, functions, and polynomials.",

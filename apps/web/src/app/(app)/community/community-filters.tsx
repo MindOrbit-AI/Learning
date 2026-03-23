@@ -1,10 +1,21 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+
+type Subject = { id: string; title: string; slug: string };
 
 export function CommunityFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+
+  useEffect(() => {
+    fetch("/api/subjects")
+      .then((r) => r.json())
+      .then((data: { subjects?: Subject[] }) => setSubjects(data.subjects ?? []))
+      .catch(() => setSubjects([]));
+  }, []);
 
   function setFilter(key: string, value: string) {
     const next = new URLSearchParams(searchParams);
@@ -22,22 +33,13 @@ export function CommunityFilters() {
         onChange={(e) => setFilter("subject", e.target.value)}
       >
         <option value="">All subjects</option>
-        <option value="algebra">Algebra</option>
-        <option value="chemistry">Chemistry</option>
-        <option value="sat-math">SAT Math</option>
-      </select>
-      <select
-        className="rounded-lg border bg-background px-3 py-2 text-sm"
-        value={searchParams.get("type") ?? ""}
-        onChange={(e) => setFilter("type", e.target.value)}
-      >
-        <option value="">All types</option>
-        <option value="note">Note</option>
-        <option value="summary">Summary</option>
-        <option value="flashcard_set">Flashcards</option>
-        <option value="diagram">Diagram</option>
-        <option value="walkthrough">Walkthrough</option>
-        <option value="mini_lesson">Mini-lesson</option>
+        {subjects
+          .filter((s) => s.slug !== "community")
+          .map((s) => (
+            <option key={s.id} value={s.slug}>
+              {s.title}
+            </option>
+          ))}
       </select>
       <select
         className="rounded-lg border bg-background px-3 py-2 text-sm"

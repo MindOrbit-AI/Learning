@@ -534,15 +534,16 @@ model UserEvent {
 }
 
 model UploadedSource {
-  id         String   @id @default(cuid())
-  userId     String
-  subjectId  String?
-  sourceType String
-  sourceUrl  String?
-  content    String?
+  id          String   @id @default(cuid())
+  userId      String
+  subjectId   String?
+  clusterId   String?
+  sourceType  String
+  sourceUrl   String?
+  content     String?
   summaryJson String?
-  status     String   @default("pending")
-  createdAt  DateTime @default(now())
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   parsedChunks ParsedChunk[]
   conceptExtractions ConceptExtraction[]

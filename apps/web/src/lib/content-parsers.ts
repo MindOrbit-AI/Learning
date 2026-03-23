@@ -72,4 +72,34 @@ export const contentParsers = {
   isYouTubeUrl(url: string): boolean {
     return youtubeTranscriptService.isYouTubeUrl(url);
   },
+
+  /**
+   * Fetch a web page URL and extract text content from HTML
+   */
+  async parseUrl(url: string): Promise<ParseResult> {
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (compatible; MindOrbit/1.0; +https://mindorbit.com)",
+      },
+    });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch URL: ${res.status} ${res.statusText}`);
+    }
+    const html = await res.text();
+    const text = htmlToText(html);
+    return {
+      text: text.trim(),
+      metadata: { url, length: text.length },
+    };
+  },
 };
+
+function htmlToText(html: string): string {
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
