@@ -16,6 +16,9 @@ import {
   Shield,
   Flame,
   Zap,
+  CreditCard,
+  Sparkles,
+  BarChart3,
 } from "lucide-react";
 import { Button } from "@mindorbit/ui";
 import { useState } from "react";
@@ -27,7 +30,9 @@ const navItems = [
   { href: "/missions", label: "Missions", icon: Target },
   { href: "/community", label: "Community", icon: Users },
   { href: "/review", label: "Review", icon: ClipboardList },
+  { href: "/insights", label: "Insights", icon: BarChart3 },
   { href: "/profile", label: "Profile", icon: User },
+  { href: "/settings/billing", label: "Billing", icon: CreditCard },
 ];
 
 export function AppShell({
@@ -35,7 +40,7 @@ export function AppShell({
   user,
 }: {
   children: React.ReactNode;
-  user: { name?: string | null; image?: string | null; role?: string; xp?: number; streakCount?: number };
+  user: { name?: string | null; image?: string | null; role?: string; xp?: number; streakCount?: number; planTier?: "FREE" | "PRO" };
 }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -123,6 +128,12 @@ export function AppShell({
             <Zap className="h-4 w-4" />
             {user?.xp ?? 0} XP
           </Link>
+          {user?.planTier === "PRO" && (
+            <span className="flex items-center gap-1 rounded-duo-lg border-2 border-primary/50 bg-primary/20 px-2 py-1 text-xs font-bold text-primary">
+              <Sparkles className="h-3.5 w-3.5" />
+              Pro
+            </span>
+          )}
           <span className="hidden text-sm font-semibold text-foreground sm:block">
             {user?.name ?? "Student"}
           </span>

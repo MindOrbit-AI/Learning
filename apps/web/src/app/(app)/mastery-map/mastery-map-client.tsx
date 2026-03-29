@@ -17,8 +17,10 @@ import {
   Position,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import { Card, CardContent, CardHeader, CardTitle } from "@mindorbit/ui";
+import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle, Button } from "@mindorbit/ui";
 import { NODE_STATE_COLORS } from "@mindorbit/lib";
+import { Lock, Sparkles } from "lucide-react";
 import { GenerateMissionButton } from "./generate-mission-button";
 import type { NodeState } from "@mindorbit/types";
 
@@ -30,12 +32,15 @@ const nodeColors: Record<string, string> = {
   untouched: NODE_STATE_COLORS.untouched,
 };
 
-function MasteryNode({ data }: { data: { label: string; state?: NodeState } }) {
+function MasteryNode({ data }: { data: { label: string; state?: NodeState; isLocked?: boolean } }) {
+  const isLocked = data.isLocked ?? false;
   const state = data.state ?? "untouched";
   const color = nodeColors[state] ?? nodeColors.untouched;
   return (
     <div
-      className="relative flex items-center justify-center rounded-duo border-2 px-5 py-3 font-semibold shadow-lg transition-transform hover:scale-105"
+      className={`relative flex items-center justify-center rounded-duo border-2 px-5 py-3 font-semibold shadow-lg transition-transform hover:scale-105 ${
+        isLocked ? "blur-[2px] opacity-75" : ""
+      }`}
       style={{
         backgroundColor: `${color}15`,
         borderColor: color,
@@ -53,6 +58,11 @@ function MasteryNode({ data }: { data: { label: string; state?: NodeState } }) {
       <Handle type="target" position={Position.Right} id="right" className="!w-2 !h-2 !border-2 !border-primary !bg-background" />
       <Handle type="source" position={Position.Right} id="right-src" className="!w-2 !h-2 !border-2 !border-primary !bg-background" />
       <div className="text-center text-sm">{data.label}</div>
+      {isLocked && (
+        <div className="absolute inset-0 flex items-center justify-center rounded-duo bg-black/20">
+          <span className="rounded-full bg-muted px-2 py-1 text-xs font-bold">Pro</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -80,7 +90,13 @@ async function fetchMapData(subjectId?: string, userId?: string) {
   if (userId) params.set("userId", userId);
   const res = await fetch(`/api/mastery-map?${params}`);
   if (!res.ok) throw new Error("Failed to fetch");
-  return res.json();
+  return res.json() as Promise<{
+    nodes: Node[];
+    edges: Edge[];
+    nodeDetails: Record<string, unknown>;
+    masteryMapAccess?: "limited" | "full";
+    lockedNodeIds?: string[];
+  }>;
 }
 
 export function MasteryMapClient() {
@@ -91,13 +107,21 @@ export function MasteryMapClient() {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [nodeDetails, setNodeDetails] = useState<Record<string, unknown>>({});
+  const [lockedNodeIds, setLockedNodeIds] = useState<Set<string>>(new Set());
+  const [showLockedOverlay, setShowLockedOverlay] = useState(false);
   const [selectedNode, setSelectedNode] = useState<string | null>(selectedNodeId);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchMapData(subjectId || undefined, undefined)
-      .then((data: { nodes: Node[]; edges: Edge[]; nodeDetails: Record<string, unknown> }) => {
-        setNodes(data.nodes);
+      .then((data) => {
+        const locked = new Set(data.lockedNodeIds ?? []);
+        setLockedNodeIds(locked);
+        const nodesWithLock = data.nodes.map((n) => ({
+          ...n,
+          data: { ...n.data, isLocked: n.type === "mastery" && locked.has(n.id) },
+        }));
+        setNodes(nodesWithLock);
         setEdges(data.edges);
         setNodeDetails(data.nodeDetails ?? {});
       })
@@ -109,10 +133,17 @@ export function MasteryMapClient() {
     setSelectedNode(selectedNodeId);
   }, [selectedNodeId]);
 
-  const onNodeClick = useCallback((_e: React.MouseEvent, node: Node) => {
-    if (node.type === "subjectLabel") return;
-    setSelectedNode(node.id);
-  }, []);
+  const onNodeClick = useCallback(
+    (_e: React.MouseEvent, node: Node) => {
+      if (node.type === "subjectLabel") return;
+      if (lockedNodeIds.has(node.id)) {
+        setShowLockedOverlay(true);
+        return;
+      }
+      setSelectedNode(node.id);
+    },
+    [lockedNodeIds]
+  );
 
   const details = selectedNode ? nodeDetails[selectedNode] : null;
 
@@ -241,6 +272,30 @@ export function MasteryMapClient() {
           </div>
         )}
 
+        {showLockedOverlay && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="flex max-w-md flex-col items-center rounded-2xl border-2 bg-background p-6 text-center shadow-xl">
+              <div className="rounded-full bg-muted p-4">
+                <Lock className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <p className="mt-4 font-semibold">Upgrade to unlock full mastery map</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Free users can view the first few nodes. Upgrade to Pro for full access.
+              </p>
+              <div className="mt-4 flex w-full gap-2">
+                <Button variant="outline" className="flex-1" onClick={() => setShowLockedOverlay(false)}>
+                  Close
+                </Button>
+                <Button asChild className="flex-1 gap-2">
+                  <Link href="/pricing">
+                    <Sparkles className="h-4 w-4" />
+                    Upgrade to Pro
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
         {selectedNode && details ? (
           <div className="w-80 shrink-0">
             <Card className="overflow-hidden rounded-3xl border-2 border-primary/10 shadow-xl">

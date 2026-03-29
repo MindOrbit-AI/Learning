@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "@/lib/auth";
 import { prisma } from "@mindorbit/db";
+import { PLAN_LIMITS } from "@mindorbit/lib";
 
 export async function GET(
   _req: Request,
@@ -11,5 +13,21 @@ export async function GET(
     select: { id: true, title: true },
     orderBy: { orderIndex: "asc" },
   });
-  return NextResponse.json({ clusters });
+
+  const session = await getServerSession();
+  const user = session?.user?.id
+    ? await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { planTier: true },
+      })
+    : null;
+  const planTier = user?.planTier ?? "FREE";
+  const maxClusters = PLAN_LIMITS[planTier].maxClustersVisible;
+  const limited =
+    maxClusters != null ? clusters.slice(0, maxClusters) : clusters;
+
+  return NextResponse.json({
+    clusters: limited,
+    hasMore: clusters.length > limited.length,
+  });
 }

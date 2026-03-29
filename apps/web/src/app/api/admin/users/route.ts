@@ -19,6 +19,9 @@ export async function GET(req: Request) {
       role: true,
       xp: true,
       suspendedAt: true,
+      planTier: true,
+      subscriptionStatus: true,
+      currentPeriodEnd: true,
       _count: { select: { resources: true } },
     },
   });

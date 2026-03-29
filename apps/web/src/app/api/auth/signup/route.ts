@@ -27,6 +27,8 @@ export async function POST(req: Request) {
         email,
         name: name || null,
         passwordHash,
+        planTier: "FREE",
+        subscriptionStatus: "INACTIVE",
       },
     });
 

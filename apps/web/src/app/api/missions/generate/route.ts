@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth";
 import { prisma } from "@mindorbit/db";
 import { missionsService } from "@/services/missions-service";
+import { featureGateService } from "@/features/billing/feature-gate.service";
+import { usageService } from "@/features/billing/usage.service";
+import { FEATURE_KEYS } from "@mindorbit/lib";
+import { AnalyticsService, EVENT_TYPES } from "@/services/analytics-service";
 import { z } from "zod";
 
 const schema = z.object({
@@ -19,6 +23,18 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { nodeId, sceneBased } = schema.parse(body);
 
+    const gate = await featureGateService.canStartMission(session.user.id);
+    if (!gate.allowed) {
+      await AnalyticsService.track(session.user.id, EVENT_TYPES.feature_limit_hit, {
+        feature: "missions",
+        reason: gate.reason,
+      });
+      return NextResponse.json(
+        { error: gate.reason ?? "Mission limit reached", upgradeRequired: true },
+        { status: 403 }
+      );
+    }
+
     const node = await prisma.conceptNode.findUnique({
       where: { id: nodeId },
     });
@@ -29,6 +45,20 @@ export async function POST(req: Request) {
     const missionId = await missionsService.generateMission(nodeId, session.user.id, {
       sceneBased: sceneBased ?? false,
     });
+
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { planTier: true },
+    });
+    if (user?.planTier === "FREE") {
+      const now = new Date();
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      await usageService.incrementUsage(session.user.id, FEATURE_KEYS.MISSIONS_STARTED, {
+        periodStart: start,
+        periodEnd: end,
+      });
+    }
     if (!missionId) {
       return NextResponse.json(
         { error: "Mission already exists or failed to create" },

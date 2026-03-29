@@ -4,8 +4,8 @@ import { prisma } from "@mindorbit/db";
 import { getServerSession } from "@/lib/auth";
 import { canViewSubject } from "@/lib/subject-visibility";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button } from "@mindorbit/ui";
-import { Play, Map, ChevronRight } from "lucide-react";
-
+import { Play, Map, ChevronRight, Lock } from "lucide-react";
+import { PLAN_LIMITS } from "@mindorbit/lib";
 export default async function SubjectDetailPage({
   params,
 }: {
@@ -39,6 +39,18 @@ export default async function SubjectDetailPage({
     : [];
   const stateMap = Object.fromEntries(userNodeStates.map((s) => [s.nodeId, s.state]));
 
+  const user = session?.user?.id
+    ? await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { planTier: true },
+      })
+    : null;
+  const planTier = user?.planTier ?? "FREE";
+  const maxClusters = PLAN_LIMITS[planTier].maxClustersVisible;
+  const visibleClusters =
+    maxClusters != null ? subject.clusters.slice(0, maxClusters) : subject.clusters;
+  const hiddenCount = subject.clusters.length - visibleClusters.length;
+
   return (
     <div className="space-y-8">
       <div>
@@ -71,7 +83,7 @@ export default async function SubjectDetailPage({
 
       <div className="space-y-6">
         <h2 className="text-lg font-semibold">Clusters & Concepts</h2>
-        {subject.clusters.map((cluster) => (
+        {visibleClusters.map((cluster) => (
           <Card key={cluster.id}>
             <CardHeader>
               <CardTitle>{cluster.title}</CardTitle>
@@ -109,6 +121,22 @@ export default async function SubjectDetailPage({
             </CardContent>
           </Card>
         ))}
+        {hiddenCount > 0 && (
+          <Card className="border-2 border-dashed border-muted">
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <div className="rounded-full bg-muted p-4">
+                <Lock className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <p className="mt-4 font-semibold">{hiddenCount} more cluster{hiddenCount !== 1 ? "s" : ""} locked</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Upgrade to Pro to view all clusters and concepts
+              </p>
+              <Link href="/pricing">
+                <Button className="mt-4">Upgrade to Pro</Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

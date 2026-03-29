@@ -19,6 +19,15 @@ export const authOptions = {
         if (!credentials?.email || !credentials?.password) return null;
         const user = await prisma.user.findUnique({
           where: { email: String(credentials.email) },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            image: true,
+            role: true,
+            planTier: true,
+            passwordHash: true,
+          },
         });
         if (!user?.passwordHash) return null;
         const valid = await bcrypt.compare(
@@ -32,6 +41,7 @@ export const authOptions = {
           name: user.name,
           image: user.image,
           role: user.role,
+          planTier: user.planTier,
         };
       },
     }),
@@ -43,6 +53,7 @@ export const authOptions = {
         (token as { id?: string }).id = user.id;
         token.email = user.email;
         (token as { role?: string }).role = user.role;
+        (token as { planTier?: string }).planTier = user.planTier;
       }
       return token;
     },
@@ -51,6 +62,7 @@ export const authOptions = {
       if (session?.user) {
         (session.user as { id?: string }).id = token.id as string;
         (session.user as { role?: string }).role = token.role as string;
+        (session.user as { planTier?: string }).planTier = token.planTier as string;
       }
       return session;
     },

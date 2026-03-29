@@ -31,6 +31,16 @@ export function UsersList() {
         { key: "email", header: "Email" },
         { key: "role", header: "Role" },
         {
+          key: "plan",
+          header: "Plan",
+          render: (u) => (u as { planTier?: string }).planTier ?? "FREE",
+        },
+        {
+          key: "subStatus",
+          header: "Subscription",
+          render: (u) => (u as { subscriptionStatus?: string }).subscriptionStatus ?? "-",
+        },
+        {
           key: "xp",
           header: "XP",
           render: (u) => String((u as { xp?: number }).xp ?? 0),

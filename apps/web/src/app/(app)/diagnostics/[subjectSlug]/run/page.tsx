@@ -2,11 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Card, CardContent } from "@mindorbit/ui";
+import Link from "next/link";
+import { Card, CardContent, Button } from "@mindorbit/ui";
+import { Lock, Sparkles } from "lucide-react";
+
 export default function DiagnosticRunPage() {
   const router = useRouter();
   const params = useParams();
   const subjectSlug = params.subjectSlug as string;
+  const [limitError, setLimitError] = useState<string | null>(null);
   const [questions, setQuestions] = useState<
     Array<{
       id: string;
@@ -28,7 +32,12 @@ export default function DiagnosticRunPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        router.push(`/subjects/${subjectSlug}`);
+        if (res.status === 403 && data.upgradeRequired) {
+          setLimitError(data.error ?? "Diagnostic limit reached");
+        } else {
+          router.push(`/subjects/${subjectSlug}`);
+        }
+        setLoading(false);
         return;
       }
       setQuestions(data.questions);
@@ -57,6 +66,31 @@ export default function DiagnosticRunPage() {
     }
     const data = await res.json();
     router.push(`/diagnostics/${subjectSlug}/results?attemptId=${data.attemptId}`);
+  }
+
+  if (limitError) {
+    return (
+      <div className="mx-auto max-w-md space-y-6 rounded-2xl border-2 border-dashed border-muted p-8 text-center">
+        <div className="rounded-full bg-muted p-4 mx-auto w-fit">
+          <Lock className="h-8 w-8 text-muted-foreground" />
+        </div>
+        <p className="font-semibold">{limitError}</p>
+        <p className="text-sm text-muted-foreground">
+          Upgrade to Pro for unlimited diagnostics
+        </p>
+        <div className="flex gap-3 justify-center">
+          <Button variant="outline" asChild>
+            <Link href={`/subjects/${subjectSlug}`}>Back to subject</Link>
+          </Button>
+          <Button asChild className="gap-2">
+            <Link href="/pricing">
+              <Sparkles className="h-4 w-4" />
+              Upgrade to Pro
+            </Link>
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   if (loading || questions.length === 0) {

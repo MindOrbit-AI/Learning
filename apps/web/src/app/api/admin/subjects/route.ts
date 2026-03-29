@@ -4,6 +4,8 @@ import { getServerSession } from "@/lib/auth";
 import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@mindorbit/db";
 import { writeAuditLog } from "@/lib/audit";
+import { featureGateService } from "@/features/billing/feature-gate.service";
+import { AnalyticsService, EVENT_TYPES } from "@/services/analytics-service";
 
 const structureClusterSchema = z.object({
   slug: z.string().min(1).regex(/^[a-z0-9-]+$/),
@@ -71,6 +73,18 @@ export async function POST(req: Request) {
   const parsed = createSubjectSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+  }
+
+  const gate = await featureGateService.canAccessFeature(session.user.id, "subject_creation");
+  if (!gate.allowed) {
+    await AnalyticsService.track(session.user.id, EVENT_TYPES.feature_limit_hit, {
+      feature: "subject_creation",
+      reason: gate.reason,
+    });
+    return NextResponse.json(
+      { error: gate.reason ?? "Subject creation limit reached", upgradeRequired: true },
+      { status: 403 }
+    );
   }
 
   const existing = await prisma.subject.findUnique({ where: { slug: parsed.data.slug } });

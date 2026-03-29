@@ -15,6 +15,15 @@ export default async function AppLayout({
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
+    select: {
+      name: true,
+      image: true,
+      role: true,
+      xp: true,
+      streakCount: true,
+      planTier: true,
+      onboardingCompleted: true,
+    },
   });
 
   if (user && !user.onboardingCompleted) {
@@ -29,6 +38,7 @@ export default async function AppLayout({
         role: user?.role ?? session.user.role,
         xp: user?.xp ?? 0,
         streakCount: user?.streakCount ?? 0,
+        planTier: user?.planTier ?? "FREE",
       }}
     >
       {children}

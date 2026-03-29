@@ -12,6 +12,14 @@ export const EVENT_TYPES = {
   resource_uploaded: "resource_uploaded",
   node_mastered: "node_mastered",
   review_completed: "review_completed",
+  pricing_viewed: "pricing_viewed",
+  upgrade_clicked: "upgrade_clicked",
+  checkout_started: "checkout_started",
+  checkout_completed: "checkout_completed",
+  subscription_activated: "subscription_activated",
+  subscription_canceled: "subscription_canceled",
+  feature_limit_hit: "feature_limit_hit",
+  paywall_viewed: "paywall_viewed",
 } as const;
 
 export type EventType = (typeof EVENT_TYPES)[keyof typeof EVENT_TYPES];

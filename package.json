@@ -21,6 +21,9 @@
     "test:unit": "turbo test:unit",
     "test:e2e": "turbo test:e2e"
   },
+  "dependencies": {
+    "stripe": "^17.4.0"
+  },
   "devDependencies": {
     "prettier": "^3.2.5",
     "prisma": "^5.22.0",

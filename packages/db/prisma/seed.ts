@@ -405,8 +405,25 @@ async function seed() {
       onboardingCompleted: true,
       xp: 150,
       streakCount: 3,
+      planTier: "FREE",
+      subscriptionStatus: "INACTIVE",
     },
     update: {},
+  });
+
+  const proUser = await prisma.user.upsert({
+    where: { email: "pro@mindorbit.learn" },
+    create: {
+      email: "pro@mindorbit.learn",
+      name: "Pro Test User",
+      passwordHash: demoPassword,
+      onboardingCompleted: true,
+      planTier: "PRO",
+      subscriptionStatus: "ACTIVE",
+      currentPeriodStart: new Date(),
+      currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    },
+    update: { planTier: "PRO", subscriptionStatus: "ACTIVE" },
   });
 
   await prisma.user.upsert({

@@ -38,6 +38,7 @@
     "tailwind-merge": "^2.5.4",
     "pdf-parse": "^1.1.1",
     "youtube-transcript": "^1.2.1",
+    "stripe": "^17.4.0",
     "zod": "^3.23.8",
     "zustand": "^5.0.1"
   },

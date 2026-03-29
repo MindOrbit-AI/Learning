@@ -121,6 +121,9 @@ export function CreateSubjectForm() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
+        if (res.status === 403 && data.upgradeRequired) {
+          throw new Error(`${data.error ?? "Limit reached"} Upgrade to Pro for unlimited subjects.`);
+        }
         throw new Error(data.error ?? "Failed to save");
       }
       const subject = await res.json();

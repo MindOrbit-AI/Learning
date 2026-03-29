@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth";
 import { prisma } from "@mindorbit/db";
+import { featureGateService } from "@/features/billing/feature-gate.service";
+import { MASTERY_MAP_FREE_NODE_THRESHOLD } from "@mindorbit/lib";
 import { subjectVisibilityWhere } from "@/lib/subject-visibility";
 import {
   algebraEdges,
@@ -41,8 +43,23 @@ export async function GET(req: Request) {
   });
 
   if (subjects.length === 0) {
-    return NextResponse.json({ nodes: [], edges: [], nodeDetails: {} });
+    return NextResponse.json({
+      nodes: [],
+      edges: [],
+      nodeDetails: {},
+      masteryMapAccess: "full" as const,
+      lockedNodeIds: [] as string[],
+    });
   }
+
+  const user = session?.user?.id
+    ? await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { planTier: true },
+      })
+    : null;
+  const accessLevel = featureGateService.getMasteryMapAccessLevel(user);
+  const lockedNodeIds: string[] = [];
 
   const userNodeStates = session?.user?.id
     ? await prisma.userNodeState.findMany({
@@ -207,5 +224,21 @@ export async function GET(req: Request) {
     }
   }
 
-  return NextResponse.json({ nodes, edges, nodeDetails });
+  if (accessLevel === "limited") {
+    const masteryNodeIds = nodes
+      .filter((n) => n.type !== "subjectLabel")
+      .map((n) => n.id);
+    const unlocked = masteryNodeIds.slice(0, MASTERY_MAP_FREE_NODE_THRESHOLD);
+    masteryNodeIds.forEach((id) => {
+      if (!unlocked.includes(id)) lockedNodeIds.push(id);
+    });
+  }
+
+  return NextResponse.json({
+    nodes,
+    edges,
+    nodeDetails,
+    masteryMapAccess: accessLevel,
+    lockedNodeIds,
+  });
 }
