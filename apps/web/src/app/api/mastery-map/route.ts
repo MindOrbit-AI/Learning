@@ -163,6 +163,8 @@ export async function GET(req: Request) {
           mastery: state?.mastery,
           resources,
           missionId: missionByNode.get(n.id) ?? null,
+          subjectTitle: subject.title,
+          subjectIcon: subject.icon ?? undefined,
         };
 
       }
@@ -232,6 +234,33 @@ export async function GET(req: Request) {
     masteryNodeIds.forEach((id) => {
       if (!unlocked.includes(id)) lockedNodeIds.push(id);
     });
+  }
+
+  const lockedSet = new Set(lockedNodeIds);
+  const adjacency = new Map<string, Set<string>>();
+  for (const e of edges) {
+    if (e.source === e.target) continue;
+    if (!adjacency.has(e.source)) adjacency.set(e.source, new Set());
+    if (!adjacency.has(e.target)) adjacency.set(e.target, new Set());
+    adjacency.get(e.source)!.add(e.target);
+    adjacency.get(e.target)!.add(e.source);
+  }
+
+  const suggestStates = new Set(["weak", "missing", "learning"]);
+  const stateOrder: Record<string, number> = { missing: 0, weak: 1, learning: 2 };
+
+  for (const nodeId of Object.keys(nodeDetails)) {
+    const neighborIds = [...(adjacency.get(nodeId) ?? [])].filter((id) => !lockedSet.has(id));
+    const picks = neighborIds
+      .map((nid) => {
+        const d = nodeDetails[nid] as { title?: string; state?: string } | undefined;
+        if (!d?.state || !suggestStates.has(d.state)) return null;
+        return { nodeId: nid, title: d.title ?? "Concept", state: d.state };
+      })
+      .filter((x): x is NonNullable<typeof x> => x != null)
+      .sort((a, b) => (stateOrder[a.state] ?? 9) - (stateOrder[b.state] ?? 9))
+      .slice(0, 4);
+    (nodeDetails[nodeId] as { chainSuggestions?: typeof picks }).chainSuggestions = picks;
   }
 
   return NextResponse.json({

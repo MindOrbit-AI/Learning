@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "@/lib/auth";
 import { prisma } from "@mindorbit/db";
+import { levelFromXp } from "@mindorbit/lib";
 import { AppShell } from "@/components/app-shell";
 
 export default async function AppLayout({
@@ -21,6 +22,7 @@ export default async function AppLayout({
       role: true,
       xp: true,
       streakCount: true,
+      bestMissionStreak: true,
       planTier: true,
       onboardingCompleted: true,
     },
@@ -30,14 +32,18 @@ export default async function AppLayout({
     redirect("/onboarding");
   }
 
+  const xp = user?.xp ?? 0;
+
   return (
     <AppShell
       user={{
         name: user?.name ?? session.user.name,
         image: user?.image ?? session.user.image,
         role: user?.role ?? session.user.role,
-        xp: user?.xp ?? 0,
+        xp,
+        level: levelFromXp(xp),
         streakCount: user?.streakCount ?? 0,
+        bestMissionStreak: user?.bestMissionStreak ?? 0,
         planTier: user?.planTier ?? "FREE",
       }}
     >

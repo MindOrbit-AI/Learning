@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, Button } from "@mindorbit/ui";
-import { Sparkles } from "lucide-react";
+import { CompletionSummaryCard } from "@/components/mission-engine/CompletionSummaryCard";
+import { missionTypeLabel } from "@/lib/mission-display";
 
 interface Task {
   id: string;
@@ -17,33 +18,74 @@ interface Task {
 
 export function MissionRunner({
   missionId,
+  missionTitle,
+  nodeTitle,
+  missionType,
   tasks,
   status,
   xpReward,
+  xpGranted,
+  starsGranted,
 }: {
   missionId: string;
+  missionTitle: string;
+  nodeTitle: string;
+  missionType: string;
   tasks: Task[];
   status: string;
   xpReward: number;
+  xpGranted?: number | null;
+  starsGranted?: number | null;
 }) {
   const router = useRouter();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [feedback, setFeedback] = useState<Record<string, boolean | null>>({});
   const [loading, setLoading] = useState(false);
+  const checkCountsRef = useRef<Record<string, number>>({});
+  const [celebration, setCelebration] = useState<{
+    xp: number;
+    stars?: number;
+    practice?: { correct: number; total: number };
+  } | null>(null);
+
+  const previousMissionId = useRef(missionId);
+  useEffect(() => {
+    if (previousMissionId.current === missionId) return;
+    previousMissionId.current = missionId;
+    setCelebration(null);
+    checkCountsRef.current = {};
+    setCurrentIndex(0);
+    setAnswers({});
+    setFeedback({});
+  }, [missionId]);
+
+  const typeLabel = missionTypeLabel(missionType);
 
   if (tasks.length === 0 && status === "completed") {
     return (
-      <Card>
-        <CardContent className="py-12 text-center">
-          <Sparkles className="mx-auto mb-4 h-12 w-12 text-primary" />
-          <p className="font-medium">Mission completed!</p>
-          <p className="text-sm text-muted-foreground">+{xpReward} XP earned</p>
-          <Button className="mt-4" onClick={() => router.push("/missions")}>
-            Back to Missions
-          </Button>
-        </CardContent>
-      </Card>
+      <CompletionSummaryCard
+        xpEarned={xpGranted ?? xpReward}
+        stars={starsGranted}
+        missionTitle={missionTitle}
+        nodeTitle={nodeTitle}
+        missionTypeLabel={typeLabel}
+        onBack={() => router.push("/missions")}
+      />
+    );
+  }
+
+  if (status === "completed" || celebration) {
+    return (
+      <CompletionSummaryCard
+        xpEarned={celebration?.xp ?? xpGranted ?? xpReward}
+        stars={celebration?.stars ?? starsGranted}
+        practiceSummary={celebration?.practice}
+        missionTitle={missionTitle}
+        nodeTitle={nodeTitle}
+        missionTypeLabel={typeLabel}
+        onBack={() => router.push("/missions")}
+      />
     );
   }
 
@@ -60,12 +102,15 @@ export function MissionRunner({
     const ans = t ? answers[t.id] : undefined;
     if (!t || !ans) return;
     const isCorrect = ans.toLowerCase().trim() === t.correctAnswer.toLowerCase().trim();
+    const prev = checkCountsRef.current[t.id] ?? 0;
+    checkCountsRef.current = { ...checkCountsRef.current, [t.id]: prev + 1 };
     setFeedback((prev) => ({ ...prev, [t.id]: isCorrect }));
   }
 
   async function handleComplete() {
     setLoading(true);
-    await fetch(`/api/missions/${missionId}/complete`, {
+    const correct = tasks.filter((t) => feedback[t.id] === true).length;
+    const res = await fetch(`/api/missions/${missionId}/complete`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -73,8 +118,19 @@ export function MissionRunner({
           taskId,
           selectedAnswer,
         })),
+        taskCheckCounts: checkCountsRef.current,
       }),
     });
+    const data = (await res.json().catch(() => ({}))) as {
+      xpEarned?: number;
+      stars?: number;
+    };
+    setCelebration({
+      xp: typeof data.xpEarned === "number" ? data.xpEarned : xpReward,
+      stars: typeof data.stars === "number" ? data.stars : undefined,
+      practice: { correct, total: tasks.length },
+    });
+    setLoading(false);
     router.refresh();
   }
 

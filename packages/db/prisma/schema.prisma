@@ -160,8 +160,10 @@ model User {
   bio                    String?
   gradeLevel             String?
   studyGoal              String?
-  streakCount            Int                @default(0)
-  xp                     Int                @default(0)
+  streakCount              Int                @default(0)
+  bestMissionStreak        Int                @default(0)
+  lastMissionCompletedAt   DateTime?
+  xp                       Int                @default(0)
   onboardingCompleted    Boolean            @default(false)
   role                   UserRole           @default(STUDENT)
   suspendedAt            DateTime?
@@ -392,8 +394,11 @@ model Mission {
   variationPrompt  String?
   estimatedMinutes Int           @default(15)
   xpReward         Int           @default(25)
+  xpGranted        Int?
+  starsGranted     Int?
   currentSceneIndex Int          @default(0)
   createdAt        DateTime      @default(now())
+  completedAt      DateTime?
   user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   node             ConceptNode   @relation(fields: [nodeId], references: [id], onDelete: Cascade)
   tasks            MissionTask[]

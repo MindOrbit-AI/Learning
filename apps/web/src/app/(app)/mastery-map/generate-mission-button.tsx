@@ -5,7 +5,14 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2, Rocket, Sparkles } from "lucide-react";
 
-export function GenerateMissionButton({ nodeId }: { nodeId: string }) {
+export function GenerateMissionButton({
+  nodeId,
+  questTagline,
+}: {
+  nodeId: string;
+  /** Optional flavor line above the button (display only). */
+  questTagline?: string;
+}) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [limitError, setLimitError] = useState<string | null>(null);
@@ -32,6 +39,11 @@ export function GenerateMissionButton({ nodeId }: { nodeId: string }) {
 
   return (
     <div className="mt-2 space-y-2">
+      {questTagline ? (
+        <p className="rounded-xl border border-primary/15 bg-primary/5 px-3 py-2 text-center text-xs font-medium text-muted-foreground">
+          {questTagline}
+        </p>
+      ) : null}
       {limitError && (
         <div className="rounded-lg bg-amber-50 p-2 text-sm text-amber-800 dark:bg-amber-950 dark:text-amber-200">
           {limitError}

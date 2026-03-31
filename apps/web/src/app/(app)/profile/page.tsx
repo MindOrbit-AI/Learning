@@ -61,6 +61,9 @@ export default async function ProfilePage() {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">{user.streakCount} days</p>
+            <p className="text-xs text-muted-foreground">
+              Mission streak · best {user.bestMissionStreak}
+            </p>
           </CardContent>
         </Card>
         <Card>

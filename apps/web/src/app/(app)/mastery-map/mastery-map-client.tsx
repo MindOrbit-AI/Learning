@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ReactFlow,
   Node,
@@ -20,9 +20,23 @@ import "reactflow/dist/style.css";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, Button } from "@mindorbit/ui";
 import { NODE_STATE_COLORS } from "@mindorbit/lib";
-import { Lock, Sparkles } from "lucide-react";
+import { GitBranch, Lock, Sparkles } from "lucide-react";
 import { GenerateMissionButton } from "./generate-mission-button";
+import { masteryMapQuestHeadline } from "@/lib/mission-flavor";
 import type { NodeState } from "@mindorbit/types";
+
+type ChainSuggestion = { nodeId: string; title: string; state: string };
+type SidebarNodeDetail = {
+  title?: string;
+  description?: string;
+  state?: string;
+  mastery?: number;
+  resources?: Array<{ id: string; title: string }>;
+  missionId?: string | null;
+  subjectTitle?: string;
+  subjectIcon?: string;
+  chainSuggestions?: ChainSuggestion[];
+};
 
 const nodeColors: Record<string, string> = {
   mastered: NODE_STATE_COLORS.mastered,
@@ -101,6 +115,8 @@ async function fetchMapData(subjectId?: string, userId?: string) {
 
 export function MasteryMapClient() {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
   const subjectId = searchParams.get("subject");
   const selectedNodeId = searchParams.get("node");
   const [viewMode, setViewMode] = useState<"graph" | "list">("graph");
@@ -133,6 +149,15 @@ export function MasteryMapClient() {
     setSelectedNode(selectedNodeId);
   }, [selectedNodeId]);
 
+  const goToNode = useCallback(
+    (nodeId: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("node", nodeId);
+      router.push(`${pathname}?${params.toString()}`);
+    },
+    [pathname, router, searchParams]
+  );
+
   const onNodeClick = useCallback(
     (_e: React.MouseEvent, node: Node) => {
       if (node.type === "subjectLabel") return;
@@ -140,12 +165,12 @@ export function MasteryMapClient() {
         setShowLockedOverlay(true);
         return;
       }
-      setSelectedNode(node.id);
+      goToNode(node.id);
     },
-    [lockedNodeIds]
+    [lockedNodeIds, goToNode]
   );
 
-  const details = selectedNode ? nodeDetails[selectedNode] : null;
+  const details = selectedNode ? (nodeDetails[selectedNode] as SidebarNodeDetail | undefined) : null;
 
   if (loading) {
     return (
@@ -163,7 +188,9 @@ export function MasteryMapClient() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-extrabold text-foreground">Mastery Map</h1>
-          <p className="text-muted-foreground mt-1">Track your progress through concepts</p>
+          <p className="text-muted-foreground mt-1">
+            Follow related concepts—chain missions along your weakest linked neighbors.
+          </p>
         </div>
         <div className="flex rounded-duo bg-muted/80 p-1">
           <button
@@ -247,7 +274,7 @@ export function MasteryMapClient() {
                 <button
                   key={n.id}
                   type="button"
-                  onClick={() => setSelectedNode(n.id)}
+                  onClick={() => goToNode(n.id)}
                   className={`w-full rounded-2xl border-2 p-4 text-left font-medium transition-all hover:scale-[1.02] ${
                     selectedNode === n.id
                       ? "border-primary bg-primary/15 shadow-lg"
@@ -299,34 +326,66 @@ export function MasteryMapClient() {
         {selectedNode && details ? (
           <div className="w-80 shrink-0">
             <Card className="overflow-hidden rounded-3xl border-2 border-primary/10 shadow-xl">
-              <CardHeader className="border-b-2 border-primary/10 bg-primary/5">
-                <CardTitle className="text-lg font-bold">
-                  {(details as { title?: string }).title}
-                </CardTitle>
+                <CardHeader className="border-b-2 border-primary/10 bg-primary/5">
+                <CardTitle className="text-lg font-bold">{details.title}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 pt-4">
-                <p className="text-sm text-muted-foreground">
-                  {(details as { description?: string }).description}
-                </p>
+                <p className="text-sm text-muted-foreground">{details.description}</p>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-semibold">State:</span>
                   <span
                     className="rounded-duo px-3 py-1 text-xs font-bold"
                     style={{
-                      backgroundColor: `${nodeColors[(details as { state?: string }).state ?? "untouched"]}30`,
+                      backgroundColor: `${nodeColors[details.state ?? "untouched"]}30`,
                     }}
                   >
-                    {(details as { state?: string }).state ?? "untouched"}
+                    {details.state ?? "untouched"}
                   </span>
                 </div>
-                {(details as { mastery?: number }).mastery != null && (
+                {details.mastery != null && (
                   <div className="rounded-2xl bg-muted/50 p-3">
                     <p className="text-xs font-semibold text-muted-foreground">Mastery</p>
-                    <p className="text-xl font-extrabold text-primary">{(details as { mastery: number }).mastery}%</p>
+                    <p className="text-xl font-extrabold text-primary">{details.mastery}%</p>
                   </div>
                 )}
                 {(() => {
-                  const res = (details as { resources?: Array<{ title: string; id: string }> }).resources ?? [];
+                  const chain = details.chainSuggestions ?? [];
+                  return chain.length > 0 ? (
+                    <div className="rounded-2xl border border-primary/15 bg-primary/5 p-3">
+                      <p className="mb-2 flex items-center gap-2 text-sm font-bold">
+                        <GitBranch className="h-4 w-4 text-primary" />
+                        Continue your path
+                      </p>
+                      <p className="mb-2 text-xs text-muted-foreground">
+                        Neighbor concepts that still need missions—pick one to focus next.
+                      </p>
+                      <ul className="space-y-2">
+                        {chain.map((s) => (
+                          <li key={s.nodeId}>
+                            <button
+                              type="button"
+                              onClick={() => goToNode(s.nodeId)}
+                              className="flex w-full items-center justify-between gap-2 rounded-xl border-2 border-transparent bg-background/80 px-3 py-2 text-left text-sm font-medium transition-all hover:border-primary/40 hover:bg-primary/10"
+                            >
+                              <span className="min-w-0 flex-1 truncate">{s.title}</span>
+                              <span
+                                className="shrink-0 rounded-duo px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+                                style={{
+                                  backgroundColor: `${nodeColors[s.state] ?? nodeColors.untouched}25`,
+                                  color: nodeColors[s.state] ?? nodeColors.untouched,
+                                }}
+                              >
+                                {s.state}
+                              </span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null;
+                })()}
+                {(() => {
+                  const res = details.resources ?? [];
                   return res.length > 0 ? (
                     <div>
                       <p className="mb-2 text-sm font-bold">Resources</p>
@@ -344,15 +403,26 @@ export function MasteryMapClient() {
                     </div>
                   ) : null;
                 })()}
-                {(details as { missionId?: string | null }).missionId ? (
+                {details.missionId ? (
                   <a
-                    href={`/missions/${(details as { missionId: string }).missionId}`}
+                    href={`/missions/${details.missionId}`}
                     className="mt-2 block rounded-2xl bg-primary px-4 py-3 text-center text-sm font-bold text-primary-foreground shadow-lg transition-all hover:scale-[1.02] hover:bg-primary/90"
                   >
                     View Mission →
                   </a>
                 ) : selectedNode ? (
-                  <GenerateMissionButton nodeId={selectedNode} />
+                  <GenerateMissionButton
+                    nodeId={selectedNode}
+                    questTagline={
+                      details.subjectTitle && details.title
+                        ? masteryMapQuestHeadline({
+                            subjectTitle: details.subjectTitle,
+                            subjectIcon: details.subjectIcon,
+                            nodeTitle: details.title,
+                          })
+                        : undefined
+                    }
+                  />
                 ) : null}
               </CardContent>
             </Card>

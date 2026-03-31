@@ -1,20 +1,47 @@
 import Link from "next/link";
 import { prisma } from "@mindorbit/db";
 import { getServerSession } from "@/lib/auth";
+import { MissionGoalsSummary } from "@/components/mission-goals-summary";
+import { endOfUtcDay, startOfUtcDay, startOfUtcWeek } from "@/lib/utc-calendar";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@mindorbit/ui";
+import { Clock, Target } from "lucide-react";
 
 export const dynamic = "force-dynamic";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@mindorbit/ui";
-import { Target, Clock } from "lucide-react";
 
 export default async function MissionsPage() {
   const session = await getServerSession();
   if (!session?.user?.id) return null;
 
-  const missions = await prisma.mission.findMany({
-    where: { userId: session.user.id },
-    include: { node: true, tasks: true },
-    orderBy: { createdAt: "desc" },
-  });
+  const now = new Date();
+  const dayStart = startOfUtcDay(now);
+  const dayEnd = endOfUtcDay(now);
+  const weekStart = startOfUtcWeek(now);
+
+  const [missions, userGoals, missionsToday, missionsThisWeek] = await Promise.all([
+    prisma.mission.findMany({
+      where: { userId: session.user.id },
+      include: { node: true, tasks: true },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { streakCount: true, bestMissionStreak: true },
+    }),
+    prisma.mission.count({
+      where: {
+        userId: session.user.id,
+        status: "completed",
+        completedAt: { gte: dayStart, lt: dayEnd },
+      },
+    }),
+    prisma.mission.count({
+      where: {
+        userId: session.user.id,
+        status: "completed",
+        completedAt: { gte: weekStart },
+      },
+    }),
+  ]);
 
   const active = missions.filter((m) => m.status !== "completed");
   const completed = missions.filter((m) => m.status === "completed");
@@ -27,6 +54,15 @@ export default async function MissionsPage() {
           AI-generated learning missions for your weak and missing nodes
         </p>
       </div>
+
+      {userGoals && (
+        <MissionGoalsSummary
+          missionStreak={userGoals.streakCount}
+          bestMissionStreak={userGoals.bestMissionStreak}
+          missionsToday={missionsToday}
+          missionsThisWeek={missionsThisWeek}
+        />
+      )}
 
       {active.length > 0 && (
         <Card>

@@ -268,6 +268,36 @@ const BADGES = [
   { slug: "first-diagnostic", title: "First Diagnostic", description: "Completed your first diagnostic", icon: "🎯" },
   { slug: "7-day-streak", title: "7-Day Streak", description: "Studied for 7 days in a row", icon: "🔥" },
   { slug: "mission-finisher", title: "Mission Finisher", description: "Completed your first mission", icon: "✅" },
+  {
+    slug: "mission-veteran",
+    title: "Mission Veteran",
+    description: "Completed 10 missions",
+    icon: "🎖️",
+  },
+  {
+    slug: "mission-legend",
+    title: "Mission Legend",
+    description: "Completed 25 missions",
+    icon: "🏆",
+  },
+  {
+    slug: "challenge-taker",
+    title: "Challenge Taker",
+    description: "Finished a challenge mission",
+    icon: "⚡",
+  },
+  {
+    slug: "scene-sharp",
+    title: "Scene Sharp",
+    description: "Cleared every scene on the first try",
+    icon: "🎯",
+  },
+  {
+    slug: "weekly-warrior",
+    title: "Weekly Warrior",
+    description: "Completed 3 missions in one week",
+    icon: "📅",
+  },
   { slug: "top-contributor", title: "Top Contributor", description: "Uploaded 10+ resources", icon: "🌟" },
   { slug: "stoichiometry-master", title: "Stoichiometry Master", description: "Mastered stoichiometry", icon: "⚗️" },
 ];

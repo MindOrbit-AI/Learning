@@ -12,6 +12,7 @@ import { MissionProgressBar } from "@/components/mission-engine/MissionProgressB
 import { HintDrawer } from "@/components/mission-engine/HintDrawer";
 import { FeedbackPanel } from "@/components/mission-engine/FeedbackPanel";
 import { CompletionSummaryCard } from "@/components/mission-engine/CompletionSummaryCard";
+import { missionTypeLabel } from "@/lib/mission-display";
 import { cn } from "@mindorbit/ui";
 
 const PASS_THRESHOLD = 0.6;
@@ -23,9 +24,13 @@ interface SceneWithResponses extends MissionSceneData {
 interface MissionLessonRunnerProps {
   missionId: string;
   missionTitle: string;
+  nodeTitle: string;
+  missionType: string;
   scenes: SceneWithResponses[];
   status: string;
   xpReward: number;
+  xpGranted?: number | null;
+  starsGranted?: number | null;
   initialSceneIndex?: number;
   initialAnswers?: Record<string, unknown>;
 }
@@ -33,9 +38,13 @@ interface MissionLessonRunnerProps {
 export function MissionLessonRunner({
   missionId,
   missionTitle,
+  nodeTitle,
+  missionType,
   scenes,
   status,
   xpReward,
+  xpGranted,
+  starsGranted,
   initialSceneIndex = 0,
   initialAnswers = {},
 }: MissionLessonRunnerProps) {
@@ -44,6 +53,22 @@ export function MissionLessonRunner({
   const [showTryAgain, setShowTryAgain] = useState(false);
   const [completeError, setCompleteError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [sessionXpEarned, setSessionXpEarned] = useState<number | null>(null);
+  const [sessionStarsEarned, setSessionStarsEarned] = useState<number | null>(null);
+  const hintDepthByStepIdRef = useRef<Record<string, number>>({});
+
+  const displayXp = sessionXpEarned ?? xpGranted ?? xpReward;
+  const displayStars = sessionStarsEarned ?? starsGranted;
+  const typeLabel = missionTypeLabel(missionType);
+
+  const attachHintLevels = useCallback(
+    <T extends { sceneId: string }>(rows: T[]) =>
+      rows.map((r) => ({
+        ...r,
+        maxHintLevel: hintDepthByStepIdRef.current[r.sceneId] ?? 0,
+      })),
+    []
+  );
 
   const lesson = missionScenesToLesson(missionId, missionTitle, scenes);
   const {
@@ -64,6 +89,12 @@ export function MissionLessonRunner({
     completedStepIds,
     isLessonComplete,
   } = useLessonRuntimeStore();
+
+  useEffect(() => {
+    setSessionXpEarned(null);
+    setSessionStarsEarned(null);
+    hintDepthByStepIdRef.current = {};
+  }, [missionId]);
 
   const initializedForMission = useRef<string | null>(null);
   useEffect(() => {
@@ -145,11 +176,6 @@ export function MissionLessonRunner({
       markStepCompleted(currentStep.id);
       if (isLast) {
         completeLesson();
-        const sceneResponses = lesson.steps.map((s, i) => ({
-          sceneId: s.id,
-          isCorrect: validationByStepId[s.id]?.isCorrect ?? (i === currentStepIndex && result.isCorrect),
-          attempts: attemptsByStepId[s.id] ?? 1,
-        }));
         const nextCorrect = lesson.steps
           .map((s) => validationByStepId[s.id]?.isCorrect || s.id === currentStep.id)
           .filter(Boolean).length;
@@ -159,16 +185,26 @@ export function MissionLessonRunner({
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              sceneResponses: lesson.steps.map((s) => ({
-                sceneId: s.id,
-                isCorrect: s.id === currentStep.id ? result.isCorrect : validationByStepId[s.id]?.isCorrect,
-                attempts: s.id === currentStep.id ? sceneAttempts + 1 : attemptsByStepId[s.id] ?? 1,
-              })),
+              sceneResponses: attachHintLevels(
+                lesson.steps.map((s) => ({
+                  sceneId: s.id,
+                  isCorrect: s.id === currentStep.id ? result.isCorrect : validationByStepId[s.id]?.isCorrect,
+                  attempts: s.id === currentStep.id ? sceneAttempts + 1 : attemptsByStepId[s.id] ?? 1,
+                }))
+              ),
             }),
           })
-            .then((res) => {
+            .then(async (res) => {
+              const data = (await res.json().catch(() => ({}))) as {
+                xpEarned?: number;
+                stars?: number;
+              };
               if (!res.ok) setCompleteError("Failed to save completion.");
-              else router.refresh();
+              else {
+                if (typeof data.xpEarned === "number") setSessionXpEarned(data.xpEarned);
+                if (typeof data.stars === "number") setSessionStarsEarned(data.stars);
+                router.refresh();
+              }
               setShowSummary(true);
             })
             .finally(() => setLoading(false));
@@ -193,6 +229,8 @@ export function MissionLessonRunner({
     sceneAttempts,
     total,
     missionId,
+    attachHintLevels,
+    router,
   ]);
 
   const markAndAdvance = useCallback(() => {
@@ -205,11 +243,13 @@ export function MissionLessonRunner({
     markStepCompleted(currentStep.id);
 
     if (isLast) {
-      const sceneResponses = lesson.steps.map((s) => ({
-        sceneId: s.id,
-        isCorrect: s.id === currentStep.id || validationByStepId[s.id]?.isCorrect,
-        attempts: s.id === currentStep.id ? 1 : attemptsByStepId[s.id] ?? 1,
-      }));
+      const sceneResponses = attachHintLevels(
+        lesson.steps.map((s) => ({
+          sceneId: s.id,
+          isCorrect: s.id === currentStep.id || validationByStepId[s.id]?.isCorrect,
+          attempts: s.id === currentStep.id ? 1 : attemptsByStepId[s.id] ?? 1,
+        }))
+      );
       const correctCount = sceneResponses.filter((r) => r.isCorrect).length;
       if (correctCount / total >= PASS_THRESHOLD) {
         setLoading(true);
@@ -218,9 +258,17 @@ export function MissionLessonRunner({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ sceneResponses }),
         })
-          .then((res) => {
+          .then(async (res) => {
+            const data = (await res.json().catch(() => ({}))) as {
+              xpEarned?: number;
+              stars?: number;
+            };
             if (!res.ok) setCompleteError("Failed to save completion.");
-            else router.refresh();
+            else {
+              if (typeof data.xpEarned === "number") setSessionXpEarned(data.xpEarned);
+              if (typeof data.stars === "number") setSessionStarsEarned(data.stars);
+              router.refresh();
+            }
             setShowSummary(true);
           })
           .finally(() => setLoading(false));
@@ -244,6 +292,8 @@ export function MissionLessonRunner({
     goNext,
     currentStepIndex,
     saveProgress,
+    attachHintLevels,
+    router,
   ]);
 
   const handleNext = useCallback(() => {
@@ -261,11 +311,13 @@ export function MissionLessonRunner({
   }, [currentStepIndex, goPrev, saveProgress]);
 
   const handleComplete = useCallback(async () => {
-    const sceneResponses = lesson.steps.map((s) => ({
-      sceneId: s.id,
-      isCorrect: validationByStepId[s.id]?.isCorrect ?? false,
-      attempts: attemptsByStepId[s.id] ?? 1,
-    }));
+    const sceneResponses = attachHintLevels(
+      lesson.steps.map((s) => ({
+        sceneId: s.id,
+        isCorrect: validationByStepId[s.id]?.isCorrect ?? false,
+        attempts: attemptsByStepId[s.id] ?? 1,
+      }))
+    );
     const correctCount = sceneResponses.filter((r) => r.isCorrect).length;
     if (correctCount / total < PASS_THRESHOLD) {
       setShowTryAgain(true);
@@ -277,11 +329,19 @@ export function MissionLessonRunner({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ sceneResponses }),
     });
+    const data = (await res.json().catch(() => ({}))) as {
+      xpEarned?: number;
+      stars?: number;
+    };
     setLoading(false);
     if (!res.ok) setCompleteError("Failed to save completion.");
-    else router.refresh();
+    else {
+      if (typeof data.xpEarned === "number") setSessionXpEarned(data.xpEarned);
+      if (typeof data.stars === "number") setSessionStarsEarned(data.stars);
+      router.refresh();
+    }
     setShowSummary(true);
-  }, [lesson, validationByStepId, attemptsByStepId, total, missionId]);
+  }, [lesson, validationByStepId, attemptsByStepId, total, missionId, attachHintLevels, router]);
 
   const handleRetry = useCallback(() => {
     if (currentStep) clearValidation(currentStep.id);
@@ -350,9 +410,12 @@ export function MissionLessonRunner({
       correctCountFromResponses > 0 ? correctCountFromResponses : correctCountFromValidation;
     return (
       <CompletionSummaryCard
-        xpEarned={xpReward}
-        correctCount={correctCount}
-        totalCount={total}
+        xpEarned={displayXp}
+        stars={displayStars}
+        practiceSummary={{ correct: correctCount, total }}
+        missionTitle={missionTitle}
+        nodeTitle={nodeTitle}
+        missionTypeLabel={typeLabel}
         onBack={() => router.push("/missions")}
       />
     );
@@ -395,6 +458,11 @@ export function MissionLessonRunner({
               hintLevel1={currentStep.hints?.[0]?.text}
               hintLevel2={currentStep.hints?.[1]?.text}
               hintLevel3={currentStep.hints?.[2]?.text}
+              onHintReveal={(level) => {
+                const id = currentStep.id;
+                const prev = hintDepthByStepIdRef.current[id] ?? 0;
+                hintDepthByStepIdRef.current[id] = Math.max(prev, level);
+              }}
             />
           )}
 

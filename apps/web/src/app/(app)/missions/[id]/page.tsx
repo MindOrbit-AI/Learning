@@ -4,6 +4,7 @@ import { getServerSession } from "@/lib/auth";
 import { MissionRunner } from "./mission-runner";
 import { MissionLessonRunner } from "@/features/lesson-runtime/components/MissionLessonRunner";
 import { Card, CardContent, CardHeader, CardTitle } from "@mindorbit/ui";
+import { missionTypeLabel } from "@/lib/mission-display";
 
 export default async function MissionDetailPage({
   params,
@@ -36,6 +37,16 @@ export default async function MissionDetailPage({
       <div>
         <h1 className="text-2xl font-bold">{mission.title}</h1>
         <p className="text-muted-foreground">{mission.node.title}</p>
+        {mission.missionType === "challenge" && (
+          <p className="mt-2 text-sm text-amber-800 dark:text-amber-200">
+            {missionTypeLabel(mission.missionType)} — extra XP for pushing deeper.
+          </p>
+        )}
+        {mission.missionType === "repair" && (
+          <p className="mt-2 text-sm text-amber-800 dark:text-amber-200">
+            {missionTypeLabel(mission.missionType)} — bonus XP for shoring up a weak concept.
+          </p>
+        )}
       </div>
 
       {!hasScenes && mission.explanation && (
@@ -64,9 +75,13 @@ export default async function MissionDetailPage({
         <MissionLessonRunner
           missionId={mission.id}
           missionTitle={mission.title}
+          nodeTitle={mission.node.title}
+          missionType={mission.missionType}
           scenes={mission.scenes}
           status={mission.status}
           xpReward={mission.xpReward}
+          xpGranted={mission.xpGranted}
+          starsGranted={mission.starsGranted}
           initialSceneIndex={mission.currentSceneIndex ?? 0}
           initialAnswers={
             mission.progress?.answersJson
@@ -77,9 +92,14 @@ export default async function MissionDetailPage({
       ) : (
         <MissionRunner
           missionId={mission.id}
+          missionTitle={mission.title}
+          nodeTitle={mission.node.title}
+          missionType={mission.missionType}
           tasks={mission.tasks}
           status={mission.status}
           xpReward={mission.xpReward}
+          xpGranted={mission.xpGranted}
+          starsGranted={mission.starsGranted}
         />
       )}
     </div>

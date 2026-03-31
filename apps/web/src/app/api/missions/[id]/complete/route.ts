@@ -21,18 +21,37 @@ export async function POST(
       sceneId: string;
       isCorrect: boolean;
       attempts: number;
+      maxHintLevel?: number;
       mistakeCategory?: MistakeCategory | null;
     }> | undefined;
 
+    let xpEarned = 0;
+    let stars = 2;
+
     if (sceneResponses && Array.isArray(sceneResponses) && sceneResponses.length > 0) {
-      await completeSceneMission(id, session.user.id, sceneResponses);
+      const result = await completeSceneMission(id, session.user.id, sceneResponses);
+      xpEarned = result.xpEarned;
+      stars = result.stars;
     } else {
-      await missionsService.completeMission(id, session.user.id);
+      const taskResponses = body.responses as
+        | Array<{ taskId: string; selectedAnswer: string }>
+        | undefined;
+      const taskCheckCounts = body.taskCheckCounts as Record<string, number> | undefined;
+      const result = await missionsService.completeMission(id, session.user.id, {
+        taskResponses: Array.isArray(taskResponses) ? taskResponses : [],
+        taskCheckCounts,
+      });
+      xpEarned = result.xpEarned;
+      stars = result.stars;
     }
     revalidatePath("/missions");
     revalidatePath(`/missions/${id}`);
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, xpEarned, stars });
   } catch (e) {
+    const msg = e instanceof Error ? e.message : "";
+    if (msg.includes("Task responses required")) {
+      return NextResponse.json({ error: msg }, { status: 400 });
+    }
     return NextResponse.json({ error: "Mission not found" }, { status: 404 });
   }
 }

@@ -40,7 +40,16 @@ export function AppShell({
   user,
 }: {
   children: React.ReactNode;
-  user: { name?: string | null; image?: string | null; role?: string; xp?: number; streakCount?: number; planTier?: "FREE" | "PRO" };
+  user: {
+    name?: string | null;
+    image?: string | null;
+    role?: string;
+    xp?: number;
+    level?: number;
+    streakCount?: number;
+    bestMissionStreak?: number;
+    planTier?: "FREE" | "PRO";
+  };
 }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -115,18 +124,28 @@ export function AppShell({
         </Link>
         <div className="flex items-center gap-3">
           <Link
-            href="/dashboard"
+            href="/missions"
             className="flex items-center gap-1.5 rounded-duo-lg border-2 border-orange-200 bg-white px-3 py-1.5 text-sm font-bold text-orange-600 shadow-sm transition-colors hover:bg-orange-50 dark:border-orange-800 dark:bg-orange-950/50 dark:text-orange-400 dark:hover:bg-orange-900/30"
+            title={
+              (user?.bestMissionStreak ?? 0) > 0
+                ? `Mission streak: ${user?.streakCount ?? 0} UTC days (best ${user?.bestMissionStreak})`
+                : `Mission streak: ${user?.streakCount ?? 0} UTC days in a row with a mission`
+            }
           >
             <Flame className="h-5 w-5" />
             {user?.streakCount ?? 0}
           </Link>
           <Link
             href="/profile"
-            className="flex items-center gap-1.5 rounded-duo-lg border-2 border-primary/30 bg-primary/10 px-3 py-1.5 text-sm font-bold text-primary shadow-sm transition-colors hover:bg-primary/20"
+            className="flex items-center gap-2 rounded-duo-lg border-2 border-primary/30 bg-primary/10 px-3 py-1.5 text-sm font-bold text-primary shadow-sm transition-colors hover:bg-primary/20"
+            title="Level and lifetime XP"
           >
-            <Zap className="h-4 w-4" />
-            {user?.xp ?? 0} XP
+            <Zap className="h-4 w-4 shrink-0" />
+            <span className="tabular-nums">
+              <span className="text-muted-foreground font-semibold">Lv {(user?.level ?? 0) + 1}</span>
+              <span className="mx-1.5 text-primary/40 font-normal">·</span>
+              <span>{user?.xp ?? 0} XP</span>
+            </span>
           </Link>
           {user?.planTier === "PRO" && (
             <span className="flex items-center gap-1 rounded-duo-lg border-2 border-primary/50 bg-primary/20 px-2 py-1 text-xs font-bold text-primary">

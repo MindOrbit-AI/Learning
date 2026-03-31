@@ -5,8 +5,14 @@
 
 import { prisma } from "@mindorbit/db";
 import { getAIProvider } from "@mindorbit/ai";
+import {
+  starsFromTaskOutcome,
+  xpFromMissionPerformance,
+} from "@mindorbit/lib";
 import { LearningStateEngine } from "./learning-state-engine";
 import { AnalyticsService, EVENT_TYPES } from "./analytics-service";
+import { awardMissionCompletionBadges } from "./mission-badges";
+import { applyMissionCompletionStreak } from "./mission-streak";
 
 export const missionsService = {
   /**
@@ -115,24 +121,80 @@ export const missionsService = {
     return mission.id;
   },
 
-  async completeMission(missionId: string, userId: string): Promise<void> {
+  async completeMission(
+    missionId: string,
+    userId: string,
+    options?: {
+      taskResponses: Array<{ taskId: string; selectedAnswer: string }>;
+      taskCheckCounts?: Record<string, number>;
+    }
+  ): Promise<{ xpEarned: number; stars: number }> {
     const mission = await prisma.mission.findUnique({
       where: { id: missionId },
+      include: { tasks: { orderBy: { orderIndex: "asc" } } },
     });
 
     if (!mission || mission.userId !== userId) {
       throw new Error("Mission not found");
     }
 
+    const completedAt = new Date();
+    const taskList = mission.tasks;
+    const totalTasks = taskList.length;
+    const taskIds = taskList.map((t) => t.id);
+    const taskById = Object.fromEntries(taskList.map((t) => [t.id, t]));
+
+    let correctCount = 0;
+    if (totalTasks > 0) {
+      const responses = options?.taskResponses ?? [];
+      if (responses.length === 0) {
+        throw new Error("Task responses required");
+      }
+      for (const r of responses) {
+        const t = taskById[r.taskId];
+        if (!t) continue;
+        const ok =
+          r.selectedAnswer.toLowerCase().trim() === t.correctAnswer.toLowerCase().trim();
+        if (ok) correctCount++;
+      }
+    } else {
+      correctCount = 0;
+    }
+
+    const accuracy = totalTasks > 0 ? correctCount / totalTasks : 1;
+    const stars =
+      totalTasks === 0
+        ? 2
+        : starsFromTaskOutcome({
+            totalTasks,
+            correctCount,
+            taskIds,
+            checkCountsByTask: options?.taskCheckCounts ?? {},
+          });
+
+    const xpEarned = xpFromMissionPerformance({
+      xpReward: mission.xpReward,
+      accuracy01: accuracy,
+      stars,
+      missionType: mission.missionType,
+    });
+
     await prisma.mission.update({
       where: { id: missionId },
-      data: { status: "completed" },
+      data: {
+        status: "completed",
+        completedAt,
+        xpGranted: xpEarned,
+        starsGranted: stars,
+      },
     });
 
     await prisma.user.update({
       where: { id: userId },
-      data: { xp: { increment: mission.xpReward } },
+      data: { xp: { increment: xpEarned } },
     });
+
+    await applyMissionCompletionStreak(userId, completedAt);
 
     const MASTERY_DELTA = 15;
     const existing = await prisma.userNodeState.findUnique({
@@ -170,22 +232,17 @@ export const missionsService = {
       },
     });
 
-    const badge = await prisma.badge.findUnique({
-      where: { slug: "mission-finisher" },
+    await awardMissionCompletionBadges(userId, {
+      missionType: mission.missionType,
+      completedAt,
     });
-    if (badge) {
-      await prisma.userBadge.upsert({
-        where: {
-          userId_badgeId: { userId, badgeId: badge.id },
-        },
-        create: { userId, badgeId: badge.id },
-        update: {},
-      }).catch(() => {});
-    }
 
     await AnalyticsService.track(userId, EVENT_TYPES.mission_completed, {
       missionId,
       nodeId: mission.nodeId,
+      stars,
     });
+
+    return { xpEarned, stars };
   },
 };

@@ -5,8 +5,14 @@
 
 import { prisma } from "@mindorbit/db";
 import type { MistakeCategory } from "@mindorbit/types";
+import {
+  starsFromSceneOutcomes,
+  xpFromMissionPerformance,
+} from "@mindorbit/lib";
 import { LearningStateEngine } from "./learning-state-engine";
 import { AnalyticsService, EVENT_TYPES } from "./analytics-service";
+import { awardMissionCompletionBadges } from "./mission-badges";
+import { applyMissionCompletionStreak } from "./mission-streak";
 
 /** Save partial progress (completed indices, answers) for resume */
 export async function savePartialProgress(
@@ -94,9 +100,10 @@ export async function completeSceneMission(
     sceneId: string;
     isCorrect: boolean;
     attempts: number;
+    maxHintLevel?: number;
     mistakeCategory?: MistakeCategory | null;
   }>
-): Promise<void> {
+): Promise<{ xpEarned: number; stars: number }> {
   const mission = await prisma.mission.findUnique({
     where: { id: missionId },
     include: { node: true },
@@ -116,7 +123,10 @@ export async function completeSceneMission(
       data: {
         missionId,
         sceneId: r.sceneId,
-        userAnswerJson: JSON.stringify({ isCorrect: r.isCorrect }),
+        userAnswerJson: JSON.stringify({
+          isCorrect: r.isCorrect,
+          maxHintLevel: r.maxHintLevel ?? 0,
+        }),
         isCorrect: r.isCorrect,
         attempts: r.attempts,
         mistakeCategory: r.mistakeCategory ?? null,
@@ -124,18 +134,37 @@ export async function completeSceneMission(
     }).catch(() => {});
   }
 
+  const stars = starsFromSceneOutcomes(
+    sceneResponses.map((r) => ({
+      isCorrect: r.isCorrect,
+      attempts: r.attempts,
+      maxHintLevel: r.maxHintLevel ?? 0,
+    }))
+  );
+  const xpEarned = xpFromMissionPerformance({
+    xpReward: mission.xpReward,
+    accuracy01: accuracy,
+    stars,
+    missionType: mission.missionType,
+  });
+  const completedAt = new Date();
+
   await prisma.mission.update({
     where: { id: missionId },
-    data: { status: "completed" },
+    data: {
+      status: "completed",
+      completedAt,
+      xpGranted: xpEarned,
+      starsGranted: stars,
+    },
   });
-
-  // XP scaled by accuracy
-  const xpEarned = Math.round(mission.xpReward * (0.5 + 0.5 * accuracy));
 
   await prisma.user.update({
     where: { id: userId },
     data: { xp: { increment: xpEarned } },
   });
+
+  await applyMissionCompletionStreak(userId, completedAt);
 
   // Update mastery, confidence, stability
   const masteryDelta = Math.min(20, Math.round(accuracy * 25));
@@ -181,18 +210,14 @@ export async function completeSceneMission(
     },
   });
 
-  const badge = await prisma.badge.findUnique({
-    where: { slug: "mission-finisher" },
+  await awardMissionCompletionBadges(userId, {
+    missionType: mission.missionType,
+    completedAt,
+    sceneResponses: sceneResponses.map((r) => ({
+      isCorrect: r.isCorrect,
+      attempts: r.attempts,
+    })),
   });
-  if (badge) {
-    await prisma.userBadge.upsert({
-      where: {
-        userId_badgeId: { userId, badgeId: badge.id },
-      },
-      create: { userId, badgeId: badge.id },
-      update: {},
-    }).catch(() => {});
-  }
 
   await AnalyticsService.track(userId, EVENT_TYPES.mission_completed, {
     missionId,
@@ -200,5 +225,8 @@ export async function completeSceneMission(
     correctCount,
     totalCount,
     xpEarned,
+    stars,
   });
+
+  return { xpEarned, stars };
 }

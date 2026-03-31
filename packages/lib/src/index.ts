@@ -3,6 +3,14 @@
  */
 
 export * from "./billing";
+export { levelFromXp, xpThresholdForLevel } from "./gamification/xp-level";
+export {
+  starsFromSceneOutcomes,
+  starsFromTaskOutcome,
+  xpFromMissionPerformance,
+  starRatingLabel,
+  type SceneOutcome,
+} from "./gamification/mission-performance";
 
 export const SUBJECTS = {
   algebra: { slug: "algebra", title: "Algebra", icon: "📐", color: "#3B82F6" },

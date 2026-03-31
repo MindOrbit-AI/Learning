@@ -92,7 +92,9 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{user?.streakCount ?? 0} days</div>
-            <p className="text-xs text-muted-foreground">Keep it going!</p>
+            <p className="text-xs text-muted-foreground">
+              UTC days with a mission · best {user?.bestMissionStreak ?? 0}
+            </p>
           </CardContent>
         </Card>
         <Card className="rounded-3xl border-2 border-primary/10 shadow-lg transition-all hover:shadow-xl">
