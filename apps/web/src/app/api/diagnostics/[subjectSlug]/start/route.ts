@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth";
 import { prisma } from "@mindorbit/db";
 import { canViewSubject } from "@/lib/subject-visibility";
-import { diagnosticsService } from "@/services/diagnostics-service";
+import {
+  diagnosticsService,
+  NoDiagnosticQuestionsError,
+} from "@/services/diagnostics-service";
 import { featureGateService } from "@/features/billing/feature-gate.service";
 import { usageService } from "@/features/billing/usage.service";
 import { FEATURE_KEYS } from "@mindorbit/lib";
@@ -67,6 +70,16 @@ export async function POST(
       })),
     });
   } catch (e) {
+    if (e instanceof NoDiagnosticQuestionsError) {
+      return NextResponse.json(
+        {
+          error:
+            "This subject has no diagnostic questions yet. Add concept nodes with descriptions, or run content ingestion.",
+          code: "NO_DIAGNOSTIC_QUESTIONS",
+        },
+        { status: 422 }
+      );
+    }
     console.error(e);
     return NextResponse.json({ error: "Failed to start diagnostic" }, { status: 500 });
   }

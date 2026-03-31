@@ -7,6 +7,14 @@ import { LearningStateEngine } from "./learning-state-engine";
 import { ReviewScheduler } from "./review-scheduler";
 import { AnalyticsService, EVENT_TYPES } from "./analytics-service";
 import { createMissionsForWeakNodes } from "@/lib/missions";
+import { graphAlignmentService } from "@/services/graph-alignment-service";
+
+export class NoDiagnosticQuestionsError extends Error {
+  constructor() {
+    super("NO_DIAGNOSTIC_QUESTIONS");
+    this.name = "NoDiagnosticQuestionsError";
+  }
+}
 
 export interface DiagnosticResponseInput {
   questionId: string;
@@ -23,10 +31,22 @@ export interface SubmitResult {
 
 export const diagnosticsService = {
   async startDiagnostic(subjectId: string, userId: string) {
-    const questions = await prisma.diagnosticQuestion.findMany({
+    let questions = await prisma.diagnosticQuestion.findMany({
       where: { subjectId },
       include: { node: true },
     });
+
+    if (questions.length === 0) {
+      await graphAlignmentService.ensureDiagnosticQuestionsForSubject(subjectId);
+      questions = await prisma.diagnosticQuestion.findMany({
+        where: { subjectId },
+        include: { node: true },
+      });
+    }
+
+    if (questions.length === 0) {
+      throw new NoDiagnosticQuestionsError();
+    }
 
     const nodeIds = [...new Set(questions.map((q) => q.nodeId))];
     const selected: string[] = [];

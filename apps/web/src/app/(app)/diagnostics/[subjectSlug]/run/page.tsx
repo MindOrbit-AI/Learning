@@ -24,6 +24,7 @@ export default function DiagnosticRunPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [unavailableError, setUnavailableError] = useState<string | null>(null);
 
   useEffect(() => {
     async function init() {
@@ -34,13 +35,23 @@ export default function DiagnosticRunPage() {
       if (!res.ok) {
         if (res.status === 403 && data.upgradeRequired) {
           setLimitError(data.error ?? "Diagnostic limit reached");
+        } else if (res.status === 422 && data.code === "NO_DIAGNOSTIC_QUESTIONS") {
+          setUnavailableError(data.error ?? "No diagnostic questions available for this subject.");
         } else {
           router.push(`/subjects/${subjectSlug}`);
         }
         setLoading(false);
         return;
       }
-      setQuestions(data.questions);
+      const qs = Array.isArray(data.questions) ? data.questions : [];
+      if (qs.length === 0) {
+        setUnavailableError(
+          "No questions were returned for this diagnostic. Try again later or contact support."
+        );
+        setLoading(false);
+        return;
+      }
+      setQuestions(qs);
       setAttemptId(data.attemptId);
       setLoading(false);
     }
@@ -68,6 +79,18 @@ export default function DiagnosticRunPage() {
     router.push(`/diagnostics/${subjectSlug}/results?attemptId=${data.attemptId}`);
   }
 
+  if (unavailableError) {
+    return (
+      <div className="mx-auto max-w-md space-y-4 rounded-2xl border border-muted p-8 text-center">
+        <p className="font-semibold">Diagnostic not available</p>
+        <p className="text-sm text-muted-foreground">{unavailableError}</p>
+        <Button variant="outline" asChild>
+          <Link href={`/subjects/${subjectSlug}`}>Back to subject</Link>
+        </Button>
+      </div>
+    );
+  }
+
   if (limitError) {
     return (
       <div className="mx-auto max-w-md space-y-6 rounded-2xl border-2 border-dashed border-muted p-8 text-center">
@@ -93,7 +116,7 @@ export default function DiagnosticRunPage() {
     );
   }
 
-  if (loading || questions.length === 0) {
+  if (loading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <p className="text-muted-foreground">Loading diagnostic...</p>

@@ -37,6 +37,47 @@ export interface AlignOptions {
 }
 
 export const graphAlignmentService = {
+  /**
+   * Ensures a subject has diagnostic questions when concept nodes exist but the
+   * question bank is empty (e.g. admin-created graphs without running ingestion).
+   */
+  async ensureDiagnosticQuestionsForSubject(subjectId: string): Promise<void> {
+    const existing = await prisma.diagnosticQuestion.count({ where: { subjectId } });
+    if (existing > 0) return;
+
+    const nodes = await prisma.conceptNode.findMany({
+      where: { subjectId },
+      orderBy: { orderIndex: "asc" },
+    });
+
+    for (const node of nodes) {
+      const conceptText = [node.description, node.title].filter(Boolean).join("\n\n").trim();
+      if (!conceptText) continue;
+
+      const questions = await getAIProvider().generateDiagnosticQuestionsFromContent(
+        conceptText.slice(0, 1500),
+        node.title,
+        2
+      );
+
+      for (const q of questions) {
+        await prisma.diagnosticQuestion
+          .create({
+            data: {
+              subjectId,
+              nodeId: node.id,
+              prompt: q.prompt,
+              type: q.type,
+              optionsJson: q.options ? JSON.stringify(q.options) : null,
+              correctAnswer: q.correctAnswer,
+              explanation: q.explanation,
+            },
+          })
+          .catch(() => {});
+      }
+    }
+  },
+
   async alignToGraph(
     extractions: ConceptExtractionResult[],
     options: AlignOptions
