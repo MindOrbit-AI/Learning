@@ -12,6 +12,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { formatRelativeTime } from "@mindorbit/lib";
+import { EarnedBadgeIcon } from "@/features/badges/earned-badge-icon";
 
 export default async function DashboardPage() {
   const session = await getServerSession();
@@ -111,15 +112,18 @@ export default async function DashboardPage() {
             <CardTitle className="text-sm font-medium">Badges</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {(user?.userBadges ?? []).slice(0, 4).map((ub) => (
-                <span
+                <EarnedBadgeIcon
                   key={ub.badgeId}
-                  className="text-2xl"
-                  title={ub.badge.title}
-                >
-                  {ub.badge.icon}
-                </span>
+                  size="sm"
+                  badge={{
+                    slug: ub.badge.slug,
+                    icon: ub.badge.icon,
+                    title: ub.badge.title,
+                    description: ub.badge.description,
+                  }}
+                />
               ))}
               {(user?.userBadges?.length ?? 0) === 0 && (
                 <p className="text-sm text-muted-foreground">Complete missions to earn badges</p>

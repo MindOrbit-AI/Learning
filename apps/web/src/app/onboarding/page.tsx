@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -36,7 +35,6 @@ const studyGoals = [
 const targetExams = ["SAT", "ACT", "AP Chemistry", "AP Biology", "AP Calculus", "Other"];
 
 export default function OnboardingPage() {
-  const router = useRouter();
   const [step, setStep] = useState(1);
   const [gradeLevel, setGradeLevel] = useState("");
   const [studyGoal, setStudyGoal] = useState("");
@@ -58,8 +56,7 @@ export default function OnboardingPage() {
         }),
       });
       if (!res.ok) throw new Error("Failed");
-      router.push("/dashboard");
-      router.refresh();
+      window.location.assign("/dashboard");
     } catch {
       setLoading(false);
     }

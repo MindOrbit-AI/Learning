@@ -3,6 +3,7 @@ import { prisma } from "@mindorbit/db";
 import { getServerSession } from "@/lib/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button } from "@mindorbit/ui";
 import { User, Flame, Star, Award } from "lucide-react";
+import { EarnedBadgeIcon } from "@/features/badges/earned-badge-icon";
 
 export default async function ProfilePage() {
   const session = await getServerSession();
@@ -92,8 +93,16 @@ export default async function ProfilePage() {
                 className="flex flex-col items-center rounded-xl border p-4"
                 title={ub.badge.description}
               >
-                <span className="text-3xl">{ub.badge.icon}</span>
-                <span className="mt-2 text-sm font-medium">{ub.badge.title}</span>
+                <EarnedBadgeIcon
+                  size="lg"
+                  badge={{
+                    slug: ub.badge.slug,
+                    icon: ub.badge.icon,
+                    title: ub.badge.title,
+                    description: ub.badge.description,
+                  }}
+                />
+                <span className="mt-3 text-sm font-medium">{ub.badge.title}</span>
               </div>
             ))}
             {(user.userBadges?.length ?? 0) === 0 && (

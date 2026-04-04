@@ -2,13 +2,12 @@
 
 import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input } from "@mindorbit/ui";
 import { Brain } from "lucide-react";
 
 function SignInForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -30,8 +29,8 @@ function SignInForm() {
         return;
       }
       const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
-      router.push(callbackUrl);
-      router.refresh();
+      // Full navigation avoids soft-navigation edge cases (e.g. stuck transition layers) after session is set.
+      window.location.assign(callbackUrl);
     } catch {
       setError("Something went wrong");
     } finally {

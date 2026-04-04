@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@mindorbit/db";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@mindorbit/ui";
 import { User, Award, FileText } from "lucide-react";
+import { EarnedBadgeIcon } from "@/features/badges/earned-badge-icon";
 
 export default async function CreatorProfilePage({
   params,
@@ -64,8 +65,16 @@ export default async function CreatorProfilePage({
                 className="flex flex-col items-center rounded-xl border p-4"
                 title={ub.badge.description}
               >
-                <span className="text-3xl">{ub.badge.icon}</span>
-                <span className="mt-2 text-sm">{ub.badge.title}</span>
+                <EarnedBadgeIcon
+                  size="lg"
+                  badge={{
+                    slug: ub.badge.slug,
+                    icon: ub.badge.icon,
+                    title: ub.badge.title,
+                    description: ub.badge.description,
+                  }}
+                />
+                <span className="mt-3 text-sm">{ub.badge.title}</span>
               </div>
             ))}
           </div>
