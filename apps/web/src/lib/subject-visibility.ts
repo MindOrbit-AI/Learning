@@ -1,24 +1,45 @@
-import type { Prisma } from "@prisma/client";
+import type { Prisma, SubjectStatus } from "@prisma/client";
+
+export type SubjectVisibilityFields = {
+  createdById: string | null;
+  status: SubjectStatus;
+};
 
 /**
- * Subjects are visible when:
- * - createdById is null (platform/seed subjects) → everyone sees
- * - createdById matches current user (user-created) → only creator sees
+ * Subjects listed for a user:
+ * - Platform subjects (createdById null)
+ * - Subjects they created
+ * - Published subjects from others that they added to their library
  */
 export function subjectVisibilityWhere(userId: string | undefined): Prisma.SubjectWhereInput {
   if (!userId) {
     return { createdById: null };
   }
   return {
-    OR: [{ createdById: null }, { createdById: userId }],
+    OR: [
+      { createdById: null },
+      { createdById: userId },
+      {
+        libraryAdds: { some: { userId } },
+      },
+    ],
   };
 }
 
-/** Check if user can view a subject (e.g. for detail page) */
+/**
+ * Whether the user may use a subject (detail, diagnostics, mastery map, etc.).
+ * - Platform subjects: anyone (including guests)
+ * - User-created: owner always; others if published (share link) or they added it to their library
+ */
 export function canViewSubject(
-  subject: { createdById: string | null },
-  userId: string | undefined
+  subject: SubjectVisibilityFields,
+  userId: string | undefined,
+  options?: { hasAdded?: boolean }
 ): boolean {
   if (subject.createdById === null) return true;
-  return userId != null && subject.createdById === userId;
+  if (!userId) return false;
+  if (subject.createdById === userId) return true;
+  if (options?.hasAdded) return true;
+  if (subject.status === "published") return true;
+  return false;
 }

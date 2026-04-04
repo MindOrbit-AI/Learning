@@ -191,6 +191,7 @@ model User {
   uploadedSources        UploadedSource[]
   featureUsages          FeatureUsage[]
   billingEvents          BillingEvent[]
+  subjectLibraryAdds     UserSubjectAdd[]
 
   @@index([planTier])
   @@index([subscriptionStatus])
@@ -252,6 +253,21 @@ model Subject {
   diagnosticAttempts  DiagnosticAttempt[]
   resources     Resource[]
   missionTemplates MissionTemplate[]
+  libraryAdds      UserSubjectAdd[]
+}
+
+/// User added someone else's published subject to their library (listed on /subjects, dashboard, etc.).
+model UserSubjectAdd {
+  id        String   @id @default(cuid())
+  userId    String
+  subjectId String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject   Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, subjectId])
+  @@index([userId])
+  @@index([subjectId])
 }
 
 model Cluster {

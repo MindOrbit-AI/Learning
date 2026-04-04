@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@mindorbit/db";
 import { getServerSession } from "@/lib/auth";
 import { canViewSubject } from "@/lib/subject-visibility";
+import { AddSubjectToLibraryButton } from "@/features/subjects/add-subject-to-library-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button } from "@mindorbit/ui";
 import { Play, Map, ChevronRight, Lock } from "lucide-react";
 import { PLAN_LIMITS } from "@mindorbit/lib";
@@ -27,7 +28,24 @@ export default async function SubjectDetailPage({
   });
 
   if (!subject) notFound();
-  if (!canViewSubject(subject, session?.user?.id as string | undefined)) notFound();
+
+  const userId = session?.user?.id;
+  const libraryAdd =
+    userId && subject.createdById && subject.createdById !== userId
+      ? await prisma.userSubjectAdd.findUnique({
+          where: { userId_subjectId: { userId, subjectId: subject.id } },
+          select: { id: true },
+        })
+      : null;
+  const hasAdded = !!libraryAdd;
+
+  if (!canViewSubject(subject, userId, { hasAdded })) notFound();
+
+  const showAddToLibrary =
+    userId &&
+    subject.createdById &&
+    subject.createdById !== userId &&
+    subject.status === "published";
 
   const userNodeStates = session?.user?.id
     ? await prisma.userNodeState.findMany({
@@ -65,6 +83,10 @@ export default async function SubjectDetailPage({
         </div>
         <p className="text-muted-foreground">{subject.description}</p>
       </div>
+
+      {showAddToLibrary && (
+        <AddSubjectToLibraryButton subjectId={subject.id} initiallyAdded={hasAdded} />
+      )}
 
       <div className="flex flex-wrap gap-4">
         <Link href={`/diagnostics/${subject.slug}`}>
