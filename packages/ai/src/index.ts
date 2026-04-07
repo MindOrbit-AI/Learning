@@ -4,5 +4,6 @@
  */
 
 export * from "./interfaces";
+export * from "./immersive-lesson";
 export * from "./mock-provider";
 export * from "./openai-provider";

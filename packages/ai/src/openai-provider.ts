@@ -13,7 +13,10 @@ import type {
   ContentDiagnosticQuestion,
   ContentSummaryJson,
   GeneratedSubjectStructure,
+  ImmersiveLessonContent,
+  ImmersiveLessonParams,
 } from "./interfaces";
+import { normalizeImmersiveLesson } from "./immersive-lesson";
 import type { QuestionType } from "@mindorbit/types";
 import { mockAIProvider } from "./mock-provider";
 
@@ -40,6 +43,21 @@ async function chat(
   const content = res.choices[0]?.message?.content?.trim();
   if (!content) throw new Error("Empty response from OpenAI");
   return content;
+}
+
+/** Tolerate markdown fences or stray prose around the JSON object. */
+function parseImmersiveLessonJson(raw: string): unknown {
+  let t = raw.trim();
+  const fence = /^```(?:json)?\s*\n?([\s\S]*?)```/m.exec(t);
+  if (fence?.[1]) t = fence[1].trim();
+  try {
+    return JSON.parse(t);
+  } catch {
+    const start = t.indexOf("{");
+    const end = t.lastIndexOf("}");
+    if (start < 0 || end <= start) throw new Error("Immersive lesson JSON parse failed");
+    return JSON.parse(t.slice(start, end + 1));
+  }
 }
 
 function createOpenAIProvider(): AIProvider {
@@ -441,6 +459,61 @@ Rules:
         return { clusters, concepts, edges };
       } catch {
         return mockAIProvider.generateSubjectStructure(title, description);
+      }
+    },
+
+    async generateImmersiveLessonContent(
+      params: ImmersiveLessonParams
+    ): Promise<ImmersiveLessonContent> {
+      const topic = params.topic.trim() || "Earth coordinates and the night sky";
+      const gradeLevel = params.gradeLevel.trim() || "Grade 10";
+      const sectionCount = Math.min(8, Math.max(2, params.sectionCount ?? 3));
+      const content = await chat(
+        [
+          {
+            role: "system",
+            content: `You write immersive textbook-style lessons as JSON for a reading UI (sections, objectives, paragraphs).
+Return ONLY valid JSON with this exact shape:
+{
+  "interestLabel": "short theme label, 2-5 words",
+  "interestEmoji": "one emoji character for the theme",
+  "gradeLabel": "string matching the learner grade (e.g. Grade 10)",
+  "sections": [ ... exactly ${sectionCount} section objects ... ]
+}
+
+Each section object:
+{
+  "id": "unique-url-safe-slug",
+  "title": "section title",
+  "quizPending": boolean — true for exactly one section where a section quiz fits (usually the first),
+  "objectives": [ "2-4 measurable objectives as strings" ],
+  "blocks": [ ordered content blocks ]
+}
+
+Each block is EITHER:
+{ "type": "p", "text": "plain text, 1-4 sentences, no markdown", "hint": boolean }
+OR
+{ "type": "h2", "text": "subheading" }
+
+Rules:
+- Use only "p" and "h2" types.
+- Each section: at least 4 "p" blocks and at least one "h2" after the first paragraph or two.
+- Set "hint": true on 1-3 paragraphs per section where a quick knowledge check would help.
+- Tone: clear, accurate, age-appropriate; no latex; you may use ° for degrees.
+- Build sections so they progress logically through the topic.`,
+          },
+          {
+            role: "user",
+            content: `Topic: ${topic}\nGrade level: ${gradeLevel}\nNumber of sections: ${sectionCount}`,
+          },
+        ],
+        { jsonMode: true, maxTokens: 12000 }
+      );
+      try {
+        const parsed = parseImmersiveLessonJson(content);
+        return normalizeImmersiveLesson(parsed, { topic, gradeLevel });
+      } catch {
+        return mockAIProvider.generateImmersiveLessonContent(params);
       }
     },
 

@@ -11,6 +11,9 @@ import type {
   ContentDiagnosticQuestion,
   ContentSummaryJson,
   GeneratedSubjectStructure,
+  ImmersiveLessonContent,
+  ImmersiveLessonParams,
+  ImmersiveLessonSection,
 } from "./interfaces";
 import type { QuestionType } from "@mindorbit/types";
 
@@ -464,6 +467,64 @@ export const mockAIProvider: AIProvider = {
 
   async generateSubjectDescription(title: string): Promise<string> {
     return `A comprehensive study of ${title}. Learners will master key concepts, build foundational skills, and develop deeper understanding.`;
+  },
+
+  async generateImmersiveLessonContent(
+    params: ImmersiveLessonParams
+  ): Promise<ImmersiveLessonContent> {
+    const topic = params.topic.trim() || "Scientific inquiry";
+    const grade = params.gradeLevel.trim() || "Grade 10";
+    const n = Math.min(8, Math.max(2, params.sectionCount ?? 3));
+    const shortTheme = topic.length > 48 ? `${topic.slice(0, 45)}…` : topic;
+    const sections: ImmersiveLessonSection[] = [];
+    for (let i = 0; i < n; i++) {
+      const isFirst = i === 0;
+      const isLast = i === n - 1;
+      const title = isFirst
+        ? `Introduction: ${shortTheme}`
+        : isLast
+          ? `Applying and reviewing ${shortTheme}`
+          : `Core concepts (${i + 1} of ${n})`;
+      sections.push({
+        id: `section-${i + 1}`,
+        title,
+        quizPending: isFirst,
+        objectives: [
+          `Define vocabulary and key ideas related to ${shortTheme}.`,
+          `Explain one concrete example tied to ${shortTheme}.`,
+          isLast ? `Summarize how the ideas about ${shortTheme} connect as a whole.` : `Relate this section to the next part of the lesson.`,
+        ],
+        blocks: [
+          {
+            type: "p",
+            text: `This section explores ${topic} for learners at ${grade}. Read actively: note definitions, cause-and-effect relationships, and any quantities or units mentioned.`,
+            hint: true,
+          },
+          {
+            type: "p",
+            text: `A useful approach is to connect new ideas to something you already know. Ask yourself what question this material answers and why that question matters.`,
+          },
+          { type: "h2", text: "Main ideas" },
+          {
+            type: "p",
+            text: `Focus on the central claim or model introduced here. In your own words, restate what problem it solves and what assumption it makes.`,
+            hint: !isFirst,
+          },
+          {
+            type: "p",
+            text: isLast
+              ? `Before moving on, skim your notes and check that you can explain the storyline of the lesson from start to finish without rereading every paragraph.`
+              : `When you finish this section, try to predict what the next part will add—often lessons move from definition to mechanism to examples.`,
+          },
+        ],
+      });
+    }
+    return {
+      interestLabel: shortTheme.split(/\s+/).slice(0, 3).join(" ") || "Learning",
+      interestEmoji: "🧪",
+      gradeLabel: grade,
+      sections,
+    };
   },
 
   async generateSubjectStructure(

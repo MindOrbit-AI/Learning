@@ -110,6 +110,36 @@ export interface GeneratedSubjectStructure {
   }>;
 }
 
+/** Blocks for immersive multi-section reader (plain text, no markdown). */
+export type ImmersiveContentBlock =
+  | { type: "p"; text: string; hint?: boolean }
+  | { type: "h2"; text: string };
+
+export interface ImmersiveLessonSection {
+  id: string;
+  title: string;
+  quizPending?: boolean;
+  objectives: string[];
+  blocks: ImmersiveContentBlock[];
+}
+
+/** Full payload for Learn-your-way-style reader UI */
+export interface ImmersiveLessonContent {
+  interestLabel: string;
+  interestEmoji: string;
+  gradeLabel: string;
+  sections: ImmersiveLessonSection[];
+}
+
+export interface ImmersiveLessonParams {
+  /** Main theme or chapter focus */
+  topic: string;
+  /** e.g. "Grade 10", "9th grade" */
+  gradeLevel: string;
+  /** Number of outline sections (2–8) */
+  sectionCount?: number;
+}
+
 /** AI-generated summary from ingested content (no chunking) */
 export interface ContentSummaryJson {
   title: string;
@@ -156,6 +186,9 @@ export interface AIProvider {
 
   /** Subject Creation - generate clusters, concepts, and edges from subject title/description */
   generateSubjectStructure(title: string, description: string): Promise<GeneratedSubjectStructure>;
+
+  /** Immersive reader — multi-section lesson with objectives and inline hint anchors */
+  generateImmersiveLessonContent(params: ImmersiveLessonParams): Promise<ImmersiveLessonContent>;
 
   /** Content Ingestion - AI selects the most relevant subject for given content (e.g. Algebra, Physics) */
   selectMostRelevantSubject?(

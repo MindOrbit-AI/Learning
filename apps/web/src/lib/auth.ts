@@ -2,8 +2,10 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@mindorbit/db";
 import bcrypt from "bcryptjs";
+import { authSecret } from "./auth-secret";
 
 export const authOptions = {
+  secret: authSecret,
   session: { strategy: "jwt" as const, maxAge: 30 * 24 * 60 * 60 },
   pages: {
     signIn: "/auth/signin",
