@@ -3,7 +3,12 @@ import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@mindorbit/db";
 import bcrypt from "bcryptjs";
 
+/** NextAuth v4 reads NEXTAUTH_SECRET; we also accept AUTH_SECRET (e.g. Vercel / shared tooling). */
+const authSecret =
+  process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET;
+
 export const authOptions = {
+  ...(authSecret ? { secret: authSecret } : {}),
   session: { strategy: "jwt" as const, maxAge: 30 * 24 * 60 * 60 },
   pages: {
     signIn: "/auth/signin",

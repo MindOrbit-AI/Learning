@@ -85,6 +85,41 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+## Production database (Vercel & Supabase)
+
+Vercel does not execute Prisma CLI commands for you. To reset or migrate a **hosted** database, run the root scripts **on your machine** (or in CI) with `DATABASE_URL` pointing at that database.
+
+### Environment
+
+1. In the Vercel project, add **`DATABASE_URL`** for the **Production** environment (and Preview if needed). Use the connection string from your host (for Supabase: **Project settings → Database**).
+2. Pull variables locally when you need to run destructive or migration commands against production:
+
+   ```bash
+   cd apps/web
+   npx vercel env pull ../../.env.production.local --environment production --yes
+   ```
+
+   Ensure `.env.production.local` is gitignored and never committed.
+
+### Reset production data (`db:reset`)
+
+`db:reset` runs `prisma db push --force-reset` (drops data) and then seeds. **Use only when you intend to wipe the remote database.**
+
+From the **repository root**:
+
+```bash
+npx dotenv-cli -e .env.production.local -- pnpm db:reset
+```
+
+### Supabase: direct URL vs pooler
+
+Supabase exposes:
+
+- **Session pooler** (often host `*.pooler.supabase.com`, port **6543**) — good for app traffic.
+- **Direct connection** (host `db.<project-ref>.supabase.co`, port **5432**) — use this for **Prisma `db push`, `migrate`, and `db reset`**. DDL and long transactions can stall or fail through the pooler.
+
+Put the **direct** URI in `DATABASE_URL` when running CLI operations against production.
+
 ## Demo Account
 
 - **Email**: demo@mindorbit.learn
