@@ -18,36 +18,36 @@ import { ProductDemoSection } from "@/features/marketing/product-demo-section";
 export const metadata: Metadata = {
   title: "MindOrbit — Build a Mind That Compounds",
   description:
-    "The Cognitive Operating System that diagnoses gaps, maps your path, and trains you to master anything—fast.",
+    "Pinpoint what you are missing, follow a clear path, and practice what matters—with diagnostics, a mastery map, and guided review.",
 };
 
 const PAIN_POINTS = [
-  "No clear structure",
-  "Don’t know what to focus on",
-  "Forget what they learned",
-  "No real improvement",
+  "Your study plan is vague or overwhelming",
+  "You are not sure what deserves your time tonight",
+  "You forget material right when it counts",
+  "Hours of effort do not show up in results",
 ] as const;
 
 const STEPS = [
   {
     n: "1",
     title: "Diagnose",
-    body: "Identify exactly what you don’t know in minutes",
+    body: "Pinpoint gaps in minutes so you stop guessing",
   },
   {
     n: "2",
     title: "Map",
-    body: "Visualize your path with a mastery map",
+    body: "See your whole subject as a path you can actually follow",
   },
   {
     n: "3",
     title: "Train",
-    body: "Target weak points with AI-generated missions",
+    body: "Practice weak spots with missions built for you",
   },
   {
     n: "4",
     title: "Reinforce",
-    body: "Lock knowledge in with smart review cycles",
+    body: "Bring it back on schedule so it sticks for exams",
   },
 ] as const;
 
@@ -81,13 +81,13 @@ export default function LandingPage() {
           </Link>
           <nav className="hidden items-center gap-8 text-sm font-medium text-muted-foreground md:flex">
             <a href="#problem" className="transition-colors hover:text-foreground">
-              Problem
+              Why it matters
             </a>
             <a href="#solution" className="transition-colors hover:text-foreground">
-              System
+              How it works
             </a>
             <a href="#demo" className="transition-colors hover:text-foreground">
-              Product
+              See it in action
             </a>
             <a href="#pricing" className="transition-colors hover:text-foreground">
               Pricing
@@ -117,10 +117,10 @@ export default function LandingPage() {
             <div className="container mx-auto px-4">
               <div className="mx-auto max-w-3xl text-center">
                 <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-                  The hook
+                  Sound familiar?
                 </p>
                 <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl md:text-[2.5rem] md:leading-tight">
-                  Most people waste time learning things they already know.
+                  You keep reviewing what you already know—while the hard parts stay fuzzy.
                 </h2>
               </div>
               <ul className="mx-auto mt-12 grid max-w-2xl gap-4 sm:grid-cols-2">
@@ -135,7 +135,7 @@ export default function LandingPage() {
                 ))}
               </ul>
               <p className="mx-auto mt-12 max-w-xl text-center text-lg font-medium text-foreground">
-                That’s why most people never reach mastery.
+                That is how studying stays busy but mastery stays out of reach.
               </p>
             </div>
           </section>
@@ -146,10 +146,10 @@ export default function LandingPage() {
             <div className="container mx-auto px-4">
               <div className="mx-auto max-w-2xl text-center">
                 <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-                  Your system
+                  Your learning loop
                 </p>
                 <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-                  Outcome, clarity, speed—on repeat
+                  Know what to fix, then fix it—without spinning your wheels
                 </h2>
               </div>
               <div className="mx-auto mt-14 grid max-w-5xl gap-5 sm:grid-cols-2">
@@ -177,17 +177,19 @@ export default function LandingPage() {
             <div className="container mx-auto px-4">
               <div className="mx-auto max-w-2xl text-center">
                 <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-                  Product demo
+                  See it in action
                 </p>
                 <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-                  This sells the system—not a content library
+                  One loop: diagnose, map, train, track progress
                 </h2>
               </div>
               <div className="mx-auto mt-12 max-w-5xl">
                 <ProductDemoSection />
                 <p className="mx-auto mt-10 max-w-lg text-center text-lg font-medium text-muted-foreground">
-                  Not content. Not courses.{" "}
-                  <span className="text-foreground">A system that builds real understanding.</span>
+                  It is not another passive video library.{" "}
+                  <span className="text-foreground">
+                    It is a repeatable way to turn weak spots into confident recall.
+                  </span>
                 </p>
               </div>
             </div>
@@ -201,17 +203,17 @@ export default function LandingPage() {
                 <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground">
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-background/50 px-3 py-1">
                     <GraduationCap className="h-4 w-4 text-primary" />
-                    Used by high-performing students
+                    Built for exams, courses, and self-study
                   </span>
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-background/50 px-3 py-1">
                     <TrendingUp className="h-4 w-4 text-primary" />
-                    Improving faster than traditional study methods
+                    Focus practice where your score actually moves
                   </span>
                 </div>
                 <blockquote className="mx-auto max-w-2xl text-balance text-lg font-medium leading-relaxed text-foreground">
                   “I finally stopped guessing what to review—the map showed me exactly where I was weak.”
                 </blockquote>
-                <p className="text-sm text-muted-foreground">Beta learner</p>
+                <p className="text-sm text-muted-foreground">Early learner, beta</p>
               </div>
             </div>
           </section>
@@ -251,13 +253,13 @@ export default function LandingPage() {
           </div>
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
             <a href="#problem" className="hover:text-foreground">
-              Problem
+              Why it matters
             </a>
             <a href="#solution" className="hover:text-foreground">
-              System
+              How it works
             </a>
             <a href="#demo" className="hover:text-foreground">
-              Product
+              See it in action
             </a>
             <a href="#pricing" className="hover:text-foreground">
               Pricing

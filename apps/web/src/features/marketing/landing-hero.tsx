@@ -20,7 +20,7 @@ export function LandingHero() {
               transition={{ duration: 0.5, ease }}
               className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-primary"
             >
-              Cognitive OS
+              For students who want real progress
             </motion.p>
             <motion.h1
               initial={{ opacity: 0, y: 16 }}
@@ -36,8 +36,8 @@ export function LandingHero() {
               transition={{ duration: 0.55, delay: 0.12, ease }}
               className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground sm:text-xl"
             >
-              MindOrbit is the Cognitive Operating System that identifies your knowledge gaps,
-              maps what to learn, and trains you to master anything—fast.
+              See where you are weak, what to study next, and how to lock it in—so you spend
+              time on the gaps that actually raise your grades and exam scores.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 16 }}

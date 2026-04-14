@@ -10,15 +10,15 @@ import {
 import { Check, Sparkles } from "lucide-react";
 
 const FREE_MARKETING = [
-  "Diagnostic",
-  "Limited nodes",
-  "Limited sessions",
+  "Skill diagnostic",
+  "Explore the map (limited topics)",
+  "Practice sessions (limited)",
 ] as const;
 
 const PRO_MARKETING = [
-  "Full mastery map",
-  "Unlimited training",
-  "Advanced insights",
+  "Full mastery map across your subject",
+  "Unlimited training missions",
+  "Deeper progress and insights",
 ] as const;
 
 export function LandingPricingSection({ proPrice }: { proPrice: number }) {
@@ -36,7 +36,7 @@ export function LandingPricingSection({ proPrice }: { proPrice: number }) {
             Simple. Transparent.
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Start with the diagnostic—upgrade when you want the full system.
+            Try the diagnostic free. Upgrade when you are ready for the full path and unlimited practice.
           </p>
         </div>
 
