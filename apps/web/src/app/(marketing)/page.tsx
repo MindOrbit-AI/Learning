@@ -16,9 +16,20 @@ import { ScrollReveal } from "@/features/marketing/scroll-reveal";
 import { ProductDemoSection } from "@/features/marketing/product-demo-section";
 
 export const metadata: Metadata = {
-  title: "MindOrbit — Build a Mind That Compounds",
+  title: { absolute: "MindOrbit — Build a Mind That Compounds" },
   description:
     "Pinpoint what you are missing, follow a clear path, and practice what matters—with diagnostics, a mastery map, and guided review.",
+  openGraph: {
+    title: "MindOrbit — Build a Mind That Compounds",
+    description:
+      "Pinpoint what you are missing, follow a clear path, and practice what matters—with diagnostics, a mastery map, and guided review.",
+    url: "/",
+  },
+  twitter: {
+    title: "MindOrbit — Build a Mind That Compounds",
+    description:
+      "Pinpoint what you are missing, follow a clear path, and practice what matters—with diagnostics, a mastery map, and guided review.",
+  },
 };
 
 const PAIN_POINTS = [
