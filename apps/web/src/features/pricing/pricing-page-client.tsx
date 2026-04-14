@@ -5,23 +5,11 @@ import Link from "next/link";
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@mindorbit/ui";
 import { Check, Loader2, Sparkles } from "lucide-react";
 import { PlanBadge } from "@/features/feature-gates/plan-badge";
-
-const FREE_FEATURES = [
-  "3 diagnostics per month",
-  "Limited missions (10/month)",
-  "Limited mastery map",
-  "2 clusters per subject",
-  "Up to 3 subjects",
-];
-
-const PRO_FEATURES = [
-  "Unlimited diagnostics",
-  "Full mastery map",
-  "Unlimited missions",
-  "All clusters per subject",
-  "Advanced insights",
-  "Unlimited subject creation",
-];
+import {
+  FREE_FEATURES,
+  PRO_FEATURES,
+  PRICING_COMPARISON_ROWS,
+} from "@/features/pricing/pricing-data";
 
 export function PricingPageClient({
   currentPlan,
@@ -146,36 +134,13 @@ export function PricingPageClient({
             </tr>
           </thead>
           <tbody>
-            <tr className="border-b">
-              <td className="py-2">Diagnostics</td>
-              <td className="text-center">3/month</td>
-              <td className="text-center">Unlimited</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2">Missions</td>
-              <td className="text-center">10/month</td>
-              <td className="text-center">Unlimited</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2">Clusters per subject</td>
-              <td className="text-center">2</td>
-              <td className="text-center">All</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2">Mastery map</td>
-              <td className="text-center">Limited</td>
-              <td className="text-center">Full</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2">Subject creation</td>
-              <td className="text-center">3 total</td>
-              <td className="text-center">Unlimited</td>
-            </tr>
-            <tr>
-              <td className="py-2">Advanced insights</td>
-              <td className="text-center">—</td>
-              <td className="text-center">✓</td>
-            </tr>
+            {PRICING_COMPARISON_ROWS.map((row) => (
+              <tr key={row.feature} className="border-b last:border-0">
+                <td className="py-2">{row.feature}</td>
+                <td className="text-center">{row.free}</td>
+                <td className="text-center">{row.pro}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
