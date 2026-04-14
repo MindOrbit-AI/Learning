@@ -20,6 +20,7 @@ export default async function BillingSettingsPage({
       currentPeriodEnd: true,
       canceledAt: true,
       billingSubscriptionId: true,
+      billingCustomerId: true,
     },
   });
 
@@ -32,6 +33,7 @@ export default async function BillingSettingsPage({
       currentPeriodEnd={state?.currentPeriodEnd?.toISOString() ?? null}
       canceledAt={user?.canceledAt?.toISOString() ?? null}
       hasSubscriptionId={!!user?.billingSubscriptionId}
+      hasBillingCustomer={!!user?.billingCustomerId}
       searchParams={params}
     />
   );

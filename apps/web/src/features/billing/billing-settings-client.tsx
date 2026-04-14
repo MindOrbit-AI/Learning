@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@mindorbit/ui";
 import { CreditCard, Loader2, Sparkles, Calendar, XCircle } from "lucide-react";
+import { PRO_PRICE_MONTHLY } from "@mindorbit/lib";
 import { PlanBadge } from "@/features/feature-gates/plan-badge";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -21,6 +22,7 @@ export function BillingSettingsClient({
   currentPeriodEnd,
   canceledAt,
   hasSubscriptionId,
+  hasBillingCustomer,
   searchParams,
 }: {
   planTier: "FREE" | "PRO";
@@ -28,12 +30,18 @@ export function BillingSettingsClient({
   currentPeriodEnd: string | null;
   canceledAt: string | null;
   hasSubscriptionId: boolean;
+  hasBillingCustomer: boolean;
   searchParams: Record<string, string | string[] | undefined>;
 }) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const upgraded = searchParams?.upgraded === "1";
 
+  const canUsePortal = hasBillingCustomer;
+  const showProActions = planTier === "PRO" && (hasSubscriptionId || canUsePortal);
+
   const handleManageBilling = async () => {
+    setError(null);
     setLoading(true);
     try {
       const res = await fetch("/api/billing/portal", { method: "POST" });
@@ -42,12 +50,14 @@ export function BillingSettingsClient({
       if (data.url) window.location.href = data.url;
     } catch (e) {
       console.error(e);
+      setError(e instanceof Error ? e.message : "Could not open billing portal");
       setLoading(false);
     }
   };
 
   const handleCancel = async () => {
     if (!confirm("Are you sure you want to cancel your subscription?")) return;
+    setError(null);
     setLoading(true);
     try {
       const res = await fetch("/api/billing/cancel", { method: "POST" });
@@ -58,6 +68,7 @@ export function BillingSettingsClient({
       window.location.reload();
     } catch (e) {
       console.error(e);
+      setError(e instanceof Error ? e.message : "Could not cancel subscription");
       setLoading(false);
     }
   };
@@ -75,6 +86,12 @@ export function BillingSettingsClient({
         </div>
       )}
 
+      {error && (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {error}
+        </div>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -88,6 +105,14 @@ export function BillingSettingsClient({
             <span className="text-muted-foreground">Plan</span>
             <PlanBadge plan={planTier} />
           </div>
+          {planTier === "PRO" && (
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Price</span>
+              <span className="font-medium">
+                ${PRO_PRICE_MONTHLY.toFixed(2)}/month
+              </span>
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Status</span>
             <span className="font-medium">{STATUS_LABELS[subscriptionStatus] ?? subscriptionStatus}</span>
@@ -108,7 +133,7 @@ export function BillingSettingsClient({
             </div>
           )}
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex flex-wrap gap-3 pt-4">
             {planTier === "FREE" && (
               <Button asChild>
                 <Link href="/pricing" className="gap-2">
@@ -117,13 +142,15 @@ export function BillingSettingsClient({
                 </Link>
               </Button>
             )}
-            {planTier === "PRO" && hasSubscriptionId && (
+            {showProActions && (
               <>
-                <Button onClick={handleManageBilling} disabled={loading} className="gap-2">
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  Manage billing
-                </Button>
-                {subscriptionStatus === "ACTIVE" && !canceledAt && (
+                {canUsePortal && (
+                  <Button onClick={handleManageBilling} disabled={loading} className="gap-2">
+                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                    Manage billing
+                  </Button>
+                )}
+                {hasSubscriptionId && subscriptionStatus === "ACTIVE" && !canceledAt && (
                   <Button variant="outline" onClick={handleCancel} disabled={loading}>
                     Cancel plan
                   </Button>

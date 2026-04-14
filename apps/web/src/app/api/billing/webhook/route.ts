@@ -13,6 +13,9 @@ export async function POST(req: Request) {
   const provider = billingService.getProvider();
   const event = await provider.handleWebhook(payload, signature);
   if (!event) {
+    if (signature) {
+      return NextResponse.json({ error: "Invalid webhook signature" }, { status: 400 });
+    }
     return NextResponse.json({ received: true });
   }
 

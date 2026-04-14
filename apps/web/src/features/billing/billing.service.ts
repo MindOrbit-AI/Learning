@@ -52,10 +52,12 @@ export const billingService = {
     }
 
     const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+    // Stripe replaces {CHECKOUT_SESSION_ID} on redirect; mock provider overwrites session_id in the URL
+    const successUrl = `${baseUrl}/api/billing/success?user_id=${encodeURIComponent(userId)}&session_id={CHECKOUT_SESSION_ID}`;
     const result = await billingProvider.createCheckoutSession({
       userId,
       customerId,
-      successUrl: `${baseUrl}/api/billing/success?user_id=${userId}`,
+      successUrl,
       cancelUrl: `${baseUrl}/pricing`,
       metadata: { userId },
     });
