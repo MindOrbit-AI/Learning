@@ -110,7 +110,7 @@ export class StripeBillingProvider implements BillingProvider {
     return {
       type: event.type,
       id: event.id,
-      data: event.data as Record<string, unknown>,
+      data: event.data as unknown as Record<string, unknown>,
     };
   }
 

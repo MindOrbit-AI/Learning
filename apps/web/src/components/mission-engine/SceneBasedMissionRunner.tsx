@@ -261,8 +261,7 @@ export function SceneBasedMissionRunner({
     return (
       <CompletionSummaryCard
         xpEarned={xpReward}
-        correctCount={correctCount}
-        totalCount={total}
+        practiceSummary={{ correct: correctCount, total }}
         onBack={() => router.push("/missions")}
       />
     );

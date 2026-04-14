@@ -30,7 +30,10 @@ export default async function SubjectsPage() {
       ? await prisma.subject.findMany({
           where: {
             status: "published",
-            createdById: { not: null, not: userId },
+            AND: [
+              { createdById: { not: null } },
+              { createdById: { not: userId } },
+            ],
             libraryAdds: { none: { userId } },
           },
           include: cardInclude,
