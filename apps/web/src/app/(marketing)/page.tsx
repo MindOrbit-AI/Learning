@@ -60,7 +60,7 @@ export default function LandingPage() {
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15">
               <Brain className="h-5 w-5 text-primary" />
             </span>
-            MindOrbit Learn
+            MindOrbit
           </Link>
           <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
             <a href="#features" className="transition-colors hover:text-foreground">
