@@ -21,6 +21,34 @@ export const SUBJECTS = {
   satMath: { slug: "sat-math", title: "SAT Math", icon: "📊", color: "#EC4899" },
 } as const;
 
+export type SubjectKey = keyof typeof SUBJECTS;
+
+export function isSubjectKey(k: string): k is SubjectKey {
+  return Object.prototype.hasOwnProperty.call(SUBJECTS, k);
+}
+
+/** Slugs stored on `Subject` rows — use when resolving onboarding keys to the database. */
+export function subjectSlugForKey(key: SubjectKey): string {
+  return SUBJECTS[key].slug;
+}
+
+/** Subject keys offered in onboarding for each high-school-style grade (typical US sequencing). */
+const ONBOARDING_SUBJECTS_BY_GRADE: Record<string, readonly SubjectKey[]> = {
+  "9": ["algebra", "geometry", "biology", "worldHistory"],
+  "10": ["algebra", "geometry", "biology", "chemistry", "worldHistory"],
+  "11": ["algebra", "geometry", "biology", "chemistry", "worldHistory", "satMath"],
+  "12": ["algebra", "geometry", "biology", "chemistry", "worldHistory", "satMath"],
+  College: ["algebra", "geometry", "biology", "chemistry", "worldHistory", "satMath"],
+  Other: ["algebra", "geometry", "biology", "chemistry", "worldHistory", "satMath"],
+};
+
+/** Returns which catalog subjects to show for onboarding step 3 for the given grade level. */
+export function subjectKeysForGradeLevel(gradeLevel: string): SubjectKey[] {
+  const keys = ONBOARDING_SUBJECTS_BY_GRADE[gradeLevel];
+  if (keys) return [...keys];
+  return Object.keys(SUBJECTS) as SubjectKey[];
+}
+
 export const NODE_STATE_COLORS = {
   mastered: "#22C55E",
   weak: "#F59E0B",

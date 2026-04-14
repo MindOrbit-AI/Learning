@@ -160,6 +160,7 @@ model User {
   bio                    String?
   gradeLevel             String?
   studyGoal              String?
+  targetExams            String[]           @default([])
   streakCount              Int                @default(0)
   bestMissionStreak        Int                @default(0)
   lastMissionCompletedAt   DateTime?

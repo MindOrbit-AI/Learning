@@ -11,7 +11,7 @@ export function CommunityFilters() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
 
   useEffect(() => {
-    fetch("/api/subjects")
+    fetch("/api/subjects?scope=published")
       .then((r) => r.json())
       .then((data: { subjects?: Subject[] }) => setSubjects(data.subjects ?? []))
       .catch(() => setSubjects([]));

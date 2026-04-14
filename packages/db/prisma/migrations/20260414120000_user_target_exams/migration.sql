@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN "targetExams" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[];

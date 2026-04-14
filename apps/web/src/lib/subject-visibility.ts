@@ -6,23 +6,18 @@ export type SubjectVisibilityFields = {
 };
 
 /**
- * Subjects listed for a user:
- * - Platform subjects (createdById null)
+ * Subjects in the signed-in user's library (lists, dashboard, search scope, etc.):
  * - Subjects they created
- * - Published subjects from others that they added to their library
+ * - Subjects they added (onboarding favorites, catalog, or community via UserSubjectAdd)
+ *
+ * Guests have no library; queries use an empty id list so nothing matches.
  */
 export function subjectVisibilityWhere(userId: string | undefined): Prisma.SubjectWhereInput {
   if (!userId) {
-    return { createdById: null };
+    return { id: { in: [] } };
   }
   return {
-    OR: [
-      { createdById: null },
-      { createdById: userId },
-      {
-        libraryAdds: { some: { userId } },
-      },
-    ],
+    OR: [{ createdById: userId }, { libraryAdds: { some: { userId } } }],
   };
 }
 

@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@mindorbit/ui";
-import { SUBJECTS } from "@mindorbit/lib";
+import { SUBJECTS, subjectKeysForGradeLevel } from "@mindorbit/lib";
 import { Brain, ChevronRight } from "lucide-react";
 
 const step1Schema = z.object({
@@ -41,6 +41,13 @@ export default function OnboardingPage() {
   const [subjects, setSubjects] = useState<string[]>([]);
   const [targetExamsSelected, setTargetExamsSelected] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const subjectKeysForStep = subjectKeysForGradeLevel(gradeLevel);
+
+  useEffect(() => {
+    const allowed = new Set<string>(subjectKeysForGradeLevel(gradeLevel));
+    setSubjects((prev) => prev.filter((k) => allowed.has(k)));
+  }, [gradeLevel]);
 
   async function handleComplete() {
     setLoading(true);
@@ -142,27 +149,30 @@ export default function OnboardingPage() {
 
             {step === 3 && (
               <div className="grid gap-3 sm:grid-cols-2">
-                {Object.entries(SUBJECTS).map(([key, s]) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => {
-                      setSubjects((prev) =>
-                        prev.includes(key)
-                          ? prev.filter((x) => x !== key)
-                          : [...prev, key]
-                      );
-                    }}
-                    className={`flex items-center gap-3 rounded-xl border p-4 text-left transition-colors ${
-                      subjects.includes(key)
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "hover:bg-muted"
-                    }`}
-                  >
-                    <span className="text-2xl">{s.icon}</span>
-                    <span>{s.title}</span>
-                  </button>
-                ))}
+                {subjectKeysForStep.map((key) => {
+                  const s = SUBJECTS[key];
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => {
+                        setSubjects((prev) =>
+                          prev.includes(key)
+                            ? prev.filter((x) => x !== key)
+                            : [...prev, key]
+                        );
+                      }}
+                      className={`flex items-center gap-3 rounded-xl border p-4 text-left transition-colors ${
+                        subjects.includes(key)
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "hover:bg-muted"
+                      }`}
+                    >
+                      <span className="text-2xl">{s.icon}</span>
+                      <span>{s.title}</span>
+                    </button>
+                  );
+                })}
               </div>
             )}
 
