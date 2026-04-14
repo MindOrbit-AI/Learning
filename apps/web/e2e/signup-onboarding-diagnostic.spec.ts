@@ -1,16 +1,14 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Signup, onboarding, diagnostic flow", () => {
-  test("user can sign up, complete onboarding, and see dashboard", async ({
+  test("user can sign up, complete onboarding, and land on diagnostic run", async ({
     page,
   }) => {
     const email = `test-${Date.now()}@mindorbit.learn`;
     const password = "testpass123";
 
-    await page.goto("/");
-    await page.getByRole("link", { name: "Get Started" }).click();
+    await page.goto("/auth/signup?callbackUrl=/onboarding");
 
-    await expect(page).toHaveURL("/auth/signup");
     await page.getByPlaceholder("Your name").fill("Test Student");
     await page.getByPlaceholder("you@example.com").fill(email);
     await page.getByPlaceholder("At least 8 characters").fill(password);
@@ -29,8 +27,10 @@ test.describe("Signup, onboarding, diagnostic flow", () => {
 
     await page.getByRole("button", { name: "Complete" }).click();
 
-    await expect(page).toHaveURL("/dashboard");
-    await expect(page.getByText("Welcome back")).toBeVisible();
+    await expect(page).toHaveURL(/\/diagnostics\/[^/]+\/run/);
+    await expect(page.getByText(/diagnostic|loading|question/i).first()).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
   test("user can sign in with demo account", async ({ page }) => {

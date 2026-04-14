@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input } from "@mindorbit/ui";
 import { Brain } from "lucide-react";
+import { safeInternalPath } from "@/lib/safe-internal-path";
 
 function SignInForm() {
   const searchParams = useSearchParams();
@@ -28,7 +29,10 @@ function SignInForm() {
         setError("Invalid email or password");
         return;
       }
-      const callbackUrl = searchParams?.get("callbackUrl") ?? "/dashboard";
+      const callbackUrl = safeInternalPath(
+        searchParams?.get("callbackUrl"),
+        "/dashboard"
+      );
       // Full navigation avoids soft-navigation edge cases (e.g. stuck transition layers) after session is set.
       window.location.assign(callbackUrl);
     } catch {
@@ -84,7 +88,14 @@ function SignInForm() {
             Demo: demo@mindorbit.learn / demo1234
           </p>
           <p className="mt-2 text-center text-sm">
-            <Link href="/auth/signup" className="text-primary hover:underline">
+            <Link
+              href={
+                searchParams?.toString()
+                  ? `/auth/signup?${searchParams.toString()}`
+                  : "/auth/signup"
+              }
+              className="text-primary hover:underline"
+            >
               Don&apos;t have an account? Sign up
             </Link>
           </p>

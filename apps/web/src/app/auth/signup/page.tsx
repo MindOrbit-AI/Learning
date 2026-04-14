@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input } from "@mindorbit/ui";
 import { Brain } from "lucide-react";
+import { safeInternalPath } from "@/lib/safe-internal-path";
 
-export default function SignUpPage() {
+function SignUpForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,7 +41,8 @@ export default function SignUpPage() {
         setError("Account created but sign in failed. Try signing in.");
         return;
       }
-      router.push("/onboarding");
+      const next = safeInternalPath(searchParams?.get("callbackUrl"), "/onboarding");
+      router.push(next);
       router.refresh();
     } catch {
       setError("Something went wrong");
@@ -101,12 +104,27 @@ export default function SignUpPage() {
             </Button>
           </form>
           <p className="mt-4 text-center text-sm">
-            <Link href="/auth/signin" className="text-primary hover:underline">
+            <Link
+              href={
+                searchParams?.toString()
+                  ? `/auth/signin?${searchParams.toString()}`
+                  : "/auth/signin"
+              }
+              className="text-primary hover:underline"
+            >
               Already have an account? Sign in
             </Link>
           </p>
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
+      <SignUpForm />
+    </Suspense>
   );
 }
