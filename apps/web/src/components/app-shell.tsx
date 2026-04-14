@@ -51,7 +51,7 @@ export function AppShell({
     planTier?: "FREE" | "PRO";
   };
 }) {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 

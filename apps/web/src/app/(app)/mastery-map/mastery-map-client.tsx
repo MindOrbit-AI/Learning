@@ -115,17 +115,17 @@ async function fetchMapData(subjectId?: string, userId?: string) {
 
 export function MasteryMapClient() {
   const searchParams = useSearchParams();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
   const router = useRouter();
-  const subjectId = searchParams.get("subject");
-  const selectedNodeId = searchParams.get("node");
+  const subjectId = searchParams?.get("subject");
+  const selectedNodeId = searchParams?.get("node");
   const [viewMode, setViewMode] = useState<"graph" | "list">("graph");
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [nodeDetails, setNodeDetails] = useState<Record<string, unknown>>({});
   const [lockedNodeIds, setLockedNodeIds] = useState<Set<string>>(new Set());
   const [showLockedOverlay, setShowLockedOverlay] = useState(false);
-  const [selectedNode, setSelectedNode] = useState<string | null>(selectedNodeId);
+  const [selectedNode, setSelectedNode] = useState<string | null>(selectedNodeId ?? null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -146,12 +146,12 @@ export function MasteryMapClient() {
   }, [subjectId, setNodes, setEdges]);
 
   useEffect(() => {
-    setSelectedNode(selectedNodeId);
+    setSelectedNode(selectedNodeId ?? null);
   }, [selectedNodeId]);
 
   const goToNode = useCallback(
     (nodeId: string) => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams?.toString());
       params.set("node", nodeId);
       router.push(`${pathname}?${params.toString()}`);
     },

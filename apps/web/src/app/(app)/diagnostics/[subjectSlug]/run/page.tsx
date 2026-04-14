@@ -9,7 +9,8 @@ import { Lock, Sparkles } from "lucide-react";
 export default function DiagnosticRunPage() {
   const router = useRouter();
   const params = useParams();
-  const subjectSlug = params.subjectSlug as string;
+  const subjectSlug =
+    typeof params?.subjectSlug === "string" ? params.subjectSlug : "";
   const [limitError, setLimitError] = useState<string | null>(null);
   const [questions, setQuestions] = useState<
     Array<{
@@ -27,6 +28,7 @@ export default function DiagnosticRunPage() {
   const [unavailableError, setUnavailableError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!subjectSlug) return;
     async function init() {
       const res = await fetch(`/api/diagnostics/${subjectSlug}/start`, {
         method: "POST",
@@ -59,7 +61,7 @@ export default function DiagnosticRunPage() {
   }, [subjectSlug, router]);
 
   async function handleSubmit() {
-    if (!attemptId) return;
+    if (!attemptId || !subjectSlug) return;
     const res = await fetch(`/api/diagnostics/${subjectSlug}/submit`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -77,6 +79,14 @@ export default function DiagnosticRunPage() {
     }
     const data = await res.json();
     router.push(`/diagnostics/${subjectSlug}/results?attemptId=${data.attemptId}`);
+  }
+
+  if (!subjectSlug) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <p className="text-muted-foreground">Loading diagnostic...</p>
+      </div>
+    );
   }
 
   if (unavailableError) {

@@ -18,7 +18,7 @@ export function CommunityPagination({
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   function goToPage(page: number) {
-    const next = new URLSearchParams(searchParams);
+    const next = new URLSearchParams(searchParams?.toString());
     if (page <= 1) next.delete("page");
     else next.set("page", String(page));
     router.push(`/community?${next}`);

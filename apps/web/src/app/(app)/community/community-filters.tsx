@@ -18,7 +18,7 @@ export function CommunityFilters() {
   }, []);
 
   function setFilter(key: string, value: string) {
-    const next = new URLSearchParams(searchParams);
+    const next = new URLSearchParams(searchParams?.toString());
     if (value) next.set(key, value);
     else next.delete(key);
     next.delete("page"); // Reset to page 1 when filters change
@@ -29,7 +29,7 @@ export function CommunityFilters() {
     <div className="flex flex-wrap gap-2">
       <select
         className="rounded-lg border bg-background px-3 py-2 text-sm"
-        value={searchParams.get("subject") ?? ""}
+        value={searchParams?.get("subject") ?? ""}
         onChange={(e) => setFilter("subject", e.target.value)}
       >
         <option value="">All subjects</option>
@@ -43,7 +43,7 @@ export function CommunityFilters() {
       </select>
       <select
         className="rounded-lg border bg-background px-3 py-2 text-sm"
-        value={searchParams.get("sort") ?? "recent"}
+        value={searchParams?.get("sort") ?? "recent"}
         onChange={(e) => setFilter("sort", e.target.value)}
       >
         <option value="recent">Recent</option>

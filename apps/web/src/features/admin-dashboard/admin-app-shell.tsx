@@ -42,7 +42,7 @@ export function AdminAppShell({
   children: React.ReactNode;
   user: { id?: string; name?: string | null; email?: string | null; image?: string | null; role?: string };
 }) {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
 
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">

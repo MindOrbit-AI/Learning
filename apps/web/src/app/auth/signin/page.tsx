@@ -28,7 +28,7 @@ function SignInForm() {
         setError("Invalid email or password");
         return;
       }
-      const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
+      const callbackUrl = searchParams?.get("callbackUrl") ?? "/dashboard";
       // Full navigation avoids soft-navigation edge cases (e.g. stuck transition layers) after session is set.
       window.location.assign(callbackUrl);
     } catch {

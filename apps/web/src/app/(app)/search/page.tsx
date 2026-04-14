@@ -8,7 +8,7 @@ import { Search, BookOpen, MapPin, FileText, User } from "lucide-react";
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
-  const q = searchParams.get("q") ?? "";
+  const q = searchParams?.get("q") ?? "";
   const [query, setQuery] = useState(q);
   const [results, setResults] = useState<{
     subjects: Array<{ id: string; title: string; slug: string }>;
