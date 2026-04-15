@@ -52,7 +52,7 @@ function SignInForm() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Sign in</CardTitle>
-          <CardDescription>Enter your credentials to continue</CardDescription>
+          <CardDescription>Sign in to continue</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -84,13 +84,7 @@ function SignInForm() {
               {loading ? "Signing in..." : "Sign in"}
             </Button>
           </form>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            Demo: demo@mindorbit.learn / demo1234
-          </p>
-          <p className="mt-1 text-center text-sm text-muted-foreground">
-            Super admin (seed): superadmin@mindorbit.learn / superadmin1234
-          </p>
-          <p className="mt-2 text-center text-sm">
+          <p className="mt-4 text-center text-sm">
             <Link
               href={
                 searchParams?.toString()
