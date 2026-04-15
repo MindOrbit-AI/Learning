@@ -60,7 +60,7 @@ export function LandingPricingSection({ proPrice }: { proPrice: number }) {
                 ))}
               </ul>
               <Button asChild variant="outline" className="w-full border-white/15 bg-transparent">
-                <Link href="/onboarding">Start Free Diagnostic</Link>
+                <Link href="/auth/signup">Start Free Diagnostic</Link>
               </Button>
             </CardContent>
           </Card>

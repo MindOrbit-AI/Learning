@@ -110,7 +110,7 @@ export default function LandingPage() {
                 Sign in
               </Button>
             </Link>
-            <Link href="/onboarding">
+            <Link href="/auth/signup">
               <Button size="sm" className="gap-1.5">
                 Start Free Diagnostic
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -244,7 +244,7 @@ export default function LandingPage() {
                 Start mastering what matters.
               </h2>
               <div className="relative mt-10">
-                <Link href="/onboarding">
+                <Link href="/auth/signup">
                   <Button size="lg" className="h-12 min-w-[220px] gap-2 px-8">
                     Start Free Diagnostic
                     <ArrowRight className="h-4 w-4" />

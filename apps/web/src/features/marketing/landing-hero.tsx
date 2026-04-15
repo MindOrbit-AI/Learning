@@ -45,7 +45,7 @@ export function LandingHero() {
               transition={{ duration: 0.55, delay: 0.18, ease }}
               className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center"
             >
-              <Link href="/onboarding" className="sm:flex-initial">
+              <Link href="/auth/signup" className="sm:flex-initial">
                 <Button size="lg" className="h-12 w-full gap-2 px-8 sm:w-auto">
                   Start Free Diagnostic
                   <ArrowRight className="h-4 w-4" />
