@@ -4,7 +4,7 @@ export default function MarketingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="dark min-h-screen selection:bg-primary/30 selection:text-primary-foreground">
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary/25 selection:text-primary-foreground">
       {children}
     </div>
   );
