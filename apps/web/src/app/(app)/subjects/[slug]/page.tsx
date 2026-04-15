@@ -6,7 +6,7 @@ import { canViewSubject } from "@/lib/subject-visibility";
 import { AddSubjectToLibraryButton } from "@/features/subjects/add-subject-to-library-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button } from "@mindorbit/ui";
 import { Play, Map, ChevronRight, Lock } from "lucide-react";
-import { PLAN_LIMITS } from "@mindorbit/lib";
+import { PLAN_LIMITS, effectivePlanTier } from "@mindorbit/lib";
 export default async function SubjectDetailPage({
   params,
 }: {
@@ -60,10 +60,13 @@ export default async function SubjectDetailPage({
   const user = session?.user?.id
     ? await prisma.user.findUnique({
         where: { id: session.user.id },
-        select: { planTier: true },
+        select: { planTier: true, bonusProUntil: true },
       })
     : null;
-  const planTier = user?.planTier ?? "FREE";
+  const planTier = effectivePlanTier({
+    planTier: user?.planTier ?? "FREE",
+    bonusProUntil: user?.bonusProUntil,
+  });
   const maxClusters = PLAN_LIMITS[planTier].maxClustersVisible;
   const visibleClusters =
     maxClusters != null ? subject.clusters.slice(0, maxClusters) : subject.clusters;

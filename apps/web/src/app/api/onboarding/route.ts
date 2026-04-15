@@ -9,6 +9,7 @@ import {
   subjectSlugForKey,
   type SubjectKey,
 } from "@mindorbit/lib";
+import { AnalyticsService, EVENT_TYPES } from "@/services/analytics-service";
 
 /** Matches onboarding step 4 options in `apps/web/src/app/onboarding/page.tsx`. */
 const TARGET_EXAM_OPTIONS = new Set([
@@ -126,6 +127,8 @@ export async function POST(req: Request) {
         skipDuplicates: true,
       });
     });
+
+    await AnalyticsService.track(userId, EVENT_TYPES.funnel_onboarding_completed, {});
 
     return NextResponse.json({ ok: true });
   } catch (e) {

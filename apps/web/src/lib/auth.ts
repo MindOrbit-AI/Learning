@@ -22,8 +22,9 @@ export const authOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
-        const user = await prisma.user.findUnique({
-          where: { email: String(credentials.email) },
+        const emailInput = String(credentials.email).trim();
+        const user = await prisma.user.findFirst({
+          where: { email: { equals: emailInput, mode: "insensitive" } },
           select: {
             id: true,
             email: true,

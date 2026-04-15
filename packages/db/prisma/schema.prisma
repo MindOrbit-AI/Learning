@@ -150,6 +150,11 @@ enum MistakeCategory {
   terminology_confusion
 }
 
+enum ReferralStatus {
+  pending
+  qualified
+}
+
 model User {
   id                     String             @id @default(cuid())
   name                   String?
@@ -175,6 +180,10 @@ model User {
   currentPeriodStart     DateTime?
   currentPeriodEnd       DateTime?
   canceledAt             DateTime?
+  /// Short shareable code for referrals (set on account creation).
+  referralCode           String?            @unique
+  /// Bonus Pro access from referrals / rewards (stackable window).
+  bonusProUntil          DateTime?
   createdAt              DateTime           @default(now())
   updatedAt              DateTime           @updatedAt
   accounts               Account[]
@@ -193,9 +202,38 @@ model User {
   featureUsages          FeatureUsage[]
   billingEvents          BillingEvent[]
   subjectLibraryAdds     UserSubjectAdd[]
+  referrerReferrals      Referral[]         @relation("ReferralReferrer")
+  refereeReferral        Referral?          @relation("ReferralReferee")
+  masteryShareTokens     MasteryShareToken[]
 
   @@index([planTier])
   @@index([subscriptionStatus])
+}
+
+/// Invited user (referee) is unique — one referral row per invited account.
+model Referral {
+  id           String         @id @default(cuid())
+  referrerId   String
+  refereeId    String         @unique
+  status       ReferralStatus @default(pending)
+  createdAt    DateTime       @default(now())
+  qualifiedAt  DateTime?
+  referrer     User           @relation("ReferralReferrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referee      User           @relation("ReferralReferee", fields: [refereeId], references: [id], onDelete: Cascade)
+
+  @@index([referrerId])
+  @@index([status])
+}
+
+model MasteryShareToken {
+  id        String    @id @default(cuid())
+  userId    String
+  token     String    @unique
+  createdAt DateTime  @default(now())
+  expiresAt DateTime?
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Account {

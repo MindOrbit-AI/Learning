@@ -11,7 +11,7 @@ export async function GET() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { planTier: true },
+    select: { planTier: true, bonusProUntil: true },
   });
 
   if (!featureGateService.canAccessAdvancedInsights(user)) {

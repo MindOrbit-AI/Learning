@@ -3,7 +3,7 @@
  */
 
 import { prisma } from "@mindorbit/db";
-import { PLAN_LIMITS, getFeatureAccess, FEATURE_KEYS } from "@mindorbit/lib";
+import { PLAN_LIMITS, getFeatureAccess, FEATURE_KEYS, effectivePlanTier } from "@mindorbit/lib";
 import type { FeatureAccessKey } from "@mindorbit/lib";
 import { usageService } from "./usage.service";
 import type { PlanTier } from "@prisma/client";
@@ -21,9 +21,12 @@ export const featureGateService = {
   ): Promise<FeatureGateResult> {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { planTier: true },
+      select: { planTier: true, bonusProUntil: true },
     });
-    const planTier = (user?.planTier ?? "FREE") as PlanTier;
+    const planTier = effectivePlanTier({
+      planTier: (user?.planTier ?? "FREE") as PlanTier,
+      bonusProUntil: user?.bonusProUntil,
+    }) as PlanTier;
     const access = getFeatureAccess(planTier, featureKey);
 
     if (!access.allowed) {
@@ -75,23 +78,31 @@ export const featureGateService = {
     return this.canAccessFeature(userId, "diagnostic");
   },
 
-  canCreateSubject(user: { planTier: PlanTier } | null): boolean {
+  canCreateSubject(user: { planTier: PlanTier; bonusProUntil?: Date | null } | null): boolean {
     if (!user) return false;
-    return user.planTier === "PRO" || PLAN_LIMITS.FREE.subjectCreationAllowed;
+    const tier = effectivePlanTier({
+      planTier: user.planTier,
+      bonusProUntil: user.bonusProUntil,
+    });
+    return tier === "PRO" || PLAN_LIMITS.FREE.subjectCreationAllowed;
   },
 
   async canStartMission(userId: string): Promise<FeatureGateResult> {
     return this.canAccessFeature(userId, "missions");
   },
 
-  canAccessAdvancedInsights(user: { planTier: PlanTier } | null): boolean {
+  canAccessAdvancedInsights(user: { planTier: PlanTier; bonusProUntil?: Date | null } | null): boolean {
     if (!user) return false;
-    return user.planTier === "PRO";
+    return (
+      effectivePlanTier({ planTier: user.planTier, bonusProUntil: user.bonusProUntil }) === "PRO"
+    );
   },
 
-  getMasteryMapAccessLevel(user: { planTier: PlanTier } | null): "limited" | "full" {
+  getMasteryMapAccessLevel(user: { planTier: PlanTier; bonusProUntil?: Date | null } | null): "limited" | "full" {
     if (!user) return "limited";
-    return user.planTier === "PRO" ? "full" : "limited";
+    return effectivePlanTier({ planTier: user.planTier, bonusProUntil: user.bonusProUntil }) === "PRO"
+      ? "full"
+      : "limited";
   },
 
   async getUpgradeReason(userId: string, featureKey: FeatureAccessKey): Promise<string> {

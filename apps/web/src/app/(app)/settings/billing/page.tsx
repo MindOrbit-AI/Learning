@@ -21,6 +21,7 @@ export default async function BillingSettingsPage({
       canceledAt: true,
       billingSubscriptionId: true,
       billingCustomerId: true,
+      bonusProUntil: true,
     },
   });
 
@@ -34,6 +35,7 @@ export default async function BillingSettingsPage({
       canceledAt={user?.canceledAt?.toISOString() ?? null}
       hasSubscriptionId={!!user?.billingSubscriptionId}
       hasBillingCustomer={!!user?.billingCustomerId}
+      bonusProUntil={user?.bonusProUntil?.toISOString() ?? null}
       searchParams={params}
     />
   );

@@ -55,7 +55,7 @@ export async function GET(req: Request) {
   const user = session?.user?.id
     ? await prisma.user.findUnique({
         where: { id: session.user.id },
-        select: { planTier: true },
+        select: { planTier: true, bonusProUntil: true },
       })
     : null;
   const accessLevel = featureGateService.getMasteryMapAccessLevel(user);

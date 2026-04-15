@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "@/lib/auth";
 import { prisma } from "@mindorbit/db";
 import { PricingPageClient } from "@/features/pricing/pricing-page-client";
-import { PRO_PRICE_MONTHLY } from "@mindorbit/lib";
+import { PRO_PRICE_MONTHLY, effectivePlanTier } from "@mindorbit/lib";
 
 export default async function PricingPage() {
   const session = await getServerSession();
@@ -10,9 +10,12 @@ export default async function PricingPage() {
   if (session?.user?.id) {
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { planTier: true },
+      select: { planTier: true, bonusProUntil: true },
     });
-    planTier = (user?.planTier ?? "FREE") as "FREE" | "PRO";
+    planTier = effectivePlanTier({
+      planTier: (user?.planTier ?? "FREE") as "FREE" | "PRO",
+      bonusProUntil: user?.bonusProUntil,
+    });
   } else {
     redirect("/auth/signin?callbackUrl=/pricing");
   }

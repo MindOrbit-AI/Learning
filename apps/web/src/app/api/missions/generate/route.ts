@@ -6,6 +6,7 @@ import { featureGateService } from "@/features/billing/feature-gate.service";
 import { usageService } from "@/features/billing/usage.service";
 import { FEATURE_KEYS } from "@mindorbit/lib";
 import { AnalyticsService, EVENT_TYPES } from "@/services/analytics-service";
+import { subscriptionService } from "@/features/billing/subscription.service";
 import { z } from "zod";
 
 const schema = z.object({
@@ -46,11 +47,8 @@ export async function POST(req: Request) {
       sceneBased: sceneBased ?? false,
     });
 
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { planTier: true },
-    });
-    if (user?.planTier === "FREE") {
+    const effectiveTier = await subscriptionService.getEffectivePlanTier(session.user.id);
+    if (effectiveTier === "FREE") {
       const now = new Date();
       const start = new Date(now.getFullYear(), now.getMonth(), 1);
       const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);

@@ -19,6 +19,7 @@ import {
   CreditCard,
   Sparkles,
   BarChart3,
+  Rocket,
 } from "lucide-react";
 import { Button } from "@mindorbit/ui";
 import { useState } from "react";
@@ -31,6 +32,7 @@ const navItems = [
   { href: "/community", label: "Community", icon: Users },
   { href: "/review", label: "Review", icon: ClipboardList },
   { href: "/insights", label: "Insights", icon: BarChart3 },
+  { href: "/growth", label: "Growth", icon: Rocket },
   { href: "/profile", label: "Profile", icon: User },
   { href: "/settings/billing", label: "Billing", icon: CreditCard },
 ];

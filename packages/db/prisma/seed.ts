@@ -1076,6 +1076,7 @@ async function seed() {
       streakCount: 3,
       planTier: "FREE",
       subscriptionStatus: "INACTIVE",
+      referralCode: "DEMOINV1",
     },
     update: {},
   });
@@ -1091,6 +1092,7 @@ async function seed() {
       subscriptionStatus: "ACTIVE",
       currentPeriodStart: new Date(),
       currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      referralCode: "PROINV01",
     },
     update: { planTier: "PRO", subscriptionStatus: "ACTIVE" },
   });
@@ -1103,8 +1105,9 @@ async function seed() {
       passwordHash: adminPassword,
       role: "ADMIN",
       onboardingCompleted: true,
+      referralCode: "ADMINV01",
     },
-    update: { role: "ADMIN" },
+    update: { role: "ADMIN", passwordHash: adminPassword },
   });
 
   const superAdminUser = await prisma.user.upsert({
@@ -1115,8 +1118,9 @@ async function seed() {
       passwordHash: superAdminPassword,
       role: "SUPER_ADMIN",
       onboardingCompleted: true,
+      referralCode: "SUPERINV1",
     },
-    update: { role: "SUPER_ADMIN" },
+    update: { role: "SUPER_ADMIN", passwordHash: superAdminPassword },
   });
 
   const allSubjects = await prisma.subject.findMany({ select: { id: true } });

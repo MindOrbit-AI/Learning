@@ -23,6 +23,7 @@ export function BillingSettingsClient({
   canceledAt,
   hasSubscriptionId,
   hasBillingCustomer,
+  bonusProUntil,
   searchParams,
 }: {
   planTier: "FREE" | "PRO";
@@ -31,11 +32,15 @@ export function BillingSettingsClient({
   canceledAt: string | null;
   hasSubscriptionId: boolean;
   hasBillingCustomer: boolean;
+  bonusProUntil: string | null;
   searchParams: Record<string, string | string[] | undefined>;
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const upgraded = searchParams?.upgraded === "1";
+
+  const bonusProEnd = bonusProUntil ? new Date(bonusProUntil) : null;
+  const bonusProActive = bonusProEnd !== null && bonusProEnd > new Date();
 
   const canUsePortal = hasBillingCustomer;
   const showProActions = planTier === "PRO" && (hasSubscriptionId || canUsePortal);
@@ -83,6 +88,18 @@ export function BillingSettingsClient({
       {upgraded && (
         <div className="rounded-2xl border-2 border-primary bg-primary/10 p-4">
           <p className="font-semibold text-primary">Welcome to Pro! Your features are now unlocked.</p>
+        </div>
+      )}
+
+      {bonusProActive && bonusProEnd && (
+        <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4">
+          <p className="flex flex-wrap items-center gap-2 text-sm text-primary">
+            <Sparkles className="h-4 w-4 shrink-0" />
+            <span>
+              Bonus Pro active until {bonusProEnd.toLocaleString()}
+              {planTier === "FREE" && " (subscription billing is still Free)"}
+            </span>
+          </p>
         </div>
       )}
 

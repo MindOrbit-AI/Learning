@@ -12,6 +12,7 @@ import {
 } from "@mindorbit/ui";
 import { Lightbulb, Map, Target } from "lucide-react";
 import { DiagnosticPostPaywall } from "@/features/diagnostics/diagnostic-post-paywall";
+import { effectivePlanTier } from "@mindorbit/lib";
 
 function diagnosticInsight(
   subjectTitle: string,
@@ -50,7 +51,7 @@ export default async function DiagnosticResultsPage({
     }),
     prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { planTier: true },
+      select: { planTier: true, bonusProUntil: true },
     }),
   ]);
 
@@ -58,7 +59,10 @@ export default async function DiagnosticResultsPage({
     redirect(`/subjects/${subjectSlug}`);
   }
 
-  const planTier = user?.planTier ?? "FREE";
+  const planTier = effectivePlanTier({
+    planTier: user?.planTier ?? "FREE",
+    bonusProUntil: user?.bonusProUntil,
+  });
 
   const nodeStates = await prisma.userNodeState.findMany({
     where: {

@@ -87,6 +87,9 @@ function SignInForm() {
           <p className="mt-4 text-center text-sm text-muted-foreground">
             Demo: demo@mindorbit.learn / demo1234
           </p>
+          <p className="mt-1 text-center text-sm text-muted-foreground">
+            Super admin (seed): superadmin@mindorbit.learn / superadmin1234
+          </p>
           <p className="mt-2 text-center text-sm">
             <Link
               href={

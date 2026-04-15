@@ -3,6 +3,7 @@
  */
 
 import { prisma } from "@mindorbit/db";
+import { effectivePlanTier } from "@mindorbit/lib";
 import type { PlanTier, SubscriptionStatus } from "@prisma/client";
 
 export interface SubscriptionState {
@@ -13,12 +14,28 @@ export interface SubscriptionState {
 }
 
 export const subscriptionService = {
+  /**
+   * Raw DB plan (billing). Prefer `getEffectivePlanTier` for feature access.
+   */
   async getUserPlan(userId: string): Promise<PlanTier> {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { planTier: true },
     });
     return user?.planTier ?? "FREE";
+  },
+
+  /** Includes bonus Pro time from referrals and rewards. */
+  async getEffectivePlanTier(userId: string): Promise<PlanTier> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { planTier: true, bonusProUntil: true },
+    });
+    if (!user) return "FREE";
+    return effectivePlanTier({
+      planTier: user.planTier,
+      bonusProUntil: user.bonusProUntil,
+    });
   },
 
   async getSubscriptionState(userId: string): Promise<SubscriptionState | null> {

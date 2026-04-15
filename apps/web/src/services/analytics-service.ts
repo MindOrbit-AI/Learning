@@ -20,6 +20,10 @@ export const EVENT_TYPES = {
   subscription_canceled: "subscription_canceled",
   feature_limit_hit: "feature_limit_hit",
   paywall_viewed: "paywall_viewed",
+  referral_signup: "referral_signup",
+  referral_qualified: "referral_qualified",
+  mastery_report_shared: "mastery_report_shared",
+  funnel_onboarding_completed: "funnel_onboarding_completed",
 } as const;
 
 export type EventType = (typeof EVENT_TYPES)[keyof typeof EVENT_TYPES];

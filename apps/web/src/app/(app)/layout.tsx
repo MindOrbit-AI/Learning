@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "@/lib/auth";
 import { prisma } from "@mindorbit/db";
-import { levelFromXp } from "@mindorbit/lib";
+import { effectivePlanTier, levelFromXp } from "@mindorbit/lib";
 import { AppShell } from "@/components/app-shell";
 
 export default async function AppLayout({
@@ -24,6 +24,7 @@ export default async function AppLayout({
       streakCount: true,
       bestMissionStreak: true,
       planTier: true,
+      bonusProUntil: true,
       onboardingCompleted: true,
     },
   });
@@ -33,6 +34,10 @@ export default async function AppLayout({
   }
 
   const xp = user?.xp ?? 0;
+  const displayPlanTier = effectivePlanTier({
+    planTier: user?.planTier ?? "FREE",
+    bonusProUntil: user?.bonusProUntil,
+  });
 
   return (
     <AppShell
@@ -44,7 +49,7 @@ export default async function AppLayout({
         level: levelFromXp(xp),
         streakCount: user?.streakCount ?? 0,
         bestMissionStreak: user?.bestMissionStreak ?? 0,
-        planTier: user?.planTier ?? "FREE",
+        planTier: displayPlanTier,
       }}
     >
       {children}

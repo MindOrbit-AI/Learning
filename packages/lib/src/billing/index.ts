@@ -10,3 +10,5 @@ export type { PlanTierType, SubscriptionStatusType, FeatureKey } from "./billing
 
 export { getFeatureAccess } from "./feature-access";
 export type { FeatureAccessKey, FeatureAccessResult } from "./feature-access";
+
+export { effectivePlanTier } from "./effective-plan";

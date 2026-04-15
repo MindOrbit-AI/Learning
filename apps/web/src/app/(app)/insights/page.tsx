@@ -9,7 +9,7 @@ export default async function InsightsPage() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { planTier: true },
+    select: { planTier: true, bonusProUntil: true },
   });
 
   const hasAccess = featureGateService.canAccessAdvancedInsights(user);

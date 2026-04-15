@@ -4,6 +4,7 @@ import { getServerSession } from "@/lib/auth";
 import type { MistakeCategory } from "@mindorbit/types";
 import { missionsService } from "@/services/missions-service";
 import { completeSceneMission } from "@/services/mission-engine";
+import { maybeQualifyReferralAfterMission } from "@/services/referral-service";
 
 export async function POST(
   req: Request,
@@ -44,6 +45,8 @@ export async function POST(
       xpEarned = result.xpEarned;
       stars = result.stars;
     }
+    await maybeQualifyReferralAfterMission(session.user.id, id);
+
     revalidatePath("/missions");
     revalidatePath(`/missions/${id}`);
     return NextResponse.json({ ok: true, xpEarned, stars });
