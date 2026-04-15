@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   BarChart3,
   Brain,
+  Calculator,
   Check,
   Flag,
   Loader2,
@@ -24,7 +25,8 @@ type ChallengeKind =
   | "pronounce"
   | "blanks"
   | "speak"
-  | "picture";
+  | "picture"
+  | "math";
 
 const CHALLENGES: {
   id: ChallengeKind;
@@ -37,6 +39,7 @@ const CHALLENGES: {
   { id: "blanks", label: "Fill in the Blanks!", icon: BarChart3, iconClass: "text-violet-500" },
   { id: "speak", label: "Speak to Impress!", icon: UserRound, iconClass: "text-amber-600" },
   { id: "picture", label: "Spot That Picture!", icon: Palette, iconClass: "text-emerald-600" },
+  { id: "math", label: "Crunch Those Numbers!", icon: Calculator, iconClass: "text-sky-600" },
 ];
 
 /** One playable question (Phase A: static pools; one is chosen at random per round). */
@@ -558,6 +561,80 @@ const ROUNDS_BY_KIND: Record<ChallengeKind, PlayRoundContent[]> = {
       options: ["Volcano", "Mountain", "Wave", "Desert"],
       correct: "Mountain",
       successTail: "sharp eyes",
+    },
+  ],
+  math: [
+    {
+      title: "What is 7 + 8?",
+      options: ["13", "14", "15", "16"],
+      correct: "15",
+      successTail: "sharp math",
+    },
+    {
+      title: "What is 12 × 3?",
+      options: ["33", "36", "39", "42"],
+      correct: "36",
+      successTail: "sharp math",
+    },
+    {
+      title: "What is 2³?",
+      options: ["4", "6", "8", "9"],
+      correct: "8",
+      successTail: "sharp math",
+    },
+    {
+      title: "What is 15 − 7?",
+      options: ["6", "7", "8", "9"],
+      correct: "8",
+      successTail: "sharp math",
+    },
+    {
+      title: "What is 48 ÷ 6?",
+      options: ["6", "7", "8", "9"],
+      correct: "8",
+      successTail: "sharp math",
+    },
+    {
+      title: "Simplify: 1/2 + 1/4",
+      options: ["1/6", "2/6", "3/4", "1"],
+      correct: "3/4",
+      successTail: "sharp math",
+    },
+    {
+      title: "What is √16?",
+      options: ["2", "3", "4", "8"],
+      correct: "4",
+      successTail: "sharp math",
+    },
+    {
+      title: "Solve for x: 2x = 14",
+      options: ["5", "6", "7", "8"],
+      correct: "7",
+      successTail: "sharp math",
+    },
+    {
+      title: "What is 20% of 50?",
+      options: ["5", "8", "10", "12"],
+      correct: "10",
+      successTail: "sharp math",
+    },
+    {
+      title: "What is 2 + 3 × 4?",
+      options: ["14", "20", "24", "9"],
+      correct: "14",
+      successTail: "sharp math",
+    },
+    {
+      title: "A rectangle is 5 cm by 6 cm. What is its area?",
+      options: ["22 cm²", "30 cm²", "11 cm²", "36 cm²"],
+      correct: "30 cm²",
+      successTail: "sharp math",
+    },
+    {
+      title: "What is (−3) + 10?",
+      options: ["−13", "7", "13", "−7"],
+      correct: "7",
+      successTail: "sharp math",
     },
   ],
 };
