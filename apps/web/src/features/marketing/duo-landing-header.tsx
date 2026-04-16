@@ -17,13 +17,13 @@ export function DuoLandingHeader() {
           MindOrbit
         </Link>
         <nav className="hidden items-center gap-8 text-sm font-bold text-muted-foreground md:flex">
-          <a href="#why" className="transition-colors hover:text-foreground">
+          <a href="/#why" className="transition-colors hover:text-foreground">
             Why MindOrbit
           </a>
-          <a href="#how" className="transition-colors hover:text-foreground">
+          <a href="/#how" className="transition-colors hover:text-foreground">
             How it works
           </a>
-          <a href="#pricing" className="transition-colors hover:text-foreground">
+          <a href="/#pricing" className="transition-colors hover:text-foreground">
             Pricing
           </a>
         </nav>
