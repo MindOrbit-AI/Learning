@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { Button } from "@mindorbit/ui";
 import { useState } from "react";
+import { ClaimGuestDiagnosticEffect } from "@/features/diagnostics/claim-guest-diagnostic-effect";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -59,6 +60,7 @@ export function AppShell({
 
   return (
     <div className="flex min-h-screen">
+      <ClaimGuestDiagnosticEffect />
       <aside
         className={`fixed inset-y-0 left-0 z-40 w-64 transform border-r bg-card transition-transform lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"

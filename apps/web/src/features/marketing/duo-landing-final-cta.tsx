@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { DuoPrimaryLink } from "./duo-primary-link";
 import { ScrollReveal } from "./scroll-reveal";
@@ -14,11 +15,17 @@ export function DuoLandingFinalCta() {
         <p className="relative mx-auto mt-4 max-w-lg text-base font-semibold text-muted-foreground sm:text-lg">
           Start with a free diagnostic and see your path in minutes.
         </p>
-        <div className="relative mt-10 flex justify-center">
+        <div className="relative mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <DuoPrimaryLink href="/auth/signup">
             Get started
             <ArrowRight className="h-4 w-4" />
           </DuoPrimaryLink>
+          <Link
+            href="/try-diagnostic"
+            className="text-sm font-extrabold uppercase tracking-wide text-[hsl(var(--duo-blue))] underline decoration-2 underline-offset-4 hover:opacity-90"
+          >
+            Or run the diagnostic first — no signup
+          </Link>
         </div>
       </ScrollReveal>
     </section>

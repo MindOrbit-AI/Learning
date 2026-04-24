@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { getAuthSecret } from "@/lib/auth-secret";
 
 const ADMIN_ROLES = ["ADMIN", "SUPER_ADMIN"];
 
@@ -26,10 +27,9 @@ export async function middleware(req: NextRequest) {
   // `url.base.startsWith("https://")`), while getToken() defaults to NEXTAUTH_URL. If NEXTAUTH_URL is https
   // but you develop on http://localhost, tokens would not match and getToken returns null.
   const secureCookie = req.nextUrl.protocol === "https:";
-  const secret = process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET;
   const token = await getToken({
     req,
-    secret,
+    secret: getAuthSecret(),
     secureCookie,
   });
 

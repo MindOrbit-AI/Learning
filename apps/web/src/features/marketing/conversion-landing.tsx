@@ -176,6 +176,14 @@ export function ConversionLanding() {
                     See How It Works
                   </a>
                 </div>
+                <p className="mt-4 text-sm font-semibold text-muted-foreground">
+                  <Link
+                    href="/try-diagnostic"
+                    className="text-[hsl(var(--duo-blue))] underline decoration-2 underline-offset-4 hover:opacity-90"
+                  >
+                    Try a sample diagnostic free — no account →
+                  </Link>
+                </p>
                 <ul className="mt-10 flex flex-col gap-2.5 text-sm font-semibold text-muted-foreground sm:text-[0.9375rem]">
                   {TRUST_STRIP.map((line) => (
                     <li key={line} className="flex gap-2">

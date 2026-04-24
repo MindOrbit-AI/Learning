@@ -2,13 +2,12 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@mindorbit/db";
 import bcrypt from "bcryptjs";
+import { getAuthSecret } from "@/lib/auth-secret";
 
-/** NextAuth v4 reads NEXTAUTH_SECRET; we also accept AUTH_SECRET (e.g. Vercel / shared tooling). */
-const authSecret =
-  process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET;
+const authSecret = getAuthSecret();
 
 export const authOptions = {
-  ...(authSecret ? { secret: authSecret } : {}),
+  secret: authSecret,
   session: { strategy: "jwt" as const, maxAge: 30 * 24 * 60 * 60 },
   pages: {
     signIn: "/auth/signin",
@@ -78,5 +77,10 @@ export const authOptions = {
 import { getServerSession as _getServerSession } from "next-auth";
 
 export async function getServerSession() {
-  return _getServerSession(authOptions);
+  try {
+    return await _getServerSession(authOptions);
+  } catch {
+    // Stale cookies after secret rotation, corrupted JWT, etc.
+    return null;
+  }
 }

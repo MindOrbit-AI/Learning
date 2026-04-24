@@ -30,7 +30,7 @@ export interface SubmitResult {
 }
 
 export const diagnosticsService = {
-  async startDiagnostic(subjectId: string, userId: string) {
+  async startDiagnostic(subjectId: string, userId: string | null) {
     let questions = await prisma.diagnosticQuestion.findMany({
       where: { subjectId },
       include: { node: true },
@@ -61,7 +61,10 @@ export const diagnosticsService = {
     const shuffled = selected.sort(() => Math.random() - 0.5).slice(0, 15);
 
     const attempt = await prisma.diagnosticAttempt.create({
-      data: { userId, subjectId },
+      data: {
+        subject: { connect: { id: subjectId } },
+        ...(userId ? { user: { connect: { id: userId } } } : {}),
+      },
     });
 
     const selectedQuestions = await prisma.diagnosticQuestion.findMany({
@@ -69,11 +72,13 @@ export const diagnosticsService = {
       include: { node: true },
     });
 
-    await AnalyticsService.track(userId, EVENT_TYPES.diagnostic_started, {
-      attemptId: attempt.id,
-      subjectId,
-      questionCount: selectedQuestions.length,
-    });
+    if (userId) {
+      await AnalyticsService.track(userId, EVENT_TYPES.diagnostic_started, {
+        attemptId: attempt.id,
+        subjectId,
+        questionCount: selectedQuestions.length,
+      });
+    }
 
     return { attempt, questions: selectedQuestions };
   },
@@ -166,28 +171,130 @@ export const diagnosticsService = {
       },
     });
 
-    const now = new Date();
-    for (const { nodeId, state, mastery } of nodeStates) {
-      await LearningStateEngine.updateNodeState(
-        attempt.userId,
-        attempt.subjectId,
-        nodeId,
-        {
-          mastery,
-          confidence: mastery,
-          stability: mastery,
-          lastPracticedAt: now,
-        }
-      );
+    const weakMissing = nodeStates.filter(
+      (n) => n.state === "weak" || n.state === "missing"
+    );
+
+    if (attempt.userId) {
+      const now = new Date();
+      for (const { nodeId, mastery } of nodeStates) {
+        await LearningStateEngine.updateNodeState(
+          attempt.userId,
+          attempt.subjectId,
+          nodeId,
+          {
+            mastery,
+            confidence: mastery,
+            stability: mastery,
+            lastPracticedAt: now,
+          }
+        );
+      }
+
+      try {
+        await createMissionsForWeakNodes(
+          attempt.userId,
+          attempt.subjectId,
+          weakMissing.slice(0, 3).map((n) => n.nodeId)
+        );
+      } catch (missionErr) {
+        console.error("Mission creation failed (non-blocking):", missionErr);
+      }
+
+      for (const { nodeId } of weakMissing) {
+        await ReviewScheduler.scheduleReview(
+          attempt.userId,
+          attempt.subjectId,
+          nodeId,
+          { intervalIndex: 0 }
+        );
+      }
+
+      await AnalyticsService.track(attempt.userId, EVENT_TYPES.diagnostic_completed, {
+        attemptId,
+        overallScore,
+        weakMissingCount: weakMissing.length,
+      });
+    }
+
+    return {
+      attemptId,
+      overallScore,
+      nodeStates,
+      weakMissingNodes: weakMissing.length,
+    };
+  },
+
+  /**
+   * Attach a completed guest attempt to a user and apply mastery/missions/reviews
+   * (normally skipped when userId was null at submit).
+   */
+  async claimGuestDiagnosticAttempt(attemptId: string, userId: string): Promise<void> {
+    const attempt = await prisma.diagnosticAttempt.findUnique({
+      where: { id: attemptId },
+      include: {
+        subject: true,
+        responses: true,
+      },
+    });
+    if (!attempt?.completedAt) {
+      throw new Error("Attempt not found or not completed");
+    }
+    if (attempt.userId !== null) {
+      if (attempt.userId === userId) return;
+      throw new Error("Attempt already belongs to another user");
+    }
+    if (attempt.subject.createdById !== null || attempt.subject.status !== "published") {
+      throw new Error("Subject cannot be claimed from guest flow");
+    }
+
+    const nodeScores = new Map<string, { correct: number; total: number }>();
+    for (const r of attempt.responses) {
+      const cur = nodeScores.get(r.nodeId) ?? { correct: 0, total: 0 };
+      cur.total += 1;
+      if (r.isCorrect) cur.correct += 1;
+      nodeScores.set(r.nodeId, cur);
+    }
+
+    const allNodes = await prisma.conceptNode.findMany({
+      where: { subjectId: attempt.subjectId },
+    });
+
+    const nodeStates: Array<{ nodeId: string; state: string; mastery: number }> = [];
+    for (const node of allNodes) {
+      const score = nodeScores.get(node.id);
+      let state = "untouched";
+      let mastery = 0;
+      if (score) {
+        mastery = (score.correct / score.total) * 100;
+        state = LearningStateEngine.assignNodeState(mastery);
+      }
+      nodeStates.push({ nodeId: node.id, state, mastery });
     }
 
     const weakMissing = nodeStates.filter(
       (n) => n.state === "weak" || n.state === "missing"
     );
+    const overallScore = attempt.overallScore ?? 0;
+
+    await prisma.diagnosticAttempt.update({
+      where: { id: attemptId },
+      data: { user: { connect: { id: userId } } },
+    });
+
+    const now = new Date();
+    for (const { nodeId, mastery } of nodeStates) {
+      await LearningStateEngine.updateNodeState(userId, attempt.subjectId, nodeId, {
+        mastery,
+        confidence: mastery,
+        stability: mastery,
+        lastPracticedAt: now,
+      });
+    }
 
     try {
       await createMissionsForWeakNodes(
-        attempt.userId,
+        userId,
         attempt.subjectId,
         weakMissing.slice(0, 3).map((n) => n.nodeId)
       );
@@ -196,25 +303,16 @@ export const diagnosticsService = {
     }
 
     for (const { nodeId } of weakMissing) {
-      await ReviewScheduler.scheduleReview(
-        attempt.userId,
-        attempt.subjectId,
-        nodeId,
-        { intervalIndex: 0 }
-      );
+      await ReviewScheduler.scheduleReview(userId, attempt.subjectId, nodeId, {
+        intervalIndex: 0,
+      });
     }
 
-    await AnalyticsService.track(attempt.userId, EVENT_TYPES.diagnostic_completed, {
+    await AnalyticsService.track(userId, EVENT_TYPES.diagnostic_completed, {
       attemptId,
       overallScore,
       weakMissingCount: weakMissing.length,
+      claimedFromGuest: true,
     });
-
-    return {
-      attemptId,
-      overallScore,
-      nodeStates,
-      weakMissingNodes: weakMissing.length,
-    };
   },
 };

@@ -39,6 +39,14 @@ export function DuoLandingHero() {
                 How it works
               </a>
             </div>
+            <p className="mt-4 text-sm font-semibold text-muted-foreground">
+              <a
+                href="/try-diagnostic"
+                className="text-[hsl(var(--duo-blue))] underline decoration-2 underline-offset-4 hover:opacity-90"
+              >
+                Try the diagnostic without an account →
+              </a>
+            </p>
           </ScrollReveal>
 
           <ScrollReveal className="relative mx-auto w-full min-w-0 max-w-lg" delay={0.1}>

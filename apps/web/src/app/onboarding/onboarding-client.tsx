@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@mindorbit/ui";
 import { SUBJECTS, subjectKeysForGradeLevel, subjectSlugForKey, type SubjectKey } from "@mindorbit/lib";
 import { Brain, ChevronRight } from "lucide-react";
+import { ClaimGuestDiagnosticEffect } from "@/features/diagnostics/claim-guest-diagnostic-effect";
 
 const gradeLevels = ["9", "10", "11", "12", "College", "Other"];
 const studyGoals = [
@@ -57,13 +58,7 @@ export function OnboardingClient() {
         setLoading(false);
         return;
       }
-      const firstKey = subjects[0] as SubjectKey | undefined;
-      if (firstKey) {
-        const slug = subjectSlugForKey(firstKey);
-        window.location.assign(`/diagnostics/${slug}/run`);
-      } else {
-        window.location.assign("/dashboard");
-      }
+      window.location.assign("/dashboard");
     } catch {
       setError("Something went wrong. Try again.");
       setLoading(false);
@@ -72,6 +67,7 @@ export function OnboardingClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-primary/5">
+      <ClaimGuestDiagnosticEffect />
       <header className="container mx-auto flex h-16 items-center px-4">
         <div className="flex items-center gap-2">
           <Brain className="h-8 w-8 text-primary" />

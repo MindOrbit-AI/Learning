@@ -49,6 +49,10 @@ export async function submitDiagnostic(
   });
   if (!attempt) throw new Error("Attempt not found");
   if (attempt.completedAt) throw new Error("Already completed");
+  if (!attempt.userId) {
+    throw new Error("Guest attempts must use diagnosticsService");
+  }
+  const userId = attempt.userId;
 
   const questions = await prisma.diagnosticQuestion.findMany({
     where: { id: { in: responses.map((r) => r.questionId) } },
@@ -130,13 +134,13 @@ export async function submitDiagnostic(
     await prisma.userNodeState.upsert({
       where: {
         userId_subjectId_nodeId: {
-          userId: attempt.userId,
+          userId,
           subjectId: attempt.subjectId,
           nodeId,
         },
       },
       create: {
-        userId: attempt.userId,
+        userId,
         subjectId: attempt.subjectId,
         nodeId,
         state,
@@ -155,7 +159,7 @@ export async function submitDiagnostic(
 
   const weakMissing = nodeStates.filter((n) => n.state === "weak" || n.state === "missing");
   await createMissionsForWeakNodes(
-    attempt.userId,
+    userId,
     attempt.subjectId,
     weakMissing.slice(0, 3).map((n) => n.nodeId)
   );
@@ -164,7 +168,7 @@ export async function submitDiagnostic(
   nextReview.setDate(nextReview.getDate() + 1);
   for (const { nodeId } of weakMissing) {
     const existing = await prisma.reviewQueueItem.findFirst({
-      where: { userId: attempt.userId, subjectId: attempt.subjectId, nodeId },
+      where: { userId, subjectId: attempt.subjectId, nodeId },
     });
     if (existing) {
       await prisma.reviewQueueItem.update({
@@ -174,7 +178,7 @@ export async function submitDiagnostic(
     } else {
       await prisma.reviewQueueItem.create({
         data: {
-          userId: attempt.userId,
+          userId,
           subjectId: attempt.subjectId,
           nodeId,
           dueAt: nextReview,

@@ -388,7 +388,8 @@ model DiagnosticQuestion {
 
 model DiagnosticAttempt {
   id              String   @id @default(cuid())
-  userId          String
+  /// Null for guest / marketing diagnostics (no account).
+  userId          String?
   subjectId       String
   startedAt      DateTime @default(now())
   completedAt     DateTime?
@@ -396,7 +397,7 @@ model DiagnosticAttempt {
   masteryScore    Float?
   confidenceScore Float?
   stabilityScore  Float?
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   subject         Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   responses       DiagnosticResponse[]
 
