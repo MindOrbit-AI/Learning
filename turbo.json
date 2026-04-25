@@ -4,7 +4,17 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
-      "env": ["NEXTAUTH_SECRET", "AUTH_SECRET", "NEXTAUTH_URL"]
+      "env": [
+        "NEXTAUTH_SECRET",
+        "AUTH_SECRET",
+        "NEXTAUTH_URL",
+        "DATABASE_URL",
+        "OPENAI_API_KEY",
+        "STRIPE_SECRET_KEY",
+        "STRIPE_WEBHOOK_SECRET",
+        "STRIPE_PRICE_ID",
+        "BILLING_PROVIDER"
+      ]
     },
     "dev": {
       "cache": false,
