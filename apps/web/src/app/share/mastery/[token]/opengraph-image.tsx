@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
-import { getSnapshotByShareToken } from "@/services/mastery-share-service";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export const alt = "Mastery snapshot";
 
@@ -11,7 +11,15 @@ export const contentType = "image/png";
 
 export default async function Image({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  const data = await getSnapshotByShareToken(token);
+  const data = await (async () => {
+    try {
+      const { getSnapshotByShareToken } = await import("@/services/mastery-share-service");
+      return await getSnapshotByShareToken(token);
+    } catch {
+      // If DB/env is unavailable during build/runtime edge-cases, return a generic OG card.
+      return null;
+    }
+  })();
   const s = data?.snapshot;
 
   const title = s ? `${s.displayName}'s mastery` : "MindOrbit Learn";
