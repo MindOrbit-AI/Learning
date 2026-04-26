@@ -15,8 +15,11 @@ export const contentParsers = {
    * Parse PDF buffer to plain text
    */
   async parsePdf(buffer: Buffer): Promise<ParseResult> {
-    // @ts-expect-error - pdf-parse has no declaration file
-    const pdfParse = (await import("pdf-parse")).default;
+    // Import the runtime parser entrypoint directly to avoid tracing package test assets.
+    // @ts-expect-error - pdf-parse has no declaration file for this subpath
+    const pdfParseModule = await import("pdf-parse/lib/pdf-parse.js");
+    const pdfParse = (pdfParseModule as unknown as { default?: (dataBuffer: Buffer) => Promise<{ text?: string; numpages?: number; info?: unknown }> }).default
+      ?? (pdfParseModule as unknown as (dataBuffer: Buffer) => Promise<{ text?: string; numpages?: number; info?: unknown }>);
     const data = await pdfParse(buffer);
     return {
       text: data.text ?? "",
