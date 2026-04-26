@@ -33,17 +33,19 @@ function SignUpForm() {
         setError(data.error ?? "Sign up failed");
         return;
       }
+      const nextPath = safeInternalPath(searchParams?.get("callbackUrl"), "/onboarding");
+      const callbackUrl = new URL(nextPath, window.location.origin).toString();
       const signInRes = await signIn("credentials", {
         email,
         password,
+        callbackUrl,
         redirect: false,
       });
       if (signInRes?.error) {
         setError("Account created but sign in failed. Try signing in.");
         return;
       }
-      const next = safeInternalPath(searchParams?.get("callbackUrl"), "/onboarding");
-      router.push(next);
+      router.push(nextPath);
       router.refresh();
     } catch {
       setError("Something went wrong");

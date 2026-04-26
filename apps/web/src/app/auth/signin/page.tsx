@@ -20,10 +20,11 @@ function SignInForm() {
     setError("");
     setLoading(true);
     try {
-      const callbackUrl = safeInternalPath(
+      const callbackPath = safeInternalPath(
         searchParams?.get("callbackUrl"),
         "/dashboard"
       );
+      const callbackUrl = new URL(callbackPath, window.location.origin).toString();
       const res = await signIn("credentials", {
         email,
         password,
@@ -54,7 +55,7 @@ function SignInForm() {
       }
 
       // Full navigation avoids soft-navigation edge cases (e.g. stuck transition layers) after session is set.
-      window.location.assign(callbackUrl);
+      window.location.assign(callbackPath);
     } catch {
       setError("Something went wrong");
     } finally {

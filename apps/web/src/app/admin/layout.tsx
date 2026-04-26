@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/admin";
 import { AdminAppShell } from "@/features/admin-dashboard/admin-app-shell";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminLayout({
   children,
 }: {

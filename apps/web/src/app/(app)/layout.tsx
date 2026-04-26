@@ -4,6 +4,8 @@ import { prisma } from "@mindorbit/db";
 import { effectivePlanTier, levelFromXp } from "@mindorbit/lib";
 import { AppShell } from "@/components/app-shell";
 
+export const dynamic = "force-dynamic";
+
 export default async function AppLayout({
   children,
 }: {
