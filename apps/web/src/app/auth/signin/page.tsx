@@ -20,19 +20,39 @@ function SignInForm() {
     setError("");
     setLoading(true);
     try {
-      const res = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-      if (res?.error) {
-        setError("Invalid email or password");
-        return;
-      }
       const callbackUrl = safeInternalPath(
         searchParams?.get("callbackUrl"),
         "/dashboard"
       );
+      const res = await signIn("credentials", {
+        email,
+        password,
+        callbackUrl,
+        redirect: false,
+      });
+      if (!res) {
+        setError("Sign in request failed. Please try again.");
+        return;
+      }
+      if (res.error) {
+        setError(
+          res.error === "CredentialsSignin"
+            ? "Invalid email or password"
+            : "Sign in failed. Please try again."
+        );
+        return;
+      }
+
+      const sessionRes = await fetch("/api/auth/session", { cache: "no-store" });
+      const session = (await sessionRes.json()) as
+        | { user?: { id?: string } | null }
+        | null;
+
+      if (!sessionRes.ok || !session?.user?.id) {
+        setError("Signed in, but we couldn't establish your session. Please try again.");
+        return;
+      }
+
       // Full navigation avoids soft-navigation edge cases (e.g. stuck transition layers) after session is set.
       window.location.assign(callbackUrl);
     } catch {
