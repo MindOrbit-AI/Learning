@@ -23,6 +23,7 @@
         "SUPABASE_SERVICE_ROLE_KEY",
         "SUPABASE_JWT_SECRET",
         "OPENAI_API_KEY",
+        "MUSIC_ENGINE_URL",
         "STRIPE_SECRET_KEY",
         "STRIPE_WEBHOOK_SECRET",
         "STRIPE_PRICE_ID",

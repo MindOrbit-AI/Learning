@@ -4,6 +4,8 @@
 
 import { PrismaClient } from "@prisma/client";
 import * as bcrypt from "bcryptjs";
+
+import { resolvePrismaDatabaseUrl } from "../src/resolve-database-url";
 import {
   algebraClusters,
   algebraEdges,
@@ -31,7 +33,15 @@ import {
   worldHistoryNodes,
 } from "@mindorbit/content";
 
-const prisma = new PrismaClient();
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL is required to run the seed.");
+}
+
+const prisma = new PrismaClient({
+  datasources: {
+    db: { url: resolvePrismaDatabaseUrl(process.env.DATABASE_URL) },
+  },
+});
 
 const SUBJECTS = [
   {

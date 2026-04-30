@@ -4,6 +4,8 @@
 
 import { PrismaClient } from "@prisma/client";
 
+import { resolvePrismaDatabaseUrl } from "./resolve-database-url";
+
 declare global {
   var prisma: PrismaClient | undefined;
 }
@@ -14,9 +16,12 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
+const databaseUrl = resolvePrismaDatabaseUrl(process.env.DATABASE_URL);
+
 export const prisma =
   globalThis.prisma ??
   new PrismaClient({
+    datasources: { db: { url: databaseUrl } },
     log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
   });
 

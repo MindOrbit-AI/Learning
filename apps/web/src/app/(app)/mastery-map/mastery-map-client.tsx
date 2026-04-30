@@ -23,12 +23,14 @@ import { NODE_STATE_COLORS } from "@mindorbit/lib";
 import { GitBranch, Lock, Sparkles } from "lucide-react";
 import { GenerateMissionButton } from "./generate-mission-button";
 import { masteryMapQuestHeadline } from "@/lib/mission-flavor";
+import { LearnWithMusicPanel } from "@/features/music/learn-with-music-panel";
 import type { NodeState } from "@mindorbit/types";
 
 type ChainSuggestion = { nodeId: string; title: string; state: string };
 type SidebarNodeDetail = {
   title?: string;
   description?: string;
+  difficulty?: string;
   state?: string;
   mastery?: number;
   resources?: Array<{ id: string; title: string }>;
@@ -331,6 +333,14 @@ export function MasteryMapClient() {
               </CardHeader>
               <CardContent className="space-y-4 pt-4">
                 <p className="text-sm text-muted-foreground">{details.description}</p>
+                {selectedNode && details.title && (
+                  <LearnWithMusicPanel
+                    conceptId={selectedNode}
+                    title={details.title}
+                    explanation={details.description ?? ""}
+                    difficultyRaw={details.difficulty ?? "medium"}
+                  />
+                )}
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-semibold">State:</span>
                   <span

@@ -159,6 +159,7 @@ export async function GET(req: Request) {
         nodeDetails[n.id] = {
           title: n.title,
           description: n.description,
+          difficulty: n.difficulty,
           state: state?.state ?? "untouched",
           mastery: state?.mastery,
           resources,

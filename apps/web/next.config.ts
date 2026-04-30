@@ -1,9 +1,14 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { config as loadEnv } from "dotenv";
 import type { NextConfig } from "next";
 
 const configDir = path.dirname(fileURLToPath(import.meta.url));
 const monorepoRoot = path.join(configDir, "../..");
+
+// Next.js only loads `.env*` from `apps/web`. Root `.env` (e.g. DATABASE_URL) is common in monorepos.
+loadEnv({ path: path.join(monorepoRoot, ".env") });
+loadEnv({ path: path.join(monorepoRoot, ".env.local"), override: true });
 
 const nextConfig: NextConfig = {
   /**

@@ -9,6 +9,11 @@
       "types": "./src/index.ts",
       "import": "./src/index.ts",
       "require": "./src/index.ts"
+    },
+    "./resolve-database-url": {
+      "types": "./src/resolve-database-url.ts",
+      "import": "./src/resolve-database-url.ts",
+      "require": "./src/resolve-database-url.ts"
     }
   },
   "scripts": {
