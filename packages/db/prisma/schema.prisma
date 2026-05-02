@@ -141,6 +141,18 @@ enum SceneType {
   transfer
 }
 
+// Micro-Interaction Engine: 2-5s steps, instant feedback (Brilliant / Duolingo style).
+enum MicroInteractionType {
+  tap_choice
+  drag_match
+  connect_nodes
+  slider_adjust
+  reveal_step
+  fill_blank
+  sequence_order
+  visual_toggle
+}
+
 enum MistakeCategory {
   prerequisite_gap
   concept_confusion
@@ -153,6 +165,32 @@ enum MistakeCategory {
 enum ReferralStatus {
   pending
   qualified
+}
+
+enum GameMode {
+  CONCEPT_BATTLE
+  SPEED_RUN
+  BUILD_SYSTEM
+  FIND_MISTAKE
+  PUZZLE_PATH
+  SIMULATION_LAB
+  DECISION_SIMULATOR
+  LAB_ESCAPE_ROOM
+  VISUAL_BUILDER
+  ADAPTIVE_QUIZ
+}
+
+enum GameRunStatus {
+  draft
+  active
+  completed
+}
+
+enum GameRewardType {
+  xp
+  badge
+  streak
+  unlock
 }
 
 model User {
@@ -205,6 +243,10 @@ model User {
   referrerReferrals      Referral[]         @relation("ReferralReferrer")
   refereeReferral        Referral?          @relation("ReferralReferee")
   masteryShareTokens     MasteryShareToken[]
+  conceptArenaStat       ConceptArenaStat?
+  games                  Game[]
+  gameAttempts           GameAttempt[]
+  gameRewards            GameReward[]
 
   @@index([planTier])
   @@index([subscriptionStatus])
@@ -293,6 +335,7 @@ model Subject {
   resources     Resource[]
   missionTemplates MissionTemplate[]
   libraryAdds      UserSubjectAdd[]
+  games            Game[]
 }
 
 /// User added someone else's published subject to their library (listed on /subjects, dashboard, etc.).
@@ -350,6 +393,8 @@ model ConceptNode {
   resources          Resource[]
   reviewQueueItems   ReviewQueueItem[]
   missionTemplates   MissionTemplate[]
+  games              Game[]
+  gameEvents         GameEvent[]
 
   @@unique([subjectId, slug])
 }
@@ -461,6 +506,7 @@ model Mission {
   scenes          MissionScene[]
   progress         MissionProgress?
   sceneResponses   MissionSceneResponse[]
+  microLesson      MicroLesson?
 }
 
 model MissionTask {
@@ -518,6 +564,33 @@ model MissionSceneResponse {
   scene            MissionScene    @relation(fields: [sceneId], references: [id], onDelete: Cascade)
 
   @@index([missionId, sceneId])
+}
+
+model MicroLesson {
+  id        String      @id @default(cuid())
+  missionId String      @unique
+  title     String?
+  createdAt DateTime    @default(now())
+  mission   Mission     @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  steps     MicroStep[]
+}
+
+model MicroStep {
+  id                String               @id @default(cuid())
+  lessonId          String
+  orderIndex        Int                  @default(0)
+  type              MicroInteractionType
+  prompt            String
+  interactionConfig Json
+  correctAnswer     String
+  feedbackCorrect   String
+  feedbackWrong     String
+  visualStateBefore Json?
+  visualStateAfter  Json?
+  masterySkill      String?
+  lesson            MicroLesson          @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId, orderIndex])
 }
 
 model Resource {
@@ -729,4 +802,99 @@ model BillingEvent {
   payloadJson      String?
   createdAt        DateTime @default(now())
   user             User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+/// Aggregated stats for Concept Battle Arena leaderboard and progression.
+model ConceptArenaStat {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  wins             Int      @default(0)
+  losses           Int      @default(0)
+  totalDamageDealt Int      @default(0)
+  bestCombo        Int      @default(0)
+  matchesPlayed    Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([wins])
+  @@index([totalDamageDealt])
+}
+
+/// LLM-generated interactive learning game instance.
+model Game {
+  id            String         @id @default(cuid())
+  userId        String
+  subjectId     String
+  topic         String
+  gradeLevel    String
+  learningGoal  String
+  gameMode      GameMode
+  title         String
+  description   String
+  conceptNodeId String
+  config        Json           @default("{}")
+  status        GameRunStatus  @default(draft)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject       Subject        @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  node          ConceptNode    @relation(fields: [conceptNodeId], references: [id], onDelete: Cascade)
+  attempts      GameAttempt[]
+
+  @@index([userId, createdAt])
+  @@index([subjectId])
+}
+
+model GameAttempt {
+  id           String    @id @default(cuid())
+  userId       String
+  gameId       String
+  score        Float     @default(0)
+  xpEarned     Int       @default(0)
+  accuracy     Float?
+  currentState Json      @default("{}")
+  masteryDelta Json?
+  weakConcepts Json?
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  game         Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events       GameEvent[]
+  rewards      GameReward[]
+
+  @@index([userId, gameId])
+  @@index([gameId, completedAt])
+}
+
+model GameEvent {
+  id             String       @id @default(cuid())
+  attemptId      String
+  eventType      String
+  payload        Json?
+  isCorrect      Boolean?
+  responseTimeMs Int?
+  conceptNodeId  String?
+  createdAt      DateTime     @default(now())
+  attempt        GameAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  conceptNode    ConceptNode? @relation(fields: [conceptNodeId], references: [id], onDelete: SetNull)
+
+  @@index([attemptId, createdAt])
+}
+
+model GameReward {
+  id          String         @id @default(cuid())
+  userId      String
+  attemptId   String
+  type        GameRewardType
+  name        String
+  description String?
+  icon        String?
+  createdAt   DateTime       @default(now())
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attempt     GameAttempt    @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([attemptId])
 }

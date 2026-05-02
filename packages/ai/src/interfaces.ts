@@ -125,6 +125,30 @@ export interface ContentSummaryJson {
   }>;
 }
 
+/** MindOrbit interactive game generator — mode keys match Prisma `GameMode`. */
+export type InteractiveGameModeSlug =
+  | "CONCEPT_BATTLE"
+  | "SPEED_RUN"
+  | "BUILD_SYSTEM"
+  | "FIND_MISTAKE"
+  | "PUZZLE_PATH"
+  | "SIMULATION_LAB"
+  | "DECISION_SIMULATOR"
+  | "LAB_ESCAPE_ROOM"
+  | "VISUAL_BUILDER"
+  | "ADAPTIVE_QUIZ";
+
+export interface InteractiveGameGenerationParams {
+  subjectTitle: string;
+  topic: string;
+  gradeLevel: string;
+  learningGoal: string;
+  gameMode: InteractiveGameModeSlug;
+}
+
+/** Full envelope stored in `Game.config` (JSON). */
+export type InteractiveGameConfigJson = Record<string, unknown>;
+
 export interface AIProvider {
   summarizeNodeConcept(nodeTitle: string, nodeDescription: string): Promise<string>;
   generateMissionContent(params: MissionContentParams): Promise<MissionContent>;
@@ -174,6 +198,11 @@ export interface AIProvider {
     nodes: Array<{ id: string; title: string; description: string }>,
     contentSummary: string
   ): Promise<string | null>;
+
+  /** Generate structured JSON for MindOrbit interactive games (any subject). */
+  generateInteractiveGameConfig(
+    params: InteractiveGameGenerationParams
+  ): Promise<InteractiveGameConfigJson>;
 }
 
 /** ConceptExplainer - Node-aware concept explanation */

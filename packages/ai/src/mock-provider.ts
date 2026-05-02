@@ -11,6 +11,8 @@ import type {
   ContentDiagnosticQuestion,
   ContentSummaryJson,
   GeneratedSubjectStructure,
+  InteractiveGameConfigJson,
+  InteractiveGameGenerationParams,
 } from "./interfaces";
 import type { QuestionType } from "@mindorbit/types";
 
@@ -515,6 +517,297 @@ export const mockAIProvider: AIProvider = {
     _contentSummary: string
   ): Promise<string | null> {
     return nodes[0]?.id ?? null;
+  },
+
+  async generateInteractiveGameConfig(
+    params: InteractiveGameGenerationParams
+  ): Promise<InteractiveGameConfigJson> {
+    const { subjectTitle, topic, gradeLevel, learningGoal, gameMode } = params;
+    const base = {
+      title: `${topic} — ${gameMode.replace(/_/g, " ")}`,
+      description: `Practice ${topic} in ${subjectTitle}. Goal: ${learningGoal}`,
+      subject: subjectTitle,
+      topic,
+      gradeLevel,
+      gameMode,
+      estimatedMinutes: 8,
+      concepts: [
+        { name: topic, skill: "recall", difficulty: "medium" as const },
+        { name: `${topic} (application)`, skill: "concept mastery", difficulty: "medium" as const },
+      ],
+      scoring: {
+        basePoints: 10,
+        speedBonus: true,
+        streakBonus: true,
+        maxScore: 500,
+      },
+    };
+
+    const q = (i: number) => ({
+      question: `Sample question ${i} about ${topic}?`,
+      choices: ["Correct option", "Distractor A", "Distractor B", "Distractor C"],
+      correctAnswer: "Correct option",
+      feedback: "Strong reasoning builds durable understanding.",
+      concept: topic,
+      difficulty: "medium",
+    });
+
+    if (gameMode === "CONCEPT_BATTLE") {
+      return {
+        ...base,
+        gameConfig: {
+          playerHealth: 100,
+          opponentHealth: 100,
+          rounds: [q(1), q(2), q(3), q(4)].map((r, idx) => ({
+            ...r,
+            damage: 20 + idx * 5,
+          })),
+          powerUps: ["hint", "shield", "double_damage"],
+        },
+      };
+    }
+    if (gameMode === "SPEED_RUN") {
+      return {
+        ...base,
+        gameConfig: {
+          durationSeconds: 60,
+          questions: [q(1), q(2), q(3), q(4), q(5), q(6)],
+        },
+      };
+    }
+    if (gameMode === "ADAPTIVE_QUIZ") {
+      return {
+        ...base,
+        gameConfig: {
+          startingDifficulty: "easy",
+          questions: [
+            { ...q(1), difficulty: "easy", followUpIfWrong: "Review the definition, then try again." },
+            { ...q(2), difficulty: "medium", followUpIfWrong: "Think about a real-world example." },
+            { ...q(3), difficulty: "hard", followUpIfWrong: "Break the problem into smaller steps." },
+          ],
+          adaptiveRules: {
+            correct: "increase difficulty",
+            wrong: "decrease difficulty and explain",
+          },
+        },
+      };
+    }
+    if (gameMode === "BUILD_SYSTEM") {
+      return {
+        ...base,
+        gameConfig: {
+          components: [
+            { id: "a", label: "Input", description: "Starting point" },
+            { id: "b", label: "Process", description: "Core mechanism" },
+            { id: "c", label: "Output", description: "Result" },
+          ],
+          correctConnections: [
+            { from: "a", to: "b", relationship: "feeds" },
+            { from: "b", to: "c", relationship: "produces" },
+          ],
+          distractors: [],
+          validationRules: ["All required connections present"],
+        },
+      };
+    }
+    if (gameMode === "FIND_MISTAKE") {
+      return {
+        ...base,
+        gameConfig: {
+          scenario: `A learner explains ${topic} to a friend after class.`,
+          flawedExplanation: `They say: "${topic} is always the same no matter the situation, and you never need to check assumptions."`,
+          mistakes: [
+            {
+              id: "m1",
+              text: `${topic} is always the same no matter the situation`,
+              whyWrong: "Real contexts change boundary conditions and valid approximations.",
+              correction: "Name the situation, list assumptions, then judge whether the model still applies.",
+              concept: topic,
+              primary: true,
+            },
+            {
+              id: "d1",
+              text: `If you memorize enough facts about ${topic}, you never have to explain your reasoning.`,
+              whyWrong: "Memorization without justification breaks under transfer questions.",
+              correction: "Practice explaining why a step is allowed, not only what the step is.",
+              concept: topic,
+            },
+          ],
+          correctMistakeId: "m1",
+          correctVersion: `A nuanced take on ${topic} for ${gradeLevel} learners: qualify claims, cite mechanisms, and revise when evidence pushes back.`,
+        },
+      };
+    }
+    if (gameMode === "PUZZLE_PATH") {
+      return {
+        ...base,
+        gameConfig: {
+          nodes: [
+            {
+              id: "n1",
+              title: "Warm-up node",
+              challenge: q(1).question,
+              choices: q(1).choices,
+              correctAnswer: q(1).correctAnswer,
+              unlockAfter: [],
+              concept: topic,
+            },
+            {
+              id: "n2",
+              title: "Bridge concept",
+              challenge: q(2).question,
+              choices: q(2).choices,
+              correctAnswer: q(2).correctAnswer,
+              unlockAfter: ["n1"],
+              concept: topic,
+            },
+            {
+              id: "n3",
+              title: "Boss checkpoint",
+              challenge: q(3).question,
+              choices: q(3).choices,
+              correctAnswer: q(3).correctAnswer,
+              unlockAfter: ["n2"],
+              concept: topic,
+            },
+          ],
+        },
+      };
+    }
+    if (gameMode === "SIMULATION_LAB") {
+      return {
+        ...base,
+        gameConfig: {
+          variables: [
+            { id: "v1", label: "Intensity", min: 0, max: 100, default: 50 },
+            { id: "v2", label: "Support", min: 0, max: 100, default: 50 },
+          ],
+          goal: "Reach a stable high-performance zone.",
+          rules: [
+            { condition: "v1 > 70 and v2 > 60", result: "Strong outcome" },
+            { condition: "v1 < 30", result: "Underpowered" },
+          ],
+          idealSettings: { v1: 75, v2: 70 },
+          feedbackStates: [],
+        },
+      };
+    }
+    if (gameMode === "DECISION_SIMULATOR") {
+      return {
+        ...base,
+        gameConfig: {
+          initialScenario: `You are deciding how to approach learning ${topic}.`,
+          states: [
+            {
+              id: "s0",
+              narrative: "What is your first move?",
+              choices: [
+                {
+                  text: "Build foundations first",
+                  nextStateId: "s1",
+                  effect: "Steady progress",
+                  scoreDelta: 10,
+                  concept: topic,
+                },
+                {
+                  text: "Skip to advanced drill",
+                  nextStateId: "s2",
+                  effect: "Risky shortcut",
+                  scoreDelta: -5,
+                  concept: topic,
+                },
+              ],
+            },
+            {
+              id: "s1",
+              narrative: "Good pace. One more decision.",
+              choices: [
+                {
+                  text: "Self-check with a mini-quiz",
+                  nextStateId: "end",
+                  effect: "Reinforcement",
+                  scoreDelta: 15,
+                  concept: topic,
+                },
+              ],
+            },
+            {
+              id: "s2",
+              narrative: "You hit friction. Recover?",
+              choices: [
+                {
+                  text: "Return to basics",
+                  nextStateId: "end",
+                  effect: "Repair",
+                  scoreDelta: 5,
+                  concept: topic,
+                },
+              ],
+            },
+            { id: "end", narrative: "Session complete.", choices: [] },
+          ],
+          endings: [],
+        },
+      };
+    }
+    if (gameMode === "LAB_ESCAPE_ROOM") {
+      return {
+        ...base,
+        gameConfig: {
+          timeLimitSeconds: 240,
+          rooms: [
+            {
+              id: "r1",
+              title: "Cold storage",
+              clue: "Log entry 07:14 — technician note: \"Precision beats speed when labels matter.\"",
+              puzzle: q(1).question,
+              choices: q(1).choices,
+              correctAnswer: q(1).correctAnswer,
+              unlockCode: "CRYO-7",
+              concept: topic,
+            },
+            {
+              id: "r2",
+              title: "Specimen bay",
+              clue: "The door hums when your reasoning chain is complete — no skipped steps.",
+              puzzle: q(2).question,
+              choices: q(2).choices,
+              correctAnswer: q(2).correctAnswer,
+              unlockCode: "BAY-12",
+              concept: topic,
+            },
+            {
+              id: "r3",
+              title: "Exit airlock",
+              clue: "Final check: pick the option that best matches the learning goal you stated.",
+              puzzle: q(3).question,
+              choices: q(3).choices,
+              correctAnswer: q(3).correctAnswer,
+              unlockCode: "CLEAR",
+              concept: topic,
+            },
+          ],
+        },
+      };
+    }
+    if (gameMode === "VISUAL_BUILDER") {
+      return {
+        ...base,
+        gameConfig: {
+          items: [
+            { id: "i1", label: "Core idea", category: "concept" },
+            { id: "i2", label: "Evidence A", category: "support" },
+            { id: "i3", label: "Evidence B", category: "support" },
+          ],
+          dropZones: [
+            { id: "z1", label: "Center", acceptedItems: ["i1"] },
+            { id: "z2", label: "Support ring", acceptedItems: ["i2", "i3"] },
+          ],
+          diagramGoal: "Place the core idea in the center; both evidence pieces belong in the support ring.",
+        },
+      };
+    }
+    return { ...base, gameConfig: {} };
   },
 
   async summarizeContentToJson(content: string): Promise<ContentSummaryJson> {

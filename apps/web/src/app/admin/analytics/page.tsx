@@ -13,6 +13,13 @@ const FUNNEL_EVENTS = [
   EVENT_TYPES.upgrade_clicked,
 ] as const;
 
+const GAME_LAB_EVENTS = [
+  EVENT_TYPES.game_generated,
+  EVENT_TYPES.game_started,
+  EVENT_TYPES.game_answer,
+  EVENT_TYPES.game_completed,
+] as const;
+
 export default async function AdminAnalyticsPage() {
   const since = new Date();
   since.setDate(since.getDate() - 30);
@@ -22,6 +29,7 @@ export default async function AdminAnalyticsPage() {
     diagnosticCount,
     missionCount,
     funnelRows,
+    gameLabRows,
     referralTotals,
     userTotal,
   ] = await Promise.all([
@@ -39,6 +47,14 @@ export default async function AdminAnalyticsPage() {
       },
       _count: true,
     }),
+    prisma.userEvent.groupBy({
+      by: ["eventType"],
+      where: {
+        createdAt: { gte: since },
+        eventType: { in: [...GAME_LAB_EVENTS] },
+      },
+      _count: true,
+    }),
     prisma.referral.groupBy({
       by: ["status"],
       _count: true,
@@ -52,6 +68,7 @@ export default async function AdminAnalyticsPage() {
   const subjectMap = new Map(subjects.map((s) => [s.id, s.title]));
 
   const funnelMap = new Map(funnelRows.map((r) => [r.eventType, r._count]));
+  const gameLabMap = new Map(gameLabRows.map((r) => [r.eventType, r._count]));
 
   return (
     <div className="space-y-6">
@@ -89,6 +106,22 @@ export default async function AdminAnalyticsPage() {
             <li key={ev} className="flex justify-between gap-4">
               <span className="font-mono text-slate-600 dark:text-slate-400">{ev}</span>
               <span>{funnelMap.get(ev) ?? 0}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+        <h2 className="mb-4 font-semibold">Game Lab (last 30 days)</h2>
+        <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
+          Server-side <span className="font-mono">UserEvent</span> stream for generated games (also see{" "}
+          <span className="font-mono">GameEvent</span> for per-attempt detail).
+        </p>
+        <ul className="space-y-2 text-sm">
+          {GAME_LAB_EVENTS.map((ev) => (
+            <li key={ev} className="flex justify-between gap-4">
+              <span className="font-mono text-slate-600 dark:text-slate-400">{ev}</span>
+              <span>{gameLabMap.get(ev) ?? 0}</span>
             </li>
           ))}
         </ul>

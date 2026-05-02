@@ -20,6 +20,8 @@ import {
   Sparkles,
   BarChart3,
   Rocket,
+  Swords,
+  Gamepad2,
 } from "lucide-react";
 import { Button } from "@mindorbit/ui";
 import { useState } from "react";
@@ -30,6 +32,8 @@ const navItems = [
   { href: "/subjects", label: "Subjects", icon: BookOpen },
   { href: "/mastery-map", label: "Mastery Map", icon: Map },
   { href: "/missions", label: "Missions", icon: Target },
+  { href: "/concept-arena", label: "Battle Arena", icon: Swords },
+  { href: "/games", label: "Game Lab", icon: Gamepad2 },
   { href: "/community", label: "Community", icon: Users },
   { href: "/review", label: "Review", icon: ClipboardList },
   { href: "/insights", label: "Insights", icon: BarChart3 },

@@ -16,7 +16,7 @@ describe("feature-access", () => {
   it("FREE user has limited mastery map", () => {
     const r = getFeatureAccess("FREE", "mastery_map");
     expect(r.allowed).toBe(true);
-    expect(r.reason).toContain("limited");
+    expect((r.reason ?? "").toLowerCase()).toContain("limited");
   });
 
   it("FREE user has limited subject creation", () => {

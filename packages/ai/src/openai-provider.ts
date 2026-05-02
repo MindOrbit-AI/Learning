@@ -1,6 +1,8 @@
 /**
  * OpenAI Provider - Real LLM integration
- * Set OPENAI_API_KEY in env to enable. Falls back to mock provider when unset.
+ * Set OPENAI_API_KEY (direct OpenAI) or AI_GATEWAY_API_KEY (Vercel AI Gateway).
+ * Optional: OPENAI_BASE_URL, OPENAI_MODEL, AI_GATEWAY_BASE_URL.
+ * Falls back to mock provider when neither key is set.
  */
 
 import OpenAI from "openai";
@@ -13,26 +15,50 @@ import type {
   ContentDiagnosticQuestion,
   ContentSummaryJson,
   GeneratedSubjectStructure,
+  InteractiveGameConfigJson,
+  InteractiveGameGenerationParams,
 } from "./interfaces";
 import type { QuestionType } from "@mindorbit/types";
 import { mockAIProvider } from "./mock-provider";
 
-const MODEL = "gpt-4o-mini";
+export type ResolvedLlm = { client: OpenAI; model: string };
 
-function getClient(): OpenAI | null {
-  const key = typeof process !== "undefined" ? process.env.OPENAI_API_KEY : undefined;
-  if (!key?.trim()) return null;
-  return new OpenAI({ apiKey: key });
+/** Resolve OpenAI-compatible client: direct API key first, else Vercel AI Gateway. */
+export function resolveLlm(): ResolvedLlm | null {
+  if (typeof process === "undefined") return null;
+
+  const openaiKey = process.env.OPENAI_API_KEY?.trim();
+  const gatewayKey = process.env.AI_GATEWAY_API_KEY?.trim();
+
+  if (openaiKey) {
+    const baseURL = process.env.OPENAI_BASE_URL?.trim() || undefined;
+    const client = new OpenAI({ apiKey: openaiKey, baseURL });
+    const envModel = process.env.OPENAI_MODEL?.trim();
+    const model =
+      envModel && envModel.length > 0
+        ? envModel
+        : baseURL?.includes("ai-gateway.vercel.sh")
+          ? "openai/gpt-4o-mini"
+          : "gpt-4o-mini";
+    return { client, model };
+  }
+
+  if (gatewayKey) {
+    const baseURL = process.env.AI_GATEWAY_BASE_URL?.trim() || "https://ai-gateway.vercel.sh/v1";
+    const model = process.env.OPENAI_MODEL?.trim() || "openai/gpt-4o-mini";
+    return { client: new OpenAI({ apiKey: gatewayKey, baseURL }), model };
+  }
+
+  return null;
 }
 
-async function chat(
+async function chatLLM(
+  llm: ResolvedLlm,
   messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[],
   options?: { jsonMode?: boolean; maxTokens?: number }
 ): Promise<string> {
-  const client = getClient();
-  if (!client) throw new Error("OPENAI_API_KEY is not set");
-  const res = await client.chat.completions.create({
-    model: MODEL,
+  const res = await llm.client.chat.completions.create({
+    model: llm.model,
     messages,
     ...(options?.jsonMode && { response_format: { type: "json_object" } }),
     ...(options?.maxTokens != null && { max_tokens: options.maxTokens }),
@@ -43,12 +69,12 @@ async function chat(
 }
 
 function createOpenAIProvider(): AIProvider {
-  const client = getClient();
-  if (!client) return mockAIProvider;
+  const llm = resolveLlm();
+  if (!llm) return mockAIProvider;
 
   return {
     async summarizeNodeConcept(nodeTitle: string, nodeDescription: string): Promise<string> {
-      const content = await chat([
+      const content = await chatLLM(llm, [
         {
           role: "system",
           content:
@@ -63,7 +89,7 @@ function createOpenAIProvider(): AIProvider {
     },
 
     async generateMissionContent(params: MissionContentParams): Promise<MissionContent> {
-      const content = await chat(
+      const content = await chatLLM(llm,
         [
           {
             role: "system",
@@ -108,7 +134,7 @@ function createOpenAIProvider(): AIProvider {
     },
 
     async generateSceneMissionContent(params: MissionContentParams): Promise<MissionSceneContent> {
-      const content = await chat(
+      const content = await chatLLM(llm,
         [
           {
             role: "system",
@@ -180,7 +206,7 @@ Use simple values for correctAnswerJson, not nested objects.`,
       nodeSlug: string,
       count: number
     ): Promise<MissionContent["practiceQuestions"]> {
-      const content = await chat(
+      const content = await chatLLM(llm,
         [
           {
             role: "system",
@@ -210,7 +236,7 @@ Use simple values for correctAnswerJson, not nested objects.`,
     },
 
     async generateReflectionPrompt(nodeTitle: string): Promise<string> {
-      const content = await chat([
+      const content = await chatLLM(llm, [
         {
           role: "system",
           content: "You write reflection prompts for learners. One sentence, question format.",
@@ -227,7 +253,7 @@ Use simple values for correctAnswerJson, not nested objects.`,
       questionPrompt: string,
       correctAnswer: string
     ): Promise<string> {
-      const content = await chat([
+      const content = await chatLLM(llm, [
         {
           role: "system",
           content:
@@ -247,7 +273,7 @@ Use simple values for correctAnswerJson, not nested objects.`,
 
     async extractConceptsFromContent(text: string): Promise<ExtractedConcept[]> {
       const truncated = text.slice(0, 8000);
-      const content = await chat(
+      const content = await chatLLM(llm,
         [
           {
             role: "system",
@@ -280,7 +306,7 @@ Use simple values for correctAnswerJson, not nested objects.`,
       count = 3
     ): Promise<ContentDiagnosticQuestion[]> {
       const truncated = conceptText.slice(0, 3000);
-      const content = await chat(
+      const content = await chatLLM(llm,
         [
           {
             role: "system",
@@ -314,7 +340,7 @@ Use simple values for correctAnswerJson, not nested objects.`,
 
     async summarizeContentToJson(content: string): Promise<ContentSummaryJson> {
       const truncated = content.slice(0, 12000);
-      const result = await chat(
+      const result = await chatLLM(llm,
         [
           {
             role: "system",
@@ -370,7 +396,7 @@ Return only valid JSON, no markdown code fence.
     },
 
     async generateSubjectDescription(title: string): Promise<string> {
-      const content = await chat([
+      const content = await chatLLM(llm, [
         {
           role: "system",
           content:
@@ -388,7 +414,7 @@ Return only valid JSON, no markdown code fence.
       title: string,
       description: string
     ): Promise<GeneratedSubjectStructure> {
-      const content = await chat(
+      const content = await chatLLM(llm,
         [
           {
             role: "system",
@@ -447,8 +473,8 @@ Rules:
     async extractTextFromImage(buffer: Buffer, mimeType: string): Promise<string> {
       const base64 = buffer.toString("base64");
       const url = `data:${mimeType};base64,${base64}`;
-      const res = await client.chat.completions.create({
-        model: MODEL,
+      const res = await llm.client.chat.completions.create({
+        model: llm.model,
         messages: [
           {
             role: "system",
@@ -475,7 +501,7 @@ Rules:
       if (subjects.length === 0) return null;
       if (subjects.length === 1) return subjects[0]?.id ?? null;
       const list = subjects.map((s) => `- ${s.id}: ${s.title} (${s.slug}) - ${s.description}`).join("\n");
-      const content = await chat(
+      const content = await chatLLM(llm,
         [
           {
             role: "system",
@@ -499,7 +525,7 @@ Rules:
       if (clusters.length === 0) return null;
       if (clusters.length === 1) return clusters[0]?.id ?? null;
       const list = clusters.map((c) => `- ${c.id}: ${c.title} (${c.description})`).join("\n");
-      const content = await chat(
+      const content = await chatLLM(llm,
         [
           {
             role: "system",
@@ -523,7 +549,7 @@ Rules:
       if (nodes.length === 0) return null;
       if (nodes.length === 1) return nodes[0]?.id ?? null;
       const list = nodes.map((n) => `- ${n.id}: ${n.title} (${n.description})`).join("\n");
-      const content = await chat(
+      const content = await chatLLM(llm,
         [
           {
             role: "system",
@@ -538,6 +564,73 @@ Rules:
       );
       const id = content.trim();
       return nodes.some((n) => n.id === id) ? id : nodes[0]?.id ?? null;
+    },
+
+    async generateInteractiveGameConfig(
+      params: InteractiveGameGenerationParams
+    ): Promise<InteractiveGameConfigJson> {
+      const system = `You are MindOrbit's Interactive Game Generator.
+Generate a playable educational game. Return ONLY valid JSON (no markdown).
+
+Universal envelope (always include these top-level keys):
+{
+  "title": string,
+  "description": string,
+  "subject": string,
+  "topic": string,
+  "gradeLevel": string,
+  "gameMode": string,
+  "estimatedMinutes": number,
+  "concepts": [{ "name": string, "skill": string, "difficulty": "easy"|"medium"|"hard" }],
+  "scoring": { "basePoints": number, "speedBonus": boolean, "streakBonus": boolean, "maxScore": number },
+  "gameConfig": object
+}
+
+Rules:
+- Age-appropriate for the grade level.
+- Teach through interaction; include immediate feedback strings.
+- At least one misconception trap (plausible wrong reasoning).
+- Include scoring that fits the mode.
+- gameMode in output must equal: ${params.gameMode}
+
+Mode-specific gameConfig shapes:
+- CONCEPT_BATTLE: playerHealth, opponentHealth, rounds[{question,choices,correctAnswer,feedback,damage,concept,difficulty}], powerUps
+- SPEED_RUN: durationSeconds, questions[{question,choices,correctAnswer,feedback,concept,difficulty}]
+- BUILD_SYSTEM: components[{id,label,description}], correctConnections[{from,to,relationship}], distractors, validationRules
+- FIND_MISTAKE: scenario, flawedExplanation, mistakes[{id,text,whyWrong,correction,concept,primary?:boolean}] (exactly one primary:true OR set correctMistakeId to the flawed claim id), correctMistakeId (id string, optional if one primary), correctVersion
+- PUZZLE_PATH: nodes array in play order; each {id,title,challenge,choices[],correctAnswer (exact string matching one choice),unlockAfter (ids of prior nodes required; first node []),concept}
+- SIMULATION_LAB: variables[{id,label,min,max,default}], goal, rules[{condition,result}], idealSettings, feedbackStates
+- DECISION_SIMULATOR: initialScenario, states[{id,narrative,choices[{text,nextStateId,effect,scoreDelta,concept}]}], endings
+- LAB_ESCAPE_ROOM: rooms[{id,title,clue,puzzle,choices,correctAnswer,unlockCode,concept}], timeLimitSeconds
+- VISUAL_BUILDER: items[{id,label,category}], dropZones[{id,label,acceptedItems: itemId[]}], diagramGoal — each item id appears in exactly one zone’s acceptedItems; a zone may list multiple ids (multiset). Partition must match items.
+- ADAPTIVE_QUIZ: startingDifficulty, questions[{question,choices,correctAnswer,feedback,concept,difficulty,followUpIfWrong}], adaptiveRules
+
+Use 4–8 questions for quiz-like modes unless the mode needs fewer.`;
+
+      const user = JSON.stringify({
+        subject: params.subjectTitle,
+        topic: params.topic,
+        gradeLevel: params.gradeLevel,
+        learningGoal: params.learningGoal,
+        gameMode: params.gameMode,
+      });
+
+      try {
+        const content = await chatLLM(llm,
+          [
+            { role: "system", content: system },
+            { role: "user", content: user },
+          ],
+          { jsonMode: true, maxTokens: 4096 }
+        );
+        const parsed = JSON.parse(content) as InteractiveGameConfigJson;
+        if (parsed && typeof parsed === "object" && parsed.gameConfig != null) {
+          return parsed;
+        }
+      } catch {
+        /* fall through */
+      }
+      return mockAIProvider.generateInteractiveGameConfig(params);
     },
   };
 }

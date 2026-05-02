@@ -24,6 +24,12 @@ export const EVENT_TYPES = {
   referral_qualified: "referral_qualified",
   mastery_report_shared: "mastery_report_shared",
   funnel_onboarding_completed: "funnel_onboarding_completed",
+  concept_arena_match_completed: "concept_arena_match_completed",
+  /** Interactive Game Lab — stored in UserEvent for funnels / dashboards */
+  game_generated: "game_generated",
+  game_started: "game_started",
+  game_answer: "game_answer",
+  game_completed: "game_completed",
 } as const;
 
 export type EventType = (typeof EVENT_TYPES)[keyof typeof EVENT_TYPES];

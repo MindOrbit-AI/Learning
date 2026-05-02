@@ -7,6 +7,8 @@ interface MissionProgressBarProps {
   total: number;
   completedIndices?: Set<number>;
   className?: string;
+  /** Softer segment transitions (micro-interaction engine). */
+  fluid?: boolean;
 }
 
 export function MissionProgressBar({
@@ -14,6 +16,7 @@ export function MissionProgressBar({
   total,
   completedIndices = new Set(),
   className,
+  fluid = false,
 }: MissionProgressBarProps) {
   if (total <= 0) return null;
 
@@ -28,7 +31,8 @@ export function MissionProgressBar({
           <div
             key={i}
             className={cn(
-              "h-1.5 flex-1 rounded-full transition-all duration-300",
+              "h-1.5 flex-1 rounded-full",
+              fluid ? "transition-all duration-500 ease-out" : "transition-all duration-300",
               i < current
                 ? "bg-primary"
                 : i === current
