@@ -102,6 +102,7 @@ export async function completeSceneMission(
     attempts: number;
     maxHintLevel?: number;
     mistakeCategory?: MistakeCategory | null;
+    masterySkill?: string | null;
   }>
 ): Promise<{ xpEarned: number; stars: number }> {
   const mission = await prisma.mission.findUnique({
@@ -126,12 +127,22 @@ export async function completeSceneMission(
         userAnswerJson: JSON.stringify({
           isCorrect: r.isCorrect,
           maxHintLevel: r.maxHintLevel ?? 0,
+          masterySkill: r.masterySkill ?? null,
         }),
         isCorrect: r.isCorrect,
         attempts: r.attempts,
         mistakeCategory: r.mistakeCategory ?? null,
       },
     }).catch(() => {});
+
+    if (r.masterySkill) {
+      void AnalyticsService.track(userId, EVENT_TYPES.visual_reasoning_practiced, {
+        missionId,
+        sceneId: r.sceneId,
+        skill: r.masterySkill,
+        isCorrect: r.isCorrect,
+      });
+    }
   }
 
   const stars = starsFromSceneOutcomes(

@@ -13,6 +13,7 @@ import { validateReveal } from "@/features/lesson-blocks/blocks/reveal/reveal.va
 import { validateTapHighlight } from "@/features/lesson-blocks/blocks/tap-highlight/tap-highlight.validation";
 import { validateFindError } from "@/features/lesson-blocks/blocks/find-error/find-error.validation";
 import { validateSlider } from "@/features/lesson-blocks/blocks/slider/slider.validation";
+import { validateVisualProblemBlock } from "@/features/lesson-blocks/blocks/visual-problem/visual-problem.validation";
 
 export function validateAnswer(
   block: InteractiveBlockConfig,
@@ -40,6 +41,8 @@ export function validateAnswer(
       return validateFindError(block, answer);
     case "slider":
       return validateSlider(block, answer);
+    case "visual-problem":
+      return validateVisualProblemBlock(block, answer);
     default: {
       const _: never = block;
       return {

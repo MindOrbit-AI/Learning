@@ -20,7 +20,8 @@ export type InteractiveBlockConfig =
   | RevealBlockConfig
   | TapHighlightBlockConfig
   | FindErrorBlockConfig
-  | SliderBlockConfig;
+  | SliderBlockConfig
+  | VisualProblemBlockConfig;
 
 export interface MultipleChoiceBlockConfig {
   type: "multiple-choice";
@@ -112,4 +113,15 @@ export interface SliderBlockConfig {
   initialValue?: number;
   targetValue?: number; // when set, validate against this
   unit?: string;
+}
+
+/** Visual-first problem: learner completes workspace, then symbolic answer (ILE lesson format). */
+export interface VisualProblemBlockConfig {
+  type: "visual-problem";
+  problemScenario: string;
+  finalPrompt: string;
+  visualWorkspace: Record<string, unknown>;
+  /** Canonical JSON `{ "answer": string, "visual": { ... } }` — same contract as micro-engine. */
+  correctSpec: string;
+  masterySkill?: string;
 }

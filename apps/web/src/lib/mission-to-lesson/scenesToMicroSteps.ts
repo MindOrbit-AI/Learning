@@ -3,9 +3,9 @@
  */
 
 import type { MissionSceneData } from "@mindorbit/types";
-import type { MicroInteractionType } from "@prisma/client";
-import type { RuntimeMicroStep } from "@/features/micro-engine/types";
+import type { MicroInteractionType, RuntimeMicroStep } from "@/features/micro-engine/types";
 import { defaultFeedbackWrong } from "@/features/micro-engine/validateMicroAnswer";
+import { buildVisualProblemMergedCorrect } from "./buildVisualProblemMerged";
 
 function oneLine(text: string, max = 96): string {
   const t = text.replace(/\s+/g, " ").trim();
@@ -13,6 +13,30 @@ function oneLine(text: string, max = 96): string {
   const cut = t.slice(0, max);
   const sp = cut.lastIndexOf(" ");
   return (sp > 40 ? cut.slice(0, sp) : cut).trim() + "…";
+}
+
+/** Real MCQ stem often lives in contentJson; scene.prompt is frequently generic ("Select the correct answer"). */
+function pickQuizStem(scene: MissionSceneData, content: Record<string, unknown>): string {
+  const generic =
+    /^(select (the )?correct answer|choose (one|an option|your answer)|pick (one|an answer))\s*\.?$/i;
+  const strip = (s: string) => s.replace(/\s+/g, " ").trim();
+  const push = (arr: string[], s: string) => {
+    const t = strip(s);
+    if (t) arr.push(t);
+  };
+  const candidates: string[] = [];
+  for (const key of ["question", "stem", "problem", "prompt", "text", "description", "statement"] as const) {
+    const v = content[key];
+    if (typeof v === "string") push(candidates, v);
+  }
+  if (typeof content.visual === "string") push(candidates, content.visual);
+  push(candidates, String(scene.prompt ?? ""));
+  push(candidates, String(scene.title ?? ""));
+  for (const c of candidates) {
+    if (c.length > 0 && !generic.test(c)) return oneLine(c, 220);
+  }
+  const fallback = candidates.find((c) => c.length > 0);
+  return oneLine(fallback || "Use the choices below.", 220);
 }
 
 function parseContent(scene: MissionSceneData): Record<string, unknown> {
@@ -159,6 +183,7 @@ function sceneToMicroStep(scene: MissionSceneData): RuntimeMicroStep {
       }
       const correctId = resolveCorrectId(options, correct);
       return base("tap_choice", {
+        prompt: pickQuizStem(scene, content),
         interactionConfig: { options, layout: "grid" },
         correctAnswer: correctId,
         feedbackWrong: oneLine(defaultFeedbackWrong("tap_choice"), 120),
@@ -270,6 +295,47 @@ function sceneToMicroStep(scene: MissionSceneData): RuntimeMicroStep {
         feedbackCorrect: "Captured.",
         feedbackWrong: "",
       });
+
+    case "visual_problem": {
+      const merged = buildVisualProblemMergedCorrect(content, correct);
+      const vw = (content.visualWorkspace ?? {}) as Record<string, unknown>;
+      const kind = String(vw.kind ?? "part_model");
+      const defWrongV = oneLine(
+        "Adjust the model first — count shaded parts against the total.",
+        140
+      );
+      const defWrongA = oneLine(
+        "Your picture matches the story; rewrite the fraction or value to match the shaded model.",
+        140
+      );
+      const defCorrect = oneLine(
+        String(
+          content.feedbackCorrect ??
+            scene.explanation ??
+            "You matched the visual and the symbolic answer."
+        ),
+        220
+      );
+      return base("visual_problem", {
+        prompt: oneLine(String(content.finalPrompt ?? scene.prompt ?? scene.title)),
+        interactionConfig: {
+          problemScenario: String(content.problemScenario ?? scene.title ?? ""),
+          visualWorkspace: content.visualWorkspace ?? { kind: "part_model", totalParts: 8 },
+          answerPlaceholder: String(content.answerPlaceholder ?? "Final answer…"),
+          feedbackWrongVisual: String(content.feedbackWrongVisual ?? defWrongV),
+          feedbackWrongAnswer: String(content.feedbackWrongAnswer ?? defWrongA),
+          feedbackCorrect: String(content.feedbackCorrect ?? defCorrect),
+          looseText: content.looseText !== false,
+        },
+        correctAnswer: merged,
+        feedbackCorrect: defCorrect,
+        feedbackWrong: oneLine(String(content.feedbackWrong ?? "Try again — model or answer."), 120),
+        masterySkill: String(content.masterySkill ?? `visual_reasoning:${kind}`),
+        // Scenario is shown in MicroInteractionEngine only; avoid duplicating it in MicroVisualLayer.
+        visualStateBefore: null,
+        visualStateAfter: null,
+      });
+    }
 
     case "construct_answer":
     case "manipulate":

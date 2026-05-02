@@ -1,6 +1,7 @@
-import type { MicroInteractionType } from "@prisma/client";
+import type { MicroInteractionType as PrismaMicroInteractionType } from "@prisma/client";
 
-export type { MicroInteractionType };
+/** Prisma enum plus engine extensions (Prisma client types lag until `yarn db:generate`). */
+export type MicroInteractionType = PrismaMicroInteractionType | "visual_problem";
 
 /** Runtime step for the Micro-Interaction Engine (from DB or scene adapter). */
 export type RuntimeMicroStep = {
@@ -24,4 +25,6 @@ export type SceneResponsePayload = {
   sceneId: string;
   isCorrect: boolean;
   attempts: number;
+  /** Visual reasoning skill id (e.g. fraction_part_whole_visual) for mastery analytics. */
+  masterySkill?: string | null;
 };

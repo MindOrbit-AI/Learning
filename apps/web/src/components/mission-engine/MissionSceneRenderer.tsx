@@ -185,6 +185,22 @@ export function MissionSceneRenderer({
         </ManipulationCanvas>
       );
 
+    case "visual_problem":
+      return (
+        <div className="space-y-3 rounded-xl border border-primary/25 bg-primary/5 p-4">
+          <p className="text-xs font-bold uppercase tracking-wide text-primary">Visual-first problem</p>
+          <p className="text-sm text-muted-foreground">
+            This step is designed for the Micro lesson runner (picture first, then answer). Open the mission
+            from Missions or the mastery map with scene-based mode to interact with the full workspace.
+          </p>
+          <ConstructAnswerScene
+            content={{ placeholder: "Placeholder answer (use lesson runner for visuals)…" }}
+            onAnswer={(a) => onAnswer(a)}
+            disabled={disabled}
+          />
+        </div>
+      );
+
     case "simulate":
       return (
         <ManipulationCanvas>

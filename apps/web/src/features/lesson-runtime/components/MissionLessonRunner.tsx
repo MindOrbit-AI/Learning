@@ -60,7 +60,7 @@ export function MissionLessonRunner({
   const steps = useMemo(() => scenesToMicroSteps(scenes as MissionSceneData[]), [scenes]);
 
   const attachHintLevels = useCallback(
-    (rows: Array<{ sceneId: string; isCorrect: boolean; attempts: number }>) =>
+    (rows: Array<{ sceneId: string; isCorrect: boolean; attempts: number; masterySkill?: string | null }>) =>
       rows.map((r) => ({
         ...r,
         maxHintLevel: hintDepthByStepIdRef.current[r.sceneId] ?? 0,
@@ -105,6 +105,7 @@ export function MissionLessonRunner({
               sceneId: r.sceneId,
               isCorrect: r.isCorrect,
               attempts: r.attempts,
+              masterySkill: r.masterySkill,
             }))
           ),
         }),

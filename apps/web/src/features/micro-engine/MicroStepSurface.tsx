@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { cn } from "@mindorbit/ui";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import type { RuntimeMicroStep } from "./types";
+import { VisualProblemSurface } from "@/features/visual-problem-solving/VisualProblemSurface";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -42,6 +43,8 @@ export function MicroStepSurface({ step, disabled, shakeToken, onCommit }: Props
       return <VisualToggle step={step} disabled={disabled} shakeToken={shakeToken} onCommit={onCommit} />;
     case "connect_nodes":
       return <ConnectNodes step={step} disabled={disabled} shakeToken={shakeToken} onCommit={onCommit} />;
+    case "visual_problem":
+      return <VisualProblemSurface step={step} disabled={disabled} shakeToken={shakeToken} onCommit={onCommit} />;
     default:
       return <FillBlank step={step} disabled={disabled} shakeToken={shakeToken} onCommit={onCommit} />;
   }
@@ -55,7 +58,10 @@ function TapChoice({ step, disabled, shakeToken, onCommit }: Props) {
       key={shakeToken}
       animate={shakeToken ? { x: [0, -6, 6, -4, 4, 0] } : {}}
       transition={{ duration: 0.45 }}
-      className={cn("grid gap-3", layout === "grid" ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1")}
+      className={cn(
+        "touch-manipulation grid gap-3",
+        layout === "grid" ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"
+      )}
     >
       {options.map((o) => (
         <button
@@ -64,7 +70,7 @@ function TapChoice({ step, disabled, shakeToken, onCommit }: Props) {
           disabled={disabled}
           onClick={() => onCommit(o.id)}
           className={cn(
-            "min-h-[52px] rounded-2xl border-2 border-muted bg-background px-4 py-4 text-left text-base font-semibold shadow-sm transition-all",
+            "min-h-[52px] cursor-pointer rounded-2xl border-2 border-muted bg-background px-4 py-4 text-left text-base font-semibold shadow-sm transition-all select-none",
             "hover:border-primary/50 hover:bg-primary/5 active:scale-[0.98]",
             "disabled:pointer-events-none disabled:opacity-60"
           )}

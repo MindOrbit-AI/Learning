@@ -333,11 +333,35 @@ export const mockAIProvider: AIProvider = {
       ],
       default: [
         {
+          sceneType: "visual_problem",
+          title: "Model the situation",
+          prompt: "What fraction did you eat?",
+          contentJson: {
+            problemScenario: `A round pizza is cut into 8 equal slices. You ate 3 slices.`,
+            visualWorkspace: { kind: "part_model", totalParts: 8, targetShadedCount: 3, match: "count" },
+            finalPrompt: "What fraction of the whole pizza did you eat? (Use notation like 3/8)",
+            masterySkill: "fraction_part_whole_visual",
+            feedbackCorrect:
+              "You shaded {{shaded}} of {{total}} equal parts, so the fraction you ate is {{userAnswer}}.",
+            feedbackWrongVisual:
+              "You shaded {{shaded}} parts but the story says you should show {{expected}} eaten parts of {{total}}.",
+            feedbackWrongAnswer:
+              "Your picture matches {{shaded}} of {{total}} — write that same relationship as a fraction.",
+            expectedAnswer: "3/8",
+          },
+          correctAnswerJson: {
+            answer: "3/8",
+            visual: { kind: "part_model", totalParts: 8, targetShadedCount: 3, match: "count" },
+          },
+          explanation: "The numerator counts shaded equal parts; the denominator counts all equal parts.",
+          orderIndex: 0,
+        },
+        {
           sceneType: "observe",
           title: "Introduction",
-          prompt: "Explore this concept step by step.",
+          prompt: "Connect the picture to the symbols you used.",
           contentJson: { description: `Learn about ${title}` },
-          orderIndex: 0,
+          orderIndex: 1,
         },
         {
           sceneType: "micro_quiz",
@@ -351,7 +375,7 @@ export const mockAIProvider: AIProvider = {
             ],
           },
           correctAnswerJson: '"a"',
-          orderIndex: 1,
+          orderIndex: 2,
         },
       ],
     };

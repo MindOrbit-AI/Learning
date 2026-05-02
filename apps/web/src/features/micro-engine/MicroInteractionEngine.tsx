@@ -8,6 +8,8 @@ import { ChevronLeft } from "lucide-react";
 import { MissionProgressBar } from "@/components/mission-engine/MissionProgressBar";
 import type { RuntimeMicroStep, SceneResponsePayload } from "./types";
 import { validateMicroAnswer } from "./validateMicroAnswer";
+import { diagnoseVisualProblemStep } from "@/features/visual-problem-solving/validateVisualProblem";
+import { applyFeedbackTemplate } from "@/features/visual-problem-solving/feedback-templates";
 import { MicroStepSurface } from "./MicroStepSurface";
 import { MicroVisualLayer } from "./MicroVisualLayer";
 import { microEngineSounds } from "./micro-engine-sounds";
@@ -94,6 +96,7 @@ export function MicroInteractionEngine({
         sceneId: s.sourceSceneId,
         isCorrect: r?.isCorrect ?? false,
         attempts: Math.max(1, r?.attempts ?? 1),
+        masterySkill: s.masterySkill,
       };
     });
   }, [steps]);
@@ -107,13 +110,32 @@ export function MicroInteractionEngine({
       answersRef.current[sceneId] = raw;
       const ok = validateMicroAnswer(step, raw);
 
+      let wrongText = step.feedbackWrong || "Try again.";
+      let correctText = step.feedbackCorrect || "Yes!";
+      if (String(step.type) === "visual_problem") {
+        const d = diagnoseVisualProblemStep(step, raw);
+        if (ok && d.ok) {
+          correctText = applyFeedbackTemplate(
+            String(step.interactionConfig.feedbackCorrect ?? step.feedbackCorrect),
+            d.vars
+          );
+        } else if (!ok && !d.ok) {
+          wrongText = applyFeedbackTemplate(
+            d.failed === "visual"
+              ? String(step.interactionConfig.feedbackWrongVisual ?? wrongText)
+              : String(step.interactionConfig.feedbackWrongAnswer ?? wrongText),
+            d.vars
+          );
+        }
+      }
+
       if (!ok) {
         microEngineSounds.wrong();
         resultsRef.current[sceneId] = { isCorrect: false, attempts: nextAttempts };
         setStreak(0);
         setShake((s) => s + 1);
         setVisualPhase("wrong");
-        setOverlay({ kind: "wrong", text: step.feedbackWrong || "Try again." });
+        setOverlay({ kind: "wrong", text: wrongText });
         setTick((t) => t + 1);
         emitProgress();
         window.setTimeout(() => {
@@ -136,7 +158,7 @@ export function MicroInteractionEngine({
       setTick((t) => t + 1);
       setLocked(true);
       setVisualPhase("correct");
-      setOverlay({ kind: "correct", text: step.feedbackCorrect || "Yes!" });
+      setOverlay({ kind: "correct", text: correctText });
 
         window.setTimeout(() => {
         setOverlay(null);
@@ -205,7 +227,7 @@ export function MicroInteractionEngine({
           </span>
         </div>
       </CardHeader>
-      <CardContent className="relative z-10 space-y-5 pb-8 pt-2 overflow-hidden">
+      <CardContent className="relative z-10 space-y-5 overflow-x-hidden overflow-y-visible pb-8 pt-2">
         {onExit ? (
           <button
             type="button"
@@ -215,6 +237,15 @@ export function MicroInteractionEngine({
             <ChevronLeft className="h-4 w-4" />
             Missions
           </button>
+        ) : null}
+
+        {String(step.type) === "visual_problem" && step.interactionConfig.problemScenario ? (
+          <div className="pointer-events-none relative z-0 rounded-2xl border border-amber-500/25 bg-amber-500/[0.06] px-4 py-3 text-sm leading-relaxed text-foreground">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700/90 dark:text-amber-300/90">
+              Problem scenario
+            </p>
+            <p className="mt-1 font-medium">{String(step.interactionConfig.problemScenario)}</p>
+          </div>
         ) : null}
 
         <MicroVisualLayer step={step} phase={visualPhase === "idle" ? "idle" : visualPhase} />
@@ -230,12 +261,12 @@ export function MicroInteractionEngine({
           }}
           transition={{ duration: visualPhase === "wrong" ? 0.4 : 0.35 }}
           className={cn(
-            "rounded-2xl border bg-card/80 p-5 shadow-sm backdrop-blur-sm",
+            "relative z-10 touch-manipulation rounded-2xl border bg-card/80 p-5 shadow-sm",
             visualPhase === "correct" && "border-emerald-500/50 shadow-[0_0_28px_rgba(34,197,94,0.25)]"
           )}
         >
           <p className="text-center text-base font-bold leading-snug md:text-lg">{step.prompt}</p>
-          <div className="mt-5">
+          <div className="relative z-10 mt-5">
             <MicroStepSurface
               step={step}
               disabled={locked}
@@ -268,7 +299,7 @@ export function MicroInteractionEngine({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               className={cn(
-                "fixed inset-x-4 top-28 z-50 mx-auto max-w-md rounded-2xl border px-5 py-4 text-center text-sm font-semibold shadow-2xl backdrop-blur-md md:inset-x-auto",
+                "pointer-events-none fixed inset-x-4 top-28 z-50 mx-auto max-w-md rounded-2xl border px-5 py-4 text-center text-sm font-semibold shadow-2xl md:inset-x-auto",
                 overlay.kind === "correct"
                   ? "border-emerald-500/40 bg-emerald-950/90 text-emerald-50"
                   : "border-rose-500/40 bg-rose-950/90 text-rose-50"

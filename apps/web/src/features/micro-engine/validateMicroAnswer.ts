@@ -1,5 +1,5 @@
-import type { MicroInteractionType } from "@prisma/client";
-import type { RuntimeMicroStep } from "./types";
+import type { MicroInteractionType, RuntimeMicroStep } from "./types";
+import { validateVisualProblem } from "@/features/visual-problem-solving/validateVisualProblem";
 
 function norm(s: string): string {
   return s.trim().toLowerCase().replace(/\s+/g, " ");
@@ -80,6 +80,9 @@ export function validateMicroAnswer(step: RuntimeMicroStep, submitted: unknown):
       return got.every((v, i) => v === want[i]);
     }
 
+    case "visual_problem":
+      return validateVisualProblem(expected, submitted);
+
     default:
       return norm(sub) === norm(expected);
   }
@@ -97,6 +100,8 @@ export function defaultFeedbackWrong(type: MicroInteractionType): string {
       return "Trace the relationship again.";
     case "visual_toggle":
       return "Toggle the pieces that matter.";
+    case "visual_problem":
+      return "Fix the visual model, then match your answer to what you built.";
     default:
       return "Almost — one more try.";
   }

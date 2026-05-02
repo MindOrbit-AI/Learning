@@ -19,7 +19,8 @@ export type SceneType =
   | "construct_answer"
   | "micro_quiz"
   | "reflect"
-  | "transfer";
+  | "transfer"
+  | "visual_problem";
 
 export interface MissionSceneSpec {
   sceneType: SceneType;

@@ -139,6 +139,8 @@ enum SceneType {
   micro_quiz
   reflect
   transfer
+  /// Solve on an interactive canvas before the text answer unlocks.
+  visual_problem
 }
 
 // Micro-Interaction Engine: 2-5s steps, instant feedback (Brilliant / Duolingo style).
@@ -151,6 +153,8 @@ enum MicroInteractionType {
   fill_blank
   sequence_order
   visual_toggle
+  /// Phased: complete required visual manipulation, then submit the symbolic answer.
+  visual_problem
 }
 
 enum MistakeCategory {

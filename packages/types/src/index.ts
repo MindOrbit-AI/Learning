@@ -24,7 +24,8 @@ export type SceneType =
   | "construct_answer"
   | "micro_quiz"
   | "reflect"
-  | "transfer";
+  | "transfer"
+  | "visual_problem";
 
 export type MistakeCategory =
   | "prerequisite_gap"

@@ -11,6 +11,9 @@ export function MicroVisualLayer({
   step: RuntimeMicroStep;
   phase: "idle" | "correct" | "wrong";
 }) {
+  // Canvas + scenario live in VisualProblemSurface / banner; no separate snippet strip.
+  if (String(step.type) === "visual_problem") return null;
+
   const before = step.visualStateBefore;
   const after = step.visualStateAfter;
   const snippet =
@@ -41,7 +44,7 @@ export function MicroVisualLayer({
         exit={{ opacity: 0 }}
         transition={{ type: "spring", stiffness: 420, damping: 28 }}
         className={cn(
-          "rounded-2xl border px-4 py-3 font-mono text-sm",
+          "pointer-events-none relative z-0 rounded-2xl border px-4 py-3 font-mono text-sm",
           dim ? "border-muted-foreground/30 bg-muted/40 text-muted-foreground" : "border-primary/30 bg-primary/5",
           phase === "correct" && "border-emerald-500/60 text-emerald-900 dark:text-emerald-100"
         )}

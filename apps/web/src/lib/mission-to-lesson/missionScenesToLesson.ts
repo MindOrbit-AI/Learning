@@ -9,7 +9,9 @@ import type {
   InteractiveBlockConfig,
   ConstructAnswerBlockConfig,
   NumberLineData,
+  VisualProblemBlockConfig,
 } from "@/features/lesson-blocks/types/block.types";
+import { buildVisualProblemMergedCorrect } from "@/lib/mission-to-lesson/buildVisualProblemMerged";
 
 function extractImageUrl(raw: unknown): string | undefined {
   if (typeof raw === "string" && (raw.startsWith("http") || raw.startsWith("/") || raw.startsWith("data:")))
@@ -275,6 +277,19 @@ function sceneToBlock(
         expectedFormat: content.expectedFormat as string | undefined,
         correctAnswer: correct != null ? String(correct) : "",
       };
+
+    case "visual_problem": {
+      const spec = buildVisualProblemMergedCorrect(content, correct);
+      const block: VisualProblemBlockConfig = {
+        type: "visual-problem",
+        problemScenario: String(content.problemScenario ?? prompt),
+        finalPrompt: String(content.finalPrompt ?? prompt),
+        visualWorkspace: (content.visualWorkspace as Record<string, unknown>) ?? {},
+        correctSpec: spec,
+        masterySkill: (content.masterySkill as string) ?? undefined,
+      };
+      return block;
+    }
 
     case "reflect":
       return {

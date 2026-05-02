@@ -30,6 +30,8 @@ export const EVENT_TYPES = {
   game_started: "game_started",
   game_answer: "game_answer",
   game_completed: "game_completed",
+  /** Visual-first mission step — payload: missionId, sceneId, skill, isCorrect */
+  visual_reasoning_practiced: "visual_reasoning_practiced",
 } as const;
 
 export type EventType = (typeof EVENT_TYPES)[keyof typeof EVENT_TYPES];
