@@ -17,6 +17,8 @@ import {
   computerScienceClusters,
   computerScienceEdges,
   computerScienceNodes,
+  VISUAL_ENGINE_LESSON_SEEDS,
+  subjectSlugForVisualLessonSeed,
   geometryClusters,
   geometryEdges,
   geometryNodes,
@@ -1194,6 +1196,32 @@ async function seed() {
       }
     }
   }
+
+  for (const lessonSeed of VISUAL_ENGINE_LESSON_SEEDS) {
+    const subSlug = subjectSlugForVisualLessonSeed(lessonSeed);
+    const subjectRow = await prisma.subject.findUnique({ where: { slug: subSlug } });
+    if (!subjectRow) continue;
+    await prisma.sceneLesson.upsert({
+      where: { id: lessonSeed.id },
+      create: {
+        id: lessonSeed.id,
+        userId: demoUser.id,
+        subjectId: subjectRow.id,
+        topic: lessonSeed.topic,
+        level: lessonSeed.level,
+        title: lessonSeed.title,
+        lessonJson: lessonSeed as object,
+      },
+      update: {
+        lessonJson: lessonSeed as object,
+        title: lessonSeed.title,
+        topic: lessonSeed.topic,
+        level: lessonSeed.level,
+        subjectId: subjectRow.id,
+      },
+    });
+  }
+  console.log(`Visual Problem Engine: ${VISUAL_ENGINE_LESSON_SEEDS.length} seed lessons upserted`);
 
   console.log("Demo user, admin users, and resources seeded");
   console.log("Seed complete.");

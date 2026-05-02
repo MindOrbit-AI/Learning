@@ -251,6 +251,9 @@ model User {
   games                  Game[]
   gameAttempts           GameAttempt[]
   gameRewards            GameReward[]
+  sceneLessons           SceneLesson[]       @relation("SceneLessonAuthor")
+  sceneAttempts          SceneAttempt[]
+  lessonAttempts         LessonAttempt[]
 
   @@index([planTier])
   @@index([subscriptionStatus])
@@ -340,6 +343,7 @@ model Subject {
   missionTemplates MissionTemplate[]
   libraryAdds      UserSubjectAdd[]
   games            Game[]
+  sceneLessons     SceneLesson[]
 }
 
 /// User added someone else's published subject to their library (listed on /subjects, dashboard, etc.).
@@ -399,6 +403,8 @@ model ConceptNode {
   missionTemplates   MissionTemplate[]
   games              Game[]
   gameEvents         GameEvent[]
+  /// Optional JSON list of prerequisite concept node ids (Visual Problem Engine).
+  prerequisitesJson  Json?
 
   @@unique([subjectId, slug])
 }
@@ -478,11 +484,65 @@ model UserNodeState {
   decay          Float     @default(0)
   lastPracticedAt DateTime?
   nextReviewAt   DateTime?
+  /// Misconceptions captured by the Visual Problem Engine (structured JSON).
+  misconceptionJson Json?
   user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   node           ConceptNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
 
   @@unique([userId, subjectId, nodeId])
   @@index([userId, nodeId])
+}
+
+/// Authorable or generated visual lesson (Brilliant-style scene sequence).
+model SceneLesson {
+  id          String    @id @default(cuid())
+  userId      String?
+  subjectId   String?
+  topic       String
+  level       String
+  title       String
+  /// Full `VisualLesson` JSON: scenes + finalMasteryCheck + metadata.
+  lessonJson  Json
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User?     @relation("SceneLessonAuthor", fields: [userId], references: [id], onDelete: SetNull)
+  subject     Subject?  @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  sceneAttempts SceneAttempt[]
+  lessonAttempts LessonAttempt[]
+
+  @@index([userId, createdAt])
+  @@index([subjectId, topic])
+}
+
+model SceneAttempt {
+  id              String    @id @default(cuid())
+  userId          String
+  sceneLessonId   String
+  sceneId         String
+  userInputJson   Json
+  isCorrect       Boolean
+  feedback        String?
+  misconception   String?
+  createdAt       DateTime  @default(now())
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sceneLesson     SceneLesson @relation(fields: [sceneLessonId], references: [id], onDelete: Cascade)
+
+  @@index([userId, sceneLessonId])
+  @@index([sceneLessonId, sceneId])
+}
+
+model LessonAttempt {
+  id            String    @id @default(cuid())
+  userId        String
+  sceneLessonId String
+  score         Float     @default(0)
+  completed     Boolean   @default(false)
+  mistakesJson  Json?
+  createdAt     DateTime  @default(now())
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sceneLesson   SceneLesson @relation(fields: [sceneLessonId], references: [id], onDelete: Cascade)
+
+  @@index([userId, sceneLessonId])
 }
 
 model Mission {

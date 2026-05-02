@@ -88,17 +88,16 @@ function TriangleSvg({ spec, size = 140 }: { spec: TriangleSpec; size?: number }
 function normalizeTriangles(ws: Record<string, unknown>): TriangleSpec[] {
   const raw = ws.diagramTriangles;
   if (Array.isArray(raw)) {
-    return raw
-      .map((t) => {
-        const o = t as Record<string, unknown>;
-        const e = o.edges as number[] | undefined;
-        if (!Array.isArray(e) || e.length < 3) return null;
-        return {
-          edges: [Number(e[0]), Number(e[1]), Number(e[2])] as [number, number, number],
-          label: o.label != null ? String(o.label) : undefined,
-        };
-      })
-      .filter((x): x is TriangleSpec => x != null);
+    const mapped: (TriangleSpec | null)[] = raw.map((t) => {
+      const o = t as Record<string, unknown>;
+      const e = o.edges as number[] | undefined;
+      if (!Array.isArray(e) || e.length < 3) return null;
+      return {
+        edges: [Number(e[0]), Number(e[1]), Number(e[2])] as [number, number, number],
+        label: o.label != null ? String(o.label) : undefined,
+      };
+    });
+    return mapped.filter((x): x is TriangleSpec => x != null);
   }
   const out: TriangleSpec[] = [];
   const pushTri = (key: string) => {

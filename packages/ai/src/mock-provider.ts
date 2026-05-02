@@ -349,10 +349,10 @@ export const mockAIProvider: AIProvider = {
               "Your picture matches {{shaded}} of {{total}} — write that same relationship as a fraction.",
             expectedAnswer: "3/8",
           },
-          correctAnswerJson: {
+          correctAnswerJson: JSON.stringify({
             answer: "3/8",
             visual: { kind: "part_model", totalParts: 8, targetShadedCount: 3, match: "count" },
-          },
+          }),
           explanation: "The numerator counts shaded equal parts; the denominator counts all equal parts.",
           orderIndex: 0,
         },

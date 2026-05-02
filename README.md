@@ -12,6 +12,10 @@ MindOrbit Learn combines:
 - **Community notes** – Node-linked resources from students
 - **Spaced repetition** – Review queue for reinforcement
 
+## Documentation
+
+- **[Visual Problem Solving Engine](./docs/visual-problem-engine.md)** — scene-based lessons (`VisualLesson` / `Scene`), primitives, APIs, Prisma models, seed catalog, and how to extend.
+
 ## Tech Stack
 
 - **Monorepo**: Turborepo + pnpm
