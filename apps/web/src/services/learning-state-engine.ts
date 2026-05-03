@@ -6,10 +6,23 @@
 import { prisma } from "@mindorbit/db";
 import type { NodeState } from "@mindorbit/types";
 
+/** DB may still return legacy `missing` until migrations run; treat as `weak`. */
+function coerceStoredNodeState(raw: string): NodeState {
+  if (raw === "missing") return "weak";
+  if (raw === "mastered" || raw === "weak" || raw === "learning" || raw === "untouched") return raw;
+  return "untouched";
+}
+
 const MASTERED_THRESHOLD = 85;
-const WEAK_THRESHOLD = 60;
+/** Mastery strictly below this → `weak`; from here up to (but not including) mastered → `learning`. */
+const WEAK_MAX_EXCLUSIVE = 30;
 const RETENTION_THRESHOLD = 0.8;
 const DEFAULT_STABILITY = 7; // days
+
+/** True when the learner should see this node as needing practice (not mastered / not untouched). */
+export function isPracticePriorityNodeState(state: NodeState | string): boolean {
+  return state === "weak" || state === "learning";
+}
 
 export interface NodeStateMetrics {
   mastery: number;
@@ -38,13 +51,13 @@ export class LearningStateEngine {
   }
 
   /**
-   * Assign node state from mastery percentage
-   * mastered >= 85, weak 60-84, missing < 60
+   * Assign node state from mastery percentage (0–100).
+   * mastered ≥ 85; learning for 30–84; weak for under 30.
    */
   static assignNodeState(mastery: number): NodeState {
     if (mastery >= MASTERED_THRESHOLD) return "mastered";
-    if (mastery >= WEAK_THRESHOLD) return "weak";
-    return "missing";
+    if (mastery < WEAK_MAX_EXCLUSIVE) return "weak";
+    return "learning";
   }
 
   /**
@@ -65,10 +78,10 @@ export class LearningStateEngine {
     const retention = this.computeRetention(uns.lastPracticedAt, stability, now);
 
     const decay = 1 - retention;
-    let state = uns.state;
+    let state = resolveDisplayNodeState(uns.mastery, uns.state as string | undefined);
 
     if (
-      uns.state === "mastered" &&
+      state === "mastered" &&
       retention < RETENTION_THRESHOLD &&
       uns.nextReviewAt &&
       now >= uns.nextReviewAt
@@ -141,4 +154,18 @@ export class LearningStateEngine {
     const retention = this.computeRetention(lastPracticedAt, stability, now);
     return retention < RETENTION_THRESHOLD || (nextReviewAt !== null && now >= nextReviewAt);
   }
+}
+
+/**
+ * State shown on maps/sidebars: derive from mastery when present so the label always matches
+ * the displayed % (e.g. 20% → `weak`), and never surface removed enum values like `missing`.
+ */
+export function resolveDisplayNodeState(
+  mastery: number | null | undefined,
+  stored: string | undefined
+): NodeState {
+  if (mastery != null && Number.isFinite(Number(mastery))) {
+    return LearningStateEngine.assignNodeState(Number(mastery));
+  }
+  return coerceStoredNodeState(String(stored ?? "untouched"));
 }

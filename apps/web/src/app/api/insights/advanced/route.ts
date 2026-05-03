@@ -56,7 +56,7 @@ export async function GET() {
   return NextResponse.json({
     masteryDistribution: masteryByState,
     weakNodeTrend: nodeStates
-      .filter((s) => s.state === "weak")
+      .filter((s) => s.state === "weak" || s.state === "learning")
       .map((s) => ({
         nodeId: s.nodeId,
         title: s.node.title,

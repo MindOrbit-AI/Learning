@@ -22,7 +22,7 @@ export const missionsService = {
   async generateMission(
     nodeId: string,
     userId: string,
-    options?: { sceneBased?: boolean }
+    options?: { sceneBased?: boolean; regenerate?: boolean }
   ): Promise<string | null> {
     const node = await prisma.conceptNode.findUnique({
       where: { id: nodeId },
@@ -30,14 +30,24 @@ export const missionsService = {
     });
     if (!node) return null;
 
-    const existing = await prisma.mission.findFirst({
-      where: {
-        userId,
-        nodeId,
-        status: { in: ["not_started", "in_progress"] },
-      },
-    });
-    if (existing) return existing.id;
+    if (options?.regenerate) {
+      await prisma.mission.deleteMany({
+        where: {
+          userId,
+          nodeId,
+          status: { in: ["not_started", "in_progress"] },
+        },
+      });
+    } else {
+      const existing = await prisma.mission.findFirst({
+        where: {
+          userId,
+          nodeId,
+          status: { in: ["not_started", "in_progress"] },
+        },
+      });
+      if (existing) return existing.id;
+    }
 
     const sceneBased = options?.sceneBased ?? false;
     const provider = getAIProvider();

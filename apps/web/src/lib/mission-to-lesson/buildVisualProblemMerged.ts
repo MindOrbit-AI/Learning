@@ -1,12 +1,30 @@
 import { expandNumberLineBounds, inferNumericTarget } from "@/features/visual-problem-solving/numberLineBounds";
 import { reconcilePartModelCountTarget } from "@/features/visual-problem-solving/partModelCountTarget";
 
+/** Drop targets for slot_fill (array drag) — ids must match keys in learner `slotAssignments`. */
+export function normalizeSlotFillSlots(raw: unknown, slotCount: number): Array<{ id: string; label: string }> {
+  const n = Math.max(1, Math.round(slotCount));
+  if (Array.isArray(raw) && raw.length > 0) {
+    return raw.map((z, i) => {
+      if (typeof z === "string") return { id: `slot-${i}`, label: z };
+      const o = z as Record<string, unknown>;
+      return {
+        id: String(o.id ?? `slot-${i}`),
+        label: String(o.label ?? o.id ?? `${i + 1}`),
+      };
+    });
+  }
+  return Array.from({ length: n }, (_, i) => ({ id: String(i), label: String(i + 1) }));
+}
+
 export function normalizeNodeList(raw: unknown): Array<{ id: string; label: string }> {
   const arr = Array.isArray(raw) ? raw : [];
   return arr.map((n, i) => {
     if (typeof n === "string") return { id: n, label: n };
     const o = n as Record<string, unknown>;
-    const label = String(o.label ?? o.text ?? o.value ?? o.id ?? `n${i}`);
+    const label = String(
+      o.label ?? o.display ?? o.expression ?? o.text ?? o.value ?? o.equation ?? o.id ?? `n${i}`
+    );
     const id = String(o.id ?? o.label ?? o.text ?? `n${i}`);
     return { id, label };
   });
@@ -19,6 +37,55 @@ function chainLabelsToEdges(chain: string[], nodes: Array<{ id: string; label: s
   const pairs: [string, string][] = [];
   for (let i = 0; i < ids.length - 1; i++) pairs.push([ids[i]!, ids[i + 1]!]);
   return pairs;
+}
+
+/** Tuples `[from,to]` or `{ from, to }` / `{ fromId, toId }` from AI / CMS. */
+function pairFromEdgeItem(x: unknown): [string, string] | null {
+  if (Array.isArray(x) && x.length === 2) return [String(x[0]), String(x[1])];
+  if (x && typeof x === "object") {
+    const o = x as Record<string, unknown>;
+    if (o.from != null && o.to != null) return [String(o.from), String(o.to)];
+    if (o.fromId != null && o.toId != null) return [String(o.fromId), String(o.toId)];
+  }
+  return null;
+}
+
+function pairsFromEdgeList(raw: unknown): [string, string][] {
+  if (!Array.isArray(raw) || raw.length === 0) return [];
+  if (raw.length === 2 && !Array.isArray(raw[0]) && typeof raw[0] !== "object") {
+    const p = pairFromEdgeItem(raw);
+    return p ? [p] : [];
+  }
+  const out: [string, string][] = [];
+  for (const x of raw) {
+    const p = pairFromEdgeItem(x);
+    if (p) out.push(p);
+  }
+  return out;
+}
+
+/** Prefer explicit edge list unless `chain` describes more links (stale single-edge correctEdges is common). */
+function bestNodeLinkPairs(
+  vw: Record<string, unknown>,
+  nodes: Array<{ id: string; label: string }>
+): [string, string][] {
+  let fromEdges = pairsFromEdgeList(vw.correctEdges);
+  if (fromEdges.length === 0) {
+    fromEdges = pairsFromEdgeList(vw.correctEdge);
+  }
+  if (fromEdges.length === 0) {
+    const single = vw.correctEdge as unknown;
+    if (Array.isArray(single) && single.length === 2 && typeof single[0] !== "object") {
+      fromEdges = [[String(single[0]), String(single[1])]];
+    }
+  }
+  let fromChain: [string, string][] = [];
+  if (Array.isArray(vw.chain) && vw.chain.length >= 2) {
+    fromChain = chainLabelsToEdges((vw.chain as unknown[]).map(String), nodes);
+  }
+  if (fromChain.length > fromEdges.length) return fromChain;
+  if (fromEdges.length > 0) return fromEdges;
+  return fromChain;
 }
 
 /** Merges scene `contentJson` + `correctAnswerJson` into canonical JSON for visual_problem steps. */
@@ -41,18 +108,60 @@ export function buildVisualProblemMergedCorrect(content: Record<string, unknown>
   if (!textAnswer) textAnswer = String(content.expectedAnswer ?? "");
 
   if (explicitVisual) {
-    const vk = String(explicitVisual.kind ?? "part_model");
-    const match = String(explicitVisual.match ?? "count");
+    let vis = explicitVisual as Record<string, unknown>;
+    const vk = String(vis.kind ?? "part_model");
+    const match = String(vis.match ?? "count");
     if (
       (vk === "part_model" || vk === "fraction_bar" || vk === "pizza_model" || vk === "area_model") &&
       match === "count"
     ) {
-      const total = Number(explicitVisual.totalParts ?? vw.totalParts ?? 8);
-      const raw = Number(explicitVisual.targetShadedCount ?? explicitVisual.shadedCount ?? 0);
+      const total = Number(vis.totalParts ?? vw.totalParts ?? 8);
+      const raw = Number(vis.targetShadedCount ?? vis.shadedCount ?? 0);
       const fixed = reconcilePartModelCountTarget(total, raw, textAnswer, match);
-      explicitVisual = { ...explicitVisual, totalParts: total, targetShadedCount: fixed };
+      const extras: Record<string, unknown> = {};
+      if (Array.isArray(vis.cellLabels)) extras.cellLabels = vis.cellLabels;
+      else if (Array.isArray(vis.partLabels)) extras.cellLabels = vis.partLabels;
+      else if (Array.isArray(vw.cellLabels)) extras.cellLabels = vw.cellLabels;
+      else if (Array.isArray(vw.partLabels)) extras.cellLabels = vw.partLabels;
+      else if (Array.isArray(vw.labels)) extras.cellLabels = vw.labels;
+      const gc = vis.gridCols ?? vis.cols ?? vw.gridCols ?? vw.cols;
+      if (gc != null && Number.isFinite(Number(gc))) extras.gridCols = Math.min(16, Math.round(Number(gc)));
+      vis = { ...vis, totalParts: total, targetShadedCount: fixed, ...extras };
     }
-    return JSON.stringify({ answer: textAnswer, visual: explicitVisual });
+    if (vk === "node_link" || vk === "cause_effect_link") {
+      const nodes = normalizeNodeList(vw.nodes);
+      const nodePayload = nodes.map((n) => ({ id: n.id, label: n.label }));
+      const syntheticVw = { ...vw } as Record<string, unknown>;
+      if (Array.isArray(vis.correctEdges)) syntheticVw.correctEdges = vis.correctEdges;
+      if (Array.isArray(vis.correctEdge)) syntheticVw.correctEdge = vis.correctEdge;
+      const best = bestNodeLinkPairs(syntheticVw, nodes);
+      if (best.length > 0) {
+        vis = { ...vis, kind: "node_link", correctEdges: best, nodes: nodePayload };
+      }
+    }
+    if (vk === "slot_fill") {
+      const items = normalizeNodeList((vis.items ?? vw.items) as unknown);
+      const slotCount = Number(vis.slotCount ?? vw.slotCount ?? items.length);
+      const slotsRaw = Array.isArray(vis.slots) ? vis.slots : vw.slots;
+      const slots = normalizeSlotFillSlots(
+        slotsRaw,
+        Math.max(slotCount, Array.isArray(slotsRaw) ? slotsRaw.length : 0, items.length || 1)
+      );
+      let correctOrder: string[] = [];
+      if (Array.isArray(vis.correctOrder)) correctOrder = (vis.correctOrder as unknown[]).map(String);
+      else if (Array.isArray(vw.correctOrder)) correctOrder = (vw.correctOrder as unknown[]).map(String);
+      if (correctOrder.length !== slots.length && items.length >= slots.length) {
+        correctOrder = items.slice(0, slots.length).map((x) => x.id);
+      }
+      vis = {
+        ...vis,
+        kind: "slot_fill",
+        items: items.map((n) => ({ id: n.id, label: n.label })),
+        slots,
+        correctOrder,
+      };
+    }
+    return JSON.stringify({ answer: textAnswer, visual: vis });
   }
 
   if (kind === "number_line") {
@@ -89,21 +198,12 @@ export function buildVisualProblemMergedCorrect(content: Record<string, unknown>
 
   if (kind === "node_link" || kind === "cause_effect_link") {
     const nodes = normalizeNodeList(vw.nodes);
-    if (Array.isArray(vw.correctEdges) && (vw.correctEdges as unknown[]).length > 0) {
-      const pairs = (vw.correctEdges as unknown[])
-        .filter((x): x is [string, string] => Array.isArray(x) && x.length === 2)
-        .map((x) => [String(x[0]), String(x[1])] as [string, string]);
+    const nodePayload = nodes.map((n) => ({ id: n.id, label: n.label }));
+    const best = bestNodeLinkPairs(vw, nodes);
+    if (best.length > 0) {
       return JSON.stringify({
         answer: textAnswer,
-        visual: { kind: "node_link", correctEdges: pairs },
-      });
-    }
-    if (Array.isArray(vw.chain) && (vw.chain as unknown[]).length >= 2) {
-      const chain = (vw.chain as unknown[]).map(String);
-      const pairs = chainLabelsToEdges(chain, nodes);
-      return JSON.stringify({
-        answer: textAnswer,
-        visual: { kind: "node_link", correctEdges: pairs },
+        visual: { kind: "node_link", correctEdges: best, nodes: nodePayload },
       });
     }
     const edge = vw.correctEdge as [string, string] | undefined;
@@ -113,7 +213,26 @@ export function buildVisualProblemMergedCorrect(content: Record<string, unknown>
         : [String(nodes[0]?.id ?? "a"), String(nodes[1]?.id ?? "b")];
     return JSON.stringify({
       answer: textAnswer,
-      visual: { kind: "node_link", correctEdges: [correctEdge] },
+      visual: { kind: "node_link", correctEdges: [correctEdge], nodes: nodePayload },
+    });
+  }
+
+  if (kind === "slot_fill") {
+    const items = normalizeNodeList(vw.items);
+    const slotCount = Number(vw.slotCount ?? items.length);
+    const slots = normalizeSlotFillSlots(vw.slots, Math.max(slotCount, Array.isArray(vw.slots) ? vw.slots.length : 0));
+    let correctOrder: string[] = Array.isArray(vw.correctOrder) ? (vw.correctOrder as unknown[]).map(String) : [];
+    if (correctOrder.length !== slots.length && items.length >= slots.length) {
+      correctOrder = items.slice(0, slots.length).map((x) => x.id);
+    }
+    return JSON.stringify({
+      answer: textAnswer,
+      visual: {
+        kind: "slot_fill",
+        items: items.map((n) => ({ id: n.id, label: n.label })),
+        slots,
+        correctOrder,
+      },
     });
   }
 
@@ -121,6 +240,12 @@ export function buildVisualProblemMergedCorrect(content: Record<string, unknown>
   const rawTarget = Number(vw.targetShadedCount ?? 1);
   const match = String(vw.match ?? "count");
   const target = reconcilePartModelCountTarget(total, rawTarget, textAnswer, match);
+  const extras: Record<string, unknown> = {};
+  if (Array.isArray(vw.cellLabels)) extras.cellLabels = vw.cellLabels;
+  else if (Array.isArray(vw.partLabels)) extras.cellLabels = vw.partLabels;
+  else if (Array.isArray(vw.labels)) extras.cellLabels = vw.labels;
+  const gc = vw.gridCols ?? vw.cols;
+  if (gc != null && Number.isFinite(Number(gc))) extras.gridCols = Math.min(16, Math.round(Number(gc)));
   return JSON.stringify({
     answer: textAnswer || "?",
     visual: {
@@ -128,6 +253,7 @@ export function buildVisualProblemMergedCorrect(content: Record<string, unknown>
       totalParts: total,
       targetShadedCount: target,
       match,
+      ...extras,
     },
   });
 }

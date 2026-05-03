@@ -51,7 +51,7 @@ export default async function MissionsPage() {
       <div>
         <h1 className="text-2xl font-bold">Missions</h1>
         <p className="text-muted-foreground">
-          AI-generated learning missions for your weak and missing nodes
+          AI-generated learning missions for your weak and learning nodes
         </p>
       </div>
 

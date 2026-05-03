@@ -17,7 +17,7 @@ import {
   type GuestWeakConcept,
 } from "@/features/diagnostics/guest-diagnostic-results-masked-report";
 import { PrimeGuestClaimCookie } from "@/features/diagnostics/prime-guest-claim-cookie";
-import { LearningStateEngine } from "@/services/learning-state-engine";
+import { LearningStateEngine, isPracticePriorityNodeState } from "@/services/learning-state-engine";
 
 function guestMarketingInsight(
   subjectTitle: string,
@@ -90,7 +90,7 @@ export default async function MarketingDiagnosticResultsPage({ params, searchPar
   for (const [, { correct, total, title }] of nodeAgg) {
     const mastery = total > 0 ? (correct / total) * 100 : 0;
     const state = LearningStateEngine.assignNodeState(mastery);
-    if (state === "weak" || state === "missing") {
+    if (isPracticePriorityNodeState(state)) {
       weakMissing.push({ node: { title }, state });
     }
   }

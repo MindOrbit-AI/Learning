@@ -12,6 +12,8 @@ import { diagnoseVisualProblemStep } from "@/features/visual-problem-solving/val
 import { applyFeedbackTemplate } from "@/features/visual-problem-solving/feedback-templates";
 import { MicroStepSurface } from "./MicroStepSurface";
 import { MicroVisualLayer } from "./MicroVisualLayer";
+import { MicroPromptDisplay } from "./MicroPromptDisplay";
+import { sanitizeDragMatchPromptForTapUi } from "./dragMatchPrompt";
 import { microEngineSounds } from "./micro-engine-sounds";
 
 const PASS_THRESHOLD = 0.6;
@@ -265,7 +267,10 @@ export function MicroInteractionEngine({
             visualPhase === "correct" && "border-emerald-500/50 shadow-[0_0_28px_rgba(34,197,94,0.25)]"
           )}
         >
-          <p className="text-center text-base font-bold leading-snug md:text-lg">{step.prompt}</p>
+          <MicroPromptDisplay
+            text={step.type === "drag_match" ? sanitizeDragMatchPromptForTapUi(step.prompt) : step.prompt}
+            className="text-center text-base font-bold leading-snug md:text-lg"
+          />
           <div className="relative z-10 mt-5">
             <MicroStepSurface
               step={step}

@@ -13,6 +13,7 @@ import {
 import { Lightbulb, Map, Target } from "lucide-react";
 import { DiagnosticPostPaywall } from "@/features/diagnostics/diagnostic-post-paywall";
 import { effectivePlanTier } from "@mindorbit/lib";
+import { isPracticePriorityNodeState } from "@/services/learning-state-engine";
 
 function diagnosticInsight(
   subjectTitle: string,
@@ -72,7 +73,7 @@ export default async function DiagnosticResultsPage({
     include: { node: true },
   });
 
-  const weakMissing = nodeStates.filter((n) => n.state === "weak" || n.state === "missing");
+  const weakMissing = nodeStates.filter((n) => isPracticePriorityNodeState(n.state));
   const mastered = nodeStates.filter((n) => n.state === "mastered");
   const insight = diagnosticInsight(attempt.subject.title, weakMissing);
 

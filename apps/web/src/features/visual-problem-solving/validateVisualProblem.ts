@@ -1,4 +1,6 @@
 import type { RuntimeMicroStep } from "@/features/micro-engine/types";
+import { normalizeNodeList } from "@/lib/mission-to-lesson/buildVisualProblemMerged";
+import { stripMathTeachingLabel } from "./mathLabelDisplay";
 import { reconcilePartModelCountTarget } from "./partModelCountTarget";
 
 export type VisualProblemPayload = {
@@ -117,6 +119,40 @@ function numberLineVars(
   return { ok: Math.abs(val - target) <= tol, vars };
 }
 
+/** Drag items into ordered slots (array representation). */
+function slotFillVars(
+  exp: Record<string, unknown>,
+  got: Record<string, unknown>
+): { ok: boolean; vars: Record<string, string | number> } {
+  const slotsRaw = exp.slots as unknown;
+  const slots = Array.isArray(slotsRaw)
+    ? (slotsRaw as { id?: unknown }[]).map((s, i) => ({ id: String(s?.id ?? i) }))
+    : [];
+  const want = Array.isArray(exp.correctOrder) ? (exp.correctOrder as unknown[]).map(String) : [];
+  const assign =
+    got.slotAssignments && typeof got.slotAssignments === "object"
+      ? (got.slotAssignments as Record<string, unknown>)
+      : {};
+  const filled = slots.filter((s) => {
+    const v = assign[s.id];
+    return v != null && String(v).length > 0;
+  }).length;
+  const vars: Record<string, string | number> = {
+    total: slots.length,
+    shaded: filled,
+    expected: want.length,
+  };
+  if (want.length === 0 || slots.length === 0) return { ok: false, vars };
+  if (want.length !== slots.length) return { ok: false, vars };
+  if (filled !== slots.length) return { ok: false, vars };
+  for (let i = 0; i < slots.length; i++) {
+    const sid = slots[i]!.id;
+    const h = assign[sid] != null ? String(assign[sid]) : "";
+    if (h !== want[i]) return { ok: false, vars };
+  }
+  return { ok: true, vars };
+}
+
 function timelineVars(
   exp: Record<string, unknown>,
   got: Record<string, unknown>
@@ -133,14 +169,41 @@ function timelineVars(
   return { ok, vars };
 }
 
-function normalizeExpectedEdges(exp: Record<string, unknown>): [string, string][] {
-  if (Array.isArray(exp.correctEdges)) {
-    return (exp.correctEdges as unknown[])
-      .filter((x): x is [string, string] => Array.isArray(x) && x.length === 2)
-      .map((x) => [String(x[0]), String(x[1])]);
+function edgePairFromUnknown(x: unknown): [string, string] | null {
+  if (Array.isArray(x) && x.length === 2) return [String(x[0]), String(x[1])];
+  if (x && typeof x === "object") {
+    const o = x as Record<string, unknown>;
+    if (o.from != null && o.to != null) return [String(o.from), String(o.to)];
+    if (o.fromId != null && o.toId != null) return [String(o.fromId), String(o.toId)];
   }
-  const ce = exp.correctEdge as [string, string] | undefined;
-  if (Array.isArray(ce) && ce.length === 2) return [[String(ce[0]), String(ce[1])]];
+  return null;
+}
+
+function normalizeExpectedEdges(exp: Record<string, unknown>): [string, string][] {
+  if (Array.isArray(exp.correctEdges) && exp.correctEdges.length > 0) {
+    const pairs = (exp.correctEdges as unknown[])
+      .map(edgePairFromUnknown)
+      .filter((p): p is [string, string] => p !== null);
+    if (pairs.length > 0) return pairs;
+  }
+  const cel = exp.correctEdge as unknown;
+  if (Array.isArray(cel) && cel.length > 0) {
+    if (cel.length === 2 && typeof cel[0] !== "object") {
+      const p = edgePairFromUnknown(cel);
+      if (p) return [p];
+    } else {
+      const pairs = (cel as unknown[]).map(edgePairFromUnknown).filter((p): p is [string, string] => p !== null);
+      if (pairs.length > 0) return pairs;
+    }
+  }
+  const chain = exp.chain as unknown;
+  if (Array.isArray(chain) && chain.length >= 2) {
+    const out: [string, string][] = [];
+    for (let i = 0; i < chain.length - 1; i++) {
+      out.push([String(chain[i]), String(chain[i + 1])]);
+    }
+    return out;
+  }
   return [];
 }
 
@@ -155,13 +218,41 @@ function normalizeGotEdges(got: Record<string, unknown>): [string, string][] {
   return [];
 }
 
+/** Map endpoint token to canonical node id when `nodes` lists id + display label (AI may use either). */
+function normalizeNodeLinkEndpoint(
+  nodes: Array<{ id: string; label: string }>,
+  token: string
+): string {
+  const t = String(token).trim();
+  if (!t) return t;
+  if (nodes.some((n) => n.id === t)) return t;
+  const compact = (s: string) => s.replace(/\s+/g, "");
+  const ct = compact(t);
+  const strippedT = stripMathTeachingLabel(t);
+  const hit = nodes.find(
+    (n) =>
+      n.label === t ||
+      stripMathTeachingLabel(n.label) === strippedT ||
+      compact(n.label) === ct ||
+      compact(stripMathTeachingLabel(n.label)) === compact(strippedT)
+  );
+  return hit?.id ?? t;
+}
+
 /** Directed edges: order (from → to) must match each segment (linked lists, cause→effect chains). */
 function nodeLinkVars(
   exp: Record<string, unknown>,
   got: Record<string, unknown>
 ): { ok: boolean; vars: Record<string, string | number> } {
-  const want = normalizeExpectedEdges(exp);
-  const have = normalizeGotEdges(got);
+  const nodes = normalizeNodeList(exp.nodes);
+  const wantRaw = normalizeExpectedEdges(exp);
+  const haveRaw = normalizeGotEdges(got);
+  const canon = (a: string, b: string) =>
+    nodes.length > 0
+      ? ([normalizeNodeLinkEndpoint(nodes, a), normalizeNodeLinkEndpoint(nodes, b)] as [string, string])
+      : ([a, b] as [string, string]);
+  const want = wantRaw.map(([a, b]) => canon(a, b));
+  const have = haveRaw.map(([a, b]) => canon(a, b));
   const vars: Record<string, string | number> = {
     total: want.length,
     shaded: have.length,
@@ -196,6 +287,8 @@ function visualMatches(
     case "node_link":
     case "cause_effect_link":
       return nodeLinkVars(expectedVisual, got);
+    case "slot_fill":
+      return slotFillVars(expectedVisual, got);
     default:
       return partModelVars(expectedVisual, got, symbolicAnswer);
   }

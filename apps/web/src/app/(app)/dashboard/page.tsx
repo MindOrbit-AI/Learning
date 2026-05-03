@@ -40,7 +40,7 @@ export default async function DashboardPage() {
   });
 
   const weakNodes = await prisma.userNodeState.findMany({
-    where: { userId: session.user.id, state: "weak" },
+    where: { userId: session.user.id, state: { in: ["weak", "learning"] } },
     include: { node: true },
     take: 5,
   });

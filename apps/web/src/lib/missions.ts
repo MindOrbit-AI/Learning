@@ -1,5 +1,5 @@
 /**
- * Mission Engine - Create missions for weak/missing nodes
+ * Mission Engine - Create missions for weak / learning nodes
  */
 
 import { prisma } from "@mindorbit/db";

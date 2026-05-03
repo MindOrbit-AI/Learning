@@ -1,25 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@mindorbit/ui";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import type { RuntimeMicroStep } from "@/features/micro-engine/types";
-import { normalizeNodeList } from "@/lib/mission-to-lesson/buildVisualProblemMerged";
+import { normalizeNodeList, normalizeSlotFillSlots } from "@/lib/mission-to-lesson/buildVisualProblemMerged";
+import { seededShuffle } from "@/lib/deterministicShuffle";
+import { stripMathTeachingLabel } from "./mathLabelDisplay";
 import { expandNumberLineBounds, inferNumericTarget } from "./numberLineBounds";
+import { NumberLine } from "@/components/primitives/NumberLine";
 import { TriangleDiagramPair } from "./TriangleDiagramPair";
+import { SlotFillBoard } from "./SlotFillBoard";
 import { visualPhaseSatisfied } from "./validateVisualProblem";
-
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const t = a[i] as T;
-    a[i] = a[j] as T;
-    a[j] = t;
-  }
-  return a;
-}
 
 type Props = {
   step: RuntimeMicroStep;
@@ -54,7 +47,10 @@ export function VisualProblemSurface({ step, disabled, shakeToken, onCommit }: P
     setVisualPayload({ kind: "timeline", order });
   }, []);
   const setLinkVisual = useCallback((patch: Record<string, unknown>) => {
-    setVisualPayload({ kind: "node_link", ...patch });
+    setVisualPayload((prev) => ({ ...prev, ...patch, kind: "node_link" }));
+  }, []);
+  const setSlotFillVisual = useCallback((patch: Record<string, unknown>) => {
+    setVisualPayload((prev) => ({ ...prev, ...patch, kind: "slot_fill" }));
   }, []);
 
   useEffect(() => {
@@ -66,6 +62,37 @@ export function VisualProblemSurface({ step, disabled, shakeToken, onCommit }: P
     () => visualPhaseSatisfied(step.correctAnswer, visualPayload),
     [step.correctAnswer, visualPayload]
   );
+
+  /** Shown when node-link has enough edges but topology/order does not match the answer key yet. */
+  const nodeLinkWrongTopology = useMemo(() => {
+    if (kind !== "node_link" && kind !== "cause_effect_link") return false;
+    if (visualOkLocal) return false;
+    const need = parseNodeLinkExpectedEdgeCount(step.correctAnswer);
+    const edges = visualPayload.edges as unknown;
+    const have = Array.isArray(edges)
+      ? (edges as unknown[]).filter((x) => Array.isArray(x) && x.length === 2).length
+      : 0;
+    return need > 0 && have >= need;
+  }, [kind, visualOkLocal, step.correctAnswer, visualPayload]);
+
+  const slotFillWrongOrderHint = useMemo(() => {
+    if (kind !== "slot_fill" || visualOkLocal) return false;
+    const assign = visualPayload.slotAssignments as Record<string, unknown> | undefined;
+    if (!assign || typeof assign !== "object") return false;
+    try {
+      const o = JSON.parse(step.correctAnswer) as { visual?: { slots?: unknown[]; correctOrder?: string[] } };
+      const slots = o.visual?.slots;
+      if (!Array.isArray(slots) || slots.length === 0) return false;
+      const filled = slots.filter((s) => {
+        const id = String((s as { id?: unknown }).id ?? "");
+        const v = id ? assign[id] : undefined;
+        return v != null && String(v).trim().length > 0;
+      }).length;
+      return filled === slots.length;
+    } catch {
+      return false;
+    }
+  }, [kind, visualOkLocal, step.correctAnswer, visualPayload]);
 
   const numberLineSlider = useMemo(() => {
     if (kind !== "number_line") return null;
@@ -123,6 +150,108 @@ export function VisualProblemSurface({ step, disabled, shakeToken, onCommit }: P
     return /\btriangle/i.test(scenario) && !hasDiagram;
   }, [step.interactionConfig.problemScenario, ws]);
 
+  /** Scenario text describes DnD but this workspace is tap-to-shade tiles only. */
+  const partModelDragDropCopyMismatch = useMemo(() => {
+    const isPart =
+      kind === "part_model" ||
+      kind === "fraction_bar" ||
+      kind === "pizza_model" ||
+      kind === "area_model";
+    if (!isPart) return false;
+    const s = String(step.interactionConfig.problemScenario ?? "");
+    return /\b(drag|drop|draggable|slot)\b/i.test(s);
+  }, [kind, step.interactionConfig.problemScenario]);
+
+  const partModelTargetShaded = useMemo(() => {
+    const isPart =
+      kind === "part_model" ||
+      kind === "fraction_bar" ||
+      kind === "pizza_model" ||
+      kind === "area_model";
+    if (!isPart) return null;
+    try {
+      const o = JSON.parse(step.correctAnswer) as { visual?: { targetShadedCount?: unknown } };
+      const t = o.visual?.targetShadedCount;
+      if (t != null && Number.isFinite(Number(t))) return Math.round(Number(t));
+    } catch {
+      /* ignore */
+    }
+    const w = Number(ws.targetShadedCount ?? NaN);
+    return Number.isFinite(w) ? Math.round(w) : null;
+  }, [kind, step.correctAnswer, ws]);
+
+  /** Optional per-cell symbols (e.g. letters in a grid); falls back to 1..n when missing. */
+  const partModelCellLabels = useMemo(() => {
+    const isPart =
+      kind === "part_model" ||
+      kind === "fraction_bar" ||
+      kind === "pizza_model" ||
+      kind === "area_model";
+    if (!isPart) return undefined;
+    let raw: unknown = ws.cellLabels ?? ws.partLabels ?? ws.labels;
+    if (raw == null) {
+      try {
+        const o = JSON.parse(step.correctAnswer) as { visual?: { cellLabels?: unknown } };
+        raw = o.visual?.cellLabels;
+      } catch {
+        /* ignore */
+      }
+    }
+    if (!Array.isArray(raw)) return undefined;
+    const n = partModelTotal;
+    const out: string[] = [];
+    for (let i = 0; i < n; i++) {
+      const v = raw[i];
+      out.push(v != null && String(v).trim() !== "" ? String(v) : String(i + 1));
+    }
+    return out;
+  }, [kind, partModelTotal, step.correctAnswer, ws]);
+
+  const partModelGridCols = useMemo(() => {
+    const isPart =
+      kind === "part_model" ||
+      kind === "fraction_bar" ||
+      kind === "pizza_model" ||
+      kind === "area_model";
+    if (!isPart) return null;
+    let c = Number(ws.gridCols ?? ws.cols ?? NaN);
+    if (!Number.isFinite(c)) {
+      try {
+        const o = JSON.parse(step.correctAnswer) as { visual?: { gridCols?: unknown } };
+        c = Number(o.visual?.gridCols ?? NaN);
+      } catch {
+        /* ignore */
+      }
+    }
+    if (!Number.isFinite(c) || c < 1) return null;
+    return Math.min(16, Math.round(c));
+  }, [kind, step.correctAnswer, ws]);
+
+  /** Story promises letters / 2D grid but CMS did not supply cellLabels. */
+  const partModelLetterGridMismatch = useMemo(() => {
+    const isPart =
+      kind === "part_model" ||
+      kind === "fraction_bar" ||
+      kind === "pizza_model" ||
+      kind === "area_model";
+    if (!isPart) return false;
+    const stem = `${String(step.interactionConfig.problemScenario ?? "")} ${String(step.prompt ?? "")}`;
+    const wantsLetters = /\b(letter|2d|two[-\s]?dimensional|grid|matrix)\b/i.test(stem);
+    const hasCellLabels =
+      Array.isArray(ws.cellLabels) ||
+      Array.isArray(ws.partLabels) ||
+      Array.isArray(ws.labels) ||
+      (() => {
+        try {
+          const o = JSON.parse(step.correctAnswer) as { visual?: { cellLabels?: unknown } };
+          return Array.isArray(o.visual?.cellLabels);
+        } catch {
+          return false;
+        }
+      })();
+    return wantsLetters && !hasCellLabels;
+  }, [kind, step.interactionConfig.problemScenario, step.prompt, step.correctAnswer, ws]);
+
   const allowEmptyAnswer = useMemo(() => {
     try {
       const o = JSON.parse(step.correctAnswer) as { answer?: string | null };
@@ -131,6 +260,40 @@ export function VisualProblemSurface({ step, disabled, shakeToken, onCommit }: P
       return step.interactionConfig.answerOptional === true;
     }
   }, [step.correctAnswer, step.interactionConfig.answerOptional]);
+
+  const nodeWorkspaceNodesJson = JSON.stringify(ws.nodes ?? []);
+  const nodeLinkNodes = useMemo(
+    () => normalizeNodeList(ws.nodes),
+    [step.id, nodeWorkspaceNodesJson]
+  );
+
+  const wsItemsKey = JSON.stringify(ws.items ?? []);
+  const wsSlotsKey = JSON.stringify(ws.slots ?? []);
+  const slotFillModel = useMemo(() => {
+    if (kind !== "slot_fill") return null;
+    try {
+      const o = JSON.parse(step.correctAnswer) as {
+        visual?: { items?: unknown; slots?: unknown; correctOrder?: string[] };
+      };
+      const v = o.visual;
+      const items = normalizeNodeList(v?.items ?? ws.items);
+      const sc = Number(ws.slotCount ?? items.length);
+      const slots = normalizeSlotFillSlots(
+        v?.slots ?? ws.slots,
+        Math.max(
+          sc,
+          Array.isArray(v?.slots) ? (v.slots as unknown[]).length : 0,
+          Array.isArray(ws.slots) ? (ws.slots as unknown[]).length : 0,
+          items.length || 1
+        )
+      );
+      return { items, slots };
+    } catch {
+      const items = normalizeNodeList(ws.items);
+      const sc = Number(ws.slotCount ?? items.length);
+      return { items, slots: normalizeSlotFillSlots(ws.slots, Math.max(sc, items.length || 1)) };
+    }
+  }, [kind, step.correctAnswer, ws, wsItemsKey, wsSlotsKey]);
 
   const submit = useCallback(() => {
     const payload = JSON.stringify({ visual: visualPayload, text });
@@ -153,11 +316,39 @@ export function VisualProblemSurface({ step, disabled, shakeToken, onCommit }: P
             parts below for now.
           </p>
         ) : null}
+        {partModelDragDropCopyMismatch ? (
+          <p className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs leading-snug text-amber-950 dark:text-amber-50">
+            This step uses a <span className="font-semibold">tap-to-select grid</span> (numbered cells), not drag-and-drop.
+            Tap cells on or off until the shaded count matches what the story asks for
+            {partModelTargetShaded != null ? (
+              <>
+                {" "}
+                (here: <span className="font-semibold">{partModelTargetShaded}</span> of {partModelTotal} cells)
+              </>
+            ) : null}{" "}
+            — then the answer field unlocks.
+          </p>
+        ) : null}
+        {partModelLetterGridMismatch ? (
+          <p className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs leading-snug text-amber-950 dark:text-amber-50">
+            The story mentions letters or a grid, but this mission did not include{" "}
+            <span className="font-mono text-[10px]">visualWorkspace.cellLabels</span>. Until content is regenerated with
+            one label per cell (row-major), cells stay numbered — tap the cell that matches the letter position in your
+            head, or use <span className="font-semibold">Regenerate</span> on the mastery map.
+          </p>
+        ) : null}
+        {kind === "slot_fill" && slotFillModel ? (
+          <p className="mb-3 text-center text-sm leading-snug text-muted-foreground">
+            Drag each type card into the slot for the matching variable. Fill every slot to unlock the answer field.
+          </p>
+        ) : null}
         {kind === "part_model" || kind === "fraction_bar" || kind === "pizza_model" || kind === "area_model" ? (
           <PartModel
             total={partModelTotal}
             disabled={disabled}
             onChange={setPartVisual}
+            cellLabels={partModelCellLabels}
+            gridCols={partModelGridCols}
           />
         ) : null}
         {kind === "number_line" && numberLineSlider ? (
@@ -173,16 +364,26 @@ export function VisualProblemSurface({ step, disabled, shakeToken, onCommit }: P
           <TimelineOrder
             items={(ws.items as Array<{ id: string; label: string }>) ?? []}
             target={timelineTarget}
+            shuffleSeed={`${step.sourceSceneId}::${step.id}::${shakeToken}`}
             disabled={disabled}
             onChange={setTimelineVisual}
           />
         ) : null}
         {(kind === "node_link" || kind === "cause_effect_link") ? (
           <NodeLinkPicker
-            nodes={normalizeNodeList(ws.nodes)}
+            nodes={nodeLinkNodes}
             expectedJson={step.correctAnswer}
             disabled={disabled}
             onChange={setLinkVisual}
+          />
+        ) : null}
+        {kind === "slot_fill" && slotFillModel ? (
+          <SlotFillBoard
+            key={`${step.id}-${shakeToken}-slotfill`}
+            items={slotFillModel.items}
+            slots={slotFillModel.slots}
+            disabled={disabled}
+            onChange={setSlotFillVisual}
           />
         ) : null}
       </div>
@@ -194,7 +395,13 @@ export function VisualProblemSurface({ step, disabled, shakeToken, onCommit }: P
         )}
       >
         <p className="text-xs font-semibold text-muted-foreground">
-          {visualOkLocal ? "Now answer using the model you built." : "Finish the visual first — then the question unlocks."}
+          {visualOkLocal
+            ? "Now answer using the model you built."
+            : nodeLinkWrongTopology
+              ? "You have the right number of links, but the flow does not match the expected diagram yet. Clear or redraw links until it matches — then the answer field unlocks."
+              : slotFillWrongOrderHint
+                ? "Every slot is filled, but the order does not match the expected array yet. Drag cards back to the bank or swap them between slots."
+                : "Finish the visual first — then the question unlocks."}
         </p>
         <input
           type="text"
@@ -225,14 +432,21 @@ function PartModel({
   total,
   disabled,
   onChange,
+  cellLabels,
+  gridCols,
 }: {
   total: number;
   disabled: boolean;
   onChange: (ids: string[]) => void;
+  /** One entry per part index 0..n-1 (row-major); shown inside each cell. */
+  cellLabels?: string[];
+  /** When set, fixes column count for a 2D-style layout. */
+  gridCols?: number | null;
 }) {
   const n = Math.max(1, Math.round(total));
   const dense = n > 24;
   const extraDense = n > 60;
+  const fixedCols = gridCols != null && gridCols > 0 ? gridCols : null;
   const [shaded, setShaded] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -256,7 +470,9 @@ function PartModel({
   return (
     <div className="relative z-10 mt-3 space-y-2">
       <p className="text-sm text-muted-foreground">
-        Click or tap parts to shade the model (each part toggles on or off).
+        {cellLabels?.length
+          ? "Click or tap cells to shade them (each toggles on or off)."
+          : "Click or tap parts to shade the model (each part toggles on or off)."}
       </p>
       <div
         className={cn(
@@ -265,23 +481,20 @@ function PartModel({
         )}
       >
         <div
-          className={cn(
-            "grid gap-1.5",
-            extraDense && "grid-cols-10",
-            dense && !extraDense && "grid-cols-6 sm:grid-cols-8",
-            !dense && "grid-cols-4 sm:grid-cols-6"
-          )}
+          className={cn("grid gap-1.5", !fixedCols && extraDense && "grid-cols-10", !fixedCols && dense && !extraDense && "grid-cols-6 sm:grid-cols-8", !fixedCols && !dense && "grid-cols-4 sm:grid-cols-6")}
+          style={fixedCols ? { gridTemplateColumns: `repeat(${fixedCols}, minmax(0, 1fr))` } : undefined}
         >
           {Array.from({ length: n }, (_, i) => {
             const id = String(i);
             const on = shaded.has(id);
+            const display = cellLabels?.[i] != null ? stripMathTeachingLabel(cellLabels[i]!) : String(i + 1);
             return (
               <button
                 key={id}
                 type="button"
                 disabled={disabled}
                 aria-pressed={on}
-                aria-label={`Part ${i + 1}, ${on ? "shaded" : "not shaded"}`}
+                aria-label={`Cell ${display}, ${on ? "shaded" : "not shaded"}`}
                 onClick={() => toggle(id)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -299,7 +512,7 @@ function PartModel({
                     : "border-muted bg-background hover:border-primary/40"
                 )}
               >
-                {i + 1}
+                {display}
               </button>
             );
           })}
@@ -338,16 +551,17 @@ function NumberLinePicker({
 
   return (
     <div className="mt-3 space-y-3">
-      <p className="text-sm text-muted-foreground">Move the marker to the value you read from the line.</p>
-      <input
-        type="range"
+      <p className="text-sm text-muted-foreground">
+        Drag the marker on the number line to the value that fits the story, then type that same number in the answer
+        box below.
+      </p>
+      <NumberLine
+        className={cn(disabled && "pointer-events-none opacity-45")}
         min={min}
         max={max}
         step={step}
-        disabled={disabled}
-        value={val}
-        onChange={(e) => setVal(Number(e.target.value))}
-        className="w-full accent-primary"
+        userPoints={[val]}
+        onChange={(pts) => setVal(Number(pts[0] ?? mid))}
       />
       <p className="text-center font-mono text-lg font-bold tabular-nums">{val}</p>
     </div>
@@ -357,29 +571,33 @@ function NumberLinePicker({
 function TimelineOrder({
   items,
   target,
+  shuffleSeed,
   disabled,
   onChange,
 }: {
   items: Array<{ id: string; label: string }>;
   target: string[];
+  shuffleSeed: string;
   disabled: boolean;
   onChange: (order: string[]) => void;
 }) {
+  const itemsKey = JSON.stringify(items.map((i) => ({ id: i.id, label: i.label })));
   const initialOrder = useMemo(() => {
-    const ids = items.map((i) => i.id);
-    let shuffled = shuffle(ids);
+    const ids = (JSON.parse(itemsKey) as Array<{ id: string }>).map((i) => i.id);
+    const baseSeed = `${shuffleSeed}::${itemsKey}`;
+    let shuffled = seededShuffle(ids, baseSeed);
     let guard = 0;
-    while (target.length && shuffled.join(",") === target.join(",") && guard++ < 12) {
-      shuffled = shuffle(ids);
+    while (target.length && shuffled.join(",") === target.join(",") && guard++ < 24) {
+      shuffled = seededShuffle(ids, `${baseSeed}#${guard}`);
     }
     return shuffled;
-  }, [items, target]);
+  }, [itemsKey, target, shuffleSeed]);
 
   const [order, setOrder] = useState<string[]>(initialOrder);
 
   useEffect(() => {
     setOrder(initialOrder);
-  }, [items, initialOrder]);
+  }, [initialOrder]);
 
   useEffect(() => {
     onChange(order);
@@ -433,6 +651,49 @@ function TimelineOrder({
   );
 }
 
+const NODE_DRAG_MIME = "application/x-mindorbit-node-id";
+
+function countNodeLinkEdges(v: Record<string, unknown>): number {
+  const countList = (arr: unknown): number => {
+    if (!Array.isArray(arr) || arr.length === 0) return 0;
+    return arr.filter((x) => {
+      if (Array.isArray(x) && x.length === 2) return true;
+      if (x && typeof x === "object") {
+        const o = x as Record<string, unknown>;
+        if (o.from != null && o.to != null) return true;
+        if (o.fromId != null && o.toId != null) return true;
+      }
+      return false;
+    }).length;
+  };
+  const nCe = countList(v.correctEdges);
+  if (nCe > 0) return nCe;
+  const cel = v.correctEdge as unknown;
+  if (Array.isArray(cel) && cel.length > 0) {
+    if (cel.length === 2 && typeof cel[0] !== "object") return 1;
+    const n = countList(cel);
+    if (n > 0) return n;
+  }
+  const chain = v.chain as unknown;
+  if (Array.isArray(chain) && chain.length >= 2) return chain.length - 1;
+  const n = Number(v.expectedEdgeCount ?? v.edgeCount ?? NaN);
+  if (Number.isFinite(n) && n > 0) return Math.min(32, Math.floor(n));
+  return 1;
+}
+
+function parseNodeLinkExpectedEdgeCount(expectedJson: string): number {
+  try {
+    const o = JSON.parse(expectedJson) as Record<string, unknown>;
+    const v =
+      typeof o.visual === "object" && o.visual !== null
+        ? (o.visual as Record<string, unknown>)
+        : (o as Record<string, unknown>);
+    return countNodeLinkEdges(v);
+  } catch {
+    return 1;
+  }
+}
+
 function NodeLinkPicker({
   nodes,
   expectedJson,
@@ -444,35 +705,54 @@ function NodeLinkPicker({
   disabled: boolean;
   onChange: (patch: Record<string, unknown>) => void;
 }) {
-  const expectedEdgeCount = useMemo(() => {
-    try {
-      const o = JSON.parse(expectedJson) as {
-        visual?: { correctEdges?: [string, string][]; correctEdge?: [string, string] };
-      };
-      const v = o.visual;
-      if (!v) return 1;
-      if (Array.isArray(v.correctEdges) && v.correctEdges.length > 0) return v.correctEdges.length;
-      if (Array.isArray(v.correctEdge) && v.correctEdge.length === 2) return 1;
-      return 1;
-    } catch {
-      return 1;
-    }
-  }, [expectedJson]);
+  const expectedEdgeCount = useMemo(() => parseNodeLinkExpectedEdgeCount(expectedJson), [expectedJson]);
 
   const [pickFrom, setPickFrom] = useState<string | null>(null);
   const [edges, setEdges] = useState<[string, string][]>([]);
+  const [draggingFrom, setDraggingFrom] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const dragSourceRef = useRef<string | null>(null);
+  /** Browsers often emit a click on the drop target right after drop; ignore it for tap-to-link. */
+  const ignoreClickUntilRef = useRef(0);
+
+  const nodesKey = JSON.stringify(nodes.map((n) => ({ id: n.id, label: n.label })));
 
   useEffect(() => {
     setPickFrom(null);
     setEdges([]);
-  }, [expectedJson, nodes]);
+    setDraggingFrom(null);
+    setDragOverId(null);
+    dragSourceRef.current = null;
+  }, [expectedJson, nodesKey]);
 
-  const labelOf = (id: string) => nodes.find((n) => n.id === id)?.label ?? id;
+  useEffect(() => {
+    onChange({ edges });
+  }, [edges, onChange]);
+
+  const labelOf = (id: string) => stripMathTeachingLabel(nodes.find((n) => n.id === id)?.label ?? id);
 
   const pushEdges = (next: [string, string][]) => {
     setEdges(next);
-    onChange({ edges: next });
   };
+
+  const commitEdge = useCallback(
+    (from: string, to: string) => {
+      if (from === to) return;
+      setEdges((prev) => {
+        const base = prev.length >= expectedEdgeCount ? [] : prev;
+        const pair: [string, string] = [from, to];
+        const next: [string, string][] =
+          expectedEdgeCount <= 1
+            ? [pair]
+            : (() => {
+                const acc = [...base, pair];
+                return acc.length > expectedEdgeCount ? acc.slice(0, expectedEdgeCount) : acc;
+              })();
+        return next;
+      });
+    },
+    [expectedEdgeCount]
+  );
 
   const handleNodePointer = (nodeId: string) => {
     if (disabled || nodes.length === 0) return;
@@ -489,28 +769,76 @@ function NodeLinkPicker({
       setPickFrom(null);
       return;
     }
-    const pair: [string, string] = [pickFrom, nodeId];
+    commitEdge(pickFrom, nodeId);
     setPickFrom(null);
+  };
 
-    if (expectedEdgeCount <= 1) {
-      pushEdges([pair]);
+  const onDragStart = (e: React.DragEvent, nodeId: string) => {
+    if (disabled) {
+      e.preventDefault();
       return;
     }
-
-    const next = [...edges, pair];
-    if (next.length >= expectedEdgeCount) {
-      pushEdges(next.slice(0, expectedEdgeCount));
-    } else {
-      pushEdges(next);
+    /** Do not clear here: `commitEdge` already replaces when full; clearing on drag start breaks when expected edge count was underestimated. */
+    dragSourceRef.current = nodeId;
+    setDraggingFrom(nodeId);
+    try {
+      e.dataTransfer.setData(NODE_DRAG_MIME, nodeId);
+      e.dataTransfer.setData("text/plain", nodeId);
+      e.dataTransfer.effectAllowed = "link";
+    } catch {
+      /* ignore */
     }
+  };
+
+  const onDragEnd = () => {
+    dragSourceRef.current = null;
+    setDraggingFrom(null);
+    setDragOverId(null);
+  };
+
+  const onDragOverNode = (e: React.DragEvent, nodeId: string) => {
+    if (disabled) return;
+    const from = dragSourceRef.current;
+    if (!from) return;
+    if (nodeId === from) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "link";
+    setDragOverId(nodeId);
+  };
+
+  const onDragLeaveNode = (e: React.DragEvent) => {
+    const related = e.relatedTarget as Node | null;
+    if (related && e.currentTarget.contains(related)) return;
+    setDragOverId(null);
+  };
+
+  const onDropOnNode = (e: React.DragEvent, toId: string) => {
+    e.preventDefault();
+    let from = "";
+    try {
+      from = e.dataTransfer.getData(NODE_DRAG_MIME) || e.dataTransfer.getData("text/plain");
+    } catch {
+      /* ignore */
+    }
+    if (!from) from = dragSourceRef.current ?? "";
+    dragSourceRef.current = null;
+    setDraggingFrom(null);
+    setDragOverId(null);
+    if (!from || from === toId) return;
+    ignoreClickUntilRef.current = Date.now() + 450;
+    commitEdge(from, toId);
+    setPickFrom(null);
   };
 
   return (
     <div className="mt-3 space-y-3">
       <p className="text-sm text-muted-foreground">
         {expectedEdgeCount <= 1
-          ? "Click the from-node, then the to-node (direction matters for a linked list)."
-          : `Draw ${expectedEdgeCount} arrows in order: click start, then end for each link (${edges.length}/${expectedEdgeCount} done).`}
+          ? "Drag one bubble onto another to draw an arrow (start → end). Direction matters."
+          : `Drag to link in order: ${expectedEdgeCount} arrows (${edges.length}/${expectedEdgeCount} done). Drag the next “from” onto its “to”.`}
+      </p>
+      <p className="text-xs text-muted-foreground">
+        Keyboard / touch fallback: tap a start bubble, then tap where it should point.
       </p>
       {edges.length > 0 ? (
         <div className="flex flex-wrap items-center gap-2">
@@ -541,12 +869,26 @@ function NodeLinkPicker({
         </p>
       ) : null}
       <div className="flex flex-wrap gap-3">
-        {nodes.map((n) => (
-          <button
-            key={n.id}
-            type="button"
-            disabled={disabled}
-            onClick={() => handleNodePointer(n.id)}
+        {nodes.map((n, idx) => {
+          const shown = stripMathTeachingLabel(n.label);
+          const shortVar = shown.length > 0 && shown.length <= 2 && /^[a-z]$/i.test(shown);
+          return (
+          <div
+            key={`${idx}-${n.id}`}
+            draggable={!disabled}
+            role="button"
+            tabIndex={disabled ? -1 : 0}
+            aria-grabbed={draggingFrom === n.id}
+            aria-label={`${shown}, drag onto another bubble or tap to connect`}
+            onDragStart={(e) => onDragStart(e, n.id)}
+            onDragEnd={onDragEnd}
+            onDragOver={(e) => onDragOverNode(e, n.id)}
+            onDragLeave={onDragLeaveNode}
+            onDrop={(e) => onDropOnNode(e, n.id)}
+            onClick={() => {
+              if (Date.now() < ignoreClickUntilRef.current) return;
+              handleNodePointer(n.id);
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
@@ -554,19 +896,28 @@ function NodeLinkPicker({
               }
             }}
             className={cn(
-              "flex h-14 min-w-[3.25rem] cursor-pointer select-none items-center justify-center rounded-full border-2 px-4 text-base font-bold transition touch-manipulation",
-              pickFrom === n.id
-                ? "border-cyan-500 bg-cyan-500/15 ring-2 ring-cyan-500/35"
-                : "border-muted bg-background hover:border-primary/40"
+              "flex h-14 cursor-grab select-none items-center justify-center rounded-full border-2 px-4 text-base font-bold transition touch-manipulation active:cursor-grabbing border-muted bg-background hover:border-primary/40",
+              shortVar ? "min-w-[3.75rem] px-5 text-2xl leading-none tracking-tight" : "min-w-[3.25rem]",
+              pickFrom === n.id && "border-cyan-500 bg-cyan-500/15 ring-2 ring-cyan-500/35",
+              draggingFrom === n.id && "border-violet-500 bg-violet-500/15 ring-2 ring-violet-400/40",
+              dragOverId === n.id &&
+                dragSourceRef.current &&
+                dragSourceRef.current !== n.id &&
+                "border-emerald-500 bg-emerald-500/10 ring-2 ring-emerald-400/50"
             )}
           >
-            {n.label}
-          </button>
-        ))}
+            <span className="pointer-events-none font-mono text-foreground">{shown}</span>
+          </div>
+          );
+        })}
       </div>
-      {pickFrom ? (
+      {pickFrom && !draggingFrom ? (
         <p className="text-xs font-medium text-cyan-700 dark:text-cyan-300">
-          Selected “{labelOf(pickFrom)}” — click the next node it points to.
+          Selected “{labelOf(pickFrom)}” — tap the bubble it points to, or drag onto it next time.
+        </p>
+      ) : draggingFrom ? (
+        <p className="text-xs font-medium text-violet-700 dark:text-violet-300">
+          Dragging from “{labelOf(draggingFrom)}” — drop on the target bubble.
         </p>
       ) : null}
     </div>

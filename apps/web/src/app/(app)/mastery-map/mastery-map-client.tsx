@@ -22,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle, Button } from "@mindorbit/ui"
 import { NODE_STATE_COLORS } from "@mindorbit/lib";
 import { GitBranch, Lock, Sparkles } from "lucide-react";
 import { GenerateMissionButton } from "./generate-mission-button";
+import { RegenerateMissionButton } from "./regenerate-mission-button";
 import { masteryMapQuestHeadline } from "@/lib/mission-flavor";
 import type { NodeState } from "@mindorbit/types";
 
@@ -41,7 +42,6 @@ type SidebarNodeDetail = {
 const nodeColors: Record<string, string> = {
   mastered: NODE_STATE_COLORS.mastered,
   weak: NODE_STATE_COLORS.weak,
-  missing: NODE_STATE_COLORS.missing,
   learning: NODE_STATE_COLORS.learning,
   untouched: NODE_STATE_COLORS.untouched,
 };
@@ -49,7 +49,7 @@ const nodeColors: Record<string, string> = {
 function MasteryNode({ data }: { data: { label: string; state?: NodeState; isLocked?: boolean } }) {
   const isLocked = data.isLocked ?? false;
   const state = data.state ?? "untouched";
-  const color = nodeColors[state] ?? nodeColors.untouched;
+  const color = nodeColors[state] ?? nodeColors.weak;
   return (
     <div
       className={`relative flex items-center justify-center rounded-duo border-2 px-5 py-3 font-semibold shadow-lg transition-transform hover:scale-105 ${
@@ -128,22 +128,39 @@ export function MasteryMapClient() {
   const [selectedNode, setSelectedNode] = useState<string | null>(selectedNodeId ?? null);
   const [loading, setLoading] = useState(true);
 
+  const applyMapPayload = useCallback(
+    (data: {
+      nodes: Node[];
+      edges: Edge[];
+      nodeDetails: Record<string, unknown>;
+      masteryMapAccess?: "limited" | "full";
+      lockedNodeIds?: string[];
+    }) => {
+      const locked = new Set(data.lockedNodeIds ?? []);
+      setLockedNodeIds(locked);
+      const nodesWithLock = data.nodes.map((n) => ({
+        ...n,
+        data: { ...n.data, isLocked: n.type === "mastery" && locked.has(n.id) },
+      }));
+      setNodes(nodesWithLock);
+      setEdges(data.edges);
+      setNodeDetails(data.nodeDetails ?? {});
+    },
+    [setNodes, setEdges]
+  );
+
+  const reloadMap = useCallback(async () => {
+    const data = await fetchMapData(subjectId || undefined, undefined);
+    applyMapPayload(data);
+  }, [subjectId, applyMapPayload]);
+
   useEffect(() => {
+    setLoading(true);
     fetchMapData(subjectId || undefined, undefined)
-      .then((data) => {
-        const locked = new Set(data.lockedNodeIds ?? []);
-        setLockedNodeIds(locked);
-        const nodesWithLock = data.nodes.map((n) => ({
-          ...n,
-          data: { ...n.data, isLocked: n.type === "mastery" && locked.has(n.id) },
-        }));
-        setNodes(nodesWithLock);
-        setEdges(data.edges);
-        setNodeDetails(data.nodeDetails ?? {});
-      })
+      .then(applyMapPayload)
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [subjectId, setNodes, setEdges]);
+  }, [subjectId, applyMapPayload]);
 
   useEffect(() => {
     setSelectedNode(selectedNodeId ?? null);
@@ -224,16 +241,12 @@ export function MasteryMapClient() {
           Mastered
         </span>
         <span className="flex items-center gap-2 text-sm font-medium">
-          <span className="h-4 w-4 rounded-full shadow-sm" style={{ background: nodeColors.weak }} />
-          Weak
-        </span>
-        <span className="flex items-center gap-2 text-sm font-medium">
-          <span className="h-4 w-4 rounded-full shadow-sm" style={{ background: nodeColors.missing }} />
-          Missing
-        </span>
-        <span className="flex items-center gap-2 text-sm font-medium">
           <span className="h-4 w-4 rounded-full shadow-sm" style={{ background: nodeColors.learning }} />
           Learning
+        </span>
+        <span className="flex items-center gap-2 text-sm font-medium">
+          <span className="h-4 w-4 rounded-full shadow-sm" style={{ background: nodeColors.weak }} />
+          Weak
         </span>
         <span className="flex items-center gap-2 text-sm font-medium">
           <span className="h-4 w-4 rounded-full shadow-sm" style={{ background: nodeColors.untouched }} />
@@ -269,7 +282,7 @@ export function MasteryMapClient() {
               .filter((n) => n.type !== "subjectLabel")
               .map((n) => {
               const state = (n.data.state as string) ?? "untouched";
-              const color = nodeColors[state];
+              const color = nodeColors[state] ?? nodeColors.untouched;
               return (
                 <button
                   key={n.id}
@@ -336,7 +349,7 @@ export function MasteryMapClient() {
                   <span
                     className="rounded-duo px-3 py-1 text-xs font-bold"
                     style={{
-                      backgroundColor: `${nodeColors[details.state ?? "untouched"]}30`,
+                      backgroundColor: `${(nodeColors[details.state ?? "untouched"] ?? nodeColors.untouched)}30`,
                     }}
                   >
                     {details.state ?? "untouched"}
@@ -404,12 +417,22 @@ export function MasteryMapClient() {
                   ) : null;
                 })()}
                 {details.missionId ? (
-                  <a
-                    href={`/missions/${details.missionId}`}
-                    className="mt-2 block rounded-2xl bg-primary px-4 py-3 text-center text-sm font-bold text-primary-foreground shadow-lg transition-all hover:scale-[1.02] hover:bg-primary/90"
-                  >
-                    View Mission →
-                  </a>
+                  <div className="mt-2 space-y-2">
+                    <a
+                      href={`/missions/${details.missionId}`}
+                      className="block rounded-2xl bg-primary px-4 py-3 text-center text-sm font-bold text-primary-foreground shadow-lg transition-all hover:scale-[1.02] hover:bg-primary/90"
+                    >
+                      View Mission →
+                    </a>
+                    {selectedNode ? (
+                      <RegenerateMissionButton
+                        nodeId={selectedNode}
+                        sceneBased
+                        onMapUpdated={reloadMap}
+                        onSuccess={(newId) => router.push(`/missions/${newId}`)}
+                      />
+                    ) : null}
+                  </div>
                 ) : selectedNode ? (
                   <GenerateMissionButton
                     nodeId={selectedNode}

@@ -13,7 +13,6 @@ datasource db {
 enum NodeState {
   mastered
   weak
-  missing
   learning
   untouched
 }

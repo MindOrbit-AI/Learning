@@ -6,6 +6,8 @@ import type { MissionSceneData } from "@mindorbit/types";
 import type { MicroInteractionType, RuntimeMicroStep } from "@/features/micro-engine/types";
 import { defaultFeedbackWrong } from "@/features/micro-engine/validateMicroAnswer";
 import { buildVisualProblemMergedCorrect } from "./buildVisualProblemMerged";
+import { coerceDataTypeVisualWorkspace, parseVisualProblemCorrectForMerge } from "./coerceDataTypeVisualWorkspace";
+import { sanitizeDragMatchPromptForTapUi } from "@/features/micro-engine/dragMatchPrompt";
 
 function oneLine(text: string, max = 96): string {
   const t = text.replace(/\s+/g, " ").trim();
@@ -39,6 +41,34 @@ function pickQuizStem(scene: MissionSceneData, content: Record<string, unknown>)
   return oneLine(fallback || "Use the choices below.", 220);
 }
 
+/** drag_drop instructions often live in contentJson; scene.prompt may be a short duplicate or empty. */
+function pickDragDropStem(scene: MissionSceneData, content: Record<string, unknown>): string {
+  const strip = (s: string) => s.replace(/\s+/g, " ").trim();
+  const push = (arr: string[], s: string) => {
+    const t = strip(s);
+    if (t) arr.push(t);
+  };
+  const candidates: string[] = [];
+  for (const key of [
+    "question",
+    "instructions",
+    "task",
+    "stem",
+    "problem",
+    "description",
+    "prompt",
+    "text",
+    "statement",
+  ] as const) {
+    const v = content[key];
+    if (typeof v === "string") push(candidates, v);
+  }
+  push(candidates, String(scene.prompt ?? ""));
+  push(candidates, String(scene.title ?? ""));
+  const first = candidates.find((c) => c.length > 0);
+  return oneLine(first || "Match each item to the correct target.", 280);
+}
+
 function parseContent(scene: MissionSceneData): Record<string, unknown> {
   if (!scene.contentJson?.trim()) return {};
   try {
@@ -54,11 +84,16 @@ function parseCorrect(scene: MissionSceneData): unknown {
   try {
     const parsed = JSON.parse(scene.correctAnswerJson);
     if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      const o = parsed as Record<string, unknown>;
       return (
-        (parsed as Record<string, unknown>).value ??
-        (parsed as Record<string, unknown>).expression ??
-        (parsed as Record<string, unknown>).correctAnswer ??
-        (parsed as Record<string, unknown>).selectedIds ??
+        o.value ??
+        o.answer ??
+        o.expression ??
+        o.correctAnswer ??
+        o.selectedIds ??
+        o.optionId ??
+        o.choiceId ??
+        o.id ??
         parsed
       );
     }
@@ -236,10 +271,30 @@ function sceneToMicroStep(scene: MissionSceneData): RuntimeMicroStep {
     }
 
     case "drag_drop": {
-      const items = (content.items ?? []) as Array<{ id: string; label: string }>;
-      const slots = (content.slots ?? []) as Array<{ id: string; label?: string }>;
+      const rawItems = (content.items ?? content.draggables ?? []) as unknown[];
+      const items = (Array.isArray(rawItems) ? rawItems : []).map((it, i) => {
+        if (typeof it === "string") return { id: `item-${i}`, label: it };
+        const o = it as Record<string, unknown>;
+        return {
+          id: String(o.id ?? o.key ?? `item-${i}`),
+          label: String(o.label ?? o.text ?? o.value ?? o.id ?? `Item ${i + 1}`),
+        };
+      });
+      const rawSlots = (content.slots ?? content.dropZones ?? content.targets ?? []) as unknown[];
+      let slots = (Array.isArray(rawSlots) ? rawSlots : []).map((z, i) => {
+        if (typeof z === "string") return { id: `slot-${i}`, label: z };
+        const o = z as Record<string, unknown>;
+        return {
+          id: String(o.id ?? o.key ?? `slot-${i}`),
+          label: o.label != null ? String(o.label) : undefined,
+        };
+      });
+
       const map: Record<string, string> = {};
       if (Array.isArray(correct)) {
+        if (slots.length === 0 && correct.length > 0) {
+          slots = correct.map((_, i) => ({ id: `drop-${i}`, label: `Target ${i + 1}` }));
+        }
         slots.forEach((slot, i) => {
           const itemId = correct[i];
           if (typeof itemId === "string" && items.some((it) => it.id === itemId)) {
@@ -248,12 +303,16 @@ function sceneToMicroStep(scene: MissionSceneData): RuntimeMicroStep {
         });
       } else if (correct && typeof correct === "object") {
         const obj = correct as Record<string, string>;
+        if (slots.length === 0 && Object.keys(obj).length > 0) {
+          slots = Object.keys(obj).map((id) => ({ id, label: id }));
+        }
         slots.forEach((slot) => {
           const itemId = obj[slot.id];
           if (typeof itemId === "string") map[slot.id] = itemId;
         });
       }
       return base("drag_match", {
+        prompt: sanitizeDragMatchPromptForTapUi(pickDragDropStem(scene, content)),
         interactionConfig: { items, slots },
         correctAnswer: JSON.stringify(map),
         feedbackWrong: oneLine(defaultFeedbackWrong("drag_match"), 120),
@@ -297,39 +356,55 @@ function sceneToMicroStep(scene: MissionSceneData): RuntimeMicroStep {
       });
 
     case "visual_problem": {
-      const merged = buildVisualProblemMergedCorrect(content, correct);
-      const vw = (content.visualWorkspace ?? {}) as Record<string, unknown>;
+      const { content: vpContent, coerced: dataTypeSlotCoerced } = coerceDataTypeVisualWorkspace(
+        content,
+        scene
+      );
+      let correctForVp: unknown = parseVisualProblemCorrectForMerge(scene) ?? correct;
+      if (dataTypeSlotCoerced) {
+        correctForVp = { answer: "" };
+      }
+      const merged = buildVisualProblemMergedCorrect(vpContent, correctForVp);
+      const vw = (vpContent.visualWorkspace ?? {}) as Record<string, unknown>;
       const kind = String(vw.kind ?? "part_model");
-      const defWrongV = oneLine(
-        "Adjust the model first — count shaded parts against the total.",
-        140
-      );
-      const defWrongA = oneLine(
-        "Your picture matches the story; rewrite the fraction or value to match the shaded model.",
-        140
-      );
+      const defWrongV =
+        kind === "slot_fill"
+          ? oneLine("Drag one item into each slot in the correct order before the text answer unlocks.", 140)
+          : kind === "node_link" || kind === "cause_effect_link"
+            ? oneLine("Draw every arrow in the correct order so the flow matches the story.", 140)
+            : oneLine("Adjust the model first — count shaded parts against the total.", 140);
+      const defWrongA =
+        kind === "slot_fill"
+          ? oneLine(
+              "Your slots match the variables; if the prompt asks for a written summary, type the same type names in order.",
+              140
+            )
+          : oneLine(
+              "Your picture matches the story; rewrite the fraction or value to match the shaded model.",
+              140
+            );
       const defCorrect = oneLine(
         String(
-          content.feedbackCorrect ??
+          vpContent.feedbackCorrect ??
             scene.explanation ??
             "You matched the visual and the symbolic answer."
         ),
         220
       );
       return base("visual_problem", {
-        prompt: oneLine(String(content.finalPrompt ?? scene.prompt ?? scene.title)),
+        prompt: oneLine(String(vpContent.finalPrompt ?? scene.prompt ?? scene.title)),
         interactionConfig: {
-          problemScenario: String(content.problemScenario ?? scene.title ?? ""),
-          visualWorkspace: content.visualWorkspace ?? { kind: "part_model", totalParts: 8 },
-          answerPlaceholder: String(content.answerPlaceholder ?? "Final answer…"),
-          feedbackWrongVisual: String(content.feedbackWrongVisual ?? defWrongV),
-          feedbackWrongAnswer: String(content.feedbackWrongAnswer ?? defWrongA),
-          feedbackCorrect: String(content.feedbackCorrect ?? defCorrect),
-          looseText: content.looseText !== false,
+          problemScenario: String(vpContent.problemScenario ?? scene.title ?? ""),
+          visualWorkspace: vpContent.visualWorkspace ?? { kind: "part_model", totalParts: 8 },
+          answerPlaceholder: String(vpContent.answerPlaceholder ?? "Final answer…"),
+          feedbackWrongVisual: String(vpContent.feedbackWrongVisual ?? defWrongV),
+          feedbackWrongAnswer: String(vpContent.feedbackWrongAnswer ?? defWrongA),
+          feedbackCorrect: String(vpContent.feedbackCorrect ?? defCorrect),
+          looseText: vpContent.looseText !== false,
         },
         correctAnswer: merged,
         feedbackCorrect: defCorrect,
-        feedbackWrong: oneLine(String(content.feedbackWrong ?? "Try again — model or answer."), 120),
+        feedbackWrong: oneLine(String(vpContent.feedbackWrong ?? "Try again — model or answer."), 120),
         masterySkill: String(content.masterySkill ?? `visual_reasoning:${kind}`),
         // Scenario is shown in MicroInteractionEngine only; avoid duplicating it in MicroVisualLayer.
         visualStateBefore: null,

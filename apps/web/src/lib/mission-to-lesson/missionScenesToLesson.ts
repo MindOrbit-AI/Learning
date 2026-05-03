@@ -54,7 +54,17 @@ function parseCorrectAnswer(scene: MissionSceneData): unknown {
   try {
     const parsed = JSON.parse(scene.correctAnswerJson);
     if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-      return parsed.value ?? parsed.expression ?? parsed.correctAnswer ?? parsed.selectedIds ?? parsed;
+      return (
+        parsed.value ??
+        parsed.answer ??
+        parsed.expression ??
+        parsed.correctAnswer ??
+        parsed.selectedIds ??
+        parsed.optionId ??
+        parsed.choiceId ??
+        parsed.id ??
+        parsed
+      );
     }
     return parsed;
   } catch {

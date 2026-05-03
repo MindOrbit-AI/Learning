@@ -3,20 +3,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@mindorbit/ui";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronDown, ChevronUp, GripVertical } from "lucide-react";
+import { stripMathTeachingLabel } from "@/features/visual-problem-solving/mathLabelDisplay";
+import { seededShuffle } from "@/lib/deterministicShuffle";
 import type { RuntimeMicroStep } from "./types";
 import { VisualProblemSurface } from "@/features/visual-problem-solving/VisualProblemSurface";
-
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const t = a[i] as T;
-    a[i] = a[j] as T;
-    a[j] = t;
-  }
-  return a;
-}
 
 type Props = {
   step: RuntimeMicroStep;
@@ -112,25 +103,36 @@ function FillBlank({ step, disabled, shakeToken, onCommit }: Props) {
   );
 }
 
+const SEQ_DRAG_MIME = "application/x-mindorbit-seq-id";
+
 function SequenceOrder({ step, disabled, shakeToken, onCommit }: Props) {
   const items = (step.interactionConfig.items ?? []) as Array<{ id: string; label: string }>;
+  const itemsKey = JSON.stringify(items.map((i) => ({ id: i.id, label: i.label })));
   const target = useMemo(() => JSON.parse(step.correctAnswer) as string[], [step.correctAnswer]);
   const committed = useRef(false);
+  const dragIdRef = useRef<string | null>(null);
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+
   const initialOrder = useMemo(() => {
-    const ids = items.map((i) => i.id);
-    let shuffled = shuffle(ids);
+    const ids = (JSON.parse(itemsKey) as Array<{ id: string }>).map((i) => i.id);
+    const baseSeed = `${step.sourceSceneId}::${step.id}::${itemsKey}::${shakeToken}`;
+    let shuffled = seededShuffle(ids, baseSeed);
     let guard = 0;
-    while (shuffled.join(",") === target.join(",") && guard++ < 12) {
-      shuffled = shuffle(ids);
+    while (shuffled.join(",") === target.join(",") && guard++ < 24) {
+      shuffled = seededShuffle(ids, `${baseSeed}#${guard}`);
     }
     return shuffled;
-  }, [items, target]);
+  }, [itemsKey, target, step.sourceSceneId, step.id, shakeToken]);
 
   const [order, setOrder] = useState<string[]>(initialOrder);
 
   useEffect(() => {
     setOrder(initialOrder);
     committed.current = false;
+    dragIdRef.current = null;
+    setDragOverIdx(null);
+    setDraggingId(null);
   }, [step.id, shakeToken, initialOrder]);
 
   useEffect(() => {
@@ -153,42 +155,123 @@ function SequenceOrder({ step, disabled, shakeToken, onCommit }: Props) {
     });
   };
 
+  const onDragStart = (e: React.DragEvent, id: string) => {
+    if (disabled) {
+      e.preventDefault();
+      return;
+    }
+    dragIdRef.current = id;
+    setDraggingId(id);
+    try {
+      e.dataTransfer.setData(SEQ_DRAG_MIME, id);
+      e.dataTransfer.setData("text/plain", id);
+      e.dataTransfer.effectAllowed = "move";
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const onDragOverRow = (e: React.DragEvent, idx: number) => {
+    if (disabled) return;
+    if (!dragIdRef.current) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDragOverIdx(idx);
+  };
+
+  const onDragLeaveRow = (e: React.DragEvent) => {
+    const related = e.relatedTarget as Node | null;
+    if (related && e.currentTarget.contains(related)) return;
+    setDragOverIdx(null);
+  };
+
+  const onDropRow = (e: React.DragEvent, toIdx: number) => {
+    e.preventDefault();
+    let id = "";
+    try {
+      id = e.dataTransfer.getData(SEQ_DRAG_MIME) || e.dataTransfer.getData("text/plain");
+    } catch {
+      /* ignore */
+    }
+    if (!id) id = dragIdRef.current ?? "";
+    dragIdRef.current = null;
+    setDraggingId(null);
+    setDragOverIdx(null);
+    if (!id) return;
+    setOrder((prev) => {
+      const fromIdx = prev.indexOf(id);
+      if (fromIdx < 0 || fromIdx === toIdx) return prev;
+      const next = [...prev];
+      const removed = next.splice(fromIdx, 1)[0];
+      if (removed === undefined) return prev;
+      next.splice(toIdx, 0, removed);
+      return next;
+    });
+  };
+
+  const onDragEnd = () => {
+    dragIdRef.current = null;
+    setDraggingId(null);
+    setDragOverIdx(null);
+  };
+
   return (
     <motion.div
       key={shakeToken}
       animate={shakeToken ? { x: [0, -6, 6, 0] } : {}}
       className="space-y-2"
     >
+      <p className="text-xs text-muted-foreground">
+        Drag a step by the handle (or the card) to reorder. Arrows nudge one row if drag is awkward on your device.
+      </p>
       {order.map((id, idx) => {
         const it = items.find((x) => x.id === id);
+        const shown = stripMathTeachingLabel(it?.label ?? id);
         return (
           <div
-            key={`${id}-${idx}`}
-            className="flex items-center gap-2 rounded-2xl border border-muted bg-card px-3 py-2"
+            key={`${idx}-${id}`}
+            draggable={!disabled}
+            role="listitem"
+            onDragStart={(e) => onDragStart(e, id)}
+            onDragEnd={onDragEnd}
+            onDragOver={(e) => onDragOverRow(e, idx)}
+            onDragLeave={onDragLeaveRow}
+            onDrop={(e) => onDropRow(e, idx)}
+            className={cn(
+              "flex items-center gap-2 rounded-2xl border border-muted bg-card px-3 py-2.5 transition",
+              !disabled && "cursor-grab active:cursor-grabbing",
+              draggingId === id && "opacity-55",
+              dragOverIdx === idx && draggingId && draggingId !== id && "ring-2 ring-emerald-500/70"
+            )}
           >
-            <span className="flex-1 text-sm font-medium">{it?.label ?? id}</span>
-            <button
-              type="button"
-              disabled={disabled}
-              className="rounded-lg p-1 hover:bg-muted"
-              aria-label="Move up"
-              onClick={() => move(idx, -1)}
-            >
-              <ChevronUp className="h-5 w-5" />
-            </button>
-            <button
-              type="button"
-              disabled={disabled}
-              className="rounded-lg p-1 hover:bg-muted"
-              aria-label="Move down"
-              onClick={() => move(idx, 1)}
-            >
-              <ChevronDown className="h-5 w-5" />
-            </button>
+            <span className="text-muted-foreground select-none" aria-hidden>
+              <GripVertical className="h-5 w-5 shrink-0" />
+            </span>
+            <span className="flex-1 font-mono text-sm font-medium leading-snug text-foreground">{shown}</span>
+            <div className="flex shrink-0 items-center gap-0.5">
+              <button
+                type="button"
+                disabled={disabled}
+                className="rounded-lg p-1 hover:bg-muted"
+                aria-label="Move up"
+                onClick={() => move(idx, -1)}
+              >
+                <ChevronUp className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                disabled={disabled}
+                className="rounded-lg p-1 hover:bg-muted"
+                aria-label="Move down"
+                onClick={() => move(idx, 1)}
+              >
+                <ChevronDown className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         );
       })}
-      <p className="text-xs text-muted-foreground">Reorder until it feels right — we detect the match.</p>
+      <p className="text-xs text-muted-foreground">Order is correct when it matches the solution — we check automatically.</p>
     </motion.div>
   );
 }
@@ -205,7 +288,7 @@ function DragMatch({ step, disabled, shakeToken, onCommit }: Props) {
     committed.current = false;
     setMap({});
     setPick(null);
-  }, [step.id]);
+  }, [step.id, shakeToken]);
 
   useEffect(() => {
     if (disabled || committed.current) return;
@@ -218,46 +301,79 @@ function DragMatch({ step, disabled, shakeToken, onCommit }: Props) {
     }
   }, [map, want, disabled, onCommit]);
 
+  const itemLine = items.map((i) => i.label || i.id).join(" · ");
+  const targetLine = slots.map((s) => s.label ?? s.id).join(" · ");
+
   return (
     <motion.div
       key={shakeToken}
       animate={shakeToken ? { x: [0, -6, 6, 0] } : {}}
-      className="grid gap-4 sm:grid-cols-2"
+      className="space-y-3"
     >
-      <div className="space-y-2">
-        <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Pick</p>
-        {items.map((it) => (
-          <button
-            key={it.id}
-            type="button"
-            disabled={disabled}
-            onClick={() => setPick(it.id)}
-            className={cn(
-              "w-full rounded-xl border px-3 py-2 text-left text-sm",
-              pick === it.id ? "border-primary bg-primary/10" : "border-muted"
-            )}
-          >
-            {it.label}
-          </button>
-        ))}
-      </div>
-      <div className="space-y-2">
-        <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Drop zone</p>
-        {slots.map((s) => (
-          <button
-            key={s.id}
-            type="button"
-            disabled={disabled || !pick}
-            onClick={() => {
-              if (!pick) return;
-              setMap((m) => ({ ...m, [s.id]: pick }));
-              setPick(null);
-            }}
-            className="w-full rounded-xl border border-dashed border-muted-foreground/40 px-3 py-3 text-left text-sm"
-          >
-            {map[s.id] ? items.find((i) => i.id === map[s.id])?.label : s.label ?? "Tap after picking an item"}
-          </button>
-        ))}
+      {itemLine || targetLine ? (
+        <div className="rounded-xl border border-muted bg-muted/25 px-3 py-2.5 text-xs leading-relaxed text-foreground">
+          {itemLine ? (
+            <p>
+              <span className="font-bold uppercase tracking-wide text-muted-foreground">Cards — </span>
+              <span className="font-mono text-[13px] font-semibold sm:text-sm">{itemLine}</span>
+            </p>
+          ) : null}
+          {targetLine ? (
+            <p className={itemLine ? "mt-2" : ""}>
+              <span className="font-bold uppercase tracking-wide text-muted-foreground">Match targets — </span>
+              <span className="font-mono text-[13px] font-semibold sm:text-sm">{targetLine}</span>
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+      <p className="text-xs text-muted-foreground">
+        Tap a card under <span className="font-semibold text-foreground">Cards</span>, then tap a row under{" "}
+        <span className="font-semibold text-foreground">Targets</span> (tap-to-match, not drag).
+      </p>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Cards</p>
+          {items.map((it) => (
+            <button
+              key={it.id}
+              type="button"
+              disabled={disabled}
+              onClick={() => setPick(it.id)}
+              className={cn(
+                "w-full rounded-xl border px-3 py-2 text-left font-mono text-sm font-semibold text-foreground",
+                pick === it.id ? "border-primary bg-primary/10" : "border-muted"
+              )}
+            >
+              {it.label || it.id}
+            </button>
+          ))}
+        </div>
+        <div className="space-y-2">
+          <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Targets</p>
+          {slots.length === 0 ? (
+            <p className="rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-xs leading-snug text-amber-950 dark:text-amber-50">
+              This step is missing drop targets in the mission data. Regenerate the mission, or ask support to fix
+              scene JSON (<span className="font-mono">slots</span> / <span className="font-mono">correctAnswerJson</span>
+              ).
+            </p>
+          ) : (
+            slots.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                disabled={disabled || !pick}
+                onClick={() => {
+                  if (!pick) return;
+                  setMap((m) => ({ ...m, [s.id]: pick }));
+                  setPick(null);
+                }}
+                className="w-full rounded-xl border border-dashed border-muted-foreground/40 px-3 py-3 text-left text-sm"
+              >
+                {map[s.id] ? items.find((i) => i.id === map[s.id])?.label : s.label ?? "Tap after picking an item"}
+              </button>
+            ))
+          )}
+        </div>
       </div>
     </motion.div>
   );

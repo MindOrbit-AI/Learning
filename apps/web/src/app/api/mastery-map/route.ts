@@ -13,6 +13,7 @@ import {
   satMathEdges,
 } from "@mindorbit/content";
 import type { Node, Edge } from "reactflow";
+import { resolveDisplayNodeState } from "@/services/learning-state-engine";
 
 const CONTENT_EDGES: Record<string, Array<{ source: string; target: string }>> = {
   algebra: algebraEdges,
@@ -136,7 +137,8 @@ export async function GET(req: Request) {
       for (let i = 0; i < clusterNodes.length; i++) {
         const n = clusterNodes[i];
         if (!n) continue;
-        const state = stateMap.get(n.id);
+        const uns = stateMap.get(n.id);
+        const displayState = resolveDisplayNodeState(uns?.mastery, uns?.state as string | undefined);
         const nodeX = startX + i * (nodeWidth + horizontalGap);
         const pos = { x: nodeX, y: levelY };
         positions.set(n.id, pos);
@@ -146,7 +148,7 @@ export async function GET(req: Request) {
           position: pos,
           data: {
             label: n.title,
-            state: state?.state ?? "untouched",
+            state: displayState,
           },
         });
 
@@ -159,8 +161,8 @@ export async function GET(req: Request) {
         nodeDetails[n.id] = {
           title: n.title,
           description: n.description,
-          state: state?.state ?? "untouched",
-          mastery: state?.mastery,
+          state: displayState,
+          mastery: uns?.mastery,
           resources,
           missionId: missionByNode.get(n.id) ?? null,
           subjectTitle: subject.title,
@@ -246,8 +248,8 @@ export async function GET(req: Request) {
     adjacency.get(e.target)!.add(e.source);
   }
 
-  const suggestStates = new Set(["weak", "missing", "learning"]);
-  const stateOrder: Record<string, number> = { missing: 0, weak: 1, learning: 2 };
+  const suggestStates = new Set(["weak", "learning"]);
+  const stateOrder: Record<string, number> = { weak: 0, learning: 1 };
 
   for (const nodeId of Object.keys(nodeDetails)) {
     const neighborIds = [...(adjacency.get(nodeId) ?? [])].filter((id) => !lockedSet.has(id));

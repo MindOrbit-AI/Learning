@@ -3,7 +3,7 @@
  */
 
 import { prisma } from "@mindorbit/db";
-import { LearningStateEngine } from "./learning-state-engine";
+import { LearningStateEngine, isPracticePriorityNodeState } from "./learning-state-engine";
 import { ReviewScheduler } from "./review-scheduler";
 import { AnalyticsService, EVENT_TYPES } from "./analytics-service";
 import { createMissionsForWeakNodes } from "@/lib/missions";
@@ -171,9 +171,7 @@ export const diagnosticsService = {
       },
     });
 
-    const weakMissing = nodeStates.filter(
-      (n) => n.state === "weak" || n.state === "missing"
-    );
+    const weakMissing = nodeStates.filter((n) => isPracticePriorityNodeState(n.state));
 
     if (attempt.userId) {
       const now = new Date();
@@ -272,9 +270,7 @@ export const diagnosticsService = {
       nodeStates.push({ nodeId: node.id, state, mastery });
     }
 
-    const weakMissing = nodeStates.filter(
-      (n) => n.state === "weak" || n.state === "missing"
-    );
+    const weakMissing = nodeStates.filter((n) => isPracticePriorityNodeState(n.state));
     const overallScore = attempt.overallScore ?? 0;
 
     await prisma.diagnosticAttempt.update({

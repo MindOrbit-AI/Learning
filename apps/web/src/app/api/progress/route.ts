@@ -16,7 +16,7 @@ export async function GET() {
       select: { xp: true },
     }),
     prisma.userNodeState.findMany({
-      where: { userId, state: { in: ["weak", "missing"] } },
+      where: { userId, state: { in: ["weak", "learning"] } },
       select: { mastery: true, confidence: true, node: { select: { title: true } } },
       take: 40,
     }),

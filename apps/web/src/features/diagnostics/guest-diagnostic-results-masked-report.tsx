@@ -4,7 +4,7 @@ import { Button, Card, CardTitle } from "@mindorbit/ui";
 
 export type GuestWeakConcept = {
   title: string;
-  state: "weak" | "missing";
+  state: "weak" | "learning";
 };
 
 type Props = {
@@ -16,7 +16,8 @@ type Props = {
 };
 
 function severityLabel(state: GuestWeakConcept["state"]): string {
-  return state === "missing" ? "Critical gap" : "Blocking progress";
+  if (state === "weak") return "Critical gap";
+  return "Needs practice";
 }
 
 /**

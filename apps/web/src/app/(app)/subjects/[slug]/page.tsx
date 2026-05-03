@@ -7,6 +7,12 @@ import { AddSubjectToLibraryButton } from "@/features/subjects/add-subject-to-li
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button } from "@mindorbit/ui";
 import { Play, Map, ChevronRight, Lock } from "lucide-react";
 import { PLAN_LIMITS, effectivePlanTier } from "@mindorbit/lib";
+import type { NodeState } from "@mindorbit/types";
+import { resolveDisplayNodeState } from "@/services/learning-state-engine";
+
+function prettyNodeState(s: NodeState): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
 export default async function SubjectDetailPage({
   params,
 }: {
@@ -55,7 +61,12 @@ export default async function SubjectDetailPage({
         },
       })
     : [];
-  const stateMap = Object.fromEntries(userNodeStates.map((s) => [s.nodeId, s.state]));
+  const nodeUiById = Object.fromEntries(
+    userNodeStates.map((s) => {
+      const displayState = resolveDisplayNodeState(s.mastery, s.state as string | undefined);
+      return [s.nodeId, { displayState, mastery: s.mastery }] as const;
+    })
+  ) as Record<string, { displayState: NodeState; mastery: number }>;
 
   const user = session?.user?.id
     ? await prisma.user.findUnique({
@@ -117,26 +128,34 @@ export default async function SubjectDetailPage({
             <CardContent>
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {cluster.conceptNodes.map((node) => {
-                  const state = stateMap[node.id];
+                  const ui = nodeUiById[node.id];
+                  const displayState = ui?.displayState ?? "untouched";
+                  const masteryVal = ui?.mastery;
+                  const hasMastery = masteryVal != null && Number.isFinite(Number(masteryVal));
+                  const pillText = hasMastery
+                    ? `${Math.round(Number(masteryVal))}% · ${prettyNodeState(displayState)}`
+                    : prettyNodeState(displayState);
                   return (
                     <Link
                       key={node.id}
                       href={`/mastery-map?node=${node.id}`}
-                      className="flex items-center justify-between rounded-xl border p-3 transition-colors hover:bg-muted"
+                      className="flex min-w-0 items-center justify-between gap-2 rounded-xl border p-3 transition-colors hover:bg-muted"
                     >
-                      <span>{node.title}</span>
+                      <span className="min-w-0 flex-1 truncate">{node.title}</span>
                       <span
-                        className={`rounded-full px-2 py-0.5 text-xs ${
-                          state === "mastered"
+                        className={`max-w-[min(12rem,46%)] truncate rounded-full px-2 py-0.5 text-center text-xs tabular-nums ${
+                          displayState === "mastered"
                             ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                            : state === "weak"
+                            : displayState === "weak"
                               ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
-                              : state === "missing"
-                                ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                                : "bg-muted text-muted-foreground"
+                              : displayState === "learning"
+                                ? "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300"
+                                : displayState === "untouched"
+                                  ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                                  : "bg-muted text-muted-foreground"
                         }`}
                       >
-                        {state ?? "—"}
+                        {pillText}
                       </span>
                       <ChevronRight className="h-4 w-4" />
                     </Link>

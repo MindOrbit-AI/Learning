@@ -52,9 +52,9 @@ export function subjectKeysForGradeLevel(gradeLevel: string): SubjectKey[] {
 export const NODE_STATE_COLORS = {
   mastered: "#22C55E",
   weak: "#F59E0B",
-  missing: "#EF4444",
   learning: "#3B82F6",
-  untouched: "#6B7280",
+  /** Not yet practiced — shown in red so it reads as “needs a first pass” on the map. */
+  untouched: "#EF4444",
 } as const;
 
 export const RESOURCE_TYPE_LABELS = {

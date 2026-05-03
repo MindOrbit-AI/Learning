@@ -4,6 +4,7 @@
 
 import { prisma } from "@mindorbit/db";
 import type { NodeState } from "@mindorbit/types";
+import { LearningStateEngine, isPracticePriorityNodeState } from "@/services/learning-state-engine";
 import { createMissionsForWeakNodes } from "./missions";
 
 export async function startDiagnostic(subjectId: string, userId: string) {
@@ -107,9 +108,7 @@ export async function submitDiagnostic(
     if (score) {
       const pct = (score.correct / score.total) * 100;
       mastery = pct;
-      if (pct >= 80) state = "mastered";
-      else if (pct >= 50) state = "weak";
-      else state = "missing";
+      state = LearningStateEngine.assignNodeState(pct);
     }
     nodeStates.push({ nodeId: node.id, state, mastery });
   }
@@ -157,7 +156,7 @@ export async function submitDiagnostic(
     });
   }
 
-  const weakMissing = nodeStates.filter((n) => n.state === "weak" || n.state === "missing");
+  const weakMissing = nodeStates.filter((n) => isPracticePriorityNodeState(n.state));
   await createMissionsForWeakNodes(
     userId,
     attempt.subjectId,

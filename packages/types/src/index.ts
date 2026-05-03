@@ -2,7 +2,7 @@
  * MindOrbit Learn - Shared Domain Types
  */
 
-export type NodeState = "mastered" | "weak" | "missing" | "learning" | "untouched";
+export type NodeState = "mastered" | "weak" | "learning" | "untouched";
 
 export type QuestionType = "multiple_choice" | "short_answer" | "true_false";
 
