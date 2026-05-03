@@ -65,6 +65,16 @@ const MISSION_TEMPLATES: Record<string, Partial<MissionContent>> = {
     variationPrompt: "What determines an atom's identity—protons or neutrons?",
     estimatedMinutes: 12,
   },
+  "basic-trig": {
+    title: "Exploring Basic Trigonometry",
+    explanation:
+      "Right-triangle trigonometry relates angles to side ratios. When you know an acute angle and one side length, you can find the others using sine, cosine, and tangent (SOH-CAH-TOA). Always identify which angle is referenced and which side is opposite, adjacent, or hypotenuse.",
+    example:
+      "A 10 m ladder makes a 30° angle with the ground. The height on the wall is the side opposite that angle: height = 10 × sin(30°) = 5 m.",
+    reflectionPrompt: "When would you use sine versus cosine for a ladder problem?",
+    variationPrompt: "What changes if the ladder makes a 45° angle instead?",
+    estimatedMinutes: 15,
+  },
   default: {
     title: "Concept Mastery",
     explanation: "This concept builds on foundational knowledge. Work through the examples and practice to solidify your understanding.",
@@ -304,6 +314,59 @@ export const mockAIProvider: AIProvider = {
           correctAnswerJson: '"a"',
           explanation: "The graph shows two rays: values less than 3 (open circle) and values greater than 5 (open circle).",
           orderIndex: 1,
+        },
+      ],
+      "basic-trig": [
+        {
+          sceneType: "observe",
+          title: "Opposite, adjacent, hypotenuse",
+          prompt: "Label the sides relative to the angle at the ground.",
+          contentJson: {
+            visual: "📐",
+            description:
+              "For the angle where the ladder meets the ground: the wall segment is opposite, the floor segment is adjacent, and the ladder is the hypotenuse.",
+          },
+          orderIndex: 0,
+        },
+        {
+          sceneType: "visual_problem",
+          title: "Height on the wall",
+          prompt: "Shade one cell per meter of vertical height.",
+          contentJson: {
+            problemScenario:
+              "A **10-meter** ladder leans against a vertical wall. The ladder meets **level ground** at a **30°** angle (the right angle is between the wall and the ground). Each cell is one meter of height along the wall—shade the cells for the **whole-number height** the ladder reaches.",
+            visualWorkspace: { kind: "part_model", totalParts: 10, targetShadedCount: 5, match: "count" },
+            finalPrompt: "How many meters high does the ladder reach on the wall?",
+            masterySkill: "trig_right_triangle_visual",
+            feedbackCorrect:
+              "You shaded {{shaded}} of {{total}} meters — that matches 10 × sin(30°) = 5 m.",
+            feedbackWrongVisual: "Shade {{expected}} cells to show the height opposite the 30° angle.",
+            feedbackWrongAnswer: "Use the opposite side: hypotenuse × sin(30°) with the 10 m ladder.",
+            expectedAnswer: "5",
+          },
+          correctAnswerJson: JSON.stringify({
+            answer: "5",
+            visual: { kind: "part_model", totalParts: 10, targetShadedCount: 5, match: "count" },
+          }),
+          explanation: "sin(30°) = 1/2, so height = 10 m × 1/2 = 5 m.",
+          orderIndex: 1,
+        },
+        {
+          sceneType: "micro_quiz",
+          title: "SOH-CAH-TOA check",
+          prompt: "For an acute angle θ in a right triangle, sin(θ) equals which ratio?",
+          contentJson: {
+            question: "For an acute angle θ in a right triangle, sin(θ) equals which ratio?",
+            options: [
+              { id: "a", label: "Opposite / hypotenuse" },
+              { id: "b", label: "Adjacent / hypotenuse" },
+              { id: "c", label: "Opposite / adjacent" },
+              { id: "d", label: "Hypotenuse / opposite" },
+            ],
+          },
+          correctAnswerJson: '"a"',
+          explanation: "Sine is opposite over hypotenuse (SOH).",
+          orderIndex: 2,
         },
       ],
       stoichiometry: [

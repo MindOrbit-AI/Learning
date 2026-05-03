@@ -85,7 +85,7 @@ function TriangleSvg({ spec, size = 140 }: { spec: TriangleSpec; size?: number }
   );
 }
 
-function normalizeTriangles(ws: Record<string, unknown>): TriangleSpec[] {
+export function normalizeTriangles(ws: Record<string, unknown>): TriangleSpec[] {
   const raw = ws.diagramTriangles;
   if (Array.isArray(raw)) {
     const mapped: (TriangleSpec | null)[] = raw.map((t) => {
@@ -112,6 +112,11 @@ function normalizeTriangles(ws: Record<string, unknown>): TriangleSpec[] {
   pushTri("triangleA");
   pushTri("triangleB");
   return out;
+}
+
+/** True when the workspace has at least one triangle with three numeric side lengths. */
+export function hasRenderableTriangleDiagrams(ws: Record<string, unknown>): boolean {
+  return normalizeTriangles(ws).length > 0;
 }
 
 export function TriangleDiagramPair({ workspace }: { workspace: Record<string, unknown> }) {

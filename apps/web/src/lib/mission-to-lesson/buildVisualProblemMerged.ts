@@ -1,6 +1,23 @@
 import { expandNumberLineBounds, inferNumericTarget } from "@/features/visual-problem-solving/numberLineBounds";
 import { reconcilePartModelCountTarget } from "@/features/visual-problem-solving/partModelCountTarget";
 
+function isTapShadePartKind(kind: string): boolean {
+  return (
+    kind === "part_model" ||
+    kind === "fraction_bar" ||
+    kind === "pizza_model" ||
+    kind === "area_model"
+  );
+}
+
+/** Tap-to-shade with fewer than two cells is unusable; fall back to text-only grading. */
+function partModelTotalTooSmall(vis: Record<string, unknown>): boolean {
+  const vk = String(vis.kind ?? "part_model");
+  if (!isTapShadePartKind(vk)) return false;
+  const tp = Number(vis.totalParts);
+  return !Number.isFinite(tp) || tp < 2;
+}
+
 /** Drop targets for slot_fill (array drag) — ids must match keys in learner `slotAssignments`. */
 export function normalizeSlotFillSlots(raw: unknown, slotCount: number): Array<{ id: string; label: string }> {
   const n = Math.max(1, Math.round(slotCount));
@@ -161,6 +178,9 @@ export function buildVisualProblemMergedCorrect(content: Record<string, unknown>
         correctOrder,
       };
     }
+    if (partModelTotalTooSmall(vis)) {
+      return JSON.stringify({ answer: textAnswer, visual: { kind: "none" } });
+    }
     return JSON.stringify({ answer: textAnswer, visual: vis });
   }
 
@@ -237,6 +257,12 @@ export function buildVisualProblemMergedCorrect(content: Record<string, unknown>
   }
 
   const total = Number(vw.totalParts ?? 8);
+  if (!Number.isFinite(total) || total < 2) {
+    return JSON.stringify({
+      answer: textAnswer || "?",
+      visual: { kind: "none" },
+    });
+  }
   const rawTarget = Number(vw.targetShadedCount ?? 1);
   const match = String(vw.match ?? "count");
   const target = reconcilePartModelCountTarget(total, rawTarget, textAnswer, match);

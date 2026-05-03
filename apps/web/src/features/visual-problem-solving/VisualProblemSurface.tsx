@@ -5,12 +5,13 @@ import { motion } from "framer-motion";
 import { cn } from "@mindorbit/ui";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import type { RuntimeMicroStep } from "@/features/micro-engine/types";
+import { formatMicroStepCorrectAnswer } from "@/features/micro-engine/formatCorrectAnswerLabel";
 import { normalizeNodeList, normalizeSlotFillSlots } from "@/lib/mission-to-lesson/buildVisualProblemMerged";
 import { seededShuffle } from "@/lib/deterministicShuffle";
 import { stripMathTeachingLabel } from "./mathLabelDisplay";
 import { expandNumberLineBounds, inferNumericTarget } from "./numberLineBounds";
 import { NumberLine } from "@/components/primitives/NumberLine";
-import { TriangleDiagramPair } from "./TriangleDiagramPair";
+import { hasRenderableTriangleDiagrams, TriangleDiagramPair } from "./TriangleDiagramPair";
 import { SlotFillBoard } from "./SlotFillBoard";
 import { visualPhaseSatisfied } from "./validateVisualProblem";
 
@@ -19,10 +20,33 @@ type Props = {
   disabled: boolean;
   shakeToken: number;
   onCommit: (payload: unknown) => void;
+  revealCorrect?: boolean;
 };
 
-export function VisualProblemSurface({ step, disabled, shakeToken, onCommit }: Props) {
+export function VisualProblemSurface({
+  step,
+  disabled,
+  shakeToken,
+  onCommit,
+  revealCorrect = false,
+}: Props) {
   const ws = (step.interactionConfig.visualWorkspace ?? {}) as Record<string, unknown>;
+  /** Triangle specs are often merged into `correctAnswer.visual` only; mirror them for the diagram layer. */
+  const workspaceForTriangles = useMemo(() => {
+    const base = { ...ws };
+    try {
+      const o = JSON.parse(step.correctAnswer) as { visual?: Record<string, unknown> };
+      const v = o.visual;
+      if (!v || typeof v !== "object") return base;
+      const next = { ...base };
+      if (v.diagramTriangles != null) next.diagramTriangles = v.diagramTriangles;
+      if (v.triangleA != null) next.triangleA = v.triangleA;
+      if (v.triangleB != null) next.triangleB = v.triangleB;
+      return next;
+    } catch {
+      return base;
+    }
+  }, [ws, step.correctAnswer]);
   const kind = String(ws.kind ?? "part_model");
   const timelineTarget = useMemo(() => {
     try {
@@ -143,12 +167,8 @@ export function VisualProblemSurface({ step, disabled, shakeToken, onCommit }: P
 
   const showTriangleHint = useMemo(() => {
     const scenario = String(step.interactionConfig.problemScenario ?? "");
-    const hasDiagram =
-      Array.isArray(ws.diagramTriangles) ||
-      (ws.triangleA && typeof ws.triangleA === "object") ||
-      (ws.triangleB && typeof ws.triangleB === "object");
-    return /\btriangle/i.test(scenario) && !hasDiagram;
-  }, [step.interactionConfig.problemScenario, ws]);
+    return /\btriangle/i.test(scenario) && !hasRenderableTriangleDiagrams(workspaceForTriangles);
+  }, [step.interactionConfig.problemScenario, workspaceForTriangles]);
 
   /** Scenario text describes DnD but this workspace is tap-to-shade tiles only. */
   const partModelDragDropCopyMismatch = useMemo(() => {
@@ -307,16 +327,28 @@ export function VisualProblemSurface({ step, disabled, shakeToken, onCommit }: P
       className="touch-manipulation space-y-6"
     >
       <div className="relative z-10 touch-manipulation rounded-2xl border border-primary/20 bg-primary/[0.04] p-4">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-primary/80">Visual workspace</p>
-        <TriangleDiagramPair workspace={ws} />
-        {showTriangleHint ? (
-          <p className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs leading-snug text-amber-950 dark:text-amber-50">
-            Drawn triangles will show here once this mission includes side lengths for both shapes.{" "}
-            <span className="font-semibold">Regenerate the mission</span> to get the latest layout, or use the numbered
-            parts below for now.
+        {revealCorrect ? (
+          <p className="mb-3 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-center text-sm font-semibold leading-snug text-emerald-900 dark:text-emerald-100">
+            Correct answer: {formatMicroStepCorrectAnswer(step)}
           </p>
         ) : null}
-        {partModelDragDropCopyMismatch ? (
+        <p className="text-[10px] font-bold uppercase tracking-widest text-primary/80">
+          {kind === "none" ? "Your answer" : "Visual workspace"}
+        </p>
+        {kind === "none" ? (
+          <p className="mb-4 text-center text-sm leading-snug text-muted-foreground">
+            Answer using the scenario and question above. This step does not include a grid or other on-screen model.
+          </p>
+        ) : null}
+        {kind !== "none" ? <TriangleDiagramPair workspace={workspaceForTriangles} /> : null}
+        {kind !== "none" && showTriangleHint ? (
+          <p className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs leading-snug text-amber-950 dark:text-amber-50">
+            Drawn triangles will show here once this mission includes valid side lengths for the triangles in the
+            story. <span className="font-semibold">Regenerate the mission</span> to get the latest layout, or use the
+            numbered parts below for now.
+          </p>
+        ) : null}
+        {kind !== "none" && partModelDragDropCopyMismatch ? (
           <p className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs leading-snug text-amber-950 dark:text-amber-50">
             This step uses a <span className="font-semibold">tap-to-select grid</span> (numbered cells), not drag-and-drop.
             Tap cells on or off until the shaded count matches what the story asks for
@@ -329,7 +361,7 @@ export function VisualProblemSurface({ step, disabled, shakeToken, onCommit }: P
             — then the answer field unlocks.
           </p>
         ) : null}
-        {partModelLetterGridMismatch ? (
+        {kind !== "none" && partModelLetterGridMismatch ? (
           <p className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs leading-snug text-amber-950 dark:text-amber-50">
             The story mentions letters or a grid, but this mission did not include{" "}
             <span className="font-mono text-[10px]">visualWorkspace.cellLabels</span>. Until content is regenerated with
@@ -337,12 +369,16 @@ export function VisualProblemSurface({ step, disabled, shakeToken, onCommit }: P
             head, or use <span className="font-semibold">Regenerate</span> on the mastery map.
           </p>
         ) : null}
-        {kind === "slot_fill" && slotFillModel ? (
+        {kind !== "none" && kind === "slot_fill" && slotFillModel ? (
           <p className="mb-3 text-center text-sm leading-snug text-muted-foreground">
             Drag each type card into the slot for the matching variable. Fill every slot to unlock the answer field.
           </p>
         ) : null}
-        {kind === "part_model" || kind === "fraction_bar" || kind === "pizza_model" || kind === "area_model" ? (
+        {kind !== "none" &&
+        (kind === "part_model" ||
+          kind === "fraction_bar" ||
+          kind === "pizza_model" ||
+          kind === "area_model") ? (
           <PartModel
             total={partModelTotal}
             disabled={disabled}
@@ -351,7 +387,7 @@ export function VisualProblemSurface({ step, disabled, shakeToken, onCommit }: P
             gridCols={partModelGridCols}
           />
         ) : null}
-        {kind === "number_line" && numberLineSlider ? (
+        {kind !== "none" && kind === "number_line" && numberLineSlider ? (
           <NumberLinePicker
             min={numberLineSlider.min}
             max={numberLineSlider.max}
@@ -360,7 +396,7 @@ export function VisualProblemSurface({ step, disabled, shakeToken, onCommit }: P
             onChange={setLineVisual}
           />
         ) : null}
-        {kind === "timeline" ? (
+        {kind !== "none" && kind === "timeline" ? (
           <TimelineOrder
             items={(ws.items as Array<{ id: string; label: string }>) ?? []}
             target={timelineTarget}
@@ -369,7 +405,7 @@ export function VisualProblemSurface({ step, disabled, shakeToken, onCommit }: P
             onChange={setTimelineVisual}
           />
         ) : null}
-        {(kind === "node_link" || kind === "cause_effect_link") ? (
+        {kind !== "none" && (kind === "node_link" || kind === "cause_effect_link") ? (
           <NodeLinkPicker
             nodes={nodeLinkNodes}
             expectedJson={step.correctAnswer}
@@ -377,7 +413,7 @@ export function VisualProblemSurface({ step, disabled, shakeToken, onCommit }: P
             onChange={setLinkVisual}
           />
         ) : null}
-        {kind === "slot_fill" && slotFillModel ? (
+        {kind !== "none" && kind === "slot_fill" && slotFillModel ? (
           <SlotFillBoard
             key={`${step.id}-${shakeToken}-slotfill`}
             items={slotFillModel.items}
@@ -396,7 +432,9 @@ export function VisualProblemSurface({ step, disabled, shakeToken, onCommit }: P
       >
         <p className="text-xs font-semibold text-muted-foreground">
           {visualOkLocal
-            ? "Now answer using the model you built."
+            ? kind === "none"
+              ? "Type your answer below."
+              : "Now answer using the model you built."
             : nodeLinkWrongTopology
               ? "You have the right number of links, but the flow does not match the expected diagram yet. Clear or redraw links until it matches — then the answer field unlocks."
               : slotFillWrongOrderHint

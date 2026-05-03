@@ -7,6 +7,7 @@ import { ChevronDown, ChevronUp, GripVertical } from "lucide-react";
 import { stripMathTeachingLabel } from "@/features/visual-problem-solving/mathLabelDisplay";
 import { seededShuffle } from "@/lib/deterministicShuffle";
 import type { RuntimeMicroStep } from "./types";
+import { tapChoiceCorrectOptionId } from "./formatCorrectAnswerLabel";
 import { VisualProblemSurface } from "@/features/visual-problem-solving/VisualProblemSurface";
 
 type Props = {
@@ -14,36 +15,100 @@ type Props = {
   disabled: boolean;
   shakeToken: number;
   onCommit: (payload: unknown) => void;
+  revealCorrect?: boolean;
 };
 
-export function MicroStepSurface({ step, disabled, shakeToken, onCommit }: Props) {
+export function MicroStepSurface({
+  step,
+  disabled,
+  shakeToken,
+  onCommit,
+  revealCorrect = false,
+}: Props) {
   switch (step.type) {
     case "tap_choice":
-      return <TapChoice step={step} disabled={disabled} shakeToken={shakeToken} onCommit={onCommit} />;
+      return (
+        <TapChoice
+          step={step}
+          disabled={disabled}
+          shakeToken={shakeToken}
+          revealCorrect={revealCorrect}
+          onCommit={onCommit}
+        />
+      );
     case "fill_blank":
-      return <FillBlank step={step} disabled={disabled} shakeToken={shakeToken} onCommit={onCommit} />;
+      return (
+        <FillBlank
+          step={step}
+          disabled={disabled}
+          shakeToken={shakeToken}
+          revealCorrect={revealCorrect}
+          onCommit={onCommit}
+        />
+      );
     case "sequence_order":
       return <SequenceOrder step={step} disabled={disabled} shakeToken={shakeToken} onCommit={onCommit} />;
     case "drag_match":
-      return <DragMatch step={step} disabled={disabled} shakeToken={shakeToken} onCommit={onCommit} />;
+      return (
+        <DragMatch
+          step={step}
+          disabled={disabled}
+          shakeToken={shakeToken}
+          revealCorrect={revealCorrect}
+          onCommit={onCommit}
+        />
+      );
     case "slider_adjust":
-      return <SliderAdjust step={step} disabled={disabled} shakeToken={shakeToken} onCommit={onCommit} />;
+      return (
+        <SliderAdjust
+          step={step}
+          disabled={disabled}
+          shakeToken={shakeToken}
+          revealCorrect={revealCorrect}
+          onCommit={onCommit}
+        />
+      );
     case "reveal_step":
       return <RevealStep step={step} disabled={disabled} shakeToken={shakeToken} onCommit={onCommit} />;
     case "visual_toggle":
       return <VisualToggle step={step} disabled={disabled} shakeToken={shakeToken} onCommit={onCommit} />;
     case "connect_nodes":
-      return <ConnectNodes step={step} disabled={disabled} shakeToken={shakeToken} onCommit={onCommit} />;
+      return (
+        <ConnectNodes
+          step={step}
+          disabled={disabled}
+          shakeToken={shakeToken}
+          revealCorrect={revealCorrect}
+          onCommit={onCommit}
+        />
+      );
     case "visual_problem":
-      return <VisualProblemSurface step={step} disabled={disabled} shakeToken={shakeToken} onCommit={onCommit} />;
+      return (
+        <VisualProblemSurface
+          step={step}
+          disabled={disabled}
+          shakeToken={shakeToken}
+          revealCorrect={revealCorrect}
+          onCommit={onCommit}
+        />
+      );
     default:
-      return <FillBlank step={step} disabled={disabled} shakeToken={shakeToken} onCommit={onCommit} />;
+      return (
+        <FillBlank
+          step={step}
+          disabled={disabled}
+          shakeToken={shakeToken}
+          revealCorrect={revealCorrect}
+          onCommit={onCommit}
+        />
+      );
   }
 }
 
-function TapChoice({ step, disabled, shakeToken, onCommit }: Props) {
+function TapChoice({ step, disabled, shakeToken, onCommit, revealCorrect = false }: Props) {
   const options = (step.interactionConfig.options ?? []) as Array<{ id: string; label: string }>;
   const layout = (step.interactionConfig.layout as string) ?? "grid";
+  const correctId = tapChoiceCorrectOptionId(step);
   return (
     <motion.div
       key={shakeToken}
@@ -54,28 +119,34 @@ function TapChoice({ step, disabled, shakeToken, onCommit }: Props) {
         layout === "grid" ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"
       )}
     >
-      {options.map((o) => (
-        <button
-          key={o.id}
-          type="button"
-          disabled={disabled}
-          onClick={() => onCommit(o.id)}
-          className={cn(
-            "min-h-[52px] cursor-pointer rounded-2xl border-2 border-muted bg-background px-4 py-4 text-left text-base font-semibold shadow-sm transition-all select-none",
-            "hover:border-primary/50 hover:bg-primary/5 active:scale-[0.98]",
-            "disabled:pointer-events-none disabled:opacity-60"
-          )}
-        >
-          {o.label}
-        </button>
-      ))}
+      {options.map((o) => {
+        const isAnswer = revealCorrect && correctId != null && o.id === correctId;
+        return (
+          <button
+            key={o.id}
+            type="button"
+            disabled={disabled}
+            onClick={() => onCommit(o.id)}
+            className={cn(
+              "min-h-[52px] cursor-pointer rounded-2xl border-2 border-muted bg-background px-4 py-4 text-left text-base font-semibold shadow-sm transition-all select-none",
+              "hover:border-primary/50 hover:bg-primary/5 active:scale-[0.98]",
+              "disabled:pointer-events-none disabled:opacity-60",
+              isAnswer &&
+                "pointer-events-none !border-emerald-500 !bg-emerald-500/15 !text-emerald-950 !opacity-100 shadow-[0_0_20px_rgba(34,197,94,0.35)] dark:!text-emerald-50"
+            )}
+          >
+            {o.label}
+          </button>
+        );
+      })}
     </motion.div>
   );
 }
 
-function FillBlank({ step, disabled, shakeToken, onCommit }: Props) {
+function FillBlank({ step, disabled, shakeToken, onCommit, revealCorrect = false }: Props) {
   const acceptAny = step.interactionConfig.acceptAny === true;
   const [v, setV] = useState("");
+  const expected = String(step.correctAnswer ?? "");
   return (
     <motion.div
       key={shakeToken}
@@ -96,6 +167,11 @@ function FillBlank({ step, disabled, shakeToken, onCommit }: Props) {
         placeholder={String(step.interactionConfig.placeholder ?? "…")}
         className="w-full rounded-2xl border-2 border-muted bg-background px-4 py-3 text-lg outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
       />
+      {revealCorrect && expected ? (
+        <p className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-center text-sm font-semibold text-emerald-900 dark:text-emerald-100">
+          Correct answer: <span className="font-mono">{expected}</span>
+        </p>
+      ) : null}
       <p className="text-xs text-muted-foreground">
         {acceptAny ? "Enter or click away when ready." : "Press Enter to lock in."}
       </p>
@@ -276,7 +352,7 @@ function SequenceOrder({ step, disabled, shakeToken, onCommit }: Props) {
   );
 }
 
-function DragMatch({ step, disabled, shakeToken, onCommit }: Props) {
+function DragMatch({ step, disabled, shakeToken, onCommit, revealCorrect = false }: Props) {
   const items = (step.interactionConfig.items ?? []) as Array<{ id: string; label: string }>;
   const slots = (step.interactionConfig.slots ?? []) as Array<{ id: string; label?: string }>;
   const want = useMemo(() => JSON.parse(step.correctAnswer) as Record<string, string>, [step.correctAnswer]);
@@ -310,6 +386,22 @@ function DragMatch({ step, disabled, shakeToken, onCommit }: Props) {
       animate={shakeToken ? { x: [0, -6, 6, 0] } : {}}
       className="space-y-3"
     >
+      {revealCorrect && Object.keys(want).length > 0 ? (
+        <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-3 py-2.5 text-xs font-medium text-emerald-950 dark:text-emerald-50">
+          <p className="font-bold uppercase tracking-wide text-emerald-800 dark:text-emerald-200">Solution</p>
+          <ul className="mt-1 list-inside list-disc space-y-0.5">
+            {Object.entries(want).map(([slotId, itemId]) => {
+              const it = items.find((i) => i.id === itemId)?.label ?? itemId;
+              const sl = slots.find((s) => s.id === slotId)?.label ?? slotId;
+              return (
+                <li key={slotId}>
+                  {it} → {sl}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ) : null}
       {itemLine || targetLine ? (
         <div className="rounded-xl border border-muted bg-muted/25 px-3 py-2.5 text-xs leading-relaxed text-foreground">
           {itemLine ? (
@@ -379,10 +471,11 @@ function DragMatch({ step, disabled, shakeToken, onCommit }: Props) {
   );
 }
 
-function SliderAdjust({ step, disabled, shakeToken, onCommit }: Props) {
+function SliderAdjust({ step, disabled, shakeToken, onCommit, revealCorrect = false }: Props) {
   const min = Number(step.interactionConfig.min) ?? 0;
   const max = Number(step.interactionConfig.max) ?? 100;
   const st = Number(step.interactionConfig.step) ?? 1;
+  const target = Number(step.correctAnswer);
   const [val, setVal] = useState(() => Math.round((min + max) / 2 / st) * st);
   return (
     <motion.div
@@ -406,6 +499,11 @@ function SliderAdjust({ step, disabled, shakeToken, onCommit }: Props) {
         <span className="font-bold text-foreground">{val}</span>
         <span>{max}</span>
       </div>
+      {revealCorrect && Number.isFinite(target) ? (
+        <p className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-center text-sm font-semibold text-emerald-900 dark:text-emerald-100">
+          Target value: <span className="font-mono tabular-nums">{target}</span>
+        </p>
+      ) : null}
       <p className="text-xs text-muted-foreground">Release to check — nudge until it feels right.</p>
     </motion.div>
   );
@@ -524,40 +622,54 @@ function VisualToggle({ step, disabled, shakeToken, onCommit }: Props) {
   );
 }
 
-function ConnectNodes({ step, disabled, shakeToken, onCommit }: Props) {
+function ConnectNodes({ step, disabled, shakeToken, onCommit, revealCorrect = false }: Props) {
   const nodes = (step.interactionConfig.nodes ?? []) as Array<{ id: string; label: string }>;
   const [a, setA] = useState<string | null>(null);
+  let correctPair: [string, string] | null = null;
+  try {
+    const p = JSON.parse(step.correctAnswer) as string[];
+    if (Array.isArray(p) && p.length >= 2) correctPair = [String(p[0]), String(p[1])];
+  } catch {
+    /* ignore */
+  }
   return (
     <motion.div
       key={shakeToken}
       animate={shakeToken ? { x: [0, -6, 6, 0] } : {}}
       className="flex flex-wrap gap-2"
     >
-      {nodes.map((n) => (
-        <button
-          key={n.id}
-          type="button"
-          disabled={disabled}
-          onClick={() => {
-            if (!a) {
-              setA(n.id);
-              return;
-            }
-            if (a === n.id) {
+      {nodes.map((n) => {
+        const inReveal =
+          revealCorrect &&
+          correctPair &&
+          (n.id === correctPair[0] || n.id === correctPair[1]);
+        return (
+          <button
+            key={n.id}
+            type="button"
+            disabled={disabled}
+            onClick={() => {
+              if (!a) {
+                setA(n.id);
+                return;
+              }
+              if (a === n.id) {
+                setA(null);
+                return;
+              }
+              onCommit(JSON.stringify([a, n.id]));
               setA(null);
-              return;
-            }
-            onCommit(JSON.stringify([a, n.id]));
-            setA(null);
-          }}
-          className={cn(
-            "rounded-2xl border-2 px-4 py-3 text-sm font-bold",
-            a === n.id ? "border-cyan-500 ring-2 ring-cyan-500/30" : "border-muted"
-          )}
-        >
-          {n.label}
-        </button>
-      ))}
+            }}
+            className={cn(
+              "rounded-2xl border-2 px-4 py-3 text-sm font-bold",
+              inReveal && "!border-emerald-500 !bg-emerald-500/15 !text-emerald-950 ring-2 !ring-emerald-500/40 dark:!text-emerald-50",
+              !inReveal && a === n.id ? "border-cyan-500 ring-2 ring-cyan-500/30" : !inReveal && "border-muted"
+            )}
+          >
+            {n.label}
+          </button>
+        );
+      })}
       <p className="w-full text-xs text-muted-foreground">Tap start, then end, to draw one link.</p>
     </motion.div>
   );

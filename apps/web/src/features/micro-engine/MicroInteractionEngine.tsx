@@ -15,9 +15,12 @@ import { MicroVisualLayer } from "./MicroVisualLayer";
 import { MicroPromptDisplay } from "./MicroPromptDisplay";
 import { sanitizeDragMatchPromptForTapUi } from "./dragMatchPrompt";
 import { microEngineSounds } from "./micro-engine-sounds";
+import { formatMicroStepCorrectAnswer } from "./formatCorrectAnswerLabel";
 
 const PASS_THRESHOLD = 0.6;
 const ADVANCE_MS = 480;
+const MAX_WRONG_ATTEMPTS_BEFORE_REVEAL = 3;
+const REVEAL_THEN_ADVANCE_MS = 2000;
 
 export type SessionEndPayload = {
   sceneResponses: SceneResponsePayload[];
@@ -38,7 +41,7 @@ type Props = {
   onExit?: () => void;
 };
 
-type Overlay = { kind: "correct" | "wrong"; text: string } | null;
+type Overlay = { kind: "correct" | "wrong" | "reveal"; text: string } | null;
 
 export function MicroInteractionEngine({
   missionTitle,
@@ -58,8 +61,10 @@ export function MicroInteractionEngine({
   const [visualPhase, setVisualPhase] = useState<"idle" | "correct" | "wrong">("idle");
   const [floatingXp, setFloatingXp] = useState<{ id: string; n: number }[]>([]);
   const [locked, setLocked] = useState(false);
+  const [revealCorrect, setRevealCorrect] = useState(false);
   const resultsRef = useRef<Record<string, { isCorrect: boolean; attempts: number }>>({});
   const answersRef = useRef<Record<string, unknown>>({});
+  const revealAdvanceTimeoutRef = useRef<number | null>(null);
 
   const total = steps.length;
   const step = steps[index];
@@ -68,6 +73,19 @@ export function MicroInteractionEngine({
   useEffect(() => {
     microEngineSounds.resume();
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (revealAdvanceTimeoutRef.current != null) {
+        window.clearTimeout(revealAdvanceTimeoutRef.current);
+        revealAdvanceTimeoutRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    setRevealCorrect(false);
+  }, [index, step?.id]);
 
   const emitProgress = useCallback(() => {
     const completedIndices = steps
@@ -137,9 +155,43 @@ export function MicroInteractionEngine({
         setStreak(0);
         setShake((s) => s + 1);
         setVisualPhase("wrong");
-        setOverlay({ kind: "wrong", text: wrongText });
         setTick((t) => t + 1);
         emitProgress();
+
+        if (nextAttempts >= MAX_WRONG_ATTEMPTS_BEFORE_REVEAL) {
+          if (revealAdvanceTimeoutRef.current != null) {
+            window.clearTimeout(revealAdvanceTimeoutRef.current);
+          }
+          const answerLabel = formatMicroStepCorrectAnswer(step);
+          setLocked(true);
+          setRevealCorrect(true);
+          setOverlay({
+            kind: "reveal",
+            text: `Here's the correct answer: ${answerLabel}`,
+          });
+          revealAdvanceTimeoutRef.current = window.setTimeout(() => {
+            revealAdvanceTimeoutRef.current = null;
+            setOverlay(null);
+            setVisualPhase("idle");
+            setRevealCorrect(false);
+            if (isLast) {
+              const sceneResponses = buildResponses();
+              const correct = sceneResponses.filter((r) => r.isCorrect).length;
+              const passed = total > 0 && correct / total >= PASS_THRESHOLD;
+              if (passed) microEngineSounds.complete();
+              onSessionEnd({ sceneResponses, passed });
+              setLocked(false);
+              emitProgress();
+              return;
+            }
+            setIndex((i) => i + 1);
+            setLocked(false);
+            emitProgress();
+          }, REVEAL_THEN_ADVANCE_MS);
+          return;
+        }
+
+        setOverlay({ kind: "wrong", text: wrongText });
         window.setTimeout(() => {
           setOverlay(null);
           setVisualPhase("idle");
@@ -276,6 +328,7 @@ export function MicroInteractionEngine({
               step={step}
               disabled={locked}
               shakeToken={shake}
+              revealCorrect={revealCorrect}
               onCommit={handleCommit}
             />
           </div>
@@ -305,7 +358,7 @@ export function MicroInteractionEngine({
               exit={{ opacity: 0, scale: 0.95 }}
               className={cn(
                 "pointer-events-none fixed inset-x-4 top-28 z-50 mx-auto max-w-md rounded-2xl border px-5 py-4 text-center text-sm font-semibold shadow-2xl md:inset-x-auto",
-                overlay.kind === "correct"
+                overlay.kind === "correct" || overlay.kind === "reveal"
                   ? "border-emerald-500/40 bg-emerald-950/90 text-emerald-50"
                   : "border-rose-500/40 bg-rose-950/90 text-rose-50"
               )}

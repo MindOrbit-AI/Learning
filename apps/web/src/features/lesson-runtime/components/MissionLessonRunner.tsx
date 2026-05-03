@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@mindorbit/ui";
 import type { MissionSceneData } from "@mindorbit/types";
@@ -50,8 +50,17 @@ export function MissionLessonRunner({
   const [sessionXpEarned, setSessionXpEarned] = useState<number | null>(null);
   const [sessionStarsEarned, setSessionStarsEarned] = useState<number | null>(null);
   const [engineSession, setEngineSession] = useState(0);
+  /** Resume index from server; reset to 0 when learner taps "Try again" after a failed run. */
+  const [engineInitialStepIndex, setEngineInitialStepIndex] = useState(initialSceneIndex);
   const hintDepthByStepIdRef = useRef<Record<string, number>>({});
   const lastFailResponsesRef = useRef<SceneResponsePayload[] | null>(null);
+
+  useEffect(() => {
+    setEngineInitialStepIndex(initialSceneIndex);
+    // Same-mission updates to `initialSceneIndex` are ignored so "Try again" can stay at step 0
+    // without this effect overwriting from stale resume props.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync resume index when switching missions only
+  }, [missionId]);
 
   const displayXp = sessionXpEarned ?? xpGranted ?? xpReward;
   const displayStars = sessionStarsEarned ?? starsGranted;
@@ -158,6 +167,9 @@ export function MissionLessonRunner({
             <button
               type="button"
               onClick={() => {
+                hintDepthByStepIdRef.current = {};
+                lastFailResponsesRef.current = null;
+                setEngineInitialStepIndex(0);
                 setShowTryAgain(false);
                 setEngineSession((k) => k + 1);
               }}
@@ -200,7 +212,7 @@ export function MissionLessonRunner({
         missionTitle={missionTitle}
         nodeTitle={nodeTitle}
         steps={steps}
-        initialStepIndex={initialSceneIndex}
+        initialStepIndex={engineInitialStepIndex}
         onProgress={(p) => void saveProgress(p)}
         onSessionEnd={handleSessionEnd}
         onExit={() => router.push("/missions")}

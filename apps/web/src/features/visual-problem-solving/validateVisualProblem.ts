@@ -275,6 +275,8 @@ function visualMatches(
 ) {
   const kind = String(expectedVisual.kind ?? "part_model");
   switch (kind) {
+    case "none":
+      return { ok: true, vars: { total: 0, shaded: 0, expected: 0 } };
     case "part_model":
     case "fraction_bar":
     case "pizza_model":

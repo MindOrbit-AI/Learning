@@ -366,23 +366,46 @@ function sceneToMicroStep(scene: MissionSceneData): RuntimeMicroStep {
       }
       const merged = buildVisualProblemMergedCorrect(vpContent, correctForVp);
       const vw = (vpContent.visualWorkspace ?? {}) as Record<string, unknown>;
-      const kind = String(vw.kind ?? "part_model");
+      const defaultPartWorkspace: Record<string, unknown> = { kind: "part_model", totalParts: 8 };
+      let visualWorkspaceOut: Record<string, unknown> =
+        (vpContent.visualWorkspace as Record<string, unknown> | undefined) ?? defaultPartWorkspace;
+      let effectiveKind = String(vw.kind ?? "part_model");
+      try {
+        const parsed = JSON.parse(merged) as { visual?: { kind?: unknown } };
+        const mk = String(parsed?.visual?.kind ?? "");
+        if (mk === "none") {
+          visualWorkspaceOut = { kind: "none" };
+          effectiveKind = "none";
+        }
+      } catch {
+        /* keep workspace from content */
+      }
       const defWrongV =
-        kind === "slot_fill"
-          ? oneLine("Drag one item into each slot in the correct order before the text answer unlocks.", 140)
-          : kind === "node_link" || kind === "cause_effect_link"
-            ? oneLine("Draw every arrow in the correct order so the flow matches the story.", 140)
-            : oneLine("Adjust the model first — count shaded parts against the total.", 140);
+        effectiveKind === "none"
+          ? oneLine("There is no on-screen model for this step — focus on the scenario and your written answer.", 140)
+          : effectiveKind === "slot_fill"
+            ? oneLine("Drag one item into each slot in the correct order before the text answer unlocks.", 140)
+            : effectiveKind === "node_link" || effectiveKind === "cause_effect_link"
+              ? oneLine("Draw every arrow in the correct order so the flow matches the story.", 140)
+              : oneLine("Adjust the model first — count shaded parts against the total.", 140);
       const defWrongA =
-        kind === "slot_fill"
+        effectiveKind === "none"
           ? oneLine(
-              "Your slots match the variables; if the prompt asks for a written summary, type the same type names in order.",
+              String(
+                vpContent.feedbackWrongAnswer ??
+                  "Re-read the question and scenario, then adjust your answer."
+              ),
               140
             )
-          : oneLine(
-              "Your picture matches the story; rewrite the fraction or value to match the shaded model.",
-              140
-            );
+          : effectiveKind === "slot_fill"
+            ? oneLine(
+                "Your slots match the variables; if the prompt asks for a written summary, type the same type names in order.",
+                140
+              )
+            : oneLine(
+                "Your picture matches the story; rewrite the fraction or value to match the shaded model.",
+                140
+              );
       const defCorrect = oneLine(
         String(
           vpContent.feedbackCorrect ??
@@ -395,7 +418,7 @@ function sceneToMicroStep(scene: MissionSceneData): RuntimeMicroStep {
         prompt: oneLine(String(vpContent.finalPrompt ?? scene.prompt ?? scene.title)),
         interactionConfig: {
           problemScenario: String(vpContent.problemScenario ?? scene.title ?? ""),
-          visualWorkspace: vpContent.visualWorkspace ?? { kind: "part_model", totalParts: 8 },
+          visualWorkspace: visualWorkspaceOut,
           answerPlaceholder: String(vpContent.answerPlaceholder ?? "Final answer…"),
           feedbackWrongVisual: String(vpContent.feedbackWrongVisual ?? defWrongV),
           feedbackWrongAnswer: String(vpContent.feedbackWrongAnswer ?? defWrongA),
@@ -405,7 +428,7 @@ function sceneToMicroStep(scene: MissionSceneData): RuntimeMicroStep {
         correctAnswer: merged,
         feedbackCorrect: defCorrect,
         feedbackWrong: oneLine(String(vpContent.feedbackWrong ?? "Try again — model or answer."), 120),
-        masterySkill: String(content.masterySkill ?? `visual_reasoning:${kind}`),
+        masterySkill: String(content.masterySkill ?? `visual_reasoning:${effectiveKind}`),
         // Scenario is shown in MicroInteractionEngine only; avoid duplicating it in MicroVisualLayer.
         visualStateBefore: null,
         visualStateAfter: null,
