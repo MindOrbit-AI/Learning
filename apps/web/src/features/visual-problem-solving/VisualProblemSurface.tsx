@@ -6,12 +6,19 @@ import { cn } from "@mindorbit/ui";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import type { RuntimeMicroStep } from "@/features/micro-engine/types";
 import { formatMicroStepCorrectAnswer } from "@/features/micro-engine/formatCorrectAnswerLabel";
-import { normalizeNodeList, normalizeSlotFillSlots } from "@/lib/mission-to-lesson/buildVisualProblemMerged";
+import {
+  enrichNodeLinkNodesWithEdgeEndpoints,
+  normalizeNodeList,
+  normalizeSlotFillSlots,
+  syncVisualWorkspaceFromMergedVisual,
+} from "@/lib/mission-to-lesson/buildVisualProblemMerged";
 import { seededShuffle } from "@/lib/deterministicShuffle";
 import { stripMathTeachingLabel } from "./mathLabelDisplay";
 import { expandNumberLineBounds, inferNumericTarget } from "./numberLineBounds";
 import { NumberLine } from "@/components/primitives/NumberLine";
 import { hasRenderableTriangleDiagrams, TriangleDiagramPair } from "./TriangleDiagramPair";
+import { BasePairSelectBoard } from "./BasePairSelectBoard";
+import { normalizeBasePairTokens } from "./basePairSelectValidation";
 import { SlotFillBoard } from "./SlotFillBoard";
 import { visualPhaseSatisfied } from "./validateVisualProblem";
 
@@ -30,7 +37,18 @@ export function VisualProblemSurface({
   onCommit,
   revealCorrect = false,
 }: Props) {
-  const ws = (step.interactionConfig.visualWorkspace ?? {}) as Record<string, unknown>;
+  const ws = useMemo(() => {
+    const raw = (step.interactionConfig.visualWorkspace ?? {}) as Record<string, unknown>;
+    try {
+      const o = JSON.parse(step.correctAnswer) as { visual?: Record<string, unknown> };
+      if (o.visual && typeof o.visual === "object") {
+        return syncVisualWorkspaceFromMergedVisual(raw, o.visual);
+      }
+    } catch {
+      /* keep raw workspace */
+    }
+    return raw;
+  }, [step.interactionConfig.visualWorkspace, step.correctAnswer]);
   /** Triangle specs are often merged into `correctAnswer.visual` only; mirror them for the diagram layer. */
   const workspaceForTriangles = useMemo(() => {
     const base = { ...ws };
@@ -75,6 +93,9 @@ export function VisualProblemSurface({
   }, []);
   const setSlotFillVisual = useCallback((patch: Record<string, unknown>) => {
     setVisualPayload((prev) => ({ ...prev, ...patch, kind: "slot_fill" }));
+  }, []);
+  const setBasePairVisual = useCallback((pairs: [string, string][]) => {
+    setVisualPayload({ kind: "base_pair_select", pairs });
   }, []);
 
   useEffect(() => {
@@ -247,6 +268,41 @@ export function VisualProblemSurface({
     return Math.min(16, Math.round(c));
   }, [kind, step.correctAnswer, ws]);
 
+  /** Optional HTTPS artwork thumbnails from mission content or merged `correctAnswer.visual`. */
+  const artworkReferenceImages = useMemo(() => {
+    const isPart =
+      kind === "part_model" ||
+      kind === "fraction_bar" ||
+      kind === "pizza_model" ||
+      kind === "area_model";
+    if (!isPart) return [] as Array<{ url: string; label?: string }>;
+    const parseList = (raw: unknown): Array<{ url: string; label?: string }> => {
+      if (!Array.isArray(raw) || raw.length === 0) return [];
+      const out: Array<{ url: string; label?: string }> = [];
+      for (const x of raw) {
+        if (typeof x === "string") {
+          const u = x.trim();
+          if (/^https?:\/\//i.test(u)) out.push({ url: u });
+        } else if (x && typeof x === "object") {
+          const o = x as Record<string, unknown>;
+          const u = String(o.url ?? o.src ?? "").trim();
+          if (!/^https?:\/\//i.test(u)) continue;
+          const label = o.label != null ? String(o.label).trim() : undefined;
+          out.push(label ? { url: u, label } : { url: u });
+        }
+      }
+      return out;
+    };
+    const fromWs = parseList(ws.referenceImages);
+    if (fromWs.length > 0) return fromWs;
+    try {
+      const o = JSON.parse(step.correctAnswer) as { visual?: { referenceImages?: unknown } };
+      return parseList(o.visual?.referenceImages);
+    } catch {
+      return [];
+    }
+  }, [kind, step.correctAnswer, ws]);
+
   /** Story promises letters / 2D grid but CMS did not supply cellLabels. */
   const partModelLetterGridMismatch = useMemo(() => {
     const isPart =
@@ -282,13 +338,34 @@ export function VisualProblemSurface({
   }, [step.correctAnswer, step.interactionConfig.answerOptional]);
 
   const nodeWorkspaceNodesJson = JSON.stringify(ws.nodes ?? []);
-  const nodeLinkNodes = useMemo(
-    () => normalizeNodeList(ws.nodes),
-    [step.id, nodeWorkspaceNodesJson]
-  );
+  const nodeLinkNodes = useMemo(() => {
+    const base = normalizeNodeList(ws.nodes);
+    if (kind !== "node_link" && kind !== "cause_effect_link") return base;
+    try {
+      const o = JSON.parse(step.correctAnswer) as { visual?: Record<string, unknown> };
+      const v = o.visual;
+      if (v && typeof v === "object") {
+        return enrichNodeLinkNodesWithEdgeEndpoints(base, v);
+      }
+    } catch {
+      /* ignore */
+    }
+    return enrichNodeLinkNodesWithEdgeEndpoints(base, ws);
+  }, [kind, step.id, step.correctAnswer, nodeWorkspaceNodesJson, ws]);
 
   const wsItemsKey = JSON.stringify(ws.items ?? []);
   const wsSlotsKey = JSON.stringify(ws.slots ?? []);
+  const basePairModel = useMemo(() => {
+    if (kind !== "base_pair_select") return null;
+    try {
+      const o = JSON.parse(step.correctAnswer) as { visual?: { tokens?: unknown } };
+      const tokens = normalizeBasePairTokens(o.visual?.tokens ?? ws.tokens);
+      return { tokens };
+    } catch {
+      return { tokens: normalizeBasePairTokens(ws.tokens) };
+    }
+  }, [kind, step.correctAnswer, ws.tokens]);
+
   const slotFillModel = useMemo(() => {
     if (kind !== "slot_fill") return null;
     try {
@@ -315,6 +392,25 @@ export function VisualProblemSurface({
     }
   }, [kind, step.correctAnswer, ws, wsItemsKey, wsSlotsKey]);
 
+  const [solutionPeek, setSolutionPeek] = useState(false);
+  useEffect(() => {
+    setSolutionPeek(false);
+  }, [step.id, shakeToken]);
+  useEffect(() => {
+    if (revealCorrect) setSolutionPeek(false);
+  }, [revealCorrect]);
+
+  const solutionSummary = useMemo(() => formatMicroStepCorrectAnswer(step), [step]);
+
+  const canPeekSolution =
+    !disabled &&
+    !revealCorrect &&
+    (kind === "node_link" ||
+      kind === "cause_effect_link" ||
+      (kind === "slot_fill" && slotFillModel != null) ||
+      kind === "timeline" ||
+      kind === "base_pair_select");
+
   const submit = useCallback(() => {
     const payload = JSON.stringify({ visual: visualPayload, text });
     onCommit(payload);
@@ -333,7 +429,7 @@ export function VisualProblemSurface({
           </p>
         ) : null}
         <p className="text-[10px] font-bold uppercase tracking-widest text-primary/80">
-          {kind === "none" ? "Your answer" : "Visual workspace"}
+          {kind === "none" ? "Your answer" : kind === "base_pair_select" ? "Pair the bases" : "Visual workspace"}
         </p>
         {kind === "none" ? (
           <p className="mb-4 text-center text-sm leading-snug text-muted-foreground">
@@ -373,6 +469,40 @@ export function VisualProblemSurface({
           <p className="mb-3 text-center text-sm leading-snug text-muted-foreground">
             Drag each type card into the slot for the matching variable. Fill every slot to unlock the answer field.
           </p>
+        ) : null}
+        {kind === "base_pair_select" && basePairModel ? (
+          <BasePairSelectBoard
+            key={`${step.id}-${shakeToken}-bp`}
+            tokens={basePairModel.tokens}
+            shuffleSeed={`${step.sourceSceneId}::${step.id}::${shakeToken}`}
+            disabled={disabled}
+            onChange={setBasePairVisual}
+          />
+        ) : null}
+        {kind !== "none" &&
+        (kind === "part_model" ||
+          kind === "fraction_bar" ||
+          kind === "pizza_model" ||
+          kind === "area_model") &&
+        artworkReferenceImages.length > 0 ? (
+          <div className="mb-4 flex flex-wrap justify-center gap-4">
+            {artworkReferenceImages.map((img, i) => (
+              <figure key={`${img.url}-${i}`} className="max-w-[min(100%,200px)] shrink-0">
+                <img
+                  src={img.url}
+                  alt={img.label ?? `Artwork ${i + 1}`}
+                  className="mx-auto max-h-44 w-full rounded-xl border border-muted bg-muted/20 object-contain shadow-sm"
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                />
+                {img.label ? (
+                  <figcaption className="mt-1.5 text-center text-[11px] font-medium leading-snug text-muted-foreground">
+                    {img.label}
+                  </figcaption>
+                ) : null}
+              </figure>
+            ))}
+          </div>
         ) : null}
         {kind !== "none" &&
         (kind === "part_model" ||
@@ -424,6 +554,30 @@ export function VisualProblemSurface({
         ) : null}
       </div>
 
+      {canPeekSolution ? (
+        <div className="flex flex-col items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setSolutionPeek((p) => !p)}
+            aria-expanded={solutionPeek}
+            className="rounded-xl border border-muted-foreground/25 bg-muted/30 px-4 py-2 text-xs font-semibold text-foreground transition hover:bg-muted/50"
+          >
+            {solutionPeek ? "Hide solution" : "Reveal solution"}
+          </button>
+          {solutionPeek ? (
+            <div className="w-full max-w-lg rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-3 py-2.5 text-center text-emerald-950 dark:text-emerald-50">
+              <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-800 dark:text-emerald-200">
+                Expected solution
+              </p>
+              <p className="mt-1 font-mono text-[13px] font-semibold leading-snug">{solutionSummary}</p>
+              <p className="mt-2 text-[11px] leading-snug text-emerald-900/85 dark:text-emerald-100/85">
+                Your workspace above is unchanged — use this only if you are stuck.
+              </p>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
       <div
         className={cn(
           "space-y-2 transition-opacity",
@@ -434,7 +588,9 @@ export function VisualProblemSurface({
           {visualOkLocal
             ? kind === "none"
               ? "Type your answer below."
-              : "Now answer using the model you built."
+              : kind === "base_pair_select"
+                ? "Type how many complementary pairs you locked (A↔T and C↔G)."
+                : "Now answer using the model you built."
             : nodeLinkWrongTopology
               ? "You have the right number of links, but the flow does not match the expected diagram yet. Clear or redraw links until it matches — then the answer field unlocks."
               : slotFillWrongOrderHint

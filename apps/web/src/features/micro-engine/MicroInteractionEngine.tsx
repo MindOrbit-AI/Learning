@@ -19,8 +19,17 @@ import { formatMicroStepCorrectAnswer } from "./formatCorrectAnswerLabel";
 
 const PASS_THRESHOLD = 0.6;
 const ADVANCE_MS = 480;
-const MAX_WRONG_ATTEMPTS_BEFORE_REVEAL = 3;
+const DEFAULT_MAX_WRONG_BEFORE_REVEAL = 3;
+const NODE_LINK_MAX_WRONG_BEFORE_REVEAL = 2;
 const REVEAL_THEN_ADVANCE_MS = 2000;
+
+function maxWrongAttemptsBeforeReveal(step: RuntimeMicroStep): number {
+  if (String(step.type) !== "visual_problem") return DEFAULT_MAX_WRONG_BEFORE_REVEAL;
+  const ws = (step.interactionConfig?.visualWorkspace ?? {}) as Record<string, unknown>;
+  const kind = String(ws.kind ?? "");
+  if (kind === "node_link" || kind === "cause_effect_link") return NODE_LINK_MAX_WRONG_BEFORE_REVEAL;
+  return DEFAULT_MAX_WRONG_BEFORE_REVEAL;
+}
 
 export type SessionEndPayload = {
   sceneResponses: SceneResponsePayload[];
@@ -158,7 +167,7 @@ export function MicroInteractionEngine({
         setTick((t) => t + 1);
         emitProgress();
 
-        if (nextAttempts >= MAX_WRONG_ATTEMPTS_BEFORE_REVEAL) {
+        if (nextAttempts >= maxWrongAttemptsBeforeReveal(step)) {
           if (revealAdvanceTimeoutRef.current != null) {
             window.clearTimeout(revealAdvanceTimeoutRef.current);
           }

@@ -1,3 +1,5 @@
+import { stripMathTeachingLabel } from "@/features/visual-problem-solving/mathLabelDisplay";
+import { normalizeNodeList } from "@/lib/mission-to-lesson/buildVisualProblemMerged";
 import type { RuntimeMicroStep } from "./types";
 
 function norm(s: string): string {
@@ -26,6 +28,38 @@ export function tapChoiceCorrectOptionId(step: RuntimeMicroStep): string | null 
   }
   const byLabelEqExpected = opts.find((o) => norm(o.label) === norm(expected));
   return byLabelEqExpected?.id ?? null;
+}
+
+function formatVisualProblemNodeLinkAnswer(step: RuntimeMicroStep, o: Record<string, unknown>): string | null {
+  const vis = o.visual as Record<string, unknown> | undefined;
+  if (!vis || typeof vis !== "object") return null;
+  const vk = String(vis.kind ?? "");
+  if (vk !== "node_link" && vk !== "cause_effect_link") return null;
+  const ws = step.interactionConfig as { nodes?: unknown; visualWorkspace?: { nodes?: unknown } };
+  const nodes = normalizeNodeList((vis.nodes ?? ws.nodes ?? ws.visualWorkspace?.nodes) as unknown);
+  const idToLabel = (id: string) => stripMathTeachingLabel(nodes.find((n) => n.id === id)?.label ?? id);
+
+  const pairsFromEdges = (raw: unknown): [string, string][] => {
+    if (!Array.isArray(raw)) return [];
+    const out: [string, string][] = [];
+    for (const x of raw) {
+      if (Array.isArray(x) && x.length >= 2) out.push([String(x[0]), String(x[1])]);
+    }
+    return out;
+  };
+
+  let pairs = pairsFromEdges(vis.correctEdges);
+  const cel = vis.correctEdge as unknown;
+  if (pairs.length === 0 && Array.isArray(cel) && cel.length === 2 && typeof cel[0] !== "object") {
+    pairs = [[String(cel[0]), String(cel[1])]];
+  }
+  const chain = vis.chain as unknown;
+  if (pairs.length === 0 && Array.isArray(chain) && chain.length >= 2) {
+    const ids = chain.map(String);
+    for (let i = 0; i < ids.length - 1; i++) pairs.push([ids[i]!, ids[i + 1]!]);
+  }
+  if (pairs.length === 0) return null;
+  return pairs.map(([a, b]) => `${idToLabel(a)} → ${idToLabel(b)}`).join(" · ");
 }
 
 /** Human-readable correct answer for overlays and hints after max wrong tries. */
@@ -78,6 +112,8 @@ export function formatMicroStepCorrectAnswer(step: RuntimeMicroStep): string {
       const o = parseJson<Record<string, unknown>>(step.correctAnswer, {});
       const ans = o.answer ?? o.text ?? o.correctAnswer;
       if (typeof ans === "string" && ans.trim()) return ans.trim();
+      const nodeLine = formatVisualProblemNodeLinkAnswer(step, o);
+      if (nodeLine) return nodeLine;
       return "the solution shown on the card";
     }
     case "reveal_step":

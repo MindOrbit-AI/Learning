@@ -1,5 +1,6 @@
 import type { RuntimeMicroStep } from "@/features/micro-engine/types";
 import { normalizeNodeList } from "@/lib/mission-to-lesson/buildVisualProblemMerged";
+import { basePairSelectSatisfied } from "./basePairSelectValidation";
 import { stripMathTeachingLabel } from "./mathLabelDisplay";
 import { reconcilePartModelCountTarget } from "./partModelCountTarget";
 
@@ -291,6 +292,8 @@ function visualMatches(
       return nodeLinkVars(expectedVisual, got);
     case "slot_fill":
       return slotFillVars(expectedVisual, got);
+    case "base_pair_select":
+      return basePairSelectSatisfied(expectedVisual, got);
     default:
       return partModelVars(expectedVisual, got, symbolicAnswer);
   }

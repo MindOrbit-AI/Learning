@@ -5,7 +5,11 @@
 import type { MissionSceneData } from "@mindorbit/types";
 import type { MicroInteractionType, RuntimeMicroStep } from "@/features/micro-engine/types";
 import { defaultFeedbackWrong } from "@/features/micro-engine/validateMicroAnswer";
-import { buildVisualProblemMergedCorrect } from "./buildVisualProblemMerged";
+import { buildVisualProblemMergedCorrect, syncVisualWorkspaceFromMergedVisual } from "./buildVisualProblemMerged";
+import {
+  coerceDnaBasePairVisualWorkspace,
+  correctPayloadForDnaBasePairCoercion,
+} from "./coerceDnaBasePairVisualWorkspace";
 import { coerceDataTypeVisualWorkspace, parseVisualProblemCorrectForMerge } from "./coerceDataTypeVisualWorkspace";
 import { sanitizeDragMatchPromptForTapUi } from "@/features/micro-engine/dragMatchPrompt";
 
@@ -356,13 +360,19 @@ function sceneToMicroStep(scene: MissionSceneData): RuntimeMicroStep {
       });
 
     case "visual_problem": {
-      const { content: vpContent, coerced: dataTypeSlotCoerced } = coerceDataTypeVisualWorkspace(
+      const { content: afterDataType, coerced: dataTypeSlotCoerced } = coerceDataTypeVisualWorkspace(
         content,
+        scene
+      );
+      const { content: vpContent, coerced: dnaBasePairCoerced } = coerceDnaBasePairVisualWorkspace(
+        afterDataType,
         scene
       );
       let correctForVp: unknown = parseVisualProblemCorrectForMerge(scene) ?? correct;
       if (dataTypeSlotCoerced) {
         correctForVp = { answer: "" };
+      } else if (dnaBasePairCoerced) {
+        correctForVp = correctPayloadForDnaBasePairCoercion(scene, vpContent);
       }
       const merged = buildVisualProblemMergedCorrect(vpContent, correctForVp);
       const vw = (vpContent.visualWorkspace ?? {}) as Record<string, unknown>;
@@ -371,11 +381,15 @@ function sceneToMicroStep(scene: MissionSceneData): RuntimeMicroStep {
         (vpContent.visualWorkspace as Record<string, unknown> | undefined) ?? defaultPartWorkspace;
       let effectiveKind = String(vw.kind ?? "part_model");
       try {
-        const parsed = JSON.parse(merged) as { visual?: { kind?: unknown } };
-        const mk = String(parsed?.visual?.kind ?? "");
+        const parsed = JSON.parse(merged) as { visual?: Record<string, unknown> };
+        const v = parsed.visual;
+        const mk = v && typeof v === "object" ? String(v.kind ?? "") : "";
         if (mk === "none") {
           visualWorkspaceOut = { kind: "none" };
           effectiveKind = "none";
+        } else if (v && typeof v === "object") {
+          visualWorkspaceOut = syncVisualWorkspaceFromMergedVisual(visualWorkspaceOut, v);
+          if (mk) effectiveKind = mk;
         }
       } catch {
         /* keep workspace from content */
@@ -383,11 +397,16 @@ function sceneToMicroStep(scene: MissionSceneData): RuntimeMicroStep {
       const defWrongV =
         effectiveKind === "none"
           ? oneLine("There is no on-screen model for this step — focus on the scenario and your written answer.", 140)
-          : effectiveKind === "slot_fill"
-            ? oneLine("Drag one item into each slot in the correct order before the text answer unlocks.", 140)
-            : effectiveKind === "node_link" || effectiveKind === "cause_effect_link"
-              ? oneLine("Draw every arrow in the correct order so the flow matches the story.", 140)
-              : oneLine("Adjust the model first — count shaded parts against the total.", 140);
+          : effectiveKind === "base_pair_select"
+            ? oneLine(
+                "Lock two complementary base pairs (A with T, C with G) using every base once — then the answer unlocks.",
+                160
+              )
+            : effectiveKind === "slot_fill"
+              ? oneLine("Drag one item into each slot in the correct order before the text answer unlocks.", 140)
+              : effectiveKind === "node_link" || effectiveKind === "cause_effect_link"
+                ? oneLine("Draw every arrow in the correct order so the flow matches the story.", 140)
+                : oneLine("Adjust the model first — count shaded parts against the total.", 140);
       const defWrongA =
         effectiveKind === "none"
           ? oneLine(
@@ -397,15 +416,23 @@ function sceneToMicroStep(scene: MissionSceneData): RuntimeMicroStep {
               ),
               140
             )
-          : effectiveKind === "slot_fill"
+          : effectiveKind === "base_pair_select"
             ? oneLine(
-                "Your slots match the variables; if the prompt asks for a written summary, type the same type names in order.",
-                140
+                String(
+                  vpContent.feedbackWrongAnswer ??
+                    "Count how many valid complementary pairs you locked, then type that number."
+                ),
+                160
               )
-            : oneLine(
-                "Your picture matches the story; rewrite the fraction or value to match the shaded model.",
-                140
-              );
+            : effectiveKind === "slot_fill"
+              ? oneLine(
+                  "Your slots match the variables; if the prompt asks for a written summary, type the same type names in order.",
+                  140
+                )
+              : oneLine(
+                  "Your picture matches the story; rewrite the fraction or value to match the shaded model.",
+                  140
+                );
       const defCorrect = oneLine(
         String(
           vpContent.feedbackCorrect ??

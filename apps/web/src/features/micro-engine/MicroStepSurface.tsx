@@ -47,7 +47,15 @@ export function MicroStepSurface({
         />
       );
     case "sequence_order":
-      return <SequenceOrder step={step} disabled={disabled} shakeToken={shakeToken} onCommit={onCommit} />;
+      return (
+        <SequenceOrder
+          step={step}
+          disabled={disabled}
+          shakeToken={shakeToken}
+          revealCorrect={revealCorrect}
+          onCommit={onCommit}
+        />
+      );
     case "drag_match":
       return (
         <DragMatch
@@ -181,7 +189,7 @@ function FillBlank({ step, disabled, shakeToken, onCommit, revealCorrect = false
 
 const SEQ_DRAG_MIME = "application/x-mindorbit-seq-id";
 
-function SequenceOrder({ step, disabled, shakeToken, onCommit }: Props) {
+function SequenceOrder({ step, disabled, shakeToken, onCommit, revealCorrect = false }: Props) {
   const items = (step.interactionConfig.items ?? []) as Array<{ id: string; label: string }>;
   const itemsKey = JSON.stringify(items.map((i) => ({ id: i.id, label: i.label })));
   const target = useMemo(() => JSON.parse(step.correctAnswer) as string[], [step.correctAnswer]);
@@ -189,6 +197,7 @@ function SequenceOrder({ step, disabled, shakeToken, onCommit }: Props) {
   const dragIdRef = useRef<string | null>(null);
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [showCorrectOrder, setShowCorrectOrder] = useState(false);
 
   const initialOrder = useMemo(() => {
     const ids = (JSON.parse(itemsKey) as Array<{ id: string }>).map((i) => i.id);
@@ -209,7 +218,14 @@ function SequenceOrder({ step, disabled, shakeToken, onCommit }: Props) {
     dragIdRef.current = null;
     setDragOverIdx(null);
     setDraggingId(null);
+    setShowCorrectOrder(false);
   }, [step.id, shakeToken, initialOrder]);
+
+  useEffect(() => {
+    if (!revealCorrect) return;
+    setOrder((prev) => (prev.join(",") === target.join(",") ? prev : [...target]));
+    setShowCorrectOrder(true);
+  }, [revealCorrect, target]);
 
   useEffect(() => {
     if (disabled || committed.current) return;
@@ -291,6 +307,8 @@ function SequenceOrder({ step, disabled, shakeToken, onCommit }: Props) {
     setDragOverIdx(null);
   };
 
+  const revealPanel = showCorrectOrder || revealCorrect;
+
   return (
     <motion.div
       key={shakeToken}
@@ -300,6 +318,40 @@ function SequenceOrder({ step, disabled, shakeToken, onCommit }: Props) {
       <p className="text-xs text-muted-foreground">
         Drag a step by the handle (or the card) to reorder. Arrows nudge one row if drag is awkward on your device.
       </p>
+      {!disabled ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowCorrectOrder((s) => !s)}
+            aria-expanded={showCorrectOrder}
+            className="rounded-lg border border-primary/30 bg-primary/5 px-3 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary/10"
+          >
+            {showCorrectOrder ? "Hide correct order" : "Show correct order"}
+          </button>
+        </div>
+      ) : null}
+      {revealPanel ? (
+        <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-3 py-2.5 text-emerald-950 dark:text-emerald-50">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-800 dark:text-emerald-200">
+            Correct order
+          </p>
+          <ol className="mt-2 list-decimal space-y-1.5 pl-4 text-sm font-medium leading-snug">
+            {target.map((id) => {
+              const it = items.find((x) => x.id === id);
+              return (
+                <li key={id} className="font-mono text-[13px] text-foreground sm:text-sm">
+                  {stripMathTeachingLabel(it?.label ?? id)}
+                </li>
+              );
+            })}
+          </ol>
+          {showCorrectOrder && !revealCorrect && !disabled ? (
+            <p className="mt-2 border-t border-emerald-500/25 pt-2 text-[11px] leading-snug text-emerald-900/80 dark:text-emerald-100/85">
+              Your draggable list is unchanged — match this order to continue.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
       {order.map((id, idx) => {
         const it = items.find((x) => x.id === id);
         const shown = stripMathTeachingLabel(it?.label ?? id);
