@@ -56,6 +56,72 @@ function partModelMismatchesArtHumanitiesStem(content: Record<string, unknown>, 
   return partModelCellLabelsAreOnlyNumericOrMissing(vis);
 }
 
+function stemAsksVariablesInExpression(stem: string): boolean {
+  const s = stem.toLowerCase();
+  if (!/\bvariabl(es)?\b/.test(s)) return false;
+  if (/\b(in the expression|in this expression|expression above|algebraic expression)\b/.test(s)) return true;
+  if (/\bwhat (are|is) the variabl/.test(s)) return true;
+  if (/\b(identify|list|name|find)\b.*\bvariabl/.test(s)) return true;
+  return false;
+}
+
+/** e.g. "Consider the expression 2x + 3y - 7." → "2x + 3y - 7" */
+function extractInlineExpression(blob: string): string | null {
+  const m = blob.match(/\bexpression:?\s+([^.\n?!]+)/i);
+  if (m) {
+    const s = m[1]!.trim();
+    if (s.length >= 2 && /[a-zA-Z]/.test(s)) return s;
+  }
+  const m2 = blob.match(/\bexpression\s+(?:is|=)\s+([^.\n?!]+)/i);
+  if (m2) {
+    const s = m2[1]!.trim();
+    if (s.length >= 2 && /[a-zA-Z]/.test(s)) return s;
+  }
+  const tick = blob.match(/`([^`\n]+)`/);
+  if (tick && /[a-zA-Z]/.test(tick[1]!) && /\d/.test(tick[1]!)) return tick[1]!.trim();
+  return null;
+}
+
+/** Coefficient·letter pairs and bare letters: "2x+3y-7" → x, y in first-seen order. */
+function extractSingleLetterVariablesFromExpression(expr: string): string[] {
+  const seen = new Set<string>();
+  const ordered: string[] = [];
+  const re = /\b(\d*)([a-zA-Z])\b/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(expr)) !== null) {
+    const ch = m[2]!;
+    if (!/^[a-zA-Z]$/.test(ch)) continue;
+    const key = ch.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    ordered.push(ch);
+  }
+  return ordered;
+}
+
+function partModelMismatchesExpressionVariablesStem(content: Record<string, unknown>, vis: Record<string, unknown>): boolean {
+  const vk = String(vis.kind ?? "part_model");
+  if (!isTapShadePartKind(vk)) return false;
+  if (String(vis.match ?? "count") !== "count") return false;
+  const stem = buildVisualStem(content);
+  if (!stemAsksVariablesInExpression(stem)) return false;
+  return partModelCellLabelsAreOnlyNumericOrMissing(vis);
+}
+
+function synthesizeExpressionVariableCellLabels(content: Record<string, unknown>, totalParts: number): string[] | null {
+  if (!Number.isFinite(totalParts) || totalParts < 2 || totalParts > 16) return null;
+  const blob = buildVisualStem(content);
+  const expr = extractInlineExpression(blob);
+  if (!expr) return null;
+  const vars = extractSingleLetterVariablesFromExpression(expr);
+  if (vars.length === 0) return null;
+  const out: string[] = [];
+  for (let i = 0; i < totalParts; i++) {
+    out.push(vars[i] ?? `Part ${i + 1}`);
+  }
+  return out;
+}
+
 function dedupeTitlesPreservingOrder(titles: string[]): string[] {
   const seen = new Set<string>();
   const out: string[] = [];
@@ -383,8 +449,13 @@ export function buildVisualProblemMergedCorrect(content: Record<string, unknown>
       const gc = vis.gridCols ?? vis.cols ?? vw.gridCols ?? vw.cols;
       if (gc != null && Number.isFinite(Number(gc))) extras.gridCols = Math.min(16, Math.round(Number(gc)));
       vis = { ...vis, totalParts: total, targetShadedCount: fixed, ...extras };
-      if (partModelMismatchesArtHumanitiesStem(content, vis)) {
-        const syn = synthesizeArtPickCellLabels(content, textAnswer, total);
+      const needsPartLabelSynth =
+        partModelMismatchesArtHumanitiesStem(content, vis) ||
+        partModelMismatchesExpressionVariablesStem(content, vis);
+      if (needsPartLabelSynth) {
+        const syn =
+          synthesizeArtPickCellLabels(content, textAnswer, total) ??
+          synthesizeExpressionVariableCellLabels(content, total);
         if (syn) {
           const refs = firstReferenceImageList(content, vis as Record<string, unknown>);
           vis = { ...vis, cellLabels: syn, ...(refs ? { referenceImages: refs } : {}) };
@@ -575,8 +646,13 @@ export function buildVisualProblemMergedCorrect(content: Record<string, unknown>
     match,
     ...extras,
   };
-  if (partModelMismatchesArtHumanitiesStem(content, implicitVis)) {
-    const syn = synthesizeArtPickCellLabels(content, textAnswer, total);
+  const needsImplicitPartLabelSynth =
+    partModelMismatchesArtHumanitiesStem(content, implicitVis) ||
+    partModelMismatchesExpressionVariablesStem(content, implicitVis);
+  if (needsImplicitPartLabelSynth) {
+    const syn =
+      synthesizeArtPickCellLabels(content, textAnswer, total) ??
+      synthesizeExpressionVariableCellLabels(content, total);
     if (syn) {
       const refs = firstReferenceImageList(content, implicitVis);
       Object.assign(implicitVis, { cellLabels: syn, ...(refs ? { referenceImages: refs } : {}) });

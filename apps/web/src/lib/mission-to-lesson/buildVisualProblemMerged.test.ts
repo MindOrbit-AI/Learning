@@ -50,6 +50,22 @@ describe("buildVisualProblemMergedCorrect", () => {
     expect(o.visual.kind).toBe("none");
   });
 
+  it("synthesizes single-letter variable labels from the expression when the prompt asks for variables", () => {
+    const merged = buildVisualProblemMergedCorrect(
+      {
+        problemScenario: "Consider the expression 2x + 3y - 7.",
+        finalPrompt: "What are the variables in the expression?",
+        visualWorkspace: { kind: "part_model", totalParts: 3, targetShadedCount: 2, match: "count" },
+      },
+      { answer: "x, y", visual: { kind: "part_model", totalParts: 3, targetShadedCount: 2, match: "count" } }
+    );
+    const o = JSON.parse(merged) as { visual: { kind: string; cellLabels: string[] } };
+    expect(o.visual.kind).toBe("part_model");
+    expect(o.visual.cellLabels[0]).toBe("x");
+    expect(o.visual.cellLabels[1]).toBe("y");
+    expect(o.visual.cellLabels[2]).toMatch(/^Part 3$/);
+  });
+
   it("keeps part_model for a coherent fraction story", () => {
     const merged = buildVisualProblemMergedCorrect(
       {
