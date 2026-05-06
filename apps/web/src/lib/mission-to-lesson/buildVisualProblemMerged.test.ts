@@ -1,5 +1,32 @@
 import { describe, expect, it } from "vitest";
-import { buildVisualProblemMergedCorrect } from "./buildVisualProblemMerged";
+import { DEFAULT_PLANT_REFERENCE_IMAGE_PATH } from "@/features/visual-problem-solving/plantReferenceArt";
+import { buildVisualProblemMergedCorrect, syncVisualWorkspaceFromMergedVisual } from "./buildVisualProblemMerged";
+
+describe("syncVisualWorkspaceFromMergedVisual", () => {
+  it("overwrites stale part_model workspace fields from merged visual (totalParts, labels, refs)", () => {
+    const out = syncVisualWorkspaceFromMergedVisual(
+      {
+        kind: "part_model",
+        totalParts: 8,
+        targetShadedCount: 1,
+        cellLabels: ["a", "b", "c", "d", "e", "f", "g", "h"],
+      },
+      {
+        kind: "part_model",
+        totalParts: 6,
+        targetShadedCount: 4,
+        match: "count",
+        cellLabels: ["Leaf 1", "Leaf 2", "Leaf 3", "Leaf 4", "Leaf 5", "Leaf 6"],
+        referenceImages: [{ url: "https://example.com/p.jpg", label: "P" }],
+      }
+    );
+    expect(out.totalParts).toBe(6);
+    expect(out.targetShadedCount).toBe(4);
+    expect(out.match).toBe("count");
+    expect(out.cellLabels).toEqual(["Leaf 1", "Leaf 2", "Leaf 3", "Leaf 4", "Leaf 5", "Leaf 6"]);
+    expect((out.referenceImages as { url: string }[])[0]?.url).toContain("example.com");
+  });
+});
 
 describe("buildVisualProblemMergedCorrect", () => {
   it("synthesizes cellLabels from answer text for art pick questions without labels", () => {
@@ -123,5 +150,50 @@ describe("buildVisualProblemMergedCorrect", () => {
     expect(o.visual.kind).toBe("part_model");
     expect(o.visual.referenceImages?.length).toBe(2);
     expect(o.visual.referenceImages?.[0]?.url).toContain("example.com");
+  });
+
+  it("adds bundled plant reference for photosynthesis-style stems when none were provided", () => {
+    const merged = buildVisualProblemMergedCorrect(
+      {
+        problemScenario: "In this illustration of a plant, light is absorbed by the leaves.",
+        finalPrompt: "How many leaves are involved in photosynthesis?",
+        visualWorkspace: { kind: "part_model", totalParts: 6, targetShadedCount: 4, match: "count" },
+      },
+      {
+        answer: "4",
+        visual: { kind: "part_model", totalParts: 6, targetShadedCount: 4, match: "count" },
+      }
+    );
+    const o = JSON.parse(merged) as { visual: { referenceImages?: Array<{ url: string }> } };
+    expect(o.visual.referenceImages?.length).toBe(1);
+    expect(o.visual.referenceImages?.[0]?.url).toBe(DEFAULT_PLANT_REFERENCE_IMAGE_PATH);
+  });
+
+  it("does not override author referenceImages for plant-related stems", () => {
+    const merged = buildVisualProblemMergedCorrect(
+      {
+        problemScenario: "Photosynthesis in green plants.",
+        finalPrompt: "Count shaded parts.",
+        visualWorkspace: { kind: "part_model", totalParts: 4, targetShadedCount: 2, match: "count" },
+        referenceImages: [{ url: "https://example.com/custom.jpg", label: "Custom" }],
+      },
+      { answer: "2", visual: { kind: "part_model", totalParts: 4, targetShadedCount: 2, match: "count" } }
+    );
+    const o = JSON.parse(merged) as { visual: { referenceImages?: Array<{ url: string }> } };
+    expect(o.visual.referenceImages?.length).toBe(1);
+    expect(o.visual.referenceImages?.[0]?.url).toContain("example.com");
+  });
+
+  it("does not add plant reference for unrelated part_model stories", () => {
+    const merged = buildVisualProblemMergedCorrect(
+      {
+        problemScenario: "A pizza has 8 equal slices. You ate 3.",
+        finalPrompt: "What fraction of the pizza did you eat?",
+        visualWorkspace: { kind: "part_model", totalParts: 8, targetShadedCount: 3, match: "count" },
+      },
+      { answer: "3/8", visual: { kind: "part_model", totalParts: 8, targetShadedCount: 3, match: "count" } }
+    );
+    const o = JSON.parse(merged) as { visual: { referenceImages?: unknown } };
+    expect(o.visual.referenceImages).toBeUndefined();
   });
 });

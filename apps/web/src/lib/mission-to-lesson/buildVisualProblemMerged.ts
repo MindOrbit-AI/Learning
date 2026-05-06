@@ -1,6 +1,7 @@
 import { expandNumberLineBounds, inferNumericTarget } from "@/features/visual-problem-solving/numberLineBounds";
 import { normalizeBasePairTokens } from "@/features/visual-problem-solving/basePairSelectValidation";
 import { reconcilePartModelCountTarget } from "@/features/visual-problem-solving/partModelCountTarget";
+import { DEFAULT_PLANT_REFERENCE_IMAGE_PATH } from "@/features/visual-problem-solving/plantReferenceArt";
 
 function isTapShadePartKind(kind: string): boolean {
   return (
@@ -215,6 +216,30 @@ function firstReferenceImageList(...sources: Record<string, unknown>[]): Array<{
   return undefined;
 }
 
+function stemSuggestsPlantIllustration(content: Record<string, unknown>): boolean {
+  const stem = buildVisualStem(content).toLowerCase();
+  if (/\bphotosynthes/.test(stem)) return true;
+  if (/\b(chloroplast|chlorophyll)\b/.test(stem) && /\b(plant|leaf|leaves)\b/.test(stem)) return true;
+  if (/\bplant\b/.test(stem) && /\b(leaves?|leaf)\b/.test(stem)) return true;
+  return false;
+}
+
+function tapModelHasReferenceImages(content: Record<string, unknown>, vis: Record<string, unknown>): boolean {
+  const vw = (content.visualWorkspace ?? {}) as Record<string, unknown>;
+  return Boolean(firstReferenceImageList(vis, vw, content));
+}
+
+/** When the story is clearly about a plant but no thumbnails were authored, attach bundled reference art. */
+function finalizeTapModelDefaultPlantReference(content: Record<string, unknown>, vis: Record<string, unknown>): void {
+  const k = String(vis.kind ?? "");
+  if (!isTapShadePartKind(k)) return;
+  if (tapModelHasReferenceImages(content, vis)) return;
+  if (!stemSuggestsPlantIllustration(content)) return;
+  (vis as { referenceImages: Array<{ url: string; label: string }> }).referenceImages = [
+    { url: DEFAULT_PLANT_REFERENCE_IMAGE_PATH, label: "Plant (reference)" },
+  ];
+}
+
 const arrLen = (x: unknown) => (Array.isArray(x) ? x.length : 0);
 
 /**
@@ -230,11 +255,25 @@ export function syncVisualWorkspaceFromMergedVisual(
     kind: String(visual.kind ?? workspace.kind ?? "part_model"),
   };
   const k = String(out.kind);
-  if (
-    (k === "part_model" || k === "fraction_bar" || k === "pizza_model" || k === "area_model") &&
-    Array.isArray((visual as { referenceImages?: unknown }).referenceImages)
-  ) {
-    out.referenceImages = (visual as { referenceImages: unknown[] }).referenceImages;
+  if (k === "part_model" || k === "fraction_bar" || k === "pizza_model" || k === "area_model") {
+    const tap = visual as Record<string, unknown>;
+    if (Array.isArray(tap.referenceImages)) {
+      out.referenceImages = tap.referenceImages;
+    }
+    for (const key of [
+      "totalParts",
+      "targetShadedCount",
+      "shadedCount",
+      "match",
+      "cellLabels",
+      "partLabels",
+      "labels",
+      "gridCols",
+      "cols",
+      "shadedPartIds",
+    ] as const) {
+      if (tap[key] !== undefined) (out as Record<string, unknown>)[key] = tap[key];
+    }
   }
   if (k === "node_link" || k === "cause_effect_link") {
     out.nodes = enrichNodeLinkNodesWithEdgeEndpoints(normalizeNodeList(workspace.nodes), visual);
@@ -250,20 +289,178 @@ export function syncVisualWorkspaceFromMergedVisual(
   return out;
 }
 
+/**
+ * How many slot_fill drop targets to render. When `slotCount` is omitted, we grow to fit
+ * `correctOrder` and all `items` (every card has a slot). When `slotCount` is set, distractors
+ * can stay in the bank unless the answer key is longer than that count.
+ */
+export function resolveSlotFillTargetCount(opts: {
+  slotCountRaw?: unknown;
+  slotsRaw: unknown;
+  correctOrderLen: number;
+  itemsLen: number;
+}): number {
+  const rawLen = Array.isArray(opts.slotsRaw) ? opts.slotsRaw.length : 0;
+  const co = Math.max(0, Math.round(opts.correctOrderLen));
+  const itemsLen = Math.max(0, Math.round(opts.itemsLen));
+  const nRaw = Number(opts.slotCountRaw);
+  const hasExplicit =
+    opts.slotCountRaw != null &&
+    opts.slotCountRaw !== "" &&
+    Number.isFinite(nRaw) &&
+    nRaw > 0;
+  if (hasExplicit) {
+    return Math.max(Math.round(nRaw), rawLen, co, 1);
+  }
+  return Math.max(rawLen, co, itemsLen, 1);
+}
+
+/** Split `n` drop targets across `bucketCount` buckets; remainder goes to earlier buckets (e.g. R then P). */
+function distributeSlotFillBucketSizes(n: number, bucketCount: number): number[] {
+  const B = Math.max(1, Math.round(bucketCount));
+  if (B <= 1) return [n];
+  const base = Math.floor(n / B);
+  const rem = n % B;
+  return Array.from({ length: B }, (_, i) => base + (i < rem ? 1 : 0));
+}
+
+/**
+ * `order` is keyed in cyclic slot order (bucket0, bucket1, bucket0, …).
+ * Reorder to bucket-major (all bucket0, then all bucket1, …) to match UI layout.
+ */
+function permuteCorrectOrderCyclicToBucketMajor<T>(
+  order: T[],
+  bucketCount: number,
+  bucketSizes: number[]
+): T[] {
+  const B = bucketCount;
+  if (B <= 1 || order.length === 0) return [...order];
+  const out: T[] = [];
+  for (let b = 0; b < B; b++) {
+    for (let j = 0; j < (bucketSizes[b] ?? 0); j++) {
+      const oldI = j * B + b;
+      if (oldI < order.length) out.push(order[oldI]!);
+    }
+  }
+  return out;
+}
+
 /** Drop targets for slot_fill (array drag) — ids must match keys in learner `slotAssignments`. */
 export function normalizeSlotFillSlots(raw: unknown, slotCount: number): Array<{ id: string; label: string }> {
   const n = Math.max(1, Math.round(slotCount));
+  const normalizeOne = (z: unknown, i: number): { id: string; label: string } => {
+    if (typeof z === "string") return { id: `slot-${i}`, label: z };
+    const o = z as Record<string, unknown>;
+    return {
+      id: String(o.id ?? `slot-${i}`),
+      label: String(o.label ?? o.id ?? `${i + 1}`),
+    };
+  };
+
   if (Array.isArray(raw) && raw.length > 0) {
-    return raw.map((z, i) => {
-      if (typeof z === "string") return { id: `slot-${i}`, label: z };
-      const o = z as Record<string, unknown>;
-      return {
-        id: String(o.id ?? `slot-${i}`),
-        label: String(o.label ?? o.id ?? `${i + 1}`),
-      };
-    });
+    const base = raw.map((z, i) => normalizeOne(z, i));
+    if (base.length >= n) return base.slice(0, n);
+    const B = base.length;
+    const counts = distributeSlotFillBucketSizes(n, B);
+    const out: Array<{ id: string; label: string }> = [];
+    for (let b = 0; b < B; b++) {
+      for (let j = 0; j < counts[b]!; j++) {
+        const bucket = base[b]!;
+        const label = j === 0 ? bucket.label : `${bucket.label} (${j + 1})`;
+        const id = j === 0 ? bucket.id : `slot-b${b}-${j}`;
+        out.push({ id, label });
+      }
+    }
+    return out;
   }
   return Array.from({ length: n }, (_, i) => ({ id: String(i), label: String(i + 1) }));
+}
+
+function normSlotItemKey(s: string): string {
+  return s.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+/** Avoid slot headers reading like bank cards when AI reuses the same string for a slot and an item. */
+function disambiguateSlotLabelsFromItems(
+  slots: Array<{ id: string; label: string }>,
+  items: Array<{ id: string; label: string }>
+): Array<{ id: string; label: string }> {
+  const itemKeys = new Set<string>();
+  for (const it of items) {
+    itemKeys.add(normSlotItemKey(it.id));
+    itemKeys.add(normSlotItemKey(it.label));
+  }
+  return slots.map((s) => {
+    const k = normSlotItemKey(s.label);
+    if (k && itemKeys.has(k)) {
+      return { ...s, label: `${s.label} — drop zone` };
+    }
+    return s;
+  });
+}
+
+/** Rough sort: first-bucket (e.g. reactants) items before second (e.g. products) when synthesizing keys. */
+function slotFillItemBucketSortKey(it: { id: string; label: string }): number {
+  const t = normSlotItemKey(`${it.id} ${it.label}`);
+  const react = /\b(co2|h2o|h_2o|water|sunlight|light|photon)\b/.test(t);
+  const prod = /\b(o2|oxygen|glucose|c6h12o6|c_6h_12o_6|sugar)\b/.test(t);
+  if (react && !prod) return 0;
+  if (prod && !react) return 2;
+  if (react) return 0;
+  if (prod) return 2;
+  return 1;
+}
+
+/** Canonical slots + answer key for slot_fill (client, merge, and validation must match). */
+export function canonicalSlotFillExpected(exp: Record<string, unknown>): {
+  slots: Array<{ id: string; label: string }>;
+  correctOrder: string[];
+  items: Array<{ id: string; label: string }>;
+} {
+  const items = normalizeNodeList(exp.items);
+  let correctOrder = Array.isArray(exp.correctOrder)
+    ? (exp.correctOrder as unknown[]).map(String)
+    : [];
+  const slotsRaw = exp.slots;
+  const rawArr = Array.isArray(slotsRaw) ? slotsRaw : [];
+  const bucketCount = rawArr.length > 0 ? rawArr.length : 1;
+  const n = resolveSlotFillTargetCount({
+    slotCountRaw: exp.slotCount,
+    slotsRaw,
+    correctOrderLen: correctOrder.length,
+    itemsLen: items.length,
+  });
+  let slots = normalizeSlotFillSlots(slotsRaw, n);
+  slots = disambiguateSlotLabelsFromItems(slots, items);
+
+  let synthesized = false;
+  if (correctOrder.length !== slots.length && items.length >= slots.length) {
+    const sorted =
+      bucketCount === 2
+        ? [...items].sort(
+            (a, b) =>
+              slotFillItemBucketSortKey(a) - slotFillItemBucketSortKey(b) ||
+              normSlotItemKey(a.label).localeCompare(normSlotItemKey(b.label))
+          )
+        : [...items];
+    correctOrder = sorted.slice(0, slots.length).map((x) => x.id);
+    synthesized = true;
+  }
+
+  // Author keys are usually cyclic (R,P,R,P,…); UI is bucket-major (R…R,P…P).
+  if (
+    !synthesized &&
+    bucketCount > 1 &&
+    n > bucketCount &&
+    correctOrder.length === slots.length
+  ) {
+    const counts = distributeSlotFillBucketSizes(n, bucketCount);
+    if (counts.reduce((a, c) => a + c, 0) === n) {
+      correctOrder = permuteCorrectOrderCyclicToBucketMajor(correctOrder, bucketCount, counts);
+    }
+  }
+
+  return { slots, correctOrder, items };
 }
 
 export function normalizeNodeList(raw: unknown): Array<{ id: string; label: string }> {
@@ -476,19 +673,17 @@ export function buildVisualProblemMergedCorrect(content: Record<string, unknown>
       }
     }
     if (vk === "slot_fill") {
-      const items = normalizeNodeList((vis.items ?? vw.items) as unknown);
-      const slotCount = Number(vis.slotCount ?? vw.slotCount ?? items.length);
-      const slotsRaw = Array.isArray(vis.slots) ? vis.slots : vw.slots;
-      const slots = normalizeSlotFillSlots(
-        slotsRaw,
-        Math.max(slotCount, Array.isArray(slotsRaw) ? slotsRaw.length : 0, items.length || 1)
-      );
-      let correctOrder: string[] = [];
-      if (Array.isArray(vis.correctOrder)) correctOrder = (vis.correctOrder as unknown[]).map(String);
-      else if (Array.isArray(vw.correctOrder)) correctOrder = (vw.correctOrder as unknown[]).map(String);
-      if (correctOrder.length !== slots.length && items.length >= slots.length) {
-        correctOrder = items.slice(0, slots.length).map((x) => x.id);
-      }
+      const mergedExp: Record<string, unknown> = {
+        items: vis.items ?? vw.items,
+        slots: vis.slots ?? vw.slots,
+        correctOrder: Array.isArray(vis.correctOrder)
+          ? vis.correctOrder
+          : Array.isArray(vw.correctOrder)
+            ? vw.correctOrder
+            : [],
+        slotCount: vis.slotCount ?? vw.slotCount,
+      };
+      const { slots, correctOrder, items } = canonicalSlotFillExpected(mergedExp);
       vis = {
         ...vis,
         kind: "slot_fill",
@@ -515,6 +710,7 @@ export function buildVisualProblemMergedCorrect(content: Record<string, unknown>
     if (partModelTotalTooSmall(vis)) {
       return JSON.stringify({ answer: textAnswer, visual: { kind: "none" } });
     }
+    finalizeTapModelDefaultPlantReference(content, vis);
     return JSON.stringify({ answer: textAnswer, visual: vis });
   }
 
@@ -594,13 +790,13 @@ export function buildVisualProblemMergedCorrect(content: Record<string, unknown>
   }
 
   if (kind === "slot_fill") {
-    const items = normalizeNodeList(vw.items);
-    const slotCount = Number(vw.slotCount ?? items.length);
-    const slots = normalizeSlotFillSlots(vw.slots, Math.max(slotCount, Array.isArray(vw.slots) ? vw.slots.length : 0));
-    let correctOrder: string[] = Array.isArray(vw.correctOrder) ? (vw.correctOrder as unknown[]).map(String) : [];
-    if (correctOrder.length !== slots.length && items.length >= slots.length) {
-      correctOrder = items.slice(0, slots.length).map((x) => x.id);
-    }
+    const mergedExp: Record<string, unknown> = {
+      items: vw.items,
+      slots: vw.slots,
+      correctOrder: vw.correctOrder ?? [],
+      slotCount: vw.slotCount,
+    };
+    const { slots, correctOrder, items } = canonicalSlotFillExpected(mergedExp);
     return JSON.stringify({
       answer: textAnswer,
       visual: {
@@ -660,6 +856,7 @@ export function buildVisualProblemMergedCorrect(content: Record<string, unknown>
       return JSON.stringify({ answer: textAnswer || "?", visual: { kind: "none" } });
     }
   }
+  finalizeTapModelDefaultPlantReference(content, implicitVis);
   return JSON.stringify({
     answer: textAnswer || "?",
     visual: implicitVis,

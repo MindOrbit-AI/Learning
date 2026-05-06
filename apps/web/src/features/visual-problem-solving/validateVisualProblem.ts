@@ -1,5 +1,8 @@
 import type { RuntimeMicroStep } from "@/features/micro-engine/types";
-import { normalizeNodeList } from "@/lib/mission-to-lesson/buildVisualProblemMerged";
+import {
+  canonicalSlotFillExpected,
+  normalizeNodeList,
+} from "@/lib/mission-to-lesson/buildVisualProblemMerged";
 import { basePairSelectSatisfied } from "./basePairSelectValidation";
 import { stripMathTeachingLabel } from "./mathLabelDisplay";
 import { reconcilePartModelCountTarget } from "./partModelCountTarget";
@@ -125,11 +128,7 @@ function slotFillVars(
   exp: Record<string, unknown>,
   got: Record<string, unknown>
 ): { ok: boolean; vars: Record<string, string | number> } {
-  const slotsRaw = exp.slots as unknown;
-  const slots = Array.isArray(slotsRaw)
-    ? (slotsRaw as { id?: unknown }[]).map((s, i) => ({ id: String(s?.id ?? i) }))
-    : [];
-  const want = Array.isArray(exp.correctOrder) ? (exp.correctOrder as unknown[]).map(String) : [];
+  const { slots, correctOrder: want } = canonicalSlotFillExpected(exp);
   const assign =
     got.slotAssignments && typeof got.slotAssignments === "object"
       ? (got.slotAssignments as Record<string, unknown>)

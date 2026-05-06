@@ -1,5 +1,5 @@
 import { stripMathTeachingLabel } from "@/features/visual-problem-solving/mathLabelDisplay";
-import { normalizeNodeList } from "@/lib/mission-to-lesson/buildVisualProblemMerged";
+import { canonicalSlotFillExpected, normalizeNodeList } from "@/lib/mission-to-lesson/buildVisualProblemMerged";
 import type { RuntimeMicroStep } from "./types";
 
 function norm(s: string): string {
@@ -62,6 +62,32 @@ function formatVisualProblemNodeLinkAnswer(step: RuntimeMicroStep, o: Record<str
   return pairs.map(([a, b]) => `${idToLabel(a)} → ${idToLabel(b)}`).join(" · ");
 }
 
+function formatVisualProblemSlotFillAnswer(step: RuntimeMicroStep, o: Record<string, unknown>): string | null {
+  const vis = o.visual as Record<string, unknown> | undefined;
+  if (!vis || typeof vis !== "object") return null;
+  if (String(vis.kind ?? "") !== "slot_fill") return null;
+
+  const ws = step.interactionConfig.visualWorkspace as Record<string, unknown> | undefined;
+  const merged: Record<string, unknown> = {
+    items: vis.items ?? ws?.items,
+    slots: vis.slots ?? ws?.slots,
+    correctOrder: vis.correctOrder ?? ws?.correctOrder ?? [],
+    slotCount: vis.slotCount ?? ws?.slotCount,
+  };
+  const { slots, correctOrder, items } = canonicalSlotFillExpected(merged);
+  if (correctOrder.length === 0) return null;
+
+  const idToLabel = (id: string) =>
+    stripMathTeachingLabel(items.find((n) => n.id === id)?.label ?? id);
+
+  const parts: string[] = [];
+  for (let i = 0; i < correctOrder.length; i++) {
+    const slotLabel = stripMathTeachingLabel(slots[i]?.label ?? `Slot ${i + 1}`);
+    parts.push(`${slotLabel}: ${idToLabel(correctOrder[i]!)}`);
+  }
+  return parts.length ? parts.join(" · ") : null;
+}
+
 /** Human-readable correct answer for overlays and hints after max wrong tries. */
 export function formatMicroStepCorrectAnswer(step: RuntimeMicroStep): string {
   switch (step.type) {
@@ -112,6 +138,8 @@ export function formatMicroStepCorrectAnswer(step: RuntimeMicroStep): string {
       const o = parseJson<Record<string, unknown>>(step.correctAnswer, {});
       const ans = o.answer ?? o.text ?? o.correctAnswer;
       if (typeof ans === "string" && ans.trim()) return ans.trim();
+      const slotFillLine = formatVisualProblemSlotFillAnswer(step, o);
+      if (slotFillLine) return slotFillLine;
       const nodeLine = formatVisualProblemNodeLinkAnswer(step, o);
       if (nodeLine) return nodeLine;
       return "the solution shown on the card";

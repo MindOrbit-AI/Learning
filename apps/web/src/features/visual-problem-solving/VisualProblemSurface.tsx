@@ -7,13 +7,15 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import type { RuntimeMicroStep } from "@/features/micro-engine/types";
 import { formatMicroStepCorrectAnswer } from "@/features/micro-engine/formatCorrectAnswerLabel";
 import {
+  canonicalSlotFillExpected,
   enrichNodeLinkNodesWithEdgeEndpoints,
   normalizeNodeList,
-  normalizeSlotFillSlots,
   syncVisualWorkspaceFromMergedVisual,
 } from "@/lib/mission-to-lesson/buildVisualProblemMerged";
 import { seededShuffle } from "@/lib/deterministicShuffle";
 import { stripMathTeachingLabel } from "./mathLabelDisplay";
+import { DEFAULT_PLANT_REFERENCE_IMAGE_PATH } from "./plantReferenceArt";
+import { PlantPartReferenceIllustration } from "./PlantPartReferenceIllustration";
 import { expandNumberLineBounds, inferNumericTarget } from "./numberLineBounds";
 import { NumberLine } from "@/components/primitives/NumberLine";
 import { hasRenderableTriangleDiagrams, TriangleDiagramPair } from "./TriangleDiagramPair";
@@ -125,13 +127,15 @@ export function VisualProblemSurface({
     const assign = visualPayload.slotAssignments as Record<string, unknown> | undefined;
     if (!assign || typeof assign !== "object") return false;
     try {
-      const o = JSON.parse(step.correctAnswer) as { visual?: { slots?: unknown[]; correctOrder?: string[] } };
-      const slots = o.visual?.slots;
-      if (!Array.isArray(slots) || slots.length === 0) return false;
+      const o = JSON.parse(step.correctAnswer) as { visual?: Record<string, unknown> };
+      const v = o.visual;
+      if (!v || String(v.kind ?? "") !== "slot_fill") return false;
+      const { slots } = canonicalSlotFillExpected(v);
+      if (slots.length === 0) return false;
       const filled = slots.filter((s) => {
-        const id = String((s as { id?: unknown }).id ?? "");
-        const v = id ? assign[id] : undefined;
-        return v != null && String(v).trim().length > 0;
+        const id = s.id;
+        const val = id ? assign[id] : undefined;
+        return val != null && String(val).trim().length > 0;
       }).length;
       return filled === slots.length;
     } catch {
@@ -175,14 +179,17 @@ export function VisualProblemSurface({
       kind === "pizza_model" ||
       kind === "area_model";
     if (!isPartKind) return 8;
-    let t = Number(ws.totalParts ?? 8);
     try {
       const o = JSON.parse(step.correctAnswer) as { visual?: { totalParts?: unknown } };
-      const tp = o.visual?.totalParts;
-      if (tp != null && Number.isFinite(Number(tp))) t = Number(tp);
+      const v = o.visual;
+      if (v && typeof v === "object") {
+        const tp = (v as { totalParts?: unknown }).totalParts;
+        if (tp != null && Number.isFinite(Number(tp))) return Math.max(1, Math.round(Number(tp)));
+      }
     } catch {
       /* ignore */
     }
+    const t = Number(ws.totalParts ?? 8);
     return Math.max(1, Math.round(t));
   }, [kind, step.correctAnswer, ws]);
 
@@ -221,6 +228,48 @@ export function VisualProblemSurface({
     return Number.isFinite(w) ? Math.round(w) : null;
   }, [kind, step.correctAnswer, ws]);
 
+  const partModelMatchMode = useMemo(() => {
+    const isPart =
+      kind === "part_model" ||
+      kind === "fraction_bar" ||
+      kind === "pizza_model" ||
+      kind === "area_model";
+    if (!isPart) return "count";
+    try {
+      const o = JSON.parse(step.correctAnswer) as { visual?: { match?: unknown } };
+      const v = o.visual;
+      if (v && typeof v === "object" && (v as { match?: unknown }).match != null) {
+        return String((v as { match: unknown }).match);
+      }
+    } catch {
+      /* ignore */
+    }
+    return String(ws.match ?? "count");
+  }, [kind, step.correctAnswer, ws]);
+
+  /**
+   * For bundled plant art: when the story is about shading **k** of **n** equal parts (count mode),
+   * show **k** leaves in the reference so the illustration matches the expected quantity (not all n tap targets).
+   */
+  const plantReferenceDisplayedLeafCount = useMemo(() => {
+    if (partModelMatchMode === "exact") return undefined;
+    const total = partModelTotal;
+    let target: number | null = partModelTargetShaded;
+    if (target == null || !Number.isFinite(target)) {
+      try {
+        const o = JSON.parse(step.correctAnswer) as { answer?: unknown };
+        const a = o.answer;
+        if (a != null && /^\s*\d+\s*$/.test(String(a))) target = parseInt(String(a).trim(), 10);
+      } catch {
+        /* ignore */
+      }
+    }
+    if (target == null || !Number.isFinite(target)) return undefined;
+    const t = Math.round(Number(target));
+    if (t < 1 || t >= total) return undefined;
+    return t;
+  }, [partModelMatchMode, partModelTotal, partModelTargetShaded, step.correctAnswer]);
+
   /** Optional per-cell symbols (e.g. letters in a grid); falls back to 1..n when missing. */
   const partModelCellLabels = useMemo(() => {
     const isPart =
@@ -229,15 +278,17 @@ export function VisualProblemSurface({
       kind === "pizza_model" ||
       kind === "area_model";
     if (!isPart) return undefined;
-    let raw: unknown = ws.cellLabels ?? ws.partLabels ?? ws.labels;
-    if (raw == null) {
-      try {
-        const o = JSON.parse(step.correctAnswer) as { visual?: { cellLabels?: unknown } };
-        raw = o.visual?.cellLabels;
-      } catch {
-        /* ignore */
+    let raw: unknown;
+    try {
+      const o = JSON.parse(step.correctAnswer) as { visual?: { cellLabels?: unknown } };
+      const v = o.visual;
+      if (v && typeof v === "object" && Array.isArray((v as { cellLabels?: unknown }).cellLabels)) {
+        raw = (v as { cellLabels: unknown[] }).cellLabels;
       }
+    } catch {
+      /* ignore */
     }
+    if (raw == null) raw = ws.cellLabels ?? ws.partLabels ?? ws.labels;
     if (!Array.isArray(raw)) return undefined;
     const n = partModelTotal;
     const out: string[] = [];
@@ -255,15 +306,17 @@ export function VisualProblemSurface({
       kind === "pizza_model" ||
       kind === "area_model";
     if (!isPart) return null;
-    let c = Number(ws.gridCols ?? ws.cols ?? NaN);
-    if (!Number.isFinite(c)) {
-      try {
-        const o = JSON.parse(step.correctAnswer) as { visual?: { gridCols?: unknown } };
-        c = Number(o.visual?.gridCols ?? NaN);
-      } catch {
-        /* ignore */
+    let c = NaN;
+    try {
+      const o = JSON.parse(step.correctAnswer) as { visual?: { gridCols?: unknown; cols?: unknown } };
+      const v = o.visual;
+      if (v && typeof v === "object") {
+        c = Number((v as { gridCols?: unknown }).gridCols ?? (v as { cols?: unknown }).cols ?? NaN);
       }
+    } catch {
+      /* ignore */
     }
+    if (!Number.isFinite(c)) c = Number(ws.gridCols ?? ws.cols ?? NaN);
     if (!Number.isFinite(c) || c < 1) return null;
     return Math.min(16, Math.round(c));
   }, [kind, step.correctAnswer, ws]);
@@ -276,17 +329,19 @@ export function VisualProblemSurface({
       kind === "pizza_model" ||
       kind === "area_model";
     if (!isPart) return [] as Array<{ url: string; label?: string }>;
+    const isRenderableRefUrl = (u: string) =>
+      /^https?:\/\//i.test(u) || (u.startsWith("/") && !u.startsWith("//"));
     const parseList = (raw: unknown): Array<{ url: string; label?: string }> => {
       if (!Array.isArray(raw) || raw.length === 0) return [];
       const out: Array<{ url: string; label?: string }> = [];
       for (const x of raw) {
         if (typeof x === "string") {
           const u = x.trim();
-          if (/^https?:\/\//i.test(u)) out.push({ url: u });
+          if (isRenderableRefUrl(u)) out.push({ url: u });
         } else if (x && typeof x === "object") {
           const o = x as Record<string, unknown>;
           const u = String(o.url ?? o.src ?? "").trim();
-          if (!/^https?:\/\//i.test(u)) continue;
+          if (!isRenderableRefUrl(u)) continue;
           const label = o.label != null ? String(o.label).trim() : undefined;
           out.push(label ? { url: u, label } : { url: u });
         }
@@ -369,26 +424,25 @@ export function VisualProblemSurface({
   const slotFillModel = useMemo(() => {
     if (kind !== "slot_fill") return null;
     try {
-      const o = JSON.parse(step.correctAnswer) as {
-        visual?: { items?: unknown; slots?: unknown; correctOrder?: string[] };
-      };
+      const o = JSON.parse(step.correctAnswer) as { visual?: Record<string, unknown> };
       const v = o.visual;
-      const items = normalizeNodeList(v?.items ?? ws.items);
-      const sc = Number(ws.slotCount ?? items.length);
-      const slots = normalizeSlotFillSlots(
-        v?.slots ?? ws.slots,
-        Math.max(
-          sc,
-          Array.isArray(v?.slots) ? (v.slots as unknown[]).length : 0,
-          Array.isArray(ws.slots) ? (ws.slots as unknown[]).length : 0,
-          items.length || 1
-        )
-      );
+      const merged: Record<string, unknown> = {
+        items: v?.items ?? ws.items,
+        slots: v?.slots ?? ws.slots,
+        correctOrder: v?.correctOrder ?? ws.correctOrder ?? [],
+        slotCount: v?.slotCount ?? ws.slotCount,
+      };
+      const { slots, items } = canonicalSlotFillExpected(merged);
       return { items, slots };
     } catch {
-      const items = normalizeNodeList(ws.items);
-      const sc = Number(ws.slotCount ?? items.length);
-      return { items, slots: normalizeSlotFillSlots(ws.slots, Math.max(sc, items.length || 1)) };
+      const merged: Record<string, unknown> = {
+        items: ws.items,
+        slots: ws.slots,
+        correctOrder: ws.correctOrder ?? [],
+        slotCount: ws.slotCount,
+      };
+      const { slots, items } = canonicalSlotFillExpected(merged);
+      return { items, slots };
     }
   }, [kind, step.correctAnswer, ws, wsItemsKey, wsSlotsKey]);
 
@@ -434,6 +488,17 @@ export function VisualProblemSurface({
         {kind === "none" ? (
           <p className="mb-4 text-center text-sm leading-snug text-muted-foreground">
             Answer using the scenario and question above. This step does not include a grid or other on-screen model.
+          </p>
+        ) : null}
+        {kind !== "none" &&
+        (kind === "part_model" ||
+          kind === "fraction_bar" ||
+          kind === "pizza_model" ||
+          kind === "area_model") &&
+        artworkReferenceImages.length === 0 ? (
+          <p className="mb-3 text-center text-xs leading-snug text-muted-foreground">
+            If the story refers to a picture or diagram, use the labeled cells below as that model — this step does not
+            show a separate illustration unless the mission attaches reference art.
           </p>
         ) : null}
         {kind !== "none" ? <TriangleDiagramPair workspace={workspaceForTriangles} /> : null}
@@ -487,19 +552,38 @@ export function VisualProblemSurface({
         artworkReferenceImages.length > 0 ? (
           <div className="mb-4 flex flex-wrap justify-center gap-4">
             {artworkReferenceImages.map((img, i) => (
-              <figure key={`${img.url}-${i}`} className="max-w-[min(100%,200px)] shrink-0">
-                <img
-                  src={img.url}
-                  alt={img.label ?? `Artwork ${i + 1}`}
-                  className="mx-auto max-h-44 w-full rounded-xl border border-muted bg-muted/20 object-contain shadow-sm"
-                  loading="lazy"
-                  referrerPolicy="no-referrer"
-                />
-                {img.label ? (
-                  <figcaption className="mt-1.5 text-center text-[11px] font-medium leading-snug text-muted-foreground">
-                    {img.label}
-                  </figcaption>
-                ) : null}
+              <figure key={`${img.url}-${i}`} className="max-w-[min(100%,min(36rem,100%))] shrink-0">
+                {img.url === DEFAULT_PLANT_REFERENCE_IMAGE_PATH ? (
+                  <>
+                    <PlantPartReferenceIllustration
+                      totalParts={partModelTotal}
+                      referenceLeafCount={plantReferenceDisplayedLeafCount}
+                      cellLabels={partModelCellLabels}
+                      gridCols={partModelGridCols}
+                      className="mx-auto"
+                    />
+                    {img.label ? (
+                      <figcaption className="mt-1.5 text-center text-[11px] font-medium leading-snug text-muted-foreground">
+                        {img.label}
+                      </figcaption>
+                    ) : null}
+                  </>
+                ) : (
+                  <>
+                    <img
+                      src={img.url}
+                      alt={img.label ?? `Artwork ${i + 1}`}
+                      className="mx-auto max-h-44 w-full max-w-[200px] rounded-xl border border-muted bg-muted/20 object-contain shadow-sm"
+                      loading="lazy"
+                      referrerPolicy="no-referrer"
+                    />
+                    {img.label ? (
+                      <figcaption className="mt-1.5 text-center text-[11px] font-medium leading-snug text-muted-foreground">
+                        {img.label}
+                      </figcaption>
+                    ) : null}
+                  </>
+                )}
               </figure>
             ))}
           </div>
