@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@mindorbit/ui";
 import { AnimatePresence, motion } from "framer-motion";
 import { Fragment, useCallback, useEffect, useMemo, useState, type DragEvent, type ReactNode, type TouchEvent } from "react";
 
@@ -621,6 +622,7 @@ interface PlayState {
 }
 
 const STORAGE_KEY = "mindorbit.stem-puzzles.arcade.v3";
+const COLOR_MODE_STORAGE_KEY = "mindorbit.stem-puzzles.color-mode";
 const XP_PER_WIN = 14;
 const LEVEL_XP = 100;
 const MAX_ENERGY = 5;
@@ -10318,7 +10320,7 @@ function VisualCard({ visual, rotation }: { visual: Visual; rotation: number }) 
       <div className="space-y-4">
         <div className="grid grid-cols-3 gap-2">
           {(visual.examples ?? []).map((ex) => (
-            <span key={ex.input} className="rounded-xl bg-zinc-800 px-2 py-2 text-center font-mono text-sm ring-1 ring-white/10">
+            <span key={ex.input} className="rounded-xl bg-zinc-800 px-2 py-2 text-center font-mono text-sm text-zinc-100 ring-1 ring-white/10">
               {ex.input} → <b className="text-emerald-300">{ex.output}</b>
             </span>
           ))}
@@ -10436,8 +10438,8 @@ function Beam({ left, right, tilt }: { left: string; right: string; tilt: -1 | 0
   return (
     <div className="flex h-36 items-center justify-center">
       <div className="relative h-4 w-64 rounded-full bg-amber-700 shadow-xl" style={{ transform: `rotate(${tilt * 8}deg)` }}>
-        <span className="absolute -top-14 left-3 rounded-2xl bg-zinc-800 px-4 py-3 font-black ring-1 ring-white/10">{left}</span>
-        <span className="absolute -top-14 right-3 rounded-2xl bg-zinc-800 px-4 py-3 font-black ring-1 ring-white/10">{right}</span>
+        <span className="absolute -top-14 left-3 rounded-2xl bg-zinc-800 px-4 py-3 font-black text-zinc-100 ring-1 ring-white/10">{left}</span>
+        <span className="absolute -top-14 right-3 rounded-2xl bg-zinc-800 px-4 py-3 font-black text-zinc-100 ring-1 ring-white/10">{right}</span>
       </div>
       <div className="absolute mt-24 h-16 w-6 rounded-t-full bg-zinc-700" />
     </div>
@@ -10755,7 +10757,7 @@ function Interaction({ puzzle, state, setState, locked }: { puzzle: Puzzle; stat
             whileTap={{ scale: 0.96 }}
             disabled={locked}
             onClick={() => setState({ choice })}
-            className={`min-h-16 rounded-2xl border-2 px-3 py-3 text-lg font-black transition ${state.choice === choice ? "border-sky-300 bg-sky-500/25 text-white shadow-lg shadow-sky-500/20" : "border-white/10 bg-zinc-800/70 text-zinc-100"}`}
+            className={`min-h-16 rounded-2xl border-2 px-3 py-3 text-lg font-black transition ${state.choice === choice ? "border-[#84d8ff] dark:border-sky-600 bg-[#ddf4ff] dark:bg-sky-950/50 text-[#1899d6] dark:text-sky-400 shadow-[0_3px_0_0_#84d8ff] dark:shadow-[0_3px_0_0_#0369a1]" : "border-neutral-200 dark:border-zinc-600 border-b-4 border-b-neutral-300 dark:border-b-zinc-600 bg-white dark:bg-zinc-900 text-neutral-800 dark:text-zinc-100 shadow-[0_3px_0_0_#e5e5e5] dark:shadow-[0_3px_0_0_#27272a] active:border-b-2 active:translate-y-0.5"}`}
           >
             {puzzle.type === "patternBlocks" ? <span className="flex justify-center"><Shape kind={Number(choice)} /></span> : choice}
           </motion.button>
@@ -10766,9 +10768,9 @@ function Interaction({ puzzle, state, setState, locked }: { puzzle: Puzzle; stat
 
   if (puzzle.mode === "slider" && puzzle.slider) {
     return (
-      <div className="rounded-3xl bg-zinc-800/70 p-5 ring-1 ring-white/10">
-        <div className="mb-4 text-center font-mono text-4xl font-black text-cyan-200">{state.slider.toFixed(1)}</div>
-        <input disabled={locked} type="range" min={puzzle.slider.min} max={puzzle.slider.max} step={puzzle.slider.step} value={state.slider} onChange={(e) => setState({ slider: Number(e.target.value) })} className="h-3 w-full accent-cyan-400" />
+      <div className="rounded-3xl border-2 border-neutral-200 dark:border-zinc-600 bg-neutral-100 dark:bg-zinc-800/80 p-5">
+        <div className="mb-4 text-center font-mono text-4xl font-black text-[#1899d6] dark:text-sky-400">{state.slider.toFixed(1)}</div>
+        <input disabled={locked} type="range" min={puzzle.slider.min} max={puzzle.slider.max} step={puzzle.slider.step} value={state.slider} onChange={(e) => setState({ slider: Number(e.target.value) })} className="h-3 w-full accent-[#1cb0f6]" />
       </div>
     );
   }
@@ -10787,8 +10789,8 @@ function Interaction({ puzzle, state, setState, locked }: { puzzle: Puzzle; stat
             </button>
           ))}
         </div>
-        <div onDragOver={(e) => e.preventDefault()} onDrop={onDrop} className="grid min-h-24 place-items-center rounded-3xl border-2 border-dashed border-cyan-300/60 bg-cyan-500/10 p-4 text-center">
-          <span className="text-sm font-bold uppercase tracking-wider text-cyan-100">{state.dropped ?? puzzle.dropLabel}</span>
+        <div onDragOver={(e) => e.preventDefault()} onDrop={onDrop} className="grid min-h-24 place-items-center rounded-3xl border-2 border-dashed border-[#84d8ff] dark:border-sky-600 bg-[#ddf4ff] dark:bg-sky-950/50 p-4 text-center">
+          <span className="text-sm font-bold uppercase tracking-wider text-[#1899d6] dark:text-sky-400">{state.dropped ?? puzzle.dropLabel}</span>
         </div>
       </div>
     );
@@ -10800,14 +10802,14 @@ function Interaction({ puzzle, state, setState, locked }: { puzzle: Puzzle; stat
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
           {(puzzle.pairs ?? []).map((pair) => (
-            <button key={pair.left} type="button" disabled={locked || state.matches[pair.left] !== undefined} onClick={() => setState({ pendingLeft: pair.left })} className={`w-full rounded-2xl px-3 py-4 text-left font-black ring-1 ring-white/10 ${state.pendingLeft === pair.left ? "bg-violet-500/30" : state.matches[pair.left] ? "bg-emerald-500/20" : "bg-zinc-800/80"}`}>
+            <button key={pair.left} type="button" disabled={locked || state.matches[pair.left] !== undefined} onClick={() => setState({ pendingLeft: pair.left })} className={`w-full rounded-2xl border-2 px-3 py-4 text-left font-black ${state.pendingLeft === pair.left ? "border-purple-400 bg-purple-100 text-neutral-900 dark:border-purple-500 dark:bg-purple-950/70 dark:text-purple-100" : state.matches[pair.left] ? "border-[#46a302] bg-[#d7ffb8] text-neutral-900 dark:border-emerald-600 dark:bg-emerald-950/35 dark:text-emerald-100" : "border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-900 text-neutral-800 dark:text-zinc-100"}`}>
               {pair.left}
             </button>
           ))}
         </div>
         <div className="space-y-2">
           {rights.map((right) => (
-            <button key={right} type="button" disabled={locked || Object.values(state.matches).includes(right)} onClick={() => state.pendingLeft && setState({ matches: { ...state.matches, [state.pendingLeft]: right }, pendingLeft: null })} className={`w-full rounded-2xl px-3 py-4 text-left font-black ring-1 ring-white/10 ${Object.values(state.matches).includes(right) ? "bg-emerald-500/20" : "bg-zinc-800/80"}`}>
+            <button key={right} type="button" disabled={locked || Object.values(state.matches).includes(right)} onClick={() => state.pendingLeft && setState({ matches: { ...state.matches, [state.pendingLeft]: right }, pendingLeft: null })} className={`w-full rounded-2xl border-2 px-3 py-4 text-left font-black text-neutral-800 dark:text-zinc-100 ${Object.values(state.matches).includes(right) ? "border-[#46a302] bg-[#d7ffb8] dark:bg-emerald-950/35" : "border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-900"}`}>
               {right}
             </button>
           ))}
@@ -10819,19 +10821,19 @@ function Interaction({ puzzle, state, setState, locked }: { puzzle: Puzzle; stat
   if (puzzle.mode === "path") {
     return (
       <div className="space-y-3">
-        <div className="flex min-h-12 flex-wrap items-center gap-2 rounded-2xl bg-zinc-800/70 p-2 ring-1 ring-white/10">
-          {state.path.length === 0 ? <span className="px-2 text-sm text-zinc-500">Tap tiles to draw a path</span> : state.path.map((idx, i) => <span key={`${idx}-${i}`} className="rounded-xl bg-cyan-500 px-3 py-2 font-mono font-black">{puzzle.pathTiles?.[idx]}</span>)}
+        <div className="flex min-h-12 flex-wrap items-center gap-2 rounded-2xl border-2 border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-900 p-2">
+          {state.path.length === 0 ? <span className="px-2 text-sm text-neutral-500 dark:text-zinc-400">Tap tiles to draw a path</span> : state.path.map((idx, i) => <span key={`${idx}-${i}`} className="rounded-xl border-2 border-[#1899d6] bg-[#1cb0f6] px-3 py-2 font-mono font-black text-white">{puzzle.pathTiles?.[idx]}</span>)}
         </div>
         <div className="grid grid-cols-4 gap-2">
-          {(puzzle.pathTiles ?? []).map((tile, i) => <button key={`${tile}-${i}`} type="button" disabled={locked} onClick={() => setState({ path: [...state.path, i] })} className="rounded-2xl bg-zinc-800 px-3 py-4 font-mono text-lg font-black ring-1 ring-white/10">{tile}</button>)}
+          {(puzzle.pathTiles ?? []).map((tile, i) => <button key={`${tile}-${i}`} type="button" disabled={locked} onClick={() => setState({ path: [...state.path, i] })} className="rounded-2xl border-2 border-neutral-200 dark:border-zinc-600 border-b-4 border-b-neutral-300 dark:border-b-zinc-600 bg-white dark:bg-zinc-900 px-3 py-4 font-mono text-lg font-black text-neutral-800 dark:text-zinc-100 transition active:border-b-2 active:translate-y-0.5">{tile}</button>)}
         </div>
-        <button type="button" disabled={locked} onClick={() => setState({ path: [] })} className="w-full rounded-xl bg-white/5 py-2 text-sm text-zinc-300">Clear path</button>
+        <button type="button" disabled={locked} onClick={() => setState({ path: [] })} className="w-full rounded-xl border-2 border-neutral-200 dark:border-zinc-600 bg-neutral-100 dark:bg-zinc-800/80 py-2 text-sm font-bold text-neutral-600 dark:text-zinc-400">Clear path</button>
       </div>
     );
   }
 
   if (puzzle.mode === "rotate") {
-    return <button type="button" disabled={locked} onClick={() => setState({ rotation: (state.rotation + (puzzle.rotationStep ?? 90)) % 360 })} className="w-full rounded-2xl bg-violet-500 px-4 py-4 text-lg font-black text-white shadow-lg shadow-violet-500/25">Rotate {puzzle.rotationStep ?? 90}°</button>;
+    return <button type="button" disabled={locked} onClick={() => setState({ rotation: (state.rotation + (puzzle.rotationStep ?? 90)) % 360 })} className="w-full rounded-2xl border-2 border-[#46a302] border-b-4 border-b-[#46a302] bg-[#58cc02] px-4 py-4 text-lg font-black text-white transition active:border-b-2 active:translate-y-0.5">Rotate {puzzle.rotationStep ?? 90}°</button>;
   }
 
   if (puzzle.mode === "reorder") {
@@ -10868,9 +10870,9 @@ function Numpad({ puzzle, state, setState, locked }: { puzzle: Puzzle; state: Pl
     setState({ numpad: state.numpad + key });
   };
   return (
-    <div className="rounded-3xl bg-zinc-800/70 p-4 ring-1 ring-white/10">
-      <div className="mb-3 grid min-h-16 place-items-center rounded-2xl bg-zinc-900/80 px-4 text-center font-mono text-3xl font-black tracking-wider text-cyan-100 ring-1 ring-white/10">
-        {state.numpad.length > 0 ? state.numpad.replace(/-/g, "−") : <span className="text-zinc-600">type a number</span>}
+    <div className="rounded-3xl border-2 border-neutral-200 dark:border-zinc-600 bg-neutral-100 dark:bg-zinc-800/80 p-4">
+      <div className="mb-3 grid min-h-16 place-items-center rounded-2xl border-2 border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-900 px-4 text-center font-mono text-3xl font-black tracking-wider text-[#1899d6] dark:text-sky-400">
+        {state.numpad.length > 0 ? state.numpad.replace(/-/g, "−") : <span className="text-neutral-400 dark:text-zinc-500">type a number</span>}
       </div>
       <div className="grid grid-cols-3 gap-2">
         {keys.map((key, i) => (
@@ -10880,12 +10882,12 @@ function Numpad({ puzzle, state, setState, locked }: { puzzle: Puzzle; state: Pl
             whileTap={{ scale: 0.94 }}
             disabled={locked || !key}
             onClick={() => press(key)}
-            className={`min-h-14 rounded-2xl text-xl font-black ring-1 ring-white/10 ${
+            className={`min-h-14 rounded-2xl border-2 border-b-4 text-xl font-black transition active:border-b-2 active:translate-y-0.5 ${
               key === ""
                 ? "invisible"
                 : key === "−" || key === "."
-                ? "bg-zinc-800 text-amber-200"
-                : "bg-zinc-900 text-white"
+                ? "border-amber-300 border-b-amber-400 bg-amber-100 text-amber-900 dark:border-amber-600 dark:border-b-amber-700 dark:bg-amber-950/50 dark:text-amber-100"
+                : "border-neutral-200 dark:border-zinc-600 border-b-neutral-300 dark:border-b-zinc-600 bg-white dark:bg-zinc-900 text-neutral-900 dark:text-zinc-50"
             }`}
           >
             {key}
@@ -10896,7 +10898,7 @@ function Numpad({ puzzle, state, setState, locked }: { puzzle: Puzzle; state: Pl
         type="button"
         disabled={locked || state.numpad.length === 0}
         onClick={() => setState({ numpad: state.numpad.slice(0, -1) })}
-        className="mt-2 w-full rounded-2xl bg-rose-500/15 py-3 text-sm font-black text-rose-100 ring-1 ring-rose-300/30 disabled:opacity-40"
+        className="mt-2 w-full rounded-2xl border-2 border-rose-300 bg-rose-50 py-3 text-sm font-black text-rose-700 transition hover:bg-rose-100 disabled:opacity-40 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-200 dark:hover:bg-rose-950/60"
       >
         ⌫ Backspace
       </button>
@@ -10921,13 +10923,13 @@ function SortCategories({ puzzle, state, setState, locked }: { puzzle: Puzzle; s
   };
   return (
     <div className="space-y-3">
-      <div className="rounded-3xl bg-zinc-800/70 p-3 ring-1 ring-white/10">
-        <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+      <div className="rounded-3xl border-2 border-neutral-200 dark:border-zinc-600 bg-neutral-100 dark:bg-zinc-800/80 p-3">
+        <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 dark:text-zinc-400">
           Cards{unplaced.length > 0 ? "" : " · all placed"}
         </p>
         <div className="flex flex-wrap gap-2">
           {unplaced.length === 0 ? (
-            <span className="text-xs text-zinc-500">Tap a bucket card to reassign.</span>
+            <span className="text-xs text-neutral-500 dark:text-zinc-400">Tap a bucket card to reassign.</span>
           ) : (
             unplaced.map((item) => (
               <button
@@ -10935,10 +10937,10 @@ function SortCategories({ puzzle, state, setState, locked }: { puzzle: Puzzle; s
                 type="button"
                 disabled={locked}
                 onClick={() => setState({ pendingItem: state.pendingItem === item.label ? null : item.label })}
-                className={`rounded-2xl px-3 py-2 text-sm font-black ring-1 transition ${
+                className={`rounded-2xl border-2 px-3 py-2 text-sm font-black transition ${
                   state.pendingItem === item.label
-                    ? "bg-amber-400 text-amber-950 ring-amber-200"
-                    : "bg-zinc-900 text-zinc-100 ring-white/10"
+                    ? "border-[#e5a000] bg-[#ffc800] text-neutral-900 dark:text-zinc-50"
+                    : "border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-900 text-neutral-800 dark:text-zinc-100"
                 }`}
               >
                 {item.label}
@@ -10957,13 +10959,13 @@ function SortCategories({ puzzle, state, setState, locked }: { puzzle: Puzzle; s
               disabled={locked || !state.pendingItem}
               onClick={() => assign(category)}
               className={`min-h-32 rounded-3xl border-2 border-dashed p-3 text-left transition ${
-                state.pendingItem ? "border-cyan-300/60 bg-cyan-500/10" : "border-white/10 bg-zinc-900/60"
+                state.pendingItem ? "border-[#84d8ff] dark:border-sky-600 bg-[#ddf4ff] dark:bg-sky-950/50 text-neutral-900 dark:text-zinc-100" : "border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-900 text-neutral-900 dark:text-zinc-100"
               }`}
             >
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-zinc-300">{category}</p>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-neutral-600 dark:text-zinc-400">{category}</p>
               <div className="mt-2 flex flex-wrap gap-1">
                 {inside.length === 0 ? (
-                  <span className="text-[11px] text-zinc-500">empty</span>
+                  <span className="text-[11px] text-neutral-400 dark:text-zinc-500">empty</span>
                 ) : (
                   inside.map((item) => (
                     <span
@@ -10972,7 +10974,7 @@ function SortCategories({ puzzle, state, setState, locked }: { puzzle: Puzzle; s
                         event.stopPropagation();
                         unassign(item.label);
                       }}
-                      className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs font-bold ring-1 ring-white/10"
+                      className="rounded-full border border-neutral-200 dark:border-zinc-600 bg-neutral-100 dark:bg-zinc-800/80 px-2 py-0.5 text-xs font-bold text-neutral-700 dark:text-zinc-300"
                     >
                       {item.label} ×
                     </span>
@@ -11006,7 +11008,7 @@ function Reorder({ state, setState, locked }: { state: PlayState; setState: (s: 
             setHeld(null);
             setState({ order: next });
           }}
-          className={`grid h-16 place-items-center rounded-2xl text-3xl ring-1 ring-white/10 ${held === i ? "bg-amber-500/30" : "bg-zinc-800"}`}
+          className={`grid h-16 place-items-center rounded-2xl border-2 border-b-4 text-3xl transition active:border-b-2 active:translate-y-0.5 ${held === i ? "border-[#ffc800] bg-amber-100 text-neutral-900 dark:border-amber-500 dark:bg-amber-950/50 dark:text-amber-100" : "border-neutral-200 dark:border-zinc-600 border-b-neutral-300 dark:border-b-zinc-600 bg-white dark:bg-zinc-900 text-neutral-800 dark:text-zinc-100"}`}
         >
           {tile}
         </button>
@@ -11029,12 +11031,12 @@ function Swipe({ labels, state, setState, locked }: { labels: string[]; state: P
     <div
       onTouchStart={(e) => setState({ touchStart: { x: e.touches[0]?.clientX ?? 0, y: e.touches[0]?.clientY ?? 0 } })}
       onTouchEnd={finishTouch}
-      className="grid min-h-36 place-items-center rounded-3xl border-2 border-dashed border-violet-300/60 bg-violet-500/10 p-5 text-center"
+      className="grid min-h-36 place-items-center rounded-3xl border-2 border-dashed border-[#84d8ff] dark:border-sky-600 bg-[#ddf4ff] dark:bg-sky-950/50 p-5 text-center"
     >
       <div>
         <p className="text-4xl">↕️</p>
-        <p className="mt-2 font-black text-violet-100">{state.swipe ? `Swiped ${state.swipe}` : "Swipe toward a door"}</p>
-        <p className="mt-2 text-xs text-zinc-400">{labels.join(" · ")}</p>
+        <p className="mt-2 font-black text-[#1899d6] dark:text-sky-400">{state.swipe ? `Swiped ${state.swipe}` : "Swipe toward a door"}</p>
+        <p className="mt-2 text-xs text-neutral-500 dark:text-zinc-400">{labels.join(" · ")}</p>
       </div>
     </div>
   );
@@ -11121,10 +11123,10 @@ function FilterPills<T extends string>({
             key={option}
             type="button"
             onClick={() => onChange(option)}
-            className={`shrink-0 rounded-full px-3 py-2 text-[11px] font-black uppercase tracking-wider transition sm:py-1.5 ${
+            className={`shrink-0 rounded-full border-2 px-3 py-2 text-[11px] font-black uppercase tracking-wider transition sm:py-1.5 ${
               selected
-                ? "bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-lg shadow-violet-500/25"
-                : "bg-zinc-800/70 text-zinc-300 ring-1 ring-white/10 hover:bg-zinc-700/70"
+                ? "border-[#46a302] bg-[#58cc02] text-white shadow-[0_3px_0_0_#46a302]"
+                : "border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-900 text-neutral-600 dark:text-zinc-400 hover:bg-neutral-100 dark:hover:bg-zinc-800"
             }`}
           >
             {render ? render(option) : option}
@@ -11135,15 +11137,49 @@ function FilterPills<T extends string>({
   );
 }
 
+function FilterSelect<T extends string>({
+  id,
+  options,
+  value,
+  onChange,
+  render,
+}: {
+  id: string;
+  options: readonly T[];
+  value: T;
+  onChange: (next: T) => void;
+  render?: (option: T) => string;
+}) {
+  return (
+    <div className="relative">
+      <select
+        id={id}
+        value={value}
+        onChange={(event) => onChange(event.target.value as T)}
+        className="w-full cursor-pointer appearance-none rounded-2xl border-2 border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-900 py-3 pl-4 pr-10 text-sm font-bold text-neutral-800 dark:text-zinc-100 shadow-[0_2px_0_0_#e5e5e5] dark:shadow-[0_2px_0_0_#27272a] focus:border-[#84d8ff] focus:outline-none focus:ring-2 focus:ring-[#ddf4ff] dark:focus:border-sky-500 dark:focus:ring-sky-900/40"
+      >
+        {options.map((option) => (
+          <option key={option} value={option} className="bg-white dark:bg-zinc-900 text-neutral-800 dark:text-zinc-100">
+            {render ? render(option) : option}
+          </option>
+        ))}
+      </select>
+      <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-neutral-400 dark:text-zinc-500" aria-hidden>
+        ▾
+      </span>
+    </div>
+  );
+}
+
 function Badge({ tone, children }: { tone: "violet" | "sky" | "amber" | "emerald"; children: ReactNode }) {
   const colors: Record<string, string> = {
-    violet: "bg-violet-500/15 text-violet-100 ring-violet-300/30",
-    sky: "bg-sky-500/15 text-sky-100 ring-sky-300/30",
-    amber: "bg-amber-500/15 text-amber-100 ring-amber-300/30",
-    emerald: "bg-emerald-500/15 text-emerald-100 ring-emerald-300/30",
+    violet: "bg-purple-100 text-purple-900 ring-1 ring-purple-200 dark:bg-purple-950/50 dark:text-purple-100 dark:ring-purple-800",
+    sky: "bg-sky-100 text-sky-900 ring-1 ring-sky-200 dark:bg-sky-950/50 dark:text-sky-100 dark:ring-sky-800",
+    amber: "bg-amber-100 text-amber-950 ring-1 ring-amber-200 dark:bg-amber-950/40 dark:text-amber-100 dark:ring-amber-800",
+    emerald: "bg-emerald-100 text-emerald-900 ring-1 ring-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-100 dark:ring-emerald-800",
   };
   return (
-    <span className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ring-1 ${colors[tone]}`}>
+    <span className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${colors[tone]}`}>
       {children}
     </span>
   );
@@ -11170,10 +11206,10 @@ function CategoryCard({
       type="button"
       onClick={onClick}
       whileTap={{ scale: 0.97 }}
-      className={`group relative flex h-full flex-col overflow-hidden rounded-[2rem] border p-5 text-left shadow-xl shadow-black/20 ring-1 transition ${
+      className={`group relative flex h-full flex-col overflow-hidden rounded-[2rem] border-2 border-b-4 p-5 text-left transition active:translate-y-0.5 ${
         unlocked
-          ? "border-white/10 bg-zinc-950/70 ring-white/5 hover:-translate-y-0.5 hover:border-white/20 hover:bg-zinc-900/85"
-          : "border-white/5 bg-zinc-950/40 ring-white/5 hover:border-amber-300/30"
+          ? "border-neutral-200 dark:border-zinc-600 border-b-neutral-300 dark:border-b-zinc-600 bg-white dark:bg-zinc-900 shadow-[0_4px_0_0_#e5e5e5] dark:shadow-[0_4px_0_0_#27272a] hover:bg-neutral-50 dark:hover:bg-zinc-800/90"
+          : "border-neutral-200 dark:border-zinc-600 border-b-neutral-300 dark:border-b-zinc-600 bg-neutral-100 dark:bg-zinc-800/80 hover:border-amber-300"
       }`}
     >
       <div
@@ -11189,12 +11225,12 @@ function CategoryCard({
         >
           <span className={unlocked ? "" : "opacity-60"}>{meta.emoji}</span>
           {!unlocked ? (
-            <span className="absolute -bottom-1 -right-1 grid h-7 w-7 place-items-center rounded-full bg-zinc-900 text-base ring-1 ring-amber-300/40">🔒</span>
+            <span className="absolute -bottom-1 -right-1 grid h-7 w-7 place-items-center rounded-full border-2 border-amber-400 bg-white dark:bg-zinc-900 text-base shadow-sm">🔒</span>
           ) : null}
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className={`line-clamp-2 text-sm font-black leading-tight ${unlocked ? "text-white" : "text-zinc-400"}`}>{meta.title}</h3>
-          <p className="mt-0.5 truncate text-[11px] text-zinc-400">{meta.short}</p>
+          <h3 className={`line-clamp-2 text-sm font-black leading-tight ${unlocked ? "text-neutral-900 dark:text-zinc-50" : "text-neutral-500 dark:text-zinc-400"}`}>{meta.title}</h3>
+          <p className="mt-0.5 truncate text-[11px] text-neutral-500 dark:text-zinc-400">{meta.short}</p>
           <div className="mt-2.5 flex flex-wrap gap-1.5">
             <Badge tone="violet">{gradeLabel(meta.grade)}</Badge>
             <Badge tone="sky">{subjectLabel(meta.subject)}</Badge>
@@ -11208,19 +11244,19 @@ function CategoryCard({
           </div>
         </div>
       </div>
-      <p className={`mt-4 line-clamp-2 text-xs leading-relaxed ${unlocked ? "text-zinc-300" : "text-zinc-500"}`}>{meta.skill}</p>
+      <p className={`mt-4 line-clamp-2 text-xs leading-relaxed ${unlocked ? "text-neutral-600 dark:text-zinc-400" : "text-neutral-500 dark:text-zinc-400"}`}>{meta.skill}</p>
       {!unlocked ? (
         <div className="mt-3 space-y-1">
-          <div className="h-1.5 rounded-full bg-white/10">
-            <div className="h-1.5 rounded-full bg-amber-400/80" style={{ width: `${progress * 100}%` }} />
+          <div className="h-2 rounded-full bg-neutral-200 dark:bg-zinc-700">
+            <div className="h-2 rounded-full bg-[#ffc800]" style={{ width: `${progress * 100}%` }} />
           </div>
-          <p className="text-[10px] uppercase tracking-[0.18em] text-amber-200/80">
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-amber-800">
             {currentXp}/{required} XP to unlock
           </p>
         </div>
       ) : null}
-      <div className="mt-auto flex items-center justify-between gap-2 pt-4 text-[11px] text-zinc-500">
-        <span className="inline-flex max-w-[65%] items-center gap-1 truncate rounded-full bg-white/5 px-2 py-0.5 font-bold uppercase tracking-wider text-zinc-300 ring-1 ring-white/10">
+      <div className="mt-auto flex items-center justify-between gap-2 pt-4 text-[11px] text-neutral-500 dark:text-zinc-400">
+        <span className="inline-flex max-w-[65%] items-center gap-1 truncate rounded-full border border-neutral-200 dark:border-zinc-600 bg-neutral-100 dark:bg-zinc-800/80 px-2 py-0.5 font-bold uppercase tracking-wider text-neutral-700 dark:text-zinc-300">
           {metaInteractionDisplay(meta)}
         </span>
         <span className="inline-flex shrink-0 items-center gap-1">⏱ ~{meta.estMin} min</span>
@@ -11264,14 +11300,14 @@ function SkillTree({
         if (inTier.length === 0) return null;
         const unlockedInTier = inTier.filter((m) => isUnlocked(m, xp, completions)).length;
         return (
-          <div key={tier} className="rounded-[2rem] border border-white/10 bg-zinc-950/55 p-5 ring-1 ring-white/5">
+          <div key={tier} className="rounded-[2rem] border-2 border-neutral-200 dark:border-zinc-600 border-b-4 border-b-neutral-300 dark:border-b-zinc-600 bg-white dark:bg-zinc-900 p-5 shadow-[0_4px_0_0_#e5e5e5] dark:shadow-[0_4px_0_0_#27272a]">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-violet-200">{tier}</p>
-                <p className="mt-1 text-base font-black text-white">{inTier.length} puzzles · {unlockedInTier} unlocked</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#1899d6] dark:text-sky-400">{tier}</p>
+                <p className="mt-1 text-base font-black text-neutral-900 dark:text-zinc-50">{inTier.length} puzzles · {unlockedInTier} unlocked</p>
               </div>
-              <div className="h-1.5 w-32 rounded-full bg-white/10">
-                <div className="h-1.5 rounded-full bg-emerald-400" style={{ width: `${(unlockedInTier / inTier.length) * 100}%` }} />
+              <div className="h-2 w-32 rounded-full bg-neutral-200 dark:bg-zinc-700">
+                <div className="h-2 rounded-full bg-[#58cc02]" style={{ width: `${(unlockedInTier / inTier.length) * 100}%` }} />
               </div>
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 xl:grid-cols-3">
@@ -11296,15 +11332,15 @@ function SkillTree({
 
 function StatCard({ label, value, tone }: { label: string; value: string; tone: "violet" | "cyan" | "amber" | "emerald" }) {
   const colors: Record<typeof tone, string> = {
-    violet: "from-violet-500/25 to-fuchsia-500/10 text-violet-100",
-    cyan: "from-cyan-500/25 to-blue-500/10 text-cyan-100",
-    amber: "from-amber-500/25 to-orange-500/10 text-amber-100",
-    emerald: "from-emerald-500/25 to-teal-500/10 text-emerald-100",
+    violet: "from-purple-100 to-fuchsia-50 dark:from-purple-950/50 dark:to-fuchsia-950/20",
+    cyan: "from-sky-100 to-blue-50 dark:from-sky-950/50 dark:to-blue-950/20",
+    amber: "from-amber-100 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/20",
+    emerald: "from-emerald-100 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/20",
   };
   return (
-    <div className={`rounded-3xl border border-white/10 bg-gradient-to-br ${colors[tone]} p-4 ring-1 ring-white/5`}>
-      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/50">{label}</p>
-      <p className="mt-1.5 text-2xl font-black tracking-tight text-white">{value}</p>
+    <div className={`rounded-3xl border-2 border-neutral-200 dark:border-zinc-600 border-b-4 border-b-neutral-300 dark:border-b-zinc-600 bg-gradient-to-br ${colors[tone]} p-4 shadow-[0_3px_0_0_#e5e5e5] dark:shadow-[0_3px_0_0_#27272a]`}>
+      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-neutral-500 dark:text-zinc-400">{label}</p>
+      <p className="mt-1.5 text-2xl font-black tracking-tight text-neutral-900 dark:text-zinc-50">{value}</p>
     </div>
   );
 }
@@ -11387,18 +11423,18 @@ function subjectLabel(subject: SubjectFilter) {
 function SearchInput({ value, onChange }: { value: string; onChange: (next: string) => void }) {
   return (
     <div className="relative">
-      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">🔎</span>
+      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-zinc-500">🔎</span>
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder="Search puzzles, skills, or topics…"
-        className="w-full rounded-2xl border border-white/10 bg-zinc-900/70 py-3.5 pl-9 pr-9 text-sm text-white placeholder:text-zinc-500 focus:border-violet-400/60 focus:outline-none focus:ring-2 focus:ring-violet-400/20"
+        className="w-full rounded-2xl border-2 border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-900 py-3.5 pl-9 pr-9 text-sm font-bold text-neutral-800 dark:text-zinc-100 shadow-[0_2px_0_0_#e5e5e5] dark:shadow-[0_2px_0_0_#27272a] placeholder:text-neutral-400 dark:placeholder:text-zinc-500 focus:border-[#84d8ff] focus:outline-none focus:ring-2 focus:ring-[#ddf4ff] dark:focus:border-sky-500 dark:focus:ring-sky-900/40"
       />
       {value ? (
         <button
           type="button"
           onClick={() => onChange("")}
-          className="absolute right-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full bg-white/5 text-xs text-zinc-300"
+          className="absolute right-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full border border-neutral-200 dark:border-zinc-600 bg-neutral-100 dark:bg-zinc-800/80 text-xs text-neutral-600 dark:text-zinc-400"
           aria-label="Clear search"
         >
           ✕
@@ -11498,11 +11534,11 @@ function ProgressBar({ xp }: { xp: number }) {
   const inLevel = xp % LEVEL_XP;
   return (
     <div className="flex items-center gap-2.5">
-      <span className="rounded-lg bg-violet-500/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-violet-100 ring-1 ring-violet-300/30">Lv {level}</span>
-      <div className="h-2 flex-1 overflow-hidden rounded-full bg-zinc-800 ring-1 ring-white/10">
-        <motion.div className="h-full rounded-full bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400" animate={{ width: `${inLevel}%` }} />
+      <span className="rounded-lg border-2 border-[#84d8ff] dark:border-sky-600 bg-[#ddf4ff] dark:bg-sky-950/50 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-[#1899d6] dark:text-sky-300">Lv {level}</span>
+      <div className="h-3 flex-1 overflow-hidden rounded-full border-2 border-neutral-200 dark:border-zinc-600 bg-neutral-200 dark:bg-zinc-700">
+        <motion.div className="h-full rounded-full bg-[#58cc02]" animate={{ width: `${inLevel}%` }} />
       </div>
-      <span className="font-mono text-xs text-zinc-500">{inLevel}/{LEVEL_XP}</span>
+      <span className="font-mono text-xs font-bold text-neutral-500 dark:text-zinc-400">{inLevel}/{LEVEL_XP}</span>
     </div>
   );
 }
@@ -11534,6 +11570,7 @@ export default function MathPuzzlesPage() {
   const [aiEnabled, setAiEnabled] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSource, setAiSource] = useState<"ai" | "mock" | "fallback" | "procedural" | null>(null);
+  const [colorMode, setColorMode] = useState<"light" | "dark">("light");
 
   const activeMeta = active ? metaFor(active) : null;
   const setState = (next: Partial<PlayState>) => setRawState((prev) => ({ ...prev, ...next }));
@@ -11615,6 +11652,15 @@ export default function MathPuzzlesPage() {
     const daySeed = new Date().toISOString().slice(0, 10).split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
     setDaily(METAS[daySeed % METAS.length]!.id);
   }, []);
+
+  useEffect(() => {
+    const mode = window.localStorage.getItem(COLOR_MODE_STORAGE_KEY);
+    if (mode === "dark" || mode === "light") setColorMode(mode);
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(COLOR_MODE_STORAGE_KEY, colorMode);
+  }, [colorMode]);
 
   useEffect(() => {
     window.localStorage.setItem(
@@ -11796,12 +11842,11 @@ export default function MathPuzzlesPage() {
   };
 
   return (
-    <div className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-[radial-gradient(circle_at_top_left,#312e81_0%,transparent_32%),radial-gradient(circle_at_top_right,#0e7490_0%,transparent_28%),linear-gradient(180deg,#050505_0%,#09090b_45%,#000_100%)] text-zinc-100">
-      <div className="pointer-events-none absolute inset-0 opacity-50">
-        <div className="absolute -left-24 -top-24 h-96 w-96 rounded-full bg-violet-500/20 blur-3xl" />
-        <div className="absolute -right-24 top-48 h-96 w-96 rounded-full bg-cyan-500/20 blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 h-96 w-96 rounded-full bg-emerald-500/10 blur-3xl" />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.012)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.012)_1px,transparent_1px)] bg-[size:52px_52px]" />
+    <div className={cn(colorMode === "dark" && "dark")}>
+      <div className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-[#f0f0f0] text-neutral-800 dark:bg-zinc-950 dark:text-zinc-100">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -right-24 top-0 h-72 w-72 rounded-full bg-[#58cc02]/15 blur-3xl dark:bg-[#58cc02]/10" />
+        <div className="absolute -left-20 bottom-32 h-64 w-64 rounded-full bg-[#1cb0f6]/12 blur-3xl dark:bg-[#1cb0f6]/8" />
       </div>
       <Confetti show={confetti} />
 
@@ -11814,53 +11859,74 @@ export default function MathPuzzlesPage() {
             exit={{ opacity: 0, y: -16 }}
             className="fixed inset-x-0 top-[max(1rem,env(safe-area-inset-top))] z-50 mx-auto flex max-w-sm justify-center px-4"
           >
-            <div className="flex items-start gap-3 rounded-2xl border border-amber-300/30 bg-amber-500/15 px-4 py-3 text-amber-50 shadow-2xl backdrop-blur-xl">
+            <div className="flex items-start gap-3 rounded-2xl border-2 border-[#e5a000] bg-[#fff4d4] px-4 py-3 text-neutral-900 shadow-[0_4px_0_0_#e5a000] dark:border-amber-600 dark:bg-amber-950/50 dark:text-amber-50 dark:shadow-[0_4px_0_0_#92400e]">
               <span className="text-xl">🔒</span>
               <div className="min-w-0">
                 <p className="truncate text-sm font-black">{lockedToast.title}</p>
-                <p className="text-[11px] leading-snug text-amber-100/90">{lockedToast.message}</p>
+                <p className="text-[11px] leading-snug text-neutral-700 dark:text-amber-100/90">{lockedToast.message}</p>
               </div>
             </div>
           </motion.div>
         ) : null}
       </AnimatePresence>
 
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-black/55 px-4 pb-4 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-2xl">
+      <header className="sticky top-0 z-30 border-b-2 border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-900 px-4 pb-4 pt-[max(0.75rem,env(safe-area-inset-top))] shadow-[0_2px_0_0_#e5e5e5] dark:shadow-[0_2px_0_0_#27272a]">
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
             <div className="flex min-w-0 flex-1 items-center gap-3">
               {active ? (
-                <button type="button" onClick={exitRun} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/10 text-xl ring-1 ring-white/10">‹</button>
+                <button
+                  type="button"
+                  onClick={exitRun}
+                  className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border-2 border-neutral-200 dark:border-zinc-600 border-b-4 border-b-neutral-300 dark:border-b-zinc-600 bg-white dark:bg-zinc-900 text-xl font-black text-neutral-700 dark:text-zinc-300 transition active:border-b-2 active:translate-y-0.5"
+                >
+                  ‹
+                </button>
               ) : (
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-violet-500/20 text-xl ring-1 ring-violet-300/20">🧠</span>
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border-2 border-[#84d8ff] dark:border-sky-600 bg-[#ddf4ff] dark:bg-sky-950/50 text-xl">🧠</span>
               )}
               <div className="min-w-0 flex-1">
-                <h1 className="truncate text-lg font-black tracking-tight sm:text-xl">{activeMeta?.title ?? "MindOrbit STEM Arcade"}</h1>
-                <p className="mt-0.5 line-clamp-2 text-xs text-zinc-400 sm:truncate sm:line-clamp-none">{activeMeta?.short ?? `${METAS.length} STEM puzzles · Math · Science · Tech · Engineering`}</p>
+                <h1 className="truncate text-lg font-black tracking-tight text-neutral-900 dark:text-zinc-50 sm:text-xl">{activeMeta?.title ?? "MindOrbit Arcade"}</h1>
+                <p className="mt-0.5 line-clamp-2 text-xs text-neutral-500 dark:text-zinc-400 sm:truncate sm:line-clamp-none">{activeMeta?.short ?? `${METAS.length} puzzles · Math · Science · Tech · Engineering`}</p>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2 sm:shrink-0 sm:justify-end sm:gap-2.5">
-              <span className="hidden rounded-full bg-violet-500/15 px-3 py-1.5 text-sm font-black text-violet-100 ring-1 ring-violet-300/30 sm:inline-flex">Lv {Math.floor(xp / LEVEL_XP) + 1}</span>
-              <span className="hidden rounded-full bg-rose-500/15 px-3 py-1.5 text-sm font-black text-rose-100 ring-1 ring-rose-300/30 sm:inline-flex">🔥 {streak}</span>
+              <button
+                type="button"
+                onClick={() => setColorMode((m) => (m === "light" ? "dark" : "light"))}
+                className="rounded-full border-2 border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-900 p-2 text-base leading-none text-neutral-700 dark:text-zinc-300 transition hover:bg-neutral-100 dark:hover:bg-zinc-700"
+                aria-label={colorMode === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                title={colorMode === "dark" ? "Light mode" : "Dark mode"}
+              >
+                {colorMode === "dark" ? "☀️" : "🌙"}
+              </button>
+              <span className="hidden rounded-full border-2 border-[#84d8ff] dark:border-sky-600 bg-[#ddf4ff] dark:bg-sky-950/50 px-3 py-1.5 text-sm font-black text-[#1899d6] dark:text-sky-300 sm:inline-flex">Lv {Math.floor(xp / LEVEL_XP) + 1}</span>
+              <span className="hidden rounded-full border-2 border-orange-200 bg-orange-100 px-3 py-1.5 text-sm font-black text-orange-800 sm:inline-flex dark:border-orange-900/50 dark:bg-orange-950/40 dark:text-orange-200">🔥 {streak}</span>
               <button
                 type="button"
                 onClick={() => setAiEnabled((value) => !value)}
                 aria-pressed={aiEnabled}
                 title={aiEnabled ? "AI puzzle generation: ON" : "AI puzzle generation: OFF"}
-                className={`hidden items-center gap-1 rounded-full px-3 py-1.5 text-sm font-black ring-1 transition sm:inline-flex ${
+                className={`hidden items-center gap-1 rounded-full border-2 px-3 py-1.5 text-sm font-black transition sm:inline-flex ${
                   aiEnabled
-                    ? "bg-gradient-to-r from-fuchsia-500/25 to-violet-500/25 text-fuchsia-100 ring-fuchsia-300/40 shadow shadow-fuchsia-500/20"
-                    : "bg-zinc-800/60 text-zinc-300 ring-white/10"
+                    ? "border-purple-300 bg-purple-100 text-purple-800 dark:border-purple-700 dark:bg-purple-950/50 dark:text-purple-200"
+                    : "border-neutral-200 dark:border-zinc-600 bg-neutral-100 dark:bg-zinc-800/80 text-neutral-600 dark:text-zinc-400"
                 }`}
               >
                 <span>✨</span>
                 <span>AI {aiEnabled ? "ON" : "OFF"}</span>
               </button>
-              <span className={`rounded-full px-3 py-1.5 text-sm font-black ring-1 ${energy === 0 ? "bg-zinc-800 text-zinc-400 ring-white/10" : "bg-cyan-500/15 text-cyan-100 ring-cyan-300/30"}`}>🔋 {energy}/{MAX_ENERGY}</span>
-              <span className="rounded-full bg-amber-500/15 px-3 py-1.5 text-sm font-black text-amber-100 ring-1 ring-amber-300/30">⚡ {xp}</span>
+              <span
+                className={`rounded-full border-2 px-3 py-1.5 text-sm font-black ${
+                  energy === 0 ? "border-neutral-200 dark:border-zinc-600 bg-neutral-100 dark:bg-zinc-800/80 text-neutral-400 dark:text-zinc-500" : "border-[#84d8ff] dark:border-sky-600 bg-[#ddf4ff] dark:bg-sky-950/50 text-[#1899d6] dark:text-sky-300"
+                }`}
+              >
+                🔋 {energy}/{MAX_ENERGY}
+              </span>
+              <span className="rounded-full border-2 border-amber-300 bg-amber-100 px-3 py-1.5 text-sm font-black text-amber-900 dark:border-amber-700 dark:bg-amber-950/50 dark:text-amber-200">⚡ {xp}</span>
             </div>
           </div>
-          <div className="mt-4 border-t border-white/5 pt-4">
+          <div className="mt-4 border-t-2 border-neutral-100 pt-4 dark:border-zinc-800">
             <ProgressBar xp={xp} />
           </div>
         </div>
@@ -11870,25 +11936,25 @@ export default function MathPuzzlesPage() {
         <AnimatePresence mode="wait">
           {!active ? (
             <motion.section key="selector" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} className="space-y-8 sm:space-y-10">
-              <section className="overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-950/70 shadow-2xl shadow-black/30 ring-1 ring-white/5">
+              <section className="overflow-hidden rounded-[2rem] border-2 border-neutral-200 dark:border-zinc-600 border-b-4 border-b-neutral-300 dark:border-b-zinc-600 bg-white dark:bg-zinc-900 shadow-[0_6px_0_0_#e5e5e5] dark:shadow-[0_6px_0_0_#27272a]">
                 <div className="relative grid gap-8 p-6 sm:p-7 lg:grid-cols-[1.25fr_0.75fr] lg:gap-10 lg:p-10">
-                  <div className={`absolute inset-0 bg-gradient-to-br ${featuredMeta.gradient} opacity-10`} />
+                  <div className={`absolute inset-0 bg-gradient-to-br ${featuredMeta.gradient} opacity-[0.08]`} />
                   <div className="relative">
-                    <p className="text-xs font-black uppercase tracking-[0.24em] text-violet-200">Visual Learning Arcade</p>
-                    <h2 className="mt-3 max-w-2xl text-4xl font-black leading-[1.02] tracking-tight text-white sm:text-5xl">
+                    <p className="text-xs font-black uppercase tracking-[0.24em] text-[#1899d6] dark:text-sky-400">Visual Learning Arcade</p>
+                    <h2 className="mt-3 max-w-2xl text-4xl font-black leading-[1.02] tracking-tight text-neutral-900 dark:text-zinc-50 sm:text-5xl">
                       Play your way through STEM.
                     </h2>
-                    <p className="mt-3 max-w-xl text-sm leading-6 text-zinc-300 sm:text-base">
+                    <p className="mt-3 max-w-xl text-sm leading-6 text-neutral-600 dark:text-zinc-400 sm:text-base">
                       {METAS.length} interactive puzzles across math, science, technology &amp; engineering.
                     </p>
-                    <div className="mt-6 -mx-1 flex gap-2.5 overflow-x-auto rounded-2xl bg-zinc-900/60 p-1.5 ring-1 ring-white/10 sm:flex-wrap sm:overflow-visible">
+                    <div className="mt-6 -mx-1 flex gap-2 overflow-x-auto rounded-2xl bg-neutral-200 dark:bg-zinc-700 p-1 sm:flex-wrap sm:overflow-visible">
                       {DOMAIN_OPTIONS.map((option) => (
                         <button
                           key={option}
                           type="button"
                           onClick={() => setDomainFilter(option)}
                           className={`shrink-0 rounded-xl px-4 py-2 text-xs font-black uppercase tracking-[0.18em] transition ${
-                            domainFilter === option ? "bg-white text-zinc-950 shadow" : "text-zinc-300 hover:text-white"
+                            domainFilter === option ? "bg-white dark:bg-zinc-900 text-neutral-900 dark:text-zinc-50 shadow-sm" : "text-neutral-600 dark:text-zinc-400 hover:bg-neutral-300/70 dark:hover:bg-zinc-600/80"
                           }`}
                         >
                           {option === "All" ? "All" : option === "Math" ? "🧮 Math" : option === "Science" ? "🔬 Science" : option === "Technology" ? "💻 Tech" : "🛠️ Eng"}
@@ -11902,14 +11968,14 @@ export default function MathPuzzlesPage() {
                       <button
                         type="button"
                         onClick={randomStart}
-                        className="rounded-2xl bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.16em] text-zinc-950 shadow-xl shadow-white/10"
+                        className="rounded-2xl border-2 border-neutral-200 dark:border-zinc-600 border-b-4 border-b-neutral-300 dark:border-b-zinc-600 bg-white dark:bg-zinc-900 px-5 py-3 text-sm font-black uppercase tracking-[0.16em] text-neutral-800 dark:text-zinc-100 shadow-sm transition active:border-b-2 active:translate-y-0.5"
                       >
                         Shuffle Puzzle
                       </button>
                       <button
                         type="button"
                         onClick={() => start(daily)}
-                        className="rounded-2xl bg-amber-400 px-5 py-3 text-sm font-black uppercase tracking-[0.16em] text-amber-950 shadow-xl shadow-amber-500/20"
+                        className="rounded-2xl border-2 border-[#e5a000] border-b-4 border-b-[#e5a000] bg-[#ffc800] px-5 py-3 text-sm font-black uppercase tracking-[0.16em] text-neutral-900 dark:text-zinc-50 transition active:border-b-2 active:translate-y-0.5 dark:border-amber-700 dark:border-b-amber-800 dark:bg-amber-600"
                       >
                         Daily: {metaFor(daily).title}
                       </button>
@@ -11926,9 +11992,9 @@ export default function MathPuzzlesPage() {
 
               <div className="grid gap-7 lg:grid-cols-[20rem_minmax(0,1fr)] lg:gap-10">
                 <aside className="space-y-6 lg:sticky lg:top-28 lg:self-start">
-                  <div className="rounded-[2rem] border border-white/10 bg-zinc-950/75 p-5 shadow-xl shadow-black/20 ring-1 ring-white/5">
+                  <div className="rounded-[2rem] border-2 border-neutral-200 dark:border-zinc-600 border-b-4 border-b-neutral-300 dark:border-b-zinc-600 bg-white dark:bg-zinc-900 p-5 shadow-[0_4px_0_0_#e5e5e5] dark:shadow-[0_4px_0_0_#27272a]">
                     <div className="mb-4 flex items-center justify-between gap-3">
-                      <h3 className="text-sm font-black uppercase tracking-[0.18em] text-zinc-200">Filters</h3>
+                      <h3 className="text-sm font-black uppercase tracking-[0.18em] text-neutral-700 dark:text-zinc-300">Filters</h3>
                       <button
                         type="button"
                         onClick={() => {
@@ -11940,28 +12006,42 @@ export default function MathPuzzlesPage() {
                           setLockFilter("All");
                           setSearch("");
                         }}
-                        className="rounded-full bg-white/5 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-zinc-300 ring-1 ring-white/10"
+                        className="rounded-full border-2 border-neutral-200 dark:border-zinc-600 bg-neutral-100 dark:bg-zinc-800/80 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-neutral-600 dark:text-zinc-400 transition hover:bg-neutral-200 dark:hover:bg-zinc-700"
                       >
                         Reset
                       </button>
                     </div>
                     <div className="space-y-5">
                       <div>
-                        <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Grade</p>
-                        <FilterPills
+                        <label htmlFor="puzzle-filter-grade" className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 dark:text-zinc-400">
+                          Grade
+                        </label>
+                        <FilterSelect
+                          id="puzzle-filter-grade"
                           options={GRADE_OPTIONS}
                           value={gradeFilter}
                           onChange={setGradeFilter}
-                          render={(option) => (option === "All" ? "All" : option === "K-8" ? "K–8" : `Grade ${option}`)}
+                          render={(option) => (option === "All" ? "All grades" : option === "K-8" ? "K–8" : `Grade ${option}`)}
                         />
                       </div>
                       <div>
-                        <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Subject</p>
-                        <FilterPills options={subjectOptions} value={subjectFilter} onChange={setSubjectFilter} render={(o) => (o === "All" ? "All" : subjectLabel(o))} />
+                        <label htmlFor="puzzle-filter-subject" className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 dark:text-zinc-400">
+                          Subject
+                        </label>
+                        <FilterSelect
+                          id="puzzle-filter-subject"
+                          options={subjectOptions}
+                          value={subjectFilter}
+                          onChange={setSubjectFilter}
+                          render={(o) => (o === "All" ? "All subjects" : subjectLabel(o))}
+                        />
                       </div>
                       <div>
-                        <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Difficulty</p>
-                        <FilterPills
+                        <label htmlFor="puzzle-filter-difficulty" className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 dark:text-zinc-400">
+                          Difficulty
+                        </label>
+                        <FilterSelect
+                          id="puzzle-filter-difficulty"
                           options={DIFFICULTY_OPTIONS}
                           value={difficultyFilter}
                           onChange={setDifficultyFilter}
@@ -11971,36 +12051,44 @@ export default function MathPuzzlesPage() {
                         />
                       </div>
                       <div>
-                        <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Status</p>
+                        <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 dark:text-zinc-400">Status</p>
                         <FilterPills options={LOCK_OPTIONS} value={lockFilter} onChange={setLockFilter} />
                       </div>
                       <div>
-                        <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Interaction</p>
-                        <FilterPills options={INTERACTION_OPTIONS} value={interactionFilter} onChange={setInteractionFilter} />
+                        <label htmlFor="puzzle-filter-interaction" className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 dark:text-zinc-400">
+                          Interaction
+                        </label>
+                        <FilterSelect
+                          id="puzzle-filter-interaction"
+                          options={INTERACTION_OPTIONS}
+                          value={interactionFilter}
+                          onChange={setInteractionFilter}
+                          render={(o) => (o === "All" ? "All interaction types" : o)}
+                        />
                       </div>
                     </div>
                   </div>
 
                   {nextUnlock ? (
-                    <div className="rounded-[2rem] border border-amber-300/30 bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-rose-500/10 p-5 ring-1 ring-white/5">
-                      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-amber-200">Next Unlock</p>
-                      <h3 className="mt-1 text-base font-black text-white">{nextUnlock.title}</h3>
-                      <p className="mt-1 text-xs text-zinc-300">{nextUnlock.unlockMessage ?? `Hit ${xpRequiredFor(nextUnlock)} XP to open this puzzle.`}</p>
-                      <div className="mt-3 h-1.5 rounded-full bg-white/10">
+                    <div className="rounded-[2rem] border-2 border-amber-300 border-b-4 border-b-amber-400 bg-gradient-to-br from-amber-50 to-orange-50 p-5 shadow-[0_4px_0_0_#fcd34d] dark:border-amber-700 dark:border-b-amber-800 dark:from-amber-950/40 dark:to-orange-950/30 dark:shadow-[0_4px_0_0_#92400e]">
+                      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-amber-800 dark:text-amber-300">Next Unlock</p>
+                      <h3 className="mt-1 text-base font-black text-neutral-900 dark:text-zinc-50">{nextUnlock.title}</h3>
+                      <p className="mt-1 text-xs text-neutral-600 dark:text-zinc-400">{nextUnlock.unlockMessage ?? `Hit ${xpRequiredFor(nextUnlock)} XP to open this puzzle.`}</p>
+                      <div className="mt-3 h-2 rounded-full bg-amber-100 dark:bg-amber-950/50">
                         <div
-                          className="h-1.5 rounded-full bg-amber-400"
+                          className="h-2 rounded-full bg-[#ffc800]"
                           style={{ width: `${Math.min(100, (xp / Math.max(1, xpRequiredFor(nextUnlock))) * 100)}%` }}
                         />
                       </div>
-                      <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-amber-200/80">{xp} / {xpRequiredFor(nextUnlock)} XP</p>
+                      <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-amber-900 dark:text-amber-200">{xp} / {xpRequiredFor(nextUnlock)} XP</p>
                     </div>
                   ) : null}
 
-                  <div className="rounded-[2rem] border border-violet-300/20 bg-violet-500/10 p-5 ring-1 ring-white/5">
-                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-violet-200">Progress</p>
-                    <p className="mt-1 text-base font-black text-white">{unlockedCount} / {METAS.length} unlocked</p>
-                    <div className="mt-3 h-1.5 rounded-full bg-white/10">
-                      <div className="h-1.5 rounded-full bg-violet-400" style={{ width: `${(unlockedCount / METAS.length) * 100}%` }} />
+                  <div className="rounded-[2rem] border-2 border-[#84d8ff] dark:border-sky-600 border-b-4 border-b-[#1899d6] dark:border-b-sky-500 bg-[#ddf4ff] dark:bg-sky-950/40 p-5 shadow-[0_4px_0_0_#84d8ff] dark:shadow-[0_4px_0_0_#0369a1]">
+                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#1899d6] dark:text-sky-300">Progress</p>
+                    <p className="mt-1 text-base font-black text-neutral-900 dark:text-zinc-50">{unlockedCount} / {METAS.length} unlocked</p>
+                    <div className="mt-3 h-2 rounded-full bg-white/80 dark:bg-zinc-700/80">
+                      <div className="h-2 rounded-full bg-[#58cc02]" style={{ width: `${(unlockedCount / METAS.length) * 100}%` }} />
                     </div>
                   </div>
                 </aside>
@@ -12008,32 +12096,32 @@ export default function MathPuzzlesPage() {
                 <section className="min-w-0 space-y-6">
                   <div className="flex flex-wrap items-end justify-between gap-4">
                     <div>
-                      <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-200">Puzzle Catalog</p>
-                      <h2 className="mt-1 text-2xl font-black tracking-tight">Choose your next challenge</h2>
+                      <p className="text-xs font-black uppercase tracking-[0.2em] text-[#1899d6] dark:text-sky-400">Puzzle Catalog</p>
+                      <h2 className="mt-1 text-2xl font-black tracking-tight text-neutral-900 dark:text-zinc-50">Choose your next challenge</h2>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="inline-flex rounded-xl bg-zinc-900/70 p-1 ring-1 ring-white/10">
+                      <div className="inline-flex rounded-xl border-2 border-neutral-200 dark:border-zinc-600 bg-neutral-200 dark:bg-zinc-700 p-1">
                         <button
                           type="button"
                           onClick={() => setCatalogView("grid")}
-                          className={`rounded-lg px-3 py-1 text-[10px] font-black uppercase tracking-wider transition ${catalogView === "grid" ? "bg-white text-zinc-950" : "text-zinc-300"}`}
+                          className={`rounded-lg px-3 py-1 text-[10px] font-black uppercase tracking-wider transition ${catalogView === "grid" ? "bg-white dark:bg-zinc-900 text-neutral-900 dark:text-zinc-50 shadow-sm" : "text-neutral-600 dark:text-zinc-400"}`}
                         >
                           ▦ Grid
                         </button>
                         <button
                           type="button"
                           onClick={() => setCatalogView("tree")}
-                          className={`rounded-lg px-3 py-1 text-[10px] font-black uppercase tracking-wider transition ${catalogView === "tree" ? "bg-white text-zinc-950" : "text-zinc-300"}`}
+                          className={`rounded-lg px-3 py-1 text-[10px] font-black uppercase tracking-wider transition ${catalogView === "tree" ? "bg-white dark:bg-zinc-900 text-neutral-900 dark:text-zinc-50 shadow-sm" : "text-neutral-600 dark:text-zinc-400"}`}
                         >
                           🌳 Skill Tree
                         </button>
                       </div>
-                      <span className="rounded-full bg-white/5 px-3 py-1 text-xs font-bold text-zinc-300 ring-1 ring-white/10">{visibleMetas.length} / {METAS.length}</span>
+                      <span className="rounded-full border-2 border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-900 px-3 py-1 text-xs font-bold text-neutral-600 dark:text-zinc-400">{visibleMetas.length} / {METAS.length}</span>
                     </div>
                   </div>
 
                   {visibleMetas.length === 0 ? (
-                    <div className="rounded-[2rem] border border-white/10 bg-zinc-950/70 p-8 text-center text-sm text-zinc-400 ring-1 ring-white/5">
+                    <div className="rounded-[2rem] border-2 border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-900 p-8 text-center text-sm text-neutral-600 dark:text-zinc-400 shadow-[0_4px_0_0_#e5e5e5] dark:shadow-[0_4px_0_0_#27272a]">
                       No puzzles match these filters yet. Try widening the grade, subject, or interaction.
                     </div>
                   ) : catalogView === "grid" ? (
@@ -12070,7 +12158,7 @@ export default function MathPuzzlesPage() {
             </motion.section>
           ) : aiLoading ? (
             <motion.section key="ai-loading" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} className="grid place-items-center py-24">
-              <div className="flex flex-col items-center gap-4 rounded-[2.5rem] border border-fuchsia-300/30 bg-gradient-to-br from-fuchsia-500/15 via-violet-500/10 to-cyan-500/15 px-8 py-12 text-center shadow-2xl shadow-fuchsia-500/10 ring-1 ring-white/10">
+              <div className="flex flex-col items-center gap-4 rounded-[2rem] border-2 border-purple-200 border-b-4 border-b-purple-300 bg-gradient-to-br from-purple-50 to-white px-8 py-12 text-center shadow-[0_6px_0_0_#e9d5ff] dark:border-purple-800 dark:border-b-purple-900 dark:from-purple-950 dark:to-zinc-900 dark:shadow-[0_6px_0_0_#581c87]">
                 <motion.span
                   className="text-5xl"
                   animate={{ rotate: [0, -8, 8, 0], scale: [1, 1.08, 1] }}
@@ -12078,18 +12166,18 @@ export default function MathPuzzlesPage() {
                 >
                   ✨
                 </motion.span>
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-fuchsia-200">AI Author Working</p>
-                <h2 className="max-w-md text-2xl font-black leading-tight text-white">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-purple-700 dark:text-purple-300">AI Author Working</p>
+                <h2 className="max-w-md text-2xl font-black leading-tight text-neutral-900 dark:text-zinc-50">
                   Generating a fresh {activeMeta?.subject ? subjectLabel(activeMeta.subject) : "STEM"} puzzle…
                 </h2>
-                <p className="max-w-sm text-sm text-zinc-300">
+                <p className="max-w-sm text-sm text-neutral-600 dark:text-zinc-400">
                   {activeMeta?.title ? `Hand-crafting "${activeMeta.title}"` : "Hand-crafting a custom challenge"} with hints, choices, and an explanation.
                 </p>
                 <div className="flex items-center gap-1">
                   {[0, 1, 2].map((dot) => (
                     <motion.span
                       key={dot}
-                      className="h-2 w-2 rounded-full bg-fuchsia-300"
+                      className="h-2 w-2 rounded-full bg-[#58cc02]"
                       animate={{ opacity: [0.2, 1, 0.2] }}
                       transition={{ duration: 0.9, repeat: Infinity, delay: dot * 0.15 }}
                     />
@@ -12099,45 +12187,45 @@ export default function MathPuzzlesPage() {
             </motion.section>
           ) : puzzle ? (
             <motion.section key={puzzle.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.85fr)] lg:items-start lg:gap-8">
-              <section className="overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-950/70 shadow-2xl shadow-black/30 ring-1 ring-white/5">
-                <div className={`h-2 bg-gradient-to-r ${activeMeta?.gradient ?? "from-violet-400 to-fuchsia-600"}`} />
+              <section className="overflow-hidden rounded-[2rem] border-2 border-neutral-200 dark:border-zinc-600 border-b-4 border-b-neutral-300 dark:border-b-zinc-600 bg-white dark:bg-zinc-900 shadow-[0_6px_0_0_#e5e5e5] dark:shadow-[0_6px_0_0_#27272a]">
+                <div className="h-3 bg-[#58cc02]" />
                 <div className="space-y-6 p-5 sm:p-7">
                   <div className="flex flex-wrap items-center gap-2.5">
-                    <span className={`inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${activeMeta?.gradient ?? "from-violet-400 to-fuchsia-600"} px-3 py-1 text-xs font-black uppercase tracking-wider text-white shadow-lg`}>
+                    <span className={`inline-flex items-center gap-2 rounded-full border-2 border-neutral-200 dark:border-zinc-600 bg-neutral-100 dark:bg-zinc-800/80 px-3 py-1 text-xs font-black uppercase tracking-wider text-neutral-800 dark:text-zinc-100`}>
                       {puzzle.emoji} {puzzle.difficulty}
                     </span>
-                    <span className="rounded-full bg-white/5 px-3 py-1 text-xs font-black uppercase tracking-wider text-zinc-300 ring-1 ring-white/10">
+                    <span className="rounded-full border-2 border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-900 px-3 py-1 text-xs font-black uppercase tracking-wider text-neutral-600 dark:text-zinc-400">
                       {activeMeta?.subject} · {metaInteractionDisplay(activeMeta ?? metaFor(puzzle.type))}
                     </span>
                     {aiSource === "ai" ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-fuchsia-500/20 px-3 py-1 text-xs font-black uppercase tracking-wider text-fuchsia-100 ring-1 ring-fuchsia-300/30">
+                      <span className="inline-flex items-center gap-1 rounded-full border-2 border-purple-200 bg-purple-100 px-3 py-1 text-xs font-black uppercase tracking-wider text-purple-800 dark:border-purple-700 dark:bg-purple-950/50 dark:text-purple-200">
                         ✨ AI generated
                       </span>
                     ) : aiSource === "mock" ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/20 px-3 py-1 text-xs font-black uppercase tracking-wider text-violet-100 ring-1 ring-violet-300/30">
+                      <span className="inline-flex items-center gap-1 rounded-full border-2 border-purple-200 bg-purple-100 px-3 py-1 text-xs font-black uppercase tracking-wider text-purple-800 dark:border-purple-700 dark:bg-purple-950/50 dark:text-purple-200">
                         ✨ AI mock
                       </span>
                     ) : aiSource === "fallback" ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 px-3 py-1 text-xs font-black uppercase tracking-wider text-amber-100 ring-1 ring-amber-300/30">
+                      <span className="inline-flex items-center gap-1 rounded-full border-2 border-amber-200 bg-amber-100 px-3 py-1 text-xs font-black uppercase tracking-wider text-amber-900 dark:border-amber-700 dark:bg-amber-950/50 dark:text-amber-200">
                         🛟 procedural fallback
                       </span>
                     ) : null}
                   </div>
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-500">Current Challenge</p>
-                    <h2 className="mt-2 text-3xl font-black leading-tight tracking-tight text-white sm:text-5xl">{puzzle.prompt}</h2>
+                    <p className="text-xs font-black uppercase tracking-[0.22em] text-[#1899d6] dark:text-sky-400">Current Challenge</p>
+                    <h2 className="mt-2 text-3xl font-black leading-tight tracking-tight text-neutral-900 dark:text-zinc-50 sm:text-5xl">{puzzle.prompt}</h2>
                   </div>
-                  <div className="rounded-[2rem] border border-white/10 bg-black/25 p-5 shadow-inner ring-1 ring-white/5">
+                  <div className="rounded-[1.25rem] border-2 border-neutral-200 dark:border-zinc-600 bg-neutral-100 dark:bg-zinc-800/80 p-4 text-neutral-900 dark:text-zinc-100 sm:p-5">
                     <VisualCard visual={puzzle.visual} rotation={state.rotation} />
                   </div>
                 </div>
               </section>
 
               <aside className="space-y-5 lg:sticky lg:top-28">
-                <div className="rounded-[2rem] border border-white/10 bg-zinc-950/70 p-5 shadow-xl shadow-black/20 ring-1 ring-white/5">
+                <div className="rounded-[2rem] border-2 border-neutral-200 dark:border-zinc-600 border-b-4 border-b-neutral-300 dark:border-b-zinc-600 bg-white dark:bg-zinc-900 p-5 shadow-[0_4px_0_0_#e5e5e5] dark:shadow-[0_4px_0_0_#27272a]">
                   <div className="mb-4 flex items-center justify-between gap-2">
-                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">Your Move</p>
-                    <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-mono text-emerald-100 ring-1 ring-emerald-300/30">
+                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-neutral-500 dark:text-zinc-400">Your Move</p>
+                    <span className="rounded-full border-2 border-[#46a302] bg-[#d7ffb8] px-2 py-0.5 text-[10px] font-mono font-bold text-[#2b6e0f] dark:border-emerald-600 dark:bg-emerald-950/35 dark:text-emerald-200">
                       +{puzzle.xpReward ?? XP_PER_WIN} XP
                     </span>
                   </div>
@@ -12150,7 +12238,7 @@ export default function MathPuzzlesPage() {
                     onClick={() => {
                       setHint((open) => !open);
                     }}
-                    className="flex-1 rounded-2xl bg-white/5 px-4 py-3 text-sm font-bold text-zinc-300 ring-1 ring-white/10"
+                    className="flex-1 rounded-2xl border-2 border-neutral-200 dark:border-zinc-600 border-b-4 border-b-neutral-300 dark:border-b-zinc-600 bg-white dark:bg-zinc-900 px-4 py-3 text-sm font-bold text-neutral-700 dark:text-zinc-300 transition active:border-b-2 active:translate-y-0.5"
                   >
                     {hint ? "Hide hint" : "Need a hint?"}
                   </button>
@@ -12158,7 +12246,7 @@ export default function MathPuzzlesPage() {
                     <button
                       type="button"
                       onClick={() => setHintIndex((value) => (value + 1) % (puzzle.hints?.length ?? 1))}
-                      className="rounded-2xl bg-sky-500/15 px-4 py-3 text-sm font-bold text-sky-100 ring-1 ring-sky-300/30"
+                      className="rounded-2xl border-2 border-[#1899d6] border-b-4 border-b-[#1899d6] bg-[#ddf4ff] dark:bg-sky-950/50 px-4 py-3 text-sm font-bold text-[#1899d6] dark:text-sky-400 transition active:border-b-2 active:translate-y-0.5"
                     >
                       Next hint
                     </button>
@@ -12171,11 +12259,11 @@ export default function MathPuzzlesPage() {
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 8 }}
-                      className="rounded-2xl border border-sky-300/20 bg-sky-500/10 p-4 text-sm text-sky-100"
+                      className="rounded-2xl border-2 border-[#84d8ff] dark:border-sky-600 bg-[#ddf4ff] dark:bg-sky-950/50 p-4 text-sm text-neutral-800 dark:text-zinc-100"
                     >
                       <p>{currentHint}</p>
                       {puzzle.hints && puzzle.hints.length > 1 ? (
-                        <p className="mt-1 text-[10px] uppercase tracking-wider text-sky-300/70">Hint {hintIndex + 1} / {puzzle.hints.length}</p>
+                        <p className="mt-1 text-[10px] font-bold uppercase tracking-wider text-[#1899d6] dark:text-sky-400">Hint {hintIndex + 1} / {puzzle.hints.length}</p>
                       ) : null}
                     </motion.div>
                   ) : null}
@@ -12183,9 +12271,18 @@ export default function MathPuzzlesPage() {
 
                 <AnimatePresence>
                   {result !== "idle" ? (
-                    <motion.div initial={{ opacity: 0, y: 10, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.98 }} className={`rounded-3xl border p-4 text-sm leading-relaxed ${result === "correct" ? "border-emerald-300/30 bg-emerald-500/10 text-emerald-50" : "border-rose-300/30 bg-rose-500/10 text-rose-50"}`}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                      className={`rounded-3xl border-2 border-b-4 p-4 text-sm leading-relaxed ${
+                        result === "correct"
+                          ? "border-[#46a302] border-b-[#46a302] bg-[#d7ffb8] dark:bg-emerald-950/35 text-neutral-900 dark:text-zinc-50 shadow-[0_4px_0_0_#46a302]"
+                          : "border-[#ff4b4b] border-b-[#d33528] bg-[#ffecec] dark:bg-rose-950/35 text-neutral-900 dark:text-zinc-50 shadow-[0_4px_0_0_#d33528]"
+                      }`}
+                    >
                       <p className="text-base font-black">{result === "correct" ? "Beautiful solve." : "Almost. Try a different move."}</p>
-                      <p className="mt-1.5 text-zinc-200">{puzzle.explanation}</p>
+                      <p className="mt-1.5 text-neutral-700 dark:text-zinc-300">{puzzle.explanation}</p>
                     </motion.div>
                   ) : null}
                 </AnimatePresence>
@@ -12198,22 +12295,28 @@ export default function MathPuzzlesPage() {
 
       <AnimatePresence>
         {active && puzzle && !aiLoading ? (
-          <motion.div key="bottom-action" initial={{ y: 96 }} animate={{ y: 0 }} exit={{ y: 96 }} className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-black/75 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 backdrop-blur-2xl">
+          <motion.div
+            key="bottom-action"
+            initial={{ y: 96 }}
+            animate={{ y: 0 }}
+            exit={{ y: 96 }}
+            className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-900 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 shadow-[0_-4px_0_0_#e5e5e5] dark:shadow-[0_-4px_0_0_#27272a]"
+          >
             <div className="mx-auto flex max-w-7xl items-center gap-3">
               <div className="hidden min-w-0 flex-1 lg:block">
-                <p className="truncate text-xs font-black uppercase tracking-[0.2em] text-zinc-500">{puzzle.title}</p>
-                <p className="truncate text-sm text-zinc-300">{result === "idle" ? "Solve the interaction panel, then check your answer." : puzzle.explanation}</p>
+                <p className="truncate text-xs font-black uppercase tracking-[0.2em] text-neutral-500 dark:text-zinc-400">{puzzle.title}</p>
+                <p className="truncate text-sm text-neutral-600 dark:text-zinc-400">{result === "idle" ? "Solve the interaction panel, then check your answer." : puzzle.explanation}</p>
               </div>
               <button
                 type="button"
                 disabled={!canCheck(puzzle, state)}
                 onClick={check}
-                className={`w-full rounded-2xl py-4 text-base font-black uppercase tracking-[0.16em] text-white shadow-xl transition disabled:cursor-not-allowed disabled:opacity-40 lg:max-w-sm ${
+                className={`w-full rounded-2xl border-2 py-4 text-base font-black uppercase tracking-[0.16em] transition disabled:cursor-not-allowed disabled:opacity-40 disabled:active:translate-y-0 lg:max-w-sm ${
                   result === "correct"
-                    ? "bg-emerald-500 shadow-emerald-500/30"
+                    ? "border-[#46a302] border-b-4 border-b-[#46a302] bg-[#58cc02] text-white active:border-b-2 active:translate-y-0.5"
                     : result === "wrong"
-                    ? "bg-rose-500 shadow-rose-500/30"
-                    : "bg-sky-500 shadow-sky-500/30"
+                    ? "border-[#d33528] border-b-4 border-b-[#d33528] bg-[#ff4b4b] text-white active:border-b-2 active:translate-y-0.5"
+                    : "border-[#1899d6] border-b-4 border-b-[#1899d6] bg-[#1cb0f6] text-white active:border-b-2 active:translate-y-0.5"
                 }`}
               >
                 {result === "correct" ? "Next Puzzle" : result === "wrong" ? "Try Again" : "Check"}
@@ -12222,6 +12325,7 @@ export default function MathPuzzlesPage() {
           </motion.div>
         ) : null}
       </AnimatePresence>
+      </div>
     </div>
   );
 }
