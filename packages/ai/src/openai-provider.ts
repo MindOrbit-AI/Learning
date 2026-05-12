@@ -17,9 +17,11 @@ import type {
   GeneratedSubjectStructure,
   InteractiveGameConfigJson,
   InteractiveGameGenerationParams,
+  WeightScalePuzzleSpec,
 } from "./interfaces";
 import type { QuestionType } from "@mindorbit/types";
 import { mockAIProvider } from "./mock-provider";
+import { parseWeightScalePuzzle } from "./weight-scale-puzzle";
 
 export type ResolvedLlm = { client: OpenAI; model: string };
 
@@ -581,6 +583,46 @@ Rules:
       );
       const id = content.trim();
       return nodes.some((n) => n.id === id) ? id : nodes[0]?.id ?? null;
+    },
+
+    async generateWeightScalePuzzle(): Promise<WeightScalePuzzleSpec> {
+      const system = `You author weight-balance puzzles for a math learning app.
+Two digital scales: identical yellow CIRCLES (same integer weight each) and identical pink SQUARES (same integer weight each). The reference scale shows only circles plus one labeled NUMBER BLOCK; their sum is referenceTotal. The target scale shows circles and squares; their sum is targetTotal.
+Return ONLY JSON (no markdown) with EXACTLY these camelCase keys:
+{
+  "question": string (short; ask for the weight of ONE square),
+  "referenceCircles": positive int 2-6,
+  "referenceBlockWeight": positive int 1-14 (shown on the block),
+  "referenceTotal": positive int,
+  "targetCircles": positive int 2-8,
+  "targetSquares": positive int 2-6,
+  "targetTotal": positive int,
+  "choices": array of EXACTLY 4 DISTINCT positive integers, SORTED ascending, including the true square weight,
+  "correctAnswer": positive int (weight of one square),
+  "explanation": one paragraph, plain text, step-by-step; use ASCII hyphen for minus (e.g. 14 - 8 = 6). Mention circles and squares.
+}
+CONSISTENCY (must hold with integers):
+cw = (referenceTotal - referenceBlockWeight) / referenceCircles must be a positive integer.
+sw = (targetTotal - targetCircles * cw) / targetSquares must be a positive integer.
+correctAnswer MUST equal sw.
+Include at least one plausible wrong integer in choices that is not correctAnswer.`;
+
+      try {
+        const content = await chatLLM(
+          llm,
+          [
+            { role: "system", content: system },
+            { role: "user", content: "Generate one new puzzle as JSON." },
+          ],
+          { jsonMode: true, maxTokens: 700 }
+        );
+        const parsed = JSON.parse(content) as unknown;
+        const spec = parseWeightScalePuzzle(parsed);
+        if (spec) return spec;
+      } catch {
+        /* fall through */
+      }
+      return mockAIProvider.generateWeightScalePuzzle();
     },
 
     async generateInteractiveGameConfig(

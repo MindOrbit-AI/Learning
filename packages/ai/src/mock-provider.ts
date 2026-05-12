@@ -13,6 +13,7 @@ import type {
   GeneratedSubjectStructure,
   InteractiveGameConfigJson,
   InteractiveGameGenerationParams,
+  WeightScalePuzzleSpec,
 } from "./interfaces";
 import type { QuestionType } from "@mindorbit/types";
 
@@ -604,6 +605,51 @@ export const mockAIProvider: AIProvider = {
     _contentSummary: string
   ): Promise<string | null> {
     return nodes[0]?.id ?? null;
+  },
+
+  async generateWeightScalePuzzle(): Promise<WeightScalePuzzleSpec> {
+    const puzzles: WeightScalePuzzleSpec[] = [
+      {
+        question: "What's the weight of one square?",
+        referenceCircles: 2,
+        referenceBlockWeight: 5,
+        referenceTotal: 9,
+        targetCircles: 4,
+        targetSquares: 2,
+        targetTotal: 14,
+        choices: [1, 2, 3, 4],
+        correctAnswer: 3,
+        explanation:
+          "2 circles + 5 = 9, so one circle = 2. 4 circles = 8. 14 - 8 = 6. 2 squares = 6, so one square = 3.",
+      },
+      {
+        question: "What's the weight of one square?",
+        referenceCircles: 2,
+        referenceBlockWeight: 4,
+        referenceTotal: 10,
+        targetCircles: 3,
+        targetSquares: 2,
+        targetTotal: 13,
+        choices: [1, 2, 3, 4],
+        correctAnswer: 2,
+        explanation:
+          "2 circles + 4 = 10, so one circle = 3. 3 circles = 9. 13 - 9 = 4. 2 squares = 4, so one square = 2.",
+      },
+      {
+        question: "How heavy is each pink square?",
+        referenceCircles: 3,
+        referenceBlockWeight: 6,
+        referenceTotal: 15,
+        targetCircles: 2,
+        targetSquares: 4,
+        targetTotal: 30,
+        choices: [4, 5, 6, 7],
+        correctAnswer: 6,
+        explanation:
+          "3 circles + 6 = 15, so one circle = 3. 2 circles = 6. 30 - 6 = 24. 4 squares = 24, so one square = 6.",
+      },
+    ];
+    return puzzles[Math.floor(Math.random() * puzzles.length)] ?? puzzles[0];
   },
 
   async generateInteractiveGameConfig(

@@ -150,6 +150,20 @@ export interface InteractiveGameGenerationParams {
 /** Full envelope stored in `Game.config` (JSON). */
 export type InteractiveGameConfigJson = Record<string, unknown>;
 
+/** Spec for the weight-scale algebra puzzle (yellow circles + pink squares on digital scales). */
+export interface WeightScalePuzzleSpec {
+  question: string;
+  referenceCircles: number;
+  referenceBlockWeight: number;
+  referenceTotal: number;
+  targetCircles: number;
+  targetSquares: number;
+  targetTotal: number;
+  choices: number[];
+  correctAnswer: number;
+  explanation: string;
+}
+
 export interface AIProvider {
   summarizeNodeConcept(nodeTitle: string, nodeDescription: string): Promise<string>;
   generateMissionContent(params: MissionContentParams): Promise<MissionContent>;
@@ -204,6 +218,9 @@ export interface AIProvider {
   generateInteractiveGameConfig(
     params: InteractiveGameGenerationParams
   ): Promise<InteractiveGameConfigJson>;
+
+  /** Generate a solvable weight-scale puzzle (integer weights, consistent equations). */
+  generateWeightScalePuzzle(): Promise<WeightScalePuzzleSpec>;
 }
 
 /** ConceptExplainer - Node-aware concept explanation */

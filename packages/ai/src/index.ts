@@ -6,3 +6,4 @@
 export * from "./interfaces";
 export * from "./mock-provider";
 export * from "./openai-provider";
+export * from "./weight-scale-puzzle";
