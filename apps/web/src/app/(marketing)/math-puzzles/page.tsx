@@ -11113,7 +11113,7 @@ function FilterPills<T extends string>({
   render?: (option: T) => string;
 }) {
   return (
-    <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+    <div className="-mx-1 flex flex-wrap gap-2 overflow-x-auto px-1 pb-1 sm:overflow-visible">
       {options.map((option) => {
         const selected = option === value;
         return (
@@ -11121,7 +11121,7 @@ function FilterPills<T extends string>({
             key={option}
             type="button"
             onClick={() => onChange(option)}
-            className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-black uppercase tracking-wider transition ${
+            className={`shrink-0 rounded-full px-3 py-2 text-[11px] font-black uppercase tracking-wider transition sm:py-1.5 ${
               selected
                 ? "bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-lg shadow-violet-500/25"
                 : "bg-zinc-800/70 text-zinc-300 ring-1 ring-white/10 hover:bg-zinc-700/70"
@@ -11170,7 +11170,7 @@ function CategoryCard({
       type="button"
       onClick={onClick}
       whileTap={{ scale: 0.97 }}
-      className={`group relative flex h-full flex-col overflow-hidden rounded-[2rem] border p-4 text-left shadow-xl shadow-black/20 ring-1 transition ${
+      className={`group relative flex h-full flex-col overflow-hidden rounded-[2rem] border p-5 text-left shadow-xl shadow-black/20 ring-1 transition ${
         unlocked
           ? "border-white/10 bg-zinc-950/70 ring-white/5 hover:-translate-y-0.5 hover:border-white/20 hover:bg-zinc-900/85"
           : "border-white/5 bg-zinc-950/40 ring-white/5 hover:border-amber-300/30"
@@ -11181,7 +11181,7 @@ function CategoryCard({
           unlocked ? "opacity-10 group-hover:opacity-20" : "opacity-5"
         }`}
       />
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-4">
         <div
           className={`relative grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${meta.gradient} text-3xl shadow-lg ${
             unlocked ? "" : "saturate-50"
@@ -11195,7 +11195,7 @@ function CategoryCard({
         <div className="min-w-0 flex-1">
           <h3 className={`line-clamp-2 text-sm font-black leading-tight ${unlocked ? "text-white" : "text-zinc-400"}`}>{meta.title}</h3>
           <p className="mt-0.5 truncate text-[11px] text-zinc-400">{meta.short}</p>
-          <div className="mt-2 flex flex-wrap gap-1">
+          <div className="mt-2.5 flex flex-wrap gap-1.5">
             <Badge tone="violet">{gradeLabel(meta.grade)}</Badge>
             <Badge tone="sky">{subjectLabel(meta.subject)}</Badge>
             {unlocked ? (
@@ -11208,7 +11208,7 @@ function CategoryCard({
           </div>
         </div>
       </div>
-      <p className={`mt-3 line-clamp-2 text-xs leading-snug ${unlocked ? "text-zinc-300" : "text-zinc-500"}`}>{meta.skill}</p>
+      <p className={`mt-4 line-clamp-2 text-xs leading-relaxed ${unlocked ? "text-zinc-300" : "text-zinc-500"}`}>{meta.skill}</p>
       {!unlocked ? (
         <div className="mt-3 space-y-1">
           <div className="h-1.5 rounded-full bg-white/10">
@@ -11219,7 +11219,7 @@ function CategoryCard({
           </p>
         </div>
       ) : null}
-      <div className="mt-auto flex items-center justify-between gap-2 pt-3 text-[11px] text-zinc-500">
+      <div className="mt-auto flex items-center justify-between gap-2 pt-4 text-[11px] text-zinc-500">
         <span className="inline-flex max-w-[65%] items-center gap-1 truncate rounded-full bg-white/5 px-2 py-0.5 font-bold uppercase tracking-wider text-zinc-300 ring-1 ring-white/10">
           {metaInteractionDisplay(meta)}
         </span>
@@ -11258,14 +11258,14 @@ function SkillTree({
     grouped[tier]!.push(meta);
   }
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {tiers.map((tier) => {
         const inTier = grouped[tier]!;
         if (inTier.length === 0) return null;
         const unlockedInTier = inTier.filter((m) => isUnlocked(m, xp, completions)).length;
         return (
-          <div key={tier} className="rounded-[2rem] border border-white/10 bg-zinc-950/55 p-4 ring-1 ring-white/5">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <div key={tier} className="rounded-[2rem] border border-white/10 bg-zinc-950/55 p-5 ring-1 ring-white/5">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.22em] text-violet-200">{tier}</p>
                 <p className="mt-1 text-base font-black text-white">{inTier.length} puzzles · {unlockedInTier} unlocked</p>
@@ -11274,7 +11274,7 @@ function SkillTree({
                 <div className="h-1.5 rounded-full bg-emerald-400" style={{ width: `${(unlockedInTier / inTier.length) * 100}%` }} />
               </div>
             </div>
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 xl:grid-cols-3">
               {inTier.map((meta) => (
                 <CategoryCard
                   key={meta.id}
@@ -11302,9 +11302,9 @@ function StatCard({ label, value, tone }: { label: string; value: string; tone: 
     emerald: "from-emerald-500/25 to-teal-500/10 text-emerald-100",
   };
   return (
-    <div className={`rounded-3xl border border-white/10 bg-gradient-to-br ${colors[tone]} p-3 ring-1 ring-white/5`}>
+    <div className={`rounded-3xl border border-white/10 bg-gradient-to-br ${colors[tone]} p-4 ring-1 ring-white/5`}>
       <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/50">{label}</p>
-      <p className="mt-1 text-2xl font-black tracking-tight text-white">{value}</p>
+      <p className="mt-1.5 text-2xl font-black tracking-tight text-white">{value}</p>
     </div>
   );
 }
@@ -11392,7 +11392,7 @@ function SearchInput({ value, onChange }: { value: string; onChange: (next: stri
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder="Search puzzles, skills, or topics…"
-        className="w-full rounded-2xl border border-white/10 bg-zinc-900/70 py-3 pl-9 pr-9 text-sm text-white placeholder:text-zinc-500 focus:border-violet-400/60 focus:outline-none focus:ring-2 focus:ring-violet-400/20"
+        className="w-full rounded-2xl border border-white/10 bg-zinc-900/70 py-3.5 pl-9 pr-9 text-sm text-white placeholder:text-zinc-500 focus:border-violet-400/60 focus:outline-none focus:ring-2 focus:ring-violet-400/20"
       />
       {value ? (
         <button
@@ -11497,8 +11497,8 @@ function ProgressBar({ xp }: { xp: number }) {
   const level = Math.floor(xp / LEVEL_XP) + 1;
   const inLevel = xp % LEVEL_XP;
   return (
-    <div className="flex items-center gap-2">
-      <span className="rounded-lg bg-violet-500/20 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-violet-100 ring-1 ring-violet-300/30">Lv {level}</span>
+    <div className="flex items-center gap-2.5">
+      <span className="rounded-lg bg-violet-500/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-violet-100 ring-1 ring-violet-300/30">Lv {level}</span>
       <div className="h-2 flex-1 overflow-hidden rounded-full bg-zinc-800 ring-1 ring-white/10">
         <motion.div className="h-full rounded-full bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400" animate={{ width: `${inLevel}%` }} />
       </div>
@@ -11797,11 +11797,11 @@ export default function MathPuzzlesPage() {
 
   return (
     <div className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-[radial-gradient(circle_at_top_left,#312e81_0%,transparent_32%),radial-gradient(circle_at_top_right,#0e7490_0%,transparent_28%),linear-gradient(180deg,#050505_0%,#09090b_45%,#000_100%)] text-zinc-100">
-      <div className="pointer-events-none absolute inset-0 opacity-60">
+      <div className="pointer-events-none absolute inset-0 opacity-50">
         <div className="absolute -left-24 -top-24 h-96 w-96 rounded-full bg-violet-500/20 blur-3xl" />
         <div className="absolute -right-24 top-48 h-96 w-96 rounded-full bg-cyan-500/20 blur-3xl" />
         <div className="absolute bottom-0 left-1/3 h-96 w-96 rounded-full bg-emerald-500/10 blur-3xl" />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.012)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.012)_1px,transparent_1px)] bg-[size:52px_52px]" />
       </div>
       <Confetti show={confetti} />
 
@@ -11825,47 +11825,53 @@ export default function MathPuzzlesPage() {
         ) : null}
       </AnimatePresence>
 
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-black/55 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-2xl">
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-black/55 px-4 pb-4 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-2xl">
         <div className="mx-auto max-w-7xl">
-          <div className="flex items-center gap-3">
-            {active ? (
-              <button type="button" onClick={exitRun} className="grid h-10 w-10 place-items-center rounded-full bg-white/10 text-xl ring-1 ring-white/10">‹</button>
-            ) : (
-              <span className="grid h-10 w-10 place-items-center rounded-2xl bg-violet-500/20 text-xl ring-1 ring-violet-300/20">🧠</span>
-            )}
-            <div className="min-w-0 flex-1">
-              <h1 className="truncate text-lg font-black tracking-tight sm:text-xl">{activeMeta?.title ?? "MindOrbit STEM Arcade"}</h1>
-              <p className="truncate text-xs text-zinc-400">{activeMeta?.short ?? `${METAS.length} STEM puzzles · Math · Science · Tech · Engineering`}</p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+            <div className="flex min-w-0 flex-1 items-center gap-3">
+              {active ? (
+                <button type="button" onClick={exitRun} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/10 text-xl ring-1 ring-white/10">‹</button>
+              ) : (
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-violet-500/20 text-xl ring-1 ring-violet-300/20">🧠</span>
+              )}
+              <div className="min-w-0 flex-1">
+                <h1 className="truncate text-lg font-black tracking-tight sm:text-xl">{activeMeta?.title ?? "MindOrbit STEM Arcade"}</h1>
+                <p className="mt-0.5 line-clamp-2 text-xs text-zinc-400 sm:truncate sm:line-clamp-none">{activeMeta?.short ?? `${METAS.length} STEM puzzles · Math · Science · Tech · Engineering`}</p>
+              </div>
             </div>
-            <span className="hidden rounded-full bg-violet-500/15 px-3 py-1.5 text-sm font-black text-violet-100 ring-1 ring-violet-300/30 sm:inline-flex">Lv {Math.floor(xp / LEVEL_XP) + 1}</span>
-            <span className="hidden rounded-full bg-rose-500/15 px-3 py-1.5 text-sm font-black text-rose-100 ring-1 ring-rose-300/30 sm:inline-flex">🔥 {streak}</span>
-            <button
-              type="button"
-              onClick={() => setAiEnabled((value) => !value)}
-              aria-pressed={aiEnabled}
-              title={aiEnabled ? "AI puzzle generation: ON" : "AI puzzle generation: OFF"}
-              className={`hidden items-center gap-1 rounded-full px-3 py-1.5 text-sm font-black ring-1 transition sm:inline-flex ${
-                aiEnabled
-                  ? "bg-gradient-to-r from-fuchsia-500/25 to-violet-500/25 text-fuchsia-100 ring-fuchsia-300/40 shadow shadow-fuchsia-500/20"
-                  : "bg-zinc-800/60 text-zinc-300 ring-white/10"
-              }`}
-            >
-              <span>✨</span>
-              <span>AI {aiEnabled ? "ON" : "OFF"}</span>
-            </button>
-            <span className={`rounded-full px-3 py-1.5 text-sm font-black ring-1 ${energy === 0 ? "bg-zinc-800 text-zinc-400 ring-white/10" : "bg-cyan-500/15 text-cyan-100 ring-cyan-300/30"}`}>🔋 {energy}/{MAX_ENERGY}</span>
-            <span className="rounded-full bg-amber-500/15 px-3 py-1.5 text-sm font-black text-amber-100 ring-1 ring-amber-300/30">⚡ {xp}</span>
+            <div className="flex flex-wrap items-center gap-2 sm:shrink-0 sm:justify-end sm:gap-2.5">
+              <span className="hidden rounded-full bg-violet-500/15 px-3 py-1.5 text-sm font-black text-violet-100 ring-1 ring-violet-300/30 sm:inline-flex">Lv {Math.floor(xp / LEVEL_XP) + 1}</span>
+              <span className="hidden rounded-full bg-rose-500/15 px-3 py-1.5 text-sm font-black text-rose-100 ring-1 ring-rose-300/30 sm:inline-flex">🔥 {streak}</span>
+              <button
+                type="button"
+                onClick={() => setAiEnabled((value) => !value)}
+                aria-pressed={aiEnabled}
+                title={aiEnabled ? "AI puzzle generation: ON" : "AI puzzle generation: OFF"}
+                className={`hidden items-center gap-1 rounded-full px-3 py-1.5 text-sm font-black ring-1 transition sm:inline-flex ${
+                  aiEnabled
+                    ? "bg-gradient-to-r from-fuchsia-500/25 to-violet-500/25 text-fuchsia-100 ring-fuchsia-300/40 shadow shadow-fuchsia-500/20"
+                    : "bg-zinc-800/60 text-zinc-300 ring-white/10"
+                }`}
+              >
+                <span>✨</span>
+                <span>AI {aiEnabled ? "ON" : "OFF"}</span>
+              </button>
+              <span className={`rounded-full px-3 py-1.5 text-sm font-black ring-1 ${energy === 0 ? "bg-zinc-800 text-zinc-400 ring-white/10" : "bg-cyan-500/15 text-cyan-100 ring-cyan-300/30"}`}>🔋 {energy}/{MAX_ENERGY}</span>
+              <span className="rounded-full bg-amber-500/15 px-3 py-1.5 text-sm font-black text-amber-100 ring-1 ring-amber-300/30">⚡ {xp}</span>
+            </div>
           </div>
-          <div className="mt-3"><ProgressBar xp={xp} /></div>
+          <div className="mt-4 border-t border-white/5 pt-4">
+            <ProgressBar xp={xp} />
+          </div>
         </div>
       </header>
 
-      <main className="relative z-10 mx-auto w-full max-w-7xl flex-1 px-4 pb-36 pt-5 sm:px-6 lg:px-8">
+      <main className="relative z-10 mx-auto w-full max-w-7xl flex-1 px-4 pb-36 pt-6 sm:px-6 lg:px-8">
         <AnimatePresence mode="wait">
           {!active ? (
-            <motion.section key="selector" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} className="space-y-6">
+            <motion.section key="selector" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} className="space-y-8 sm:space-y-10">
               <section className="overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-950/70 shadow-2xl shadow-black/30 ring-1 ring-white/5">
-                <div className="relative grid gap-6 p-5 sm:p-6 lg:grid-cols-[1.25fr_0.75fr] lg:p-8">
+                <div className="relative grid gap-8 p-6 sm:p-7 lg:grid-cols-[1.25fr_0.75fr] lg:gap-10 lg:p-10">
                   <div className={`absolute inset-0 bg-gradient-to-br ${featuredMeta.gradient} opacity-10`} />
                   <div className="relative">
                     <p className="text-xs font-black uppercase tracking-[0.24em] text-violet-200">Visual Learning Arcade</p>
@@ -11875,7 +11881,7 @@ export default function MathPuzzlesPage() {
                     <p className="mt-3 max-w-xl text-sm leading-6 text-zinc-300 sm:text-base">
                       {METAS.length} interactive puzzles across math, science, technology &amp; engineering.
                     </p>
-                    <div className="mt-5 -mx-1 flex gap-2 overflow-x-auto rounded-2xl bg-zinc-900/70 p-1 ring-1 ring-white/10 sm:flex-wrap sm:overflow-visible">
+                    <div className="mt-6 -mx-1 flex gap-2.5 overflow-x-auto rounded-2xl bg-zinc-900/60 p-1.5 ring-1 ring-white/10 sm:flex-wrap sm:overflow-visible">
                       {DOMAIN_OPTIONS.map((option) => (
                         <button
                           key={option}
@@ -11889,10 +11895,10 @@ export default function MathPuzzlesPage() {
                         </button>
                       ))}
                     </div>
-                    <div className="mt-5 max-w-2xl">
+                    <div className="mt-6 max-w-2xl">
                       <SearchInput value={search} onChange={setSearch} />
                     </div>
-                    <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                    <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:gap-4">
                       <button
                         type="button"
                         onClick={randomStart}
@@ -11909,7 +11915,7 @@ export default function MathPuzzlesPage() {
                       </button>
                     </div>
                   </div>
-                  <div className="relative grid grid-cols-2 gap-3 self-end">
+                  <div className="relative grid grid-cols-2 gap-4 self-end">
                     <StatCard label="Visible" value={String(visibleMetas.length)} tone="cyan" />
                     <StatCard label="Solved" value={String(solved)} tone="emerald" />
                     <StatCard label="Streak" value={String(streak)} tone="amber" />
@@ -11918,10 +11924,10 @@ export default function MathPuzzlesPage() {
                 </div>
               </section>
 
-              <div className="grid gap-5 lg:grid-cols-[20rem_minmax(0,1fr)]">
-                <aside className="space-y-4 lg:sticky lg:top-28 lg:self-start">
-                  <div className="rounded-[2rem] border border-white/10 bg-zinc-950/75 p-4 shadow-xl shadow-black/20 ring-1 ring-white/5">
-                    <div className="mb-3 flex items-center justify-between gap-3">
+              <div className="grid gap-7 lg:grid-cols-[20rem_minmax(0,1fr)] lg:gap-10">
+                <aside className="space-y-6 lg:sticky lg:top-28 lg:self-start">
+                  <div className="rounded-[2rem] border border-white/10 bg-zinc-950/75 p-5 shadow-xl shadow-black/20 ring-1 ring-white/5">
+                    <div className="mb-4 flex items-center justify-between gap-3">
                       <h3 className="text-sm font-black uppercase tracking-[0.18em] text-zinc-200">Filters</h3>
                       <button
                         type="button"
@@ -11939,9 +11945,9 @@ export default function MathPuzzlesPage() {
                         Reset
                       </button>
                     </div>
-                    <div className="space-y-3">
+                    <div className="space-y-5">
                       <div>
-                        <p className="mb-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Grade</p>
+                        <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Grade</p>
                         <FilterPills
                           options={GRADE_OPTIONS}
                           value={gradeFilter}
@@ -11950,11 +11956,11 @@ export default function MathPuzzlesPage() {
                         />
                       </div>
                       <div>
-                        <p className="mb-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Subject</p>
+                        <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Subject</p>
                         <FilterPills options={subjectOptions} value={subjectFilter} onChange={setSubjectFilter} render={(o) => (o === "All" ? "All" : subjectLabel(o))} />
                       </div>
                       <div>
-                        <p className="mb-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Difficulty</p>
+                        <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Difficulty</p>
                         <FilterPills
                           options={DIFFICULTY_OPTIONS}
                           value={difficultyFilter}
@@ -11965,18 +11971,18 @@ export default function MathPuzzlesPage() {
                         />
                       </div>
                       <div>
-                        <p className="mb-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Status</p>
+                        <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Status</p>
                         <FilterPills options={LOCK_OPTIONS} value={lockFilter} onChange={setLockFilter} />
                       </div>
                       <div>
-                        <p className="mb-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Interaction</p>
+                        <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Interaction</p>
                         <FilterPills options={INTERACTION_OPTIONS} value={interactionFilter} onChange={setInteractionFilter} />
                       </div>
                     </div>
                   </div>
 
                   {nextUnlock ? (
-                    <div className="rounded-[2rem] border border-amber-300/30 bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-rose-500/10 p-4 ring-1 ring-white/5">
+                    <div className="rounded-[2rem] border border-amber-300/30 bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-rose-500/10 p-5 ring-1 ring-white/5">
                       <p className="text-[10px] font-black uppercase tracking-[0.22em] text-amber-200">Next Unlock</p>
                       <h3 className="mt-1 text-base font-black text-white">{nextUnlock.title}</h3>
                       <p className="mt-1 text-xs text-zinc-300">{nextUnlock.unlockMessage ?? `Hit ${xpRequiredFor(nextUnlock)} XP to open this puzzle.`}</p>
@@ -11990,7 +11996,7 @@ export default function MathPuzzlesPage() {
                     </div>
                   ) : null}
 
-                  <div className="rounded-[2rem] border border-violet-300/20 bg-violet-500/10 p-4 ring-1 ring-white/5">
+                  <div className="rounded-[2rem] border border-violet-300/20 bg-violet-500/10 p-5 ring-1 ring-white/5">
                     <p className="text-[10px] font-black uppercase tracking-[0.22em] text-violet-200">Progress</p>
                     <p className="mt-1 text-base font-black text-white">{unlockedCount} / {METAS.length} unlocked</p>
                     <div className="mt-3 h-1.5 rounded-full bg-white/10">
@@ -11999,8 +12005,8 @@ export default function MathPuzzlesPage() {
                   </div>
                 </aside>
 
-                <section className="min-w-0 space-y-5">
-                  <div className="flex flex-wrap items-end justify-between gap-3">
+                <section className="min-w-0 space-y-6">
+                  <div className="flex flex-wrap items-end justify-between gap-4">
                     <div>
                       <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-200">Puzzle Catalog</p>
                       <h2 className="mt-1 text-2xl font-black tracking-tight">Choose your next challenge</h2>
@@ -12031,7 +12037,7 @@ export default function MathPuzzlesPage() {
                       No puzzles match these filters yet. Try widening the grade, subject, or interaction.
                     </div>
                   ) : catalogView === "grid" ? (
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 xl:grid-cols-3">
                       {visibleMetas.map((meta, i) => (
                         <motion.div
                           key={meta.id}
@@ -12092,11 +12098,11 @@ export default function MathPuzzlesPage() {
               </div>
             </motion.section>
           ) : puzzle ? (
-            <motion.section key={puzzle.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} className="grid gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.85fr)] lg:items-start">
+            <motion.section key={puzzle.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.85fr)] lg:items-start lg:gap-8">
               <section className="overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-950/70 shadow-2xl shadow-black/30 ring-1 ring-white/5">
                 <div className={`h-2 bg-gradient-to-r ${activeMeta?.gradient ?? "from-violet-400 to-fuchsia-600"}`} />
-                <div className="space-y-5 p-4 sm:p-6">
-                  <div className="flex flex-wrap items-center gap-2">
+                <div className="space-y-6 p-5 sm:p-7">
+                  <div className="flex flex-wrap items-center gap-2.5">
                     <span className={`inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${activeMeta?.gradient ?? "from-violet-400 to-fuchsia-600"} px-3 py-1 text-xs font-black uppercase tracking-wider text-white shadow-lg`}>
                       {puzzle.emoji} {puzzle.difficulty}
                     </span>
@@ -12121,15 +12127,15 @@ export default function MathPuzzlesPage() {
                     <p className="text-xs font-black uppercase tracking-[0.22em] text-zinc-500">Current Challenge</p>
                     <h2 className="mt-2 text-3xl font-black leading-tight tracking-tight text-white sm:text-5xl">{puzzle.prompt}</h2>
                   </div>
-                  <div className="rounded-[2rem] border border-white/10 bg-black/25 p-4 shadow-inner ring-1 ring-white/5">
+                  <div className="rounded-[2rem] border border-white/10 bg-black/25 p-5 shadow-inner ring-1 ring-white/5">
                     <VisualCard visual={puzzle.visual} rotation={state.rotation} />
                   </div>
                 </div>
               </section>
 
-              <aside className="space-y-4 lg:sticky lg:top-28">
-                <div className="rounded-[2rem] border border-white/10 bg-zinc-950/70 p-4 shadow-xl shadow-black/20 ring-1 ring-white/5">
-                  <div className="mb-3 flex items-center justify-between gap-2">
+              <aside className="space-y-5 lg:sticky lg:top-28">
+                <div className="rounded-[2rem] border border-white/10 bg-zinc-950/70 p-5 shadow-xl shadow-black/20 ring-1 ring-white/5">
+                  <div className="mb-4 flex items-center justify-between gap-2">
                     <p className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">Your Move</p>
                     <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-mono text-emerald-100 ring-1 ring-emerald-300/30">
                       +{puzzle.xpReward ?? XP_PER_WIN} XP
