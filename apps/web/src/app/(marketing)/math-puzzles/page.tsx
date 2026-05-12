@@ -20,6 +20,7 @@ type Mode =
 type Grade = "K-8" | "9" | "10" | "11" | "12";
 type GradeFilter = Grade | "All";
 type Subject =
+  | "MathFoundations"
   | "Arithmetic"
   | "Algebra"
   | "Geometry"
@@ -124,6 +125,26 @@ type PuzzleId =
   | "fractionBars"
   | "decimalSlider"
   | "ratioRecipe"
+  | "placeValueBuilder"
+  | "roundingTarget"
+  | "integerChipSort"
+  | "orderOpsTower"
+  | "equivalentFractionBridge"
+  | "fractionOperationLab"
+  | "decimalPlaceRace"
+  | "percentBarBuilder"
+  | "ratioTableMatch"
+  | "coordinateQuadrantSort"
+  | "numberLineJump"
+  | "multiplicationFact"
+  | "divisionRemainder"
+  | "fractionDecimalConvert"
+  | "percentFractionDecimal"
+  | "absoluteValueBasics"
+  | "exponentBasic"
+  | "expandedFormBuilder"
+  | "unitConversionBridge"
+  | "negativeNumberOperate"
   | "escapeRoom"
   | "linearBalance"
   | "slopeRunner"
@@ -641,6 +662,26 @@ const METAS: PuzzleMeta[] = [
   m("fractionBars", "Fraction Bar Comparison", "Compare lengths", "📊", "from-orange-300 to-red-600", "K-8", "Arithmetic", "Compare fractions", 2, "choice"),
   m("decimalSlider", "Decimal Slider Puzzle", "Tune the value", "🎚️", "from-sky-300 to-cyan-700", "K-8", "Arithmetic", "Place decimals", 2, "slider"),
   m("ratioRecipe", "Ratio Recipe Puzzle", "Mix the recipe", "🥣", "from-amber-300 to-rose-600", "K-8", "Arithmetic", "Apply ratios", 2, "drag"),
+  m("placeValueBuilder", "Place Value Builder", "Build the number", "🏗️", "from-sky-300 to-blue-700", "K-8", "MathFoundations", "Read hundreds, tens, and ones", 2, "numpad", "Fill in number"),
+  m("roundingTarget", "Rounding Target", "Land on the nearest value", "🎯", "from-emerald-300 to-teal-700", "K-8", "MathFoundations", "Round whole numbers and decimals", 2, "choice"),
+  m("integerChipSort", "Integer Chip Sort", "Positive or negative?", "🧲", "from-rose-300 to-fuchsia-700", "K-8", "MathFoundations", "Classify integers by sign", 2, "sort", "Sort categories"),
+  m("orderOpsTower", "Order Ops Tower", "Climb PEMDAS", "🗼", "from-violet-300 to-indigo-700", "K-8", "MathFoundations", "Evaluate expressions in order", 3, "choice"),
+  m("equivalentFractionBridge", "Equivalent Fraction Bridge", "Cross with equal parts", "🌉", "from-amber-300 to-orange-700", "K-8", "MathFoundations", "Recognize equivalent fractions", 3, "match"),
+  m("fractionOperationLab", "Fraction Operation Lab", "Add or subtract slices", "🧪", "from-pink-300 to-rose-700", "K-8", "MathFoundations", "Operate on like-denominator fractions", 3, "choice"),
+  m("decimalPlaceRace", "Decimal Place Race", "Compare the decimals", "🏁", "from-cyan-300 to-blue-700", "K-8", "MathFoundations", "Compare tenths and hundredths", 3, "choice"),
+  m("percentBarBuilder", "Percent Bar Builder", "Fill the percent bar", "▰", "from-lime-300 to-green-700", "9", "MathFoundations", "Convert percents to values", 3, "numpad", "Fill in number"),
+  m("ratioTableMatch", "Ratio Table Match", "Pair equal ratios", "📋", "from-yellow-300 to-amber-700", "9", "MathFoundations", "Complete equivalent ratio tables", 3, "match"),
+  m("coordinateQuadrantSort", "Coordinate Quadrant Sort", "Sort points by quadrant", "🧭", "from-purple-300 to-violet-700", "9", "MathFoundations", "Classify coordinate plane points", 3, "sort", "Sort categories"),
+  m("numberLineJump", "Number Line Jump", "Hop along the line", "➡️", "from-sky-300 to-indigo-700", "K-8", "MathFoundations", "Add and subtract with integers", 2, "choice"),
+  m("multiplicationFact", "Multiplication Fact Blast", "Speed-run the facts", "✖️", "from-orange-300 to-red-700", "K-8", "MathFoundations", "Recall multiplication facts", 2, "numpad", "Fill in number"),
+  m("divisionRemainder", "Division with Remainder", "Split with a leftover", "➗", "from-emerald-300 to-green-700", "K-8", "MathFoundations", "Divide with a remainder", 3, "choice"),
+  m("fractionDecimalConvert", "Fraction ↔ Decimal", "Swap the forms", "🔁", "from-cyan-300 to-teal-700", "K-8", "MathFoundations", "Convert between fractions and decimals", 3, "match"),
+  m("percentFractionDecimal", "Percent · Fraction · Decimal", "Pair the three forms", "🔗", "from-fuchsia-300 to-pink-700", "9", "MathFoundations", "Convert percents, fractions, decimals", 3, "match"),
+  m("absoluteValueBasics", "Absolute Value Basics", "Drop the sign", "📏", "from-amber-300 to-yellow-700", "K-8", "MathFoundations", "Compute |x|", 2, "numpad", "Fill in number"),
+  m("exponentBasic", "Exponent Power-Up", "Multiply repeatedly", "⚡", "from-violet-300 to-purple-700", "K-8", "MathFoundations", "Evaluate small powers", 2, "numpad", "Fill in number"),
+  m("expandedFormBuilder", "Expanded Form Builder", "Stretch out the digits", "🧱", "from-rose-300 to-amber-700", "K-8", "MathFoundations", "Write numbers in expanded form", 2, "choice"),
+  m("unitConversionBridge", "Unit Conversion Bridge", "Cross the units", "📐", "from-blue-300 to-cyan-700", "K-8", "MathFoundations", "Convert basic units", 3, "numpad", "Fill in number"),
+  m("negativeNumberOperate", "Negative Number Lab", "Operate with negatives", "🧊", "from-indigo-300 to-blue-700", "K-8", "MathFoundations", "Add, subtract, multiply negatives", 3, "numpad", "Fill in number"),
   m("escapeRoom", "Math Escape Room", "Unlock every door", "🚪", "from-zinc-300 to-violet-700", "K-8", "Algebra", "Chain operations", 3, "swipe"),
   m("absValueDistance", "Absolute Value Distance", "Measure the distance", "📏", "from-cyan-400 to-blue-700", "9", "Algebra", "Compute |a − b|", 3, "numpad", "Fill in number"),
   m("absoluteValueEquation", "Absolute Value Equation", "Solve |x + b| = c", "🪞", "from-fuchsia-400 to-pink-600", "9", "Algebra", "Split into two cases", 3, "choice"),
@@ -2020,6 +2061,434 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
         hint: "Order matters: first ingredient, then second.",
         explanation: `The recipe asks for ${a} parts blue to ${b} parts pink.`,
       };
+    }
+    case "placeValueBuilder": {
+      const hundreds = rand(1, 9);
+      const tens = rand(0, 9);
+      const ones = rand(0, 9);
+      const value = hundreds * 100 + tens * 10 + ones;
+      return numpadEng(
+        m,
+        difficulty,
+        `Build the number with ${hundreds} hundreds, ${tens} tens, and ${ones} ones.`,
+        { kind: "icon", icon: m.emoji, title: `${hundreds}H ${tens}T ${ones}O`, subtitle: "Place value blocks" },
+        value,
+        "Hundreds are worth 100, tens are worth 10, ones are worth 1.",
+        [`${hundreds} hundreds = ${hundreds * 100}.`, `${tens} tens = ${tens * 10}.`, `Add ${hundreds * 100} + ${tens * 10} + ${ones}.`],
+        `${hundreds * 100} + ${tens * 10} + ${ones} = ${value}.`,
+      );
+    }
+    case "roundingTarget": {
+      const place = pick(["nearest ten", "nearest hundred", "nearest tenth"] as const);
+      if (place === "nearest tenth") {
+        const tenths = rand(12, 98) / 10;
+        const hundredthsDigit = rand(1, 9);
+        const value = Number((tenths + hundredthsDigit / 100).toFixed(2));
+        const rounded = (Math.round(value * 10) / 10).toFixed(1);
+        return makeChoice(
+          {
+            ...base(m, difficulty, "choice", `Round ${value.toFixed(2)} to the nearest tenth.`, {
+              kind: "icon",
+              icon: m.emoji,
+              title: value.toFixed(2),
+              subtitle: "Nearest tenth",
+            }),
+            hint: "Look at the hundredths digit.",
+            hints: [`Hundredths digit is ${hundredthsDigit}.`, hundredthsDigit >= 5 ? "Round the tenths up." : "Keep the tenths the same."],
+            explanation: `${value.toFixed(2)} rounds to ${rounded}.`,
+          },
+          rounded,
+          [value.toFixed(2), (Math.floor(value * 10) / 10).toFixed(1), (Math.ceil(value * 10) / 10).toFixed(1)],
+        );
+      }
+      const baseValue = rand(12, 987);
+      const factor = place === "nearest hundred" ? 100 : 10;
+      const rounded = Math.round(baseValue / factor) * factor;
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Round ${baseValue} to the ${place}.`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: String(baseValue),
+            subtitle: place,
+          }),
+          hint: factor === 100 ? "Look at the tens digit." : "Look at the ones digit.",
+          hints: [`Rounding unit is ${factor}.`, `Closest multiple of ${factor} is ${rounded}.`],
+          explanation: `${baseValue} rounds to ${rounded} to the ${place}.`,
+        },
+        String(rounded),
+        numberChoices(rounded, factor),
+      );
+    }
+    case "integerChipSort": {
+      const positives = [2, 5, 9, 12, 18].map(String);
+      const negatives = [-1, -4, -7, -11, -15].map(String);
+      const zeros = ["0", "+0"];
+      return sortEng(
+        m,
+        difficulty,
+        "Sort each integer by sign.",
+        ["Positive", "Negative", "Zero"],
+        [
+          ...positives.map((label) => ({ label, category: "Positive" })),
+          ...negatives.map((label) => ({ label, category: "Negative" })),
+          ...zeros.map((label) => ({ label, category: "Zero" })),
+        ],
+        "Numbers greater than zero are positive; less than zero are negative.",
+        ["The minus sign means less than zero.", "Zero is neither positive nor negative."],
+        "Classify by position relative to zero on the number line.",
+      );
+    }
+    case "orderOpsTower": {
+      const a = rand(2, 8);
+      const b = rand(2, 6);
+      const c = rand(2, 5);
+      const d = rand(1, 9);
+      const useParens = Math.random() < 0.5;
+      const expression = useParens ? `${a} + ${b} × (${c} + ${d})` : `${a} + ${b} × ${c}²`;
+      const answer = useParens ? a + b * (c + d) : a + b * c * c;
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Evaluate ${expression}.`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: expression,
+            subtitle: "Order of operations",
+          }),
+          hint: "Do parentheses and exponents before multiplication and addition.",
+          hints: useParens ? [`Parentheses first: ${c} + ${d} = ${c + d}.`, `Then multiply: ${b} × ${c + d}.`] : [`Exponent first: ${c}² = ${c * c}.`, `Then multiply: ${b} × ${c * c}.`],
+          explanation: useParens ? `${a} + ${b} × ${c + d} = ${answer}.` : `${a} + ${b} × ${c * c} = ${answer}.`,
+        },
+        String(answer),
+        numberChoices(answer, 12),
+      );
+    }
+    case "equivalentFractionBridge": {
+      const variants = [
+        [[frac(1, 2), frac(2, 4)], [frac(2, 3), frac(4, 6)], [frac(3, 4), frac(6, 8)], [frac(1, 5), frac(3, 15)], [frac(5, 6), frac(10, 12)]],
+        [[frac(3, 6), frac(1, 2)], [frac(6, 9), frac(2, 3)], [frac(4, 10), frac(2, 5)], [frac(9, 12), frac(3, 4)], [frac(8, 20), frac(2, 5)]],
+        [[frac(2, 8), frac(1, 4)], [frac(6, 15), frac(2, 5)], [frac(10, 25), frac(2, 5)], [frac(12, 16), frac(3, 4)], [frac(14, 21), frac(2, 3)]],
+      ];
+      return matchEng(
+        m,
+        difficulty,
+        "Match each fraction to an equivalent fraction.",
+        pick(variants) as [string, string][],
+        "Multiply or divide numerator and denominator by the same number.",
+        ["Equivalent fractions name the same amount.", "Simplify both fractions to compare."],
+        "Fractions are equivalent when they simplify to the same ratio.",
+      );
+    }
+    case "fractionOperationLab": {
+      const den = pick([6, 8, 10, 12] as const);
+      const a = rand(1, Math.floor(den / 2));
+      const b = rand(1, Math.floor(den / 2));
+      const add = a + b < den || Math.random() < 0.7;
+      const top = add ? a + b : Math.max(a, b) - Math.min(a, b);
+      const expression = add ? `${a}/${den} + ${b}/${den}` : `${Math.max(a, b)}/${den} − ${Math.min(a, b)}/${den}`;
+      const answer = frac(top, den);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Compute ${expression}.`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: expression,
+            subtitle: "Same denominator",
+          }),
+          hint: "Keep the denominator; operate on the numerators.",
+          hints: [`Common denominator is ${den}.`, add ? `${a} + ${b} = ${top}.` : `${Math.max(a, b)} − ${Math.min(a, b)} = ${top}.`],
+          explanation: `${expression} = ${answer}.`,
+        },
+        answer,
+        [frac(top + 1, den), frac(Math.max(1, top - 1), den), `${top}/${den + 2}`],
+      );
+    }
+    case "decimalPlaceRace": {
+      const left = Number((rand(10, 99) / 10).toFixed(1));
+      const right = Number((left + pick([-0.3, -0.1, 0.07, 0.2, 0.35] as const)).toFixed(2));
+      const answer = left > right ? `${left.toFixed(1)} is greater` : right > left ? `${right.toFixed(2)} is greater` : "They are equal";
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Compare ${left.toFixed(1)} and ${right.toFixed(2)}.`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: `${left.toFixed(1)} ? ${right.toFixed(2)}`,
+            subtitle: "Line up decimal places",
+          }),
+          hint: "Write both numbers with the same number of decimal places.",
+          hints: [`${left.toFixed(1)} = ${left.toFixed(2)}.`, `Compare ${left.toFixed(2)} to ${right.toFixed(2)}.`],
+          explanation: `${left.toFixed(2)} ${left > right ? ">" : left < right ? "<" : "="} ${right.toFixed(2)}.`,
+        },
+        answer,
+        [`${left.toFixed(1)} is greater`, `${right.toFixed(2)} is greater`, "They are equal"].filter((choice) => choice !== answer),
+      );
+    }
+    case "percentBarBuilder": {
+      const percent = pick([10, 20, 25, 30, 40, 50, 60, 75] as const);
+      const whole = pick([40, 60, 80, 100, 120, 200] as const);
+      const answer = (percent * whole) / 100;
+      return numpadEng(
+        m,
+        difficulty,
+        `Find ${percent}% of ${whole}.`,
+        { kind: "icon", icon: m.emoji, title: `${percent}% of ${whole}`, subtitle: "Percent bar" },
+        answer,
+        "Convert the percent to a fraction or decimal, then multiply.",
+        [`${percent}% = ${percent}/100.`, `${whole} × ${percent}/100 = ${answer}.`],
+        `${percent}% of ${whole} is ${answer}.`,
+      );
+    }
+    case "ratioTableMatch": {
+      const a = rand(2, 6);
+      const b = rand(2, 8);
+      const factors = [1, 2, 3, 4, 5];
+      return matchEng(
+        m,
+        difficulty,
+        `Match each ${a}:${b} ratio table row to its equivalent pair.`,
+        factors.map((factor) => [`×${factor}`, `${a * factor}:${b * factor}`]),
+        "Multiply both parts of the ratio by the same factor.",
+        [`Base ratio is ${a}:${b}.`, "Equivalent ratios scale both columns together."],
+        `Rows like ${a * 2}:${b * 2} and ${a * 3}:${b * 3} preserve the same ratio ${a}:${b}.`,
+      );
+    }
+    case "coordinateQuadrantSort": {
+      const items = [
+        { label: "(3, 4)", category: "Quadrant I" },
+        { label: "(6, 2)", category: "Quadrant I" },
+        { label: "(-3, 5)", category: "Quadrant II" },
+        { label: "(-7, 1)", category: "Quadrant II" },
+        { label: "(-4, -6)", category: "Quadrant III" },
+        { label: "(-2, -8)", category: "Quadrant III" },
+        { label: "(5, -3)", category: "Quadrant IV" },
+        { label: "(9, -1)", category: "Quadrant IV" },
+      ];
+      return sortEng(
+        m,
+        difficulty,
+        "Sort each point by coordinate-plane quadrant.",
+        ["Quadrant I", "Quadrant II", "Quadrant III", "Quadrant IV"],
+        items,
+        "Use the signs of x and y.",
+        ["I: (+,+), II: (-,+), III: (-,-), IV: (+,-).", "The first coordinate is x; the second is y."],
+        "Quadrants are determined by the sign pattern of (x, y).",
+      );
+    }
+    case "numberLineJump": {
+      const start = rand(-9, 9);
+      const jump = rand(-9, 9) || 4;
+      const end = start + jump;
+      const jumpStr = jump >= 0 ? `+${jump}` : `${jump}`;
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Start at ${start} on the number line and jump ${jumpStr}. Where do you land?`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: `${start} ${jumpStr}`,
+            subtitle: "Number line jump",
+          }),
+          hint: jump >= 0 ? "Moving right increases; left decreases." : "Negative jump moves left.",
+          hints: [`Start: ${start}.`, `Add ${jump} → ${end}.`],
+          explanation: `${start} + (${jump}) = ${end}.`,
+        },
+        String(end),
+        [String(end + 1), String(end - 1), String(start - jump)],
+      );
+    }
+    case "multiplicationFact": {
+      const a = rand(3, difficulty === "hard" ? 12 : 9);
+      const b = rand(3, difficulty === "hard" ? 12 : 9);
+      const answer = a * b;
+      return numpadEng(
+        m,
+        difficulty,
+        `What is ${a} × ${b}?`,
+        { kind: "icon", icon: m.emoji, title: `${a} × ${b}`, subtitle: "Multiplication facts" },
+        answer,
+        "Use a known fact or skip-count.",
+        [`${a} groups of ${b}.`, `${b} groups of ${a}.`],
+        `${a} × ${b} = ${answer}.`,
+      );
+    }
+    case "divisionRemainder": {
+      const divisor = rand(3, 9);
+      const quotient = rand(3, 12);
+      const remainder = rand(1, divisor - 1);
+      const dividend = divisor * quotient + remainder;
+      const answer = `${quotient} R ${remainder}`;
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Divide ${dividend} ÷ ${divisor}. Pick the quotient with remainder.`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: `${dividend} ÷ ${divisor}`,
+            subtitle: "Whole-number division",
+          }),
+          hint: "Find the largest multiple of the divisor that fits.",
+          hints: [`${divisor} × ${quotient} = ${divisor * quotient}.`, `${dividend} − ${divisor * quotient} = ${remainder}.`],
+          explanation: `${dividend} = ${divisor} × ${quotient} + ${remainder}, so quotient is ${quotient} remainder ${remainder}.`,
+        },
+        answer,
+        [`${quotient + 1} R ${remainder}`, `${quotient} R ${Math.max(0, remainder - 1)}`, `${quotient - 1} R ${remainder}`],
+      );
+    }
+    case "fractionDecimalConvert": {
+      const variants: [string, string][][] = [
+        [["1/2", "0.5"], ["1/4", "0.25"], ["3/4", "0.75"], ["1/5", "0.2"], ["2/5", "0.4"]],
+        [["1/10", "0.1"], ["3/10", "0.3"], ["7/10", "0.7"], ["1/2", "0.5"], ["9/10", "0.9"]],
+        [["1/8", "0.125"], ["3/8", "0.375"], ["5/8", "0.625"], ["7/8", "0.875"], ["1/4", "0.25"]],
+        [["1/20", "0.05"], ["3/20", "0.15"], ["1/25", "0.04"], ["1/50", "0.02"], ["1/100", "0.01"]],
+      ];
+      return matchEng(
+        m,
+        difficulty,
+        "Match each fraction with its decimal form.",
+        pick(variants),
+        "Divide the numerator by the denominator.",
+        ["Fractions like 1/2 and 1/4 are common decimals.", "Look for tenths, fifths, and eighths."],
+        "Each fraction has a unique decimal expansion.",
+      );
+    }
+    case "percentFractionDecimal": {
+      const variants: [string, string][][] = [
+        [["25%", "1/4 = 0.25"], ["50%", "1/2 = 0.5"], ["75%", "3/4 = 0.75"], ["10%", "1/10 = 0.1"], ["20%", "1/5 = 0.2"]],
+        [["5%", "1/20 = 0.05"], ["40%", "2/5 = 0.4"], ["60%", "3/5 = 0.6"], ["80%", "4/5 = 0.8"], ["100%", "1 = 1.0"]],
+        [["12.5%", "1/8 = 0.125"], ["37.5%", "3/8 = 0.375"], ["62.5%", "5/8 = 0.625"], ["87.5%", "7/8 = 0.875"], ["50%", "1/2 = 0.5"]],
+      ];
+      return matchEng(
+        m,
+        difficulty,
+        "Pair each percent with its fraction/decimal equivalent.",
+        pick(variants),
+        "Percent = parts per 100.",
+        ["Drop the % sign and divide by 100 for the decimal.", "Simplify the fraction over 100."],
+        "Percent, fraction, and decimal are three views of the same number.",
+      );
+    }
+    case "absoluteValueBasics": {
+      const value = pick([-15, -12, -9, -7, -4, -2, 3, 5, 8, 11, 14] as const);
+      const answer = Math.abs(value);
+      return numpadEng(
+        m,
+        difficulty,
+        `Compute |${value}|.`,
+        { kind: "icon", icon: m.emoji, title: `|${value}|`, subtitle: "Absolute value" },
+        answer,
+        "Absolute value is distance from zero — always non-negative.",
+        [value < 0 ? `Drop the negative sign.` : `Already non-negative.`, `|x| measures distance to 0.`],
+        `|${value}| = ${answer}.`,
+      );
+    }
+    case "exponentBasic": {
+      const baseVal = rand(2, 6);
+      const exp = rand(2, baseVal <= 3 ? 5 : 4);
+      const answer = Math.pow(baseVal, exp);
+      return numpadEng(
+        m,
+        difficulty,
+        `Compute ${baseVal}^${exp}.`,
+        { kind: "icon", icon: m.emoji, title: `${baseVal}^${exp}`, subtitle: "Repeated multiplication" },
+        answer,
+        "Multiply the base by itself the exponent number of times.",
+        [`${baseVal}^${exp} = ${Array(exp).fill(baseVal).join(" × ")}.`],
+        `${baseVal}^${exp} = ${answer}.`,
+      );
+    }
+    case "expandedFormBuilder": {
+      const thousands = rand(1, 9);
+      const hundreds = rand(0, 9);
+      const tens = rand(0, 9);
+      const ones = rand(0, 9);
+      const value = thousands * 1000 + hundreds * 100 + tens * 10 + ones;
+      const parts: string[] = [];
+      if (thousands) parts.push(`${thousands * 1000}`);
+      if (hundreds) parts.push(`${hundreds * 100}`);
+      if (tens) parts.push(`${tens * 10}`);
+      if (ones) parts.push(`${ones}`);
+      const answer = parts.join(" + ");
+      const distractors = [
+        `${thousands} + ${hundreds} + ${tens} + ${ones}`,
+        `${thousands * 100} + ${hundreds * 10} + ${tens} + ${ones}`,
+        `${value} + 0`,
+      ];
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Pick the expanded form of ${value}.`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: String(value),
+            subtitle: "Expanded form",
+          }),
+          hint: "Each digit's value depends on its place.",
+          hints: [`${thousands} is in the thousands place.`, "Sum each digit times its place value."],
+          explanation: `${value} = ${answer}.`,
+        },
+        answer,
+        distractors,
+      );
+    }
+    case "unitConversionBridge": {
+      const conversions = [
+        { prompt: (n: number) => `Convert ${n} feet to inches.`, factor: 12, label: "1 ft = 12 in", hint: "1 foot = 12 inches.", explanation: (n: number, r: number) => `${n} ft × 12 = ${r} in.` },
+        { prompt: (n: number) => `Convert ${n} minutes to seconds.`, factor: 60, label: "1 min = 60 s", hint: "1 minute = 60 seconds.", explanation: (n: number, r: number) => `${n} min × 60 = ${r} s.` },
+        { prompt: (n: number) => `Convert ${n} meters to centimeters.`, factor: 100, label: "1 m = 100 cm", hint: "1 meter = 100 cm.", explanation: (n: number, r: number) => `${n} m × 100 = ${r} cm.` },
+        { prompt: (n: number) => `Convert ${n} kilograms to grams.`, factor: 1000, label: "1 kg = 1000 g", hint: "1 kg = 1000 g.", explanation: (n: number, r: number) => `${n} kg × 1000 = ${r} g.` },
+        { prompt: (n: number) => `Convert ${n} hours to minutes.`, factor: 60, label: "1 hr = 60 min", hint: "1 hour = 60 minutes.", explanation: (n: number, r: number) => `${n} hr × 60 = ${r} min.` },
+      ];
+      const conv = pick(conversions);
+      const n = rand(2, 9);
+      const answer = n * conv.factor;
+      return numpadEng(
+        m,
+        difficulty,
+        conv.prompt(n),
+        { kind: "icon", icon: m.emoji, title: conv.label, subtitle: "Unit conversion" },
+        answer,
+        conv.hint,
+        [conv.hint, `Multiply by ${conv.factor}.`],
+        conv.explanation(n, answer),
+      );
+    }
+    case "negativeNumberOperate": {
+      const ops = [
+        () => {
+          const a = -rand(2, 9);
+          const b = rand(2, 9);
+          return { prompt: `${a} + ${b}`, answer: a + b, hint: "Adding a positive moves right on the number line." };
+        },
+        () => {
+          const a = rand(2, 9);
+          const b = rand(2, 9);
+          return { prompt: `${a} − ${a + b}`, answer: -b, hint: "Subtract a larger value from a smaller one to get a negative." };
+        },
+        () => {
+          const a = -rand(2, 6);
+          const b = rand(2, 6);
+          return { prompt: `${a} × ${b}`, answer: a * b, hint: "Negative × positive = negative." };
+        },
+        () => {
+          const a = -rand(2, 6);
+          const b = -rand(2, 6);
+          return { prompt: `${a} × ${b}`, answer: a * b, hint: "Negative × negative = positive." };
+        },
+        () => {
+          const a = -rand(2, 9);
+          const b = -rand(2, 9);
+          return { prompt: `${a} − ${b}`, answer: a - b, hint: "Subtracting a negative is adding." };
+        },
+      ];
+      const op = pick(ops)();
+      return numpadEng(
+        m,
+        difficulty,
+        `Compute ${op.prompt}.`,
+        { kind: "icon", icon: m.emoji, title: op.prompt, subtitle: "Signed arithmetic" },
+        op.answer,
+        op.hint,
+        [op.hint, "Track signs carefully."],
+        `${op.prompt} = ${op.answer}.`,
+        true,
+      );
     }
     case "escapeRoom":
       return {
@@ -8961,6 +9430,7 @@ function subjectChoicePreview(meta: PuzzleMeta, difficulty: Difficulty): Puzzle 
 
 function placeholderMatch(meta: PuzzleMeta, difficulty: Difficulty): Puzzle {
   const banks: Record<Subject, [string, string][]> = {
+    MathFoundations: [["4 tens", "40"], ["1/2", "2/4"], ["25% of 80", "20"]],
     Algebra: [["2x at x=3", "6"], ["x² at x=4", "16"], ["3x − 1 at x=2", "5"]],
     Geometry: [["Square side 4", "16"], ["Rect 3×5", "15"], ["Triangle b=6 h=4", "12"]],
     Trigonometry: [["sin 30°", "1/2"], ["cos 60°", "1/2"], ["tan 45°", "1"]],
@@ -9095,6 +9565,15 @@ function placeholderNumpad(meta: PuzzleMeta, difficulty: Difficulty): Puzzle {
 
 function placeholderSort(meta: PuzzleMeta, difficulty: Difficulty): Puzzle {
   const banks: Record<Subject, { categories: string[]; items: { label: string; category: string }[] }> = {
+    MathFoundations: {
+      categories: ["Positive", "Negative"],
+      items: [
+        { label: "6", category: "Positive" },
+        { label: "12", category: "Positive" },
+        { label: "−4", category: "Negative" },
+        { label: "−9", category: "Negative" },
+      ],
+    },
     Algebra: {
       categories: ["x terms", "Constants"],
       items: [
@@ -10452,6 +10931,7 @@ function StatCard({ label, value, tone }: { label: string; value: string; tone: 
 function subjectEmoji(subject: SubjectFilter) {
   const icons: Record<SubjectFilter, string> = {
     All: "✨",
+    MathFoundations: "🏗️",
     Arithmetic: "🔢",
     Algebra: "⚖️",
     Geometry: "📐",
@@ -10498,6 +10978,7 @@ function subjectEmoji(subject: SubjectFilter) {
 }
 
 const SUBJECT_DISPLAY_OVERRIDES: Partial<Record<SubjectFilter, string>> = {
+  MathFoundations: "Math Foundations",
   EarthScience: "Earth Science",
   GeneralScience: "General Science",
   NumberTheory: "Number Theory",
@@ -10575,6 +11056,7 @@ const INTERACTION_OPTIONS: readonly InteractionFilter[] = [
 const GRADE_OPTIONS: readonly GradeFilter[] = ["All", "9", "10", "11", "12", "K-8"];
 const MATH_SUBJECTS: readonly SubjectFilter[] = [
   "All",
+  "MathFoundations",
   "Algebra",
   "Geometry",
   "Trigonometry",
