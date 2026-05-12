@@ -195,6 +195,22 @@ type PuzzleId =
   | "absValueDistance"
   | "inequalityNumberLine"
   | "algebraTiles"
+  | "distributiveProperty"
+  | "compoundInequality"
+  | "slopeIntercept"
+  | "pointSlopeMatch"
+  | "absoluteValueEquation"
+  | "quadraticFormula"
+  | "discriminantClassify"
+  | "geometricSeriesSum"
+  | "literalEquation"
+  | "directVariation"
+  | "inverseVariation"
+  | "exponentRules"
+  | "completingSquare"
+  | "absValueInequality"
+  | "logEquation"
+  | "binomialExpansion"
   | "angleDetective"
   | "parallelTransversal"
   | "polygonAngles"
@@ -596,17 +612,17 @@ function m(
 }
 
 const METAS: PuzzleMeta[] = [
-  m("weightScale", "Weight Scale", "Solve hidden weights", "⚖️", "from-amber-400 to-orange-500", "K-8", "Algebra", "Solve for unknown weights", 2, "choice"),
+  m("balanceBeam", "Balance Beam Puzzle", "Level the beam", "🪵", "from-orange-300 to-stone-600", "K-8", "Algebra", "Compare weights", 2, "choice"),
   m("fractionPizza", "Fraction Pizza", "Build and compare slices", "🍕", "from-rose-400 to-red-500", "K-8", "Arithmetic", "Recognize fraction parts", 2, "choice"),
-  m("numberMachine", "Number Machine", "Find the hidden rule", "⚙️", "from-sky-400 to-blue-600", "K-8", "Algebra", "Spot function rules", 2, "choice"),
+  m("equationMatch", "Equation Match Puzzle", "Pair equations", "🔗", "from-blue-400 to-indigo-700", "K-8", "Algebra", "Pair equation values", 2, "match"),
   m("patternBlocks", "Pattern Blocks", "Continue the sequence", "🧩", "from-violet-400 to-fuchsia-600", "K-8", "Logic", "Continue visual patterns", 2, "choice"),
   m("areaBuilder", "Area Builder", "Count tiles and edges", "🟩", "from-emerald-400 to-green-600", "K-8", "Geometry", "Compute rectangular area", 2, "choice"),
   m("gridPath", "Grid Path", "Walk through operations", "🎯", "from-cyan-400 to-teal-600", "K-8", "Arithmetic", "Chain operations", 2, "path"),
   m("waterFill", "Water Fill Puzzle", "Pour to the target", "💧", "from-blue-400 to-cyan-600", "K-8", "Arithmetic", "Reason about volume", 2, "drag"),
-  m("treasureEquations", "Treasure Chest Equations", "Crack the lock", "💎", "from-yellow-300 to-amber-600", "K-8", "Algebra", "Solve one-step equations", 2, "choice"),
+  m("numberMachine", "Number Machine", "Find the hidden rule", "⚙️", "from-sky-400 to-blue-600", "K-8", "Algebra", "Spot function rules", 2, "choice"),
   m("monsterMerge", "Monster Merge Math", "Combine creature values", "👾", "from-lime-400 to-emerald-600", "K-8", "Arithmetic", "Combine quantities", 2, "choice"),
   m("clock", "Clock Puzzle", "Read the time", "🕒", "from-indigo-400 to-purple-600", "K-8", "Arithmetic", "Read analog clocks", 2, "choice"),
-  m("balanceBeam", "Balance Beam Puzzle", "Level the beam", "🪵", "from-orange-300 to-stone-600", "K-8", "Algebra", "Compare weights", 2, "choice"),
+  m("treasureEquations", "Treasure Chest Equations", "Crack the lock", "💎", "from-yellow-300 to-amber-600", "K-8", "Algebra", "Solve one-step equations", 2, "choice"),
   m("diceProbability", "Dice Probability", "Predict the chance", "🎲", "from-red-400 to-pink-600", "K-8", "Statistics", "Simple probability", 2, "choice"),
   m("coordinateTreasure", "Coordinate Treasure Hunt", "Find the point", "🗺️", "from-teal-400 to-cyan-700", "K-8", "Geometry", "Read coordinates", 2, "choice"),
   m("shapeFolding", "Shape Folding Puzzle", "Fold in your mind", "📦", "from-fuchsia-400 to-violet-700", "K-8", "Geometry", "Visualize rotation", 2, "rotate"),
@@ -615,7 +631,7 @@ const METAS: PuzzleMeta[] = [
   m("resourceManagement", "Resource Management", "Spend wisely", "🪙", "from-amber-300 to-lime-600", "K-8", "Arithmetic", "Budget resources", 2, "choice"),
   m("numberPyramid", "Missing Number Pyramid", "Build upward", "🔺", "from-red-300 to-orange-600", "K-8", "Arithmetic", "Sum upward chains", 2, "choice"),
   m("snakePath", "Arithmetic Snake Path", "Draw the value trail", "🐍", "from-green-400 to-teal-700", "K-8", "Arithmetic", "Sum number paths", 2, "path"),
-  m("equationMatch", "Equation Match Puzzle", "Pair equations", "🔗", "from-blue-400 to-indigo-700", "K-8", "Algebra", "Pair equation values", 2, "match"),
+  m("weightScale", "Weight Scale", "Solve hidden weights", "⚖️", "from-amber-400 to-orange-500", "K-8", "Algebra", "Solve for unknown weights", 2, "choice"),
   m("multiplicationArray", "Multiplication Array", "See multiplication", "🔢", "from-emerald-300 to-sky-600", "K-8", "Arithmetic", "Visualize multiplication", 2, "choice"),
   m("sudokuMini", "Sudoku Mini", "Tiny logic grid", "🧠", "from-purple-300 to-indigo-700", "K-8", "Logic", "Logical deduction", 2, "choice"),
   m("magicSquare", "Magic Square Puzzle", "Rows share totals", "✨", "from-yellow-300 to-purple-600", "K-8", "Logic", "Constraint reasoning", 2, "choice"),
@@ -626,14 +642,14 @@ const METAS: PuzzleMeta[] = [
   m("decimalSlider", "Decimal Slider Puzzle", "Tune the value", "🎚️", "from-sky-300 to-cyan-700", "K-8", "Arithmetic", "Place decimals", 2, "slider"),
   m("ratioRecipe", "Ratio Recipe Puzzle", "Mix the recipe", "🥣", "from-amber-300 to-rose-600", "K-8", "Arithmetic", "Apply ratios", 2, "drag"),
   m("escapeRoom", "Math Escape Room", "Unlock every door", "🚪", "from-zinc-300 to-violet-700", "K-8", "Algebra", "Chain operations", 3, "swipe"),
-  m("linearBalance", "Linear Equation Balance", "Balance the equation", "⚖️", "from-blue-400 to-indigo-600", "9", "Algebra", "Solve ax + b = c", 3, "choice"),
-  m("slopeRunner", "Slope Runner", "Race the slope", "🏃", "from-sky-400 to-blue-600", "9", "Algebra", "Slope from two points", 3, "choice"),
-  m("graphLine", "Graph the Line", "Plot the equation", "📈", "from-emerald-400 to-teal-600", "9", "Algebra", "Identify line equations", 3, "choice"),
-  m("functionRule", "Function Machine", "Infer the function", "⚙️", "from-violet-400 to-fuchsia-600", "9", "Algebra", "Evaluate linear functions", 3, "choice"),
-  m("inequalityGate", "Inequality Gate", "Pick the open gate", "🚧", "from-amber-400 to-orange-600", "9", "Algebra", "Solve linear inequalities", 3, "choice"),
-  m("systemsScale", "Systems of Equations Scale", "Two scales, one truth", "⚖️", "from-rose-400 to-pink-600", "9", "Algebra", "Solve linear systems", 4, "choice"),
+  m("absValueDistance", "Absolute Value Distance", "Measure the distance", "📏", "from-cyan-400 to-blue-700", "9", "Algebra", "Compute |a − b|", 3, "numpad", "Fill in number"),
+  m("absoluteValueEquation", "Absolute Value Equation", "Solve |x + b| = c", "🪞", "from-fuchsia-400 to-pink-600", "9", "Algebra", "Split into two cases", 3, "choice"),
+  m("directVariation", "Direct Variation Lab", "Find k in y = kx", "📏", "from-lime-400 to-green-600", "9", "Algebra", "Apply direct variation", 3, "numpad", "Fill in number"),
+  m("distributiveProperty", "Distribute Lab", "Spread it out", "🧪", "from-emerald-400 to-lime-600", "9", "Algebra", "Apply a(b ± c) = ab ± ac", 3, "choice"),
   m("exponentMatch", "Exponent Match", "Pair the powers", "🔥", "from-red-400 to-orange-600", "9", "Algebra", "Apply exponent rules", 3, "match"),
-  m("scientificNotation", "Scientific Notation Converter", "Move the decimal", "🔬", "from-cyan-400 to-blue-700", "9", "Algebra", "Convert scientific notation", 3, "choice"),
+  m("exponentRules", "Exponent Rules Workshop", "Simplify with the laws", "⚡", "from-orange-400 to-red-700", "9", "Algebra", "Apply product, quotient, and power rules", 3, "choice"),
+  m("expressionSimplifier", "Expression Simplifier", "Reduce the expression", "✂️", "from-emerald-400 to-cyan-700", "9", "Algebra", "Simplify expressions", 3, "choice"),
+  m("functionRule", "Function Machine", "Infer the function", "⚙️", "from-violet-400 to-fuchsia-600", "9", "Algebra", "Evaluate linear functions", 3, "choice"),
   m("pythagoreanPath", "Pythagorean Path", "Find the missing side", "📐", "from-emerald-400 to-green-700", "9", "Geometry", "Use a² + b² = c²", 3, "choice"),
   m("angleChase", "Angle Chase", "Trace the angles", "📐", "from-amber-300 to-amber-700", "9", "Geometry", "Sum interior angles", 3, "choice"),
   m("triangleCongruence", "Triangle Congruence Match", "Match the congruence rule", "🔺", "from-rose-300 to-red-700", "9", "Geometry", "Apply SSS, SAS, ASA", 3, "match"),
@@ -647,18 +663,18 @@ const METAS: PuzzleMeta[] = [
   m("transformationsGrid", "Transformations Grid", "Rotate or reflect", "🔁", "from-violet-400 to-fuchsia-700", "10", "Geometry", "Apply transformations", 4, "rotate"),
   m("areaVolume", "Area & Volume Builder", "Stack the volume", "🧊", "from-sky-300 to-indigo-700", "10", "Geometry", "Compute area and volume", 4, "drag"),
   m("rightTriangleSolver", "Trig Right Triangle Solver", "Find sin / cos / tan", "📐", "from-amber-400 to-pink-700", "10", "Trigonometry", "Solve right triangles", 4, "choice"),
-  m("quadraticLauncher", "Quadratic Equation Launcher", "Launch the parabola", "🚀", "from-rose-400 to-red-700", "10", "Algebra", "Solve quadratics", 4, "choice"),
-  m("parabolaMatch", "Parabola Graph Match", "Match shape to formula", "🪤", "from-orange-300 to-rose-700", "10", "Algebra", "Recognize parabolas", 4, "match"),
-  m("factoringTiles", "Factoring Tiles", "Slide to factor", "🧱", "from-emerald-300 to-teal-700", "10", "Algebra", "Factor quadratics", 4, "drag"),
-  m("polynomialPuzzle", "Polynomial Puzzle", "Assemble polynomials", "🧩", "from-violet-300 to-purple-700", "10", "Algebra", "Multiply polynomials", 4, "choice"),
-  m("radicalSimplify", "Radical Simplifier", "Pull out the squares", "√", "from-amber-300 to-yellow-700", "10", "Algebra", "Simplify radicals", 4, "choice"),
-  m("rationalMatch", "Rational Expression Match", "Match reduced forms", "➗", "from-sky-300 to-blue-700", "10", "Algebra", "Reduce rational expressions", 4, "match"),
-  m("complexPlane", "Complex Number Plane", "Plot a + bi", "🌐", "from-fuchsia-400 to-purple-700", "10", "Algebra", "Plot complex numbers", 4, "choice"),
+  m("graphLine", "Graph the Line", "Plot the equation", "📈", "from-emerald-400 to-teal-600", "9", "Algebra", "Identify line equations", 3, "choice"),
+  m("inequalityGate", "Inequality Gate", "Pick the open gate", "🚧", "from-amber-400 to-orange-600", "9", "Algebra", "Solve linear inequalities", 3, "choice"),
+  m("inequalityNumberLine", "Inequality Number Line Escape", "Slide to safe zone", "🚪", "from-amber-400 to-orange-700", "9", "Algebra", "Graph inequalities", 3, "slider"),
+  m("likeTermSorter", "Like-Term Sorter", "Sort the like terms", "🗂️", "from-sky-400 to-violet-700", "9", "Algebra", "Combine like terms", 3, "sort"),
+  m("linearBalance", "Linear Equation Balance", "Balance the equation", "⚖️", "from-blue-400 to-indigo-600", "9", "Algebra", "Solve ax + b = c", 3, "choice"),
+  m("literalEquation", "Literal Equation Solver", "Rearrange the formula", "🧰", "from-cyan-400 to-emerald-600", "9", "Algebra", "Solve formulas for any variable", 3, "choice"),
+  m("scientificNotation", "Scientific Notation Converter", "Move the decimal", "🔬", "from-cyan-400 to-blue-700", "9", "Algebra", "Convert scientific notation", 3, "choice"),
   m("conditionalTree", "Conditional Probability Tree", "Trace the tree", "🌳", "from-emerald-400 to-green-700", "10", "Statistics", "Conditional probability", 4, "choice"),
   m("geometricConstruction", "Geometric Construction Puzzle", "Construct the shape", "📏", "from-zinc-300 to-stone-700", "10", "Geometry", "Compass and straightedge", 4, "rotate"),
-  m("quadraticSystems", "Quadratic Systems Puzzle", "Find the intersections", "📈", "from-rose-400 to-red-700", "11", "Algebra", "Solve quadratic systems", 5, "choice"),
-  m("polynomialRoots", "Polynomial Roots Finder", "Spot the zeros", "🌱", "from-emerald-400 to-teal-700", "11", "Algebra", "Find polynomial roots", 5, "choice"),
-  m("syntheticDivision", "Synthetic Division Machine", "Divide step by step", "🛠️", "from-zinc-300 to-zinc-700", "11", "Algebra", "Synthetic division", 5, "choice"),
+  m("slopeIntercept", "Slope-Intercept Finder", "Find the y-intercept", "📐", "from-sky-400 to-cyan-600", "9", "Algebra", "Compute b from slope and point", 3, "numpad", "Fill in number"),
+  m("slopeRunner", "Slope Runner", "Race the slope", "🏃", "from-sky-400 to-blue-600", "9", "Algebra", "Slope from two points", 3, "choice"),
+  m("variableLock", "Variable Lock Puzzle", "Crack the variable", "🔒", "from-amber-400 to-rose-700", "9", "Algebra", "Solve for x with a numpad", 3, "numpad", "Unlock"),
   m("asymptoteHunt", "Rational Function Asymptote Hunt", "Track the asymptotes", "🪜", "from-cyan-300 to-blue-700", "11", "Precalculus", "Identify asymptotes", 5, "choice"),
   m("exponentialGrowth", "Exponential Growth Simulator", "Predict the curve", "📈", "from-amber-300 to-rose-700", "11", "Precalculus", "Exponential models", 5, "choice"),
   m("logarithmUnlock", "Logarithm Unlock Puzzle", "Solve for the exponent", "🔑", "from-yellow-300 to-amber-700", "11", "Precalculus", "Evaluate logarithms", 4, "choice"),
@@ -686,16 +702,32 @@ const METAS: PuzzleMeta[] = [
   m("zScore", "Normal Curve Z-Score Puzzle", "Standardize the score", "🔔", "from-indigo-400 to-fuchsia-700", "12", "Statistics", "Compute z-scores", 4, "choice"),
   m("confidenceInterval", "Confidence Interval Lab", "Tune the margin", "🎚️", "from-cyan-400 to-blue-700", "12", "Statistics", "Confidence intervals", 5, "slider"),
   m("hypothesisTest", "Hypothesis Test Decision", "Reject or accept?", "⚖️", "from-emerald-300 to-cyan-700", "12", "Statistics", "Hypothesis testing", 5, "choice"),
-  m("equationMaze", "Equation Maze", "Trace the right path", "🌀", "from-violet-400 to-blue-700", "9", "Algebra", "Solve multi-step equations", 4, "path", "Drawing"),
-  m("variableLock", "Variable Lock Puzzle", "Crack the variable", "🔒", "from-amber-400 to-rose-700", "9", "Algebra", "Solve for x with a numpad", 3, "numpad", "Unlock"),
-  m("expressionSimplifier", "Expression Simplifier", "Reduce the expression", "✂️", "from-emerald-400 to-cyan-700", "9", "Algebra", "Simplify expressions", 3, "choice"),
-  m("likeTermSorter", "Like-Term Sorter", "Sort the like terms", "🗂️", "from-sky-400 to-violet-700", "9", "Algebra", "Combine like terms", 3, "sort"),
-  m("functionTableBuilder", "Function Table Builder", "Drop the right outputs", "📋", "from-fuchsia-400 to-pink-700", "9", "Algebra", "Evaluate functions", 4, "drag", "Build with tiles"),
-  m("domainRangePicker", "Domain & Range Picker", "Spot domain or range", "🎯", "from-rose-400 to-amber-700", "10", "Algebra", "Find domain and range", 4, "choice", "Region select"),
-  m("piecewiseSwitch", "Piecewise Function Switchboard", "Pick the right piece", "🔀", "from-orange-400 to-rose-700", "11", "Algebra", "Evaluate piecewise functions", 4, "choice"),
-  m("absValueDistance", "Absolute Value Distance", "Measure the distance", "📏", "from-cyan-400 to-blue-700", "9", "Algebra", "Compute |a − b|", 3, "numpad", "Fill in number"),
-  m("inequalityNumberLine", "Inequality Number Line Escape", "Slide to safe zone", "🚪", "from-amber-400 to-orange-700", "9", "Algebra", "Graph inequalities", 3, "slider"),
   m("algebraTiles", "Algebra Tile Builder", "Build the expression", "🧱", "from-emerald-300 to-emerald-700", "9", "Algebra", "Visualize x and constants", 4, "drag", "Build with tiles"),
+  m("compoundInequality", "Compound Inequality Solver", "Squeeze x into range", "🎯", "from-amber-400 to-yellow-600", "9", "Algebra", "Solve a ≤ x + b ≤ c", 4, "choice"),
+  m("equationMaze", "Equation Maze", "Trace the right path", "🌀", "from-violet-400 to-blue-700", "9", "Algebra", "Solve multi-step equations", 4, "path", "Drawing"),
+  m("functionTableBuilder", "Function Table Builder", "Drop the right outputs", "📋", "from-fuchsia-400 to-pink-700", "9", "Algebra", "Evaluate functions", 4, "drag", "Build with tiles"),
+  m("pointSlopeMatch", "Point-Slope Match", "Pair forms of a line", "🔗", "from-blue-400 to-indigo-600", "9", "Algebra", "Convert point-slope to slope-intercept", 4, "match"),
+  m("systemsScale", "Systems of Equations Scale", "Two scales, one truth", "⚖️", "from-rose-400 to-pink-600", "9", "Algebra", "Solve linear systems", 4, "choice"),
+  m("absValueInequality", "Absolute Value Inequality", "Inside or outside?", "🚦", "from-fuchsia-400 to-violet-700", "10", "Algebra", "Solve |x − a| < c or > c", 4, "choice"),
+  m("completingSquare", "Completing the Square", "Push it to vertex form", "🟧", "from-teal-400 to-indigo-700", "10", "Algebra", "Convert standard to vertex form", 4, "choice"),
+  m("complexPlane", "Complex Number Plane", "Plot a + bi", "🌐", "from-fuchsia-400 to-purple-700", "10", "Algebra", "Plot complex numbers", 4, "choice"),
+  m("discriminantClassify", "Discriminant Classifier", "Real, repeated, or complex?", "🔮", "from-violet-400 to-purple-700", "10", "Algebra", "Use b² − 4ac to classify roots", 4, "choice"),
+  m("domainRangePicker", "Domain & Range Picker", "Spot domain or range", "🎯", "from-rose-400 to-amber-700", "10", "Algebra", "Find domain and range", 4, "choice", "Region select"),
+  m("factoringTiles", "Factoring Tiles", "Slide to factor", "🧱", "from-emerald-300 to-teal-700", "10", "Algebra", "Factor quadratics", 4, "drag"),
+  m("inverseVariation", "Inverse Variation Lab", "Find y when x changes", "🪁", "from-amber-400 to-rose-600", "10", "Algebra", "Apply y = k/x", 4, "numpad", "Fill in number"),
+  m("parabolaMatch", "Parabola Graph Match", "Match shape to formula", "🪤", "from-orange-300 to-rose-700", "10", "Algebra", "Recognize parabolas", 4, "match"),
+  m("polynomialPuzzle", "Polynomial Puzzle", "Assemble polynomials", "🧩", "from-violet-300 to-purple-700", "10", "Algebra", "Multiply polynomials", 4, "choice"),
+  m("quadraticLauncher", "Quadratic Equation Launcher", "Launch the parabola", "🚀", "from-rose-400 to-red-700", "10", "Algebra", "Solve quadratics", 4, "choice"),
+  m("quadraticFormula", "Quadratic Formula Lab", "Plug in a, b, c", "🧮", "from-rose-400 to-red-600", "10", "Algebra", "Solve ax² + bx + c = 0", 4, "choice"),
+  m("radicalSimplify", "Radical Simplifier", "Pull out the squares", "√", "from-amber-300 to-yellow-700", "10", "Algebra", "Simplify radicals", 4, "choice"),
+  m("rationalMatch", "Rational Expression Match", "Match reduced forms", "➗", "from-sky-300 to-blue-700", "10", "Algebra", "Reduce rational expressions", 4, "match"),
+  m("binomialExpansion", "Binomial Expansion", "Pascal's coefficients", "🧨", "from-emerald-400 to-cyan-700", "11", "Algebra", "Expand (x + k)ⁿ", 4, "choice"),
+  m("geometricSeriesSum", "Geometric Series Sum", "Add the powers", "🌀", "from-teal-400 to-emerald-700", "11", "Algebra", "Compute Sₙ = a₁(rⁿ − 1)/(r − 1)", 4, "numpad", "Fill in number"),
+  m("logEquation", "Log Equation Solver", "Drop the log", "📜", "from-purple-400 to-fuchsia-700", "11", "Algebra", "Solve log equations for x", 4, "numpad", "Fill in number"),
+  m("piecewiseSwitch", "Piecewise Function Switchboard", "Pick the right piece", "🔀", "from-orange-400 to-rose-700", "11", "Algebra", "Evaluate piecewise functions", 4, "choice"),
+  m("polynomialRoots", "Polynomial Roots Finder", "Spot the zeros", "🌱", "from-emerald-400 to-teal-700", "11", "Algebra", "Find polynomial roots", 5, "choice"),
+  m("quadraticSystems", "Quadratic Systems Puzzle", "Find the intersections", "📈", "from-rose-400 to-red-700", "11", "Algebra", "Solve quadratic systems", 5, "choice"),
+  m("syntheticDivision", "Synthetic Division Machine", "Divide step by step", "🛠️", "from-zinc-300 to-zinc-700", "11", "Algebra", "Synthetic division", 5, "choice"),
   m("angleDetective", "Angle Relationship Detective", "Find the missing angle", "🕵️", "from-amber-300 to-amber-700", "9", "Geometry", "Apply angle relationships", 3, "numpad", "Fill in number"),
   m("parallelTransversal", "Parallel Lines Transversal", "Find the alternate angle", "🔀", "from-blue-400 to-violet-700", "9", "Geometry", "Parallel lines theorems", 4, "choice"),
   m("polygonAngles", "Polygon Interior Angle Builder", "Sum the polygon angles", "🛡️", "from-emerald-300 to-teal-700", "9", "Geometry", "Use (n−2)·180", 3, "numpad", "Fill in number"),
@@ -4244,6 +4276,572 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
       const ans = `${a + b}x + ${c}`;
       return dragEng(m, difficulty, `Combine tiles: ${a}x + ${b}x + ${c}.`, ans, [`${a * b}x + ${c}`, `${a + b}x²`, `${a + b + c}x`],
         "Combined expression", "Add like-term tiles.", ["Tiles for x merge.", "Constant tile stays alone."], `${a}x + ${b}x = ${a + b}x; add ${c} to get ${ans}.`);
+    }
+    case "distributiveProperty": {
+      const a = rand(2, 7);
+      const bCoef = rand(2, 9);
+      const cConst = rand(2, 9);
+      const useMinus = Math.random() < 0.4;
+      const opStr = useMinus ? "−" : "+";
+      const product = a * cConst;
+      const answer = useMinus ? `${a * bCoef}x − ${product}` : `${a * bCoef}x + ${product}`;
+      const distractors = [
+        useMinus ? `${a * bCoef}x − ${cConst}` : `${a * bCoef}x + ${cConst}`,
+        `${a + bCoef}x ${opStr} ${a + cConst}`,
+        `${bCoef * cConst}x ${opStr} ${a}`,
+      ];
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Distribute: ${a}(${bCoef}x ${opStr} ${cConst}).`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: `${a}(${bCoef}x ${opStr} ${cConst})`,
+            subtitle: "a(b ± c) = ab ± ac",
+          }),
+          hint: "Multiply a into every term inside the parentheses.",
+          hints: [`${a} × ${bCoef}x = ${a * bCoef}x.`, `${a} × ${cConst} = ${product}.`],
+          explanation: `${a}(${bCoef}x ${opStr} ${cConst}) = ${answer}.`,
+        },
+        answer,
+        distractors,
+      );
+    }
+    case "compoundInequality": {
+      const b = rand(1, 6);
+      const lo = rand(-4, 4);
+      const span = rand(2, 6);
+      const hi = lo + span;
+      const xLo = lo - b;
+      const xHi = hi - b;
+      const useMinus = Math.random() < 0.5;
+      const bDisplay = useMinus ? -b : b;
+      const xLoEff = useMinus ? lo - bDisplay : lo - b;
+      const xHiEff = useMinus ? hi - bDisplay : hi - b;
+      const opText = useMinus ? `− ${b}` : `+ ${b}`;
+      const answer = `${xLoEff} ≤ x ≤ ${xHiEff}`;
+      const distractors = [
+        `${lo} ≤ x ≤ ${hi}`,
+        `${xLoEff + 1} ≤ x ≤ ${xHiEff + 1}`,
+        `${-xHiEff} ≤ x ≤ ${-xLoEff}`,
+      ];
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Solve: ${lo} ≤ x ${opText} ≤ ${hi}.`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: `${lo} ≤ x ${opText} ≤ ${hi}`,
+            subtitle: "Apply the same step to all three parts",
+          }),
+          hint: `${useMinus ? "Add" : "Subtract"} ${b} to/from every part.`,
+          hints: [
+            `Treat it like two inequalities at once.`,
+            `${lo} ${useMinus ? "+" : "−"} ${b} ≤ x ≤ ${hi} ${useMinus ? "+" : "−"} ${b}.`,
+          ],
+          explanation: `${useMinus ? "Add" : "Subtract"} ${b} from each side: ${answer}.`,
+        },
+        answer,
+        distractors,
+      );
+    }
+    case "slopeIntercept": {
+      const slope = pick([-3, -2, -1, 1, 2, 3, 4] as const);
+      const x0 = rand(-3, 5);
+      const bIntercept = rand(-6, 8);
+      const y0 = slope * x0 + bIntercept;
+      return numpadEng(
+        m, difficulty,
+        `A line has slope ${slope} and passes through (${x0}, ${y0}). Find the y-intercept b.`,
+        { kind: "coordinate", title: `slope = ${slope}, point (${x0}, ${y0})`, subtitle: "y = mx + b" },
+        bIntercept,
+        "Use y = mx + b and solve for b.",
+        [`b = y − m·x.`, `b = ${y0} − (${slope})·(${x0}).`],
+        `b = ${y0} − ${slope}·${x0} = ${bIntercept}.`,
+        true,
+      );
+    }
+    case "pointSlopeMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each point-slope form with its slope-intercept equivalent.",
+          pairs: [
+            ["y − 3 = 2(x − 1)", "y = 2x + 1"],
+            ["y − 5 = −1(x + 2)", "y = −x + 3"],
+            ["y + 4 = 3(x − 2)", "y = 3x − 10"],
+            ["y − 1 = (1/2)(x + 4)", "y = (1/2)x + 3"],
+          ],
+          hint: "Distribute the slope, then isolate y.",
+          hints: ["y − y₁ = m(x − x₁).", "Solve for y: y = mx + (y₁ − m·x₁)."],
+          explanation: "Distribute m, then add y₁ to both sides.",
+        },
+        {
+          prompt: "Pair each line description with its slope-intercept equation.",
+          pairs: [
+            ["slope 4, through (0, 2)", "y = 4x + 2"],
+            ["slope −2, through (1, 3)", "y = −2x + 5"],
+            ["slope 1, through (−1, −1)", "y = x"],
+            ["slope 0, through (3, 7)", "y = 7"],
+          ],
+          hint: "Use y = mx + b and the given point.",
+          hints: ["b = y − m·x.", "Plug the point into the formula."],
+          explanation: "Compute b from the point, then write y = mx + b.",
+        },
+        {
+          prompt: "Pair each pair of points with the slope of the line through them.",
+          pairs: [
+            ["(0, 0) and (2, 4)", "slope 2"],
+            ["(1, 2) and (3, 8)", "slope 3"],
+            ["(0, 5) and (5, 0)", "slope −1"],
+            ["(−2, 1) and (2, 1)", "slope 0"],
+          ],
+          hint: "Slope = (y₂ − y₁) / (x₂ − x₁).",
+          hints: ["Rise over run.", "Watch the signs in the subtraction."],
+          explanation: "Use the slope formula on each pair.",
+        },
+        {
+          prompt: "Pair each line with its parallel or perpendicular partner through the origin.",
+          pairs: [
+            ["y = 2x + 5 (parallel)", "y = 2x"],
+            ["y = 2x + 5 (perpendicular)", "y = −(1/2)x"],
+            ["y = −3x + 1 (parallel)", "y = −3x"],
+            ["y = −3x + 1 (perpendicular)", "y = (1/3)x"],
+          ],
+          hint: "Parallel keeps slope; perpendicular uses negative reciprocal.",
+          hints: ["Parallel: same m.", "Perpendicular: m → −1/m."],
+          explanation: "Match slopes for parallel; flip and negate for perpendicular.",
+        },
+      ]);
+    }
+    case "absoluteValueEquation": {
+      const bConst = rand(1, 6) * (Math.random() < 0.5 ? 1 : -1);
+      const cVal = rand(2, 10);
+      const x1 = cVal - bConst;
+      const x2 = -cVal - bConst;
+      const sortedX = x1 < x2 ? [x1, x2] : [x2, x1];
+      const answer = `x = ${sortedX[0]} or x = ${sortedX[1]}`;
+      const bStr = bConst >= 0 ? `+ ${bConst}` : `− ${Math.abs(bConst)}`;
+      const distractors = [
+        `x = ${cVal - bConst} only`,
+        `x = ${cVal} or x = −${cVal}`,
+        `No solution`,
+      ].filter((d) => d !== answer);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Solve |x ${bStr}| = ${cVal}.`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: `|x ${bStr}| = ${cVal}`,
+            subtitle: "Absolute value splits into two cases",
+          }),
+          hint: `x ${bStr} = ±${cVal}.`,
+          hints: [
+            "An absolute value equation has two cases.",
+            `Positive case: x ${bStr} = ${cVal}.`,
+            `Negative case: x ${bStr} = −${cVal}.`,
+          ],
+          explanation: `Split into two: x = ${cVal} − (${bConst}) = ${x1}, and x = −${cVal} − (${bConst}) = ${x2}.`,
+        },
+        answer,
+        distractors,
+      );
+    }
+    case "quadraticFormula": {
+      const r1 = pick([1, 2, 3, 4, 5] as const);
+      const r2 = -pick([1, 2, 3, 4, 5] as const);
+      const bCoef = -(r1 + r2);
+      const cConst = r1 * r2;
+      const delta = bCoef * bCoef - 4 * cConst;
+      const bStr = bCoef >= 0 ? `+ ${bCoef}` : `− ${Math.abs(bCoef)}`;
+      const cStr = cConst >= 0 ? `+ ${cConst}` : `− ${Math.abs(cConst)}`;
+      const sortedRoots = [r1, r2].sort((p, q) => p - q);
+      const answer = `x = ${sortedRoots[0]} or x = ${sortedRoots[1]}`;
+      const distractors = [
+        `x = ${-r1} or x = ${-r2}`,
+        `x = ${r1 + r2} or x = ${r1 * r2}`,
+        `x = ±√${Math.abs(cConst)}`,
+      ];
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Use the quadratic formula to solve x² ${bStr}x ${cStr} = 0.`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: `x² ${bStr}x ${cStr} = 0`,
+            subtitle: "x = (−b ± √(b² − 4ac)) / 2a",
+          }),
+          hint: "Start by computing the discriminant Δ = b² − 4ac.",
+          hints: [
+            `a = 1, b = ${bCoef}, c = ${cConst}.`,
+            `Δ = b² − 4ac = ${delta}.`,
+            `Plug into x = (−b ± √Δ) / 2a.`,
+          ],
+          explanation: `Δ = ${delta}; √Δ = ${Math.sqrt(delta)}. Roots: ${sortedRoots[0]} and ${sortedRoots[1]}.`,
+        },
+        answer,
+        distractors,
+      );
+    }
+    case "discriminantClassify": {
+      const variants: { quad: string; delta: number; label: string }[] = [
+        { quad: "x² − 5x + 6", delta: 1, label: "Two distinct real roots" },
+        { quad: "x² + x − 6", delta: 25, label: "Two distinct real roots" },
+        { quad: "x² − 7x + 12", delta: 1, label: "Two distinct real roots" },
+        { quad: "x² − 4x + 4", delta: 0, label: "One repeated real root" },
+        { quad: "x² + 6x + 9", delta: 0, label: "One repeated real root" },
+        { quad: "x² − 10x + 25", delta: 0, label: "One repeated real root" },
+        { quad: "x² + 2x + 5", delta: -16, label: "Two complex conjugate roots" },
+        { quad: "x² − 2x + 5", delta: -16, label: "Two complex conjugate roots" },
+        { quad: "x² + 4x + 8", delta: -16, label: "Two complex conjugate roots" },
+      ];
+      const v = pick(variants);
+      const allLabels = ["Two distinct real roots", "One repeated real root", "Two complex conjugate roots"];
+      const distractors = allLabels.filter((label) => label !== v.label);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Classify the roots of ${v.quad} = 0.`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: `${v.quad} = 0`,
+            subtitle: "Use Δ = b² − 4ac",
+          }),
+          hint: "Compute the discriminant first.",
+          hints: [
+            `Δ = ${v.delta}.`,
+            "Δ > 0: two distinct real roots.",
+            "Δ = 0: one repeated real root.",
+            "Δ < 0: two complex conjugate roots.",
+          ],
+          explanation: `Δ = ${v.delta} → ${v.label.toLowerCase()}.`,
+        },
+        v.label,
+        distractors,
+      );
+    }
+    case "geometricSeriesSum": {
+      const a1 = pick([1, 2, 3, 4] as const);
+      const r = pick([2, 3] as const);
+      const n = pick([3, 4, 5] as const);
+      const rn = Math.pow(r, n);
+      const sum = (a1 * (rn - 1)) / (r - 1);
+      return numpadEng(
+        m, difficulty,
+        `Geometric series: a₁ = ${a1}, r = ${r}, n = ${n}. Find Sₙ.`,
+        { kind: "icon", icon: m.emoji, title: `Σ ${a1}·${r}^(k−1), k=1..${n}`, subtitle: `Sₙ = a₁(rⁿ − 1)/(r − 1)` },
+        sum,
+        "Apply Sₙ = a₁·(rⁿ − 1)/(r − 1).",
+        [`rⁿ = ${r}^${n} = ${rn}.`, `Sₙ = ${a1}·(${rn} − 1)/${r - 1}.`],
+        `Sₙ = ${a1}·(${rn} − 1)/${r - 1} = ${sum}.`,
+        false,
+      );
+    }
+    case "literalEquation": {
+      return bankChoice(m, difficulty, [
+        {
+          prompt: "Solve A = ½bh for h.",
+          visual: { kind: "icon", icon: m.emoji, title: "A = ½bh", subtitle: "Triangle area, solve for h" },
+          answer: "h = 2A / b",
+          distractors: ["h = A / (2b)", "h = 2A − b", "h = b / (2A)"],
+          hint: "Multiply both sides by 2, then divide by b.",
+          hints: ["2A = bh.", "Divide both sides by b."],
+          explanation: "A = ½bh → 2A = bh → h = 2A / b.",
+        },
+        {
+          prompt: "Solve C = 2πr for r.",
+          visual: { kind: "icon", icon: m.emoji, title: "C = 2πr", subtitle: "Circle circumference" },
+          answer: "r = C / (2π)",
+          distractors: ["r = 2πC", "r = C − 2π", "r = π / (2C)"],
+          hint: "Divide both sides by 2π.",
+          hints: ["Isolate r.", "C / (2π) = r."],
+          explanation: "C = 2πr → r = C / (2π).",
+        },
+        {
+          prompt: "Solve y = mx + b for x.",
+          visual: { kind: "icon", icon: m.emoji, title: "y = mx + b", subtitle: "Slope-intercept" },
+          answer: "x = (y − b) / m",
+          distractors: ["x = (y + b) / m", "x = y − b − m", "x = m(y − b)"],
+          hint: "Subtract b, then divide by m.",
+          hints: ["y − b = mx.", "Divide both sides by m."],
+          explanation: "Move b across first, then divide by m.",
+        },
+        {
+          prompt: "Solve F = (9/5)C + 32 for C.",
+          visual: { kind: "icon", icon: m.emoji, title: "F = (9/5)C + 32", subtitle: "Temperature" },
+          answer: "C = (5/9)(F − 32)",
+          distractors: ["C = (9/5)(F + 32)", "C = F − 32", "C = (F − 32) / 9"],
+          hint: "Subtract 32, then multiply by 5/9.",
+          hints: ["F − 32 = (9/5)C.", "Multiply both sides by 5/9."],
+          explanation: "Reverse each operation in order.",
+        },
+        {
+          prompt: "Solve V = πr²h for h.",
+          visual: { kind: "icon", icon: m.emoji, title: "V = πr²h", subtitle: "Cylinder volume" },
+          answer: "h = V / (πr²)",
+          distractors: ["h = V · πr²", "h = πr² − V", "h = V / r²"],
+          hint: "Divide both sides by πr².",
+          hints: ["Isolate h.", "Divide V by the base area."],
+          explanation: "V = πr²h → h = V / (πr²).",
+        },
+        {
+          prompt: "Solve d = rt for t.",
+          visual: { kind: "icon", icon: m.emoji, title: "d = rt", subtitle: "Distance-rate-time" },
+          answer: "t = d / r",
+          distractors: ["t = r / d", "t = d · r", "t = d − r"],
+          hint: "Divide both sides by r.",
+          hints: ["Isolate t.", "Travel time = distance / rate."],
+          explanation: "d = rt → t = d / r.",
+        },
+      ]);
+    }
+    case "directVariation": {
+      const k = rand(2, 9);
+      const x = rand(2, 7);
+      const y = k * x;
+      const askY = Math.random() < 0.5;
+      if (askY) {
+        const x2 = rand(2, 9);
+        const y2 = k * x2;
+        return numpadEng(
+          m, difficulty,
+          `y varies directly with x. When x = ${x}, y = ${y}. Find y when x = ${x2}.`,
+          { kind: "icon", icon: m.emoji, title: "y = kx", subtitle: `k = ${k}` },
+          y2,
+          "Find k first, then multiply.",
+          [`k = y / x = ${y} / ${x} = ${k}.`, `y = ${k} · ${x2}.`],
+          `k = ${k}; y = ${k} · ${x2} = ${y2}.`,
+          false,
+        );
+      }
+      return numpadEng(
+        m, difficulty,
+        `y varies directly with x. When x = ${x}, y = ${y}. Find the constant k in y = kx.`,
+        { kind: "icon", icon: m.emoji, title: "y = kx", subtitle: `(${x}, ${y})` },
+        k,
+        "k = y / x.",
+        ["Direct variation: y / x is constant.", `${y} / ${x} = ?`],
+        `k = ${y} / ${x} = ${k}.`,
+        false,
+      );
+    }
+    case "inverseVariation": {
+      const kChoices = [12, 18, 24, 30, 36, 48, 60] as const;
+      const k = pick(kChoices);
+      const xCandidates = [2, 3, 4, 6].filter((v) => k % v === 0);
+      const x1 = pick(xCandidates);
+      const y1 = k / x1;
+      const x2 = pick(xCandidates.filter((v) => v !== x1));
+      const y2 = k / x2;
+      return numpadEng(
+        m, difficulty,
+        `y varies inversely with x. When x = ${x1}, y = ${y1}. Find y when x = ${x2}.`,
+        { kind: "icon", icon: m.emoji, title: "y = k / x", subtitle: `k = ${k}` },
+        y2,
+        "First find k = x · y, then divide by the new x.",
+        [`k = ${x1} · ${y1} = ${k}.`, `y = ${k} / ${x2}.`],
+        `k = ${k}; y = ${k} / ${x2} = ${y2}.`,
+        false,
+      );
+    }
+    case "exponentRules": {
+      const a = rand(2, 5);
+      const m1 = rand(2, 6);
+      const n1 = rand(2, 6);
+      return bankChoice(m, difficulty, [
+        {
+          prompt: `Simplify ${a}^${m1} · ${a}^${n1}.`,
+          visual: { kind: "icon", icon: m.emoji, title: `${a}^${m1} · ${a}^${n1}`, subtitle: "Product of powers" },
+          answer: `${a}^${m1 + n1}`,
+          distractors: [`${a}^${m1 * n1}`, `${a * a}^${m1 + n1}`, `${m1 + n1}^${a}`],
+          hint: "Same base → add exponents.",
+          hints: ["a^m · a^n = a^(m+n).", `${m1} + ${n1} = ${m1 + n1}.`],
+          explanation: `${a}^${m1} · ${a}^${n1} = ${a}^${m1 + n1}.`,
+        },
+        {
+          prompt: `Simplify (${a}^${m1})^${n1}.`,
+          visual: { kind: "icon", icon: m.emoji, title: `(${a}^${m1})^${n1}`, subtitle: "Power of a power" },
+          answer: `${a}^${m1 * n1}`,
+          distractors: [`${a}^${m1 + n1}`, `${a * n1}^${m1}`, `${a}^${Math.pow(m1, n1)}`],
+          hint: "Multiply the exponents.",
+          hints: ["(a^m)^n = a^(m·n).", `${m1} · ${n1} = ${m1 * n1}.`],
+          explanation: `(${a}^${m1})^${n1} = ${a}^${m1 * n1}.`,
+        },
+        {
+          prompt: `Simplify ${a}^${m1 + n1} / ${a}^${n1}.`,
+          visual: { kind: "icon", icon: m.emoji, title: `${a}^${m1 + n1} / ${a}^${n1}`, subtitle: "Quotient of powers" },
+          answer: `${a}^${m1}`,
+          distractors: [`${a}^${m1 + 2 * n1}`, `1^${m1}`, `${a}^${Math.abs(n1 - m1)}`],
+          hint: "Same base → subtract exponents.",
+          hints: ["a^m / a^n = a^(m−n).", `${m1 + n1} − ${n1} = ${m1}.`],
+          explanation: `${a}^${m1 + n1} / ${a}^${n1} = ${a}^${m1}.`,
+        },
+        {
+          prompt: `Simplify ${a}^0 · ${a}^${m1}.`,
+          visual: { kind: "icon", icon: m.emoji, title: `${a}^0 · ${a}^${m1}`, subtitle: "Zero exponent" },
+          answer: `${a}^${m1}`,
+          distractors: ["0", "1", `${a}^${m1 + 1}`],
+          hint: "Any nonzero base to the 0 is 1.",
+          hints: ["a^0 = 1.", "1 · a^m = a^m."],
+          explanation: `${a}^0 = 1, so the product is ${a}^${m1}.`,
+        },
+        {
+          prompt: `Rewrite ${a}^(−${m1}) without a negative exponent.`,
+          visual: { kind: "icon", icon: m.emoji, title: `${a}^−${m1}`, subtitle: "Negative exponent" },
+          answer: `1 / ${a}^${m1}`,
+          distractors: [`−${a}^${m1}`, "0", `${a}^${m1}`],
+          hint: "Negative exponent → reciprocal.",
+          hints: ["a^(−n) = 1 / a^n.", "Flip to the denominator."],
+          explanation: `${a}^(−${m1}) = 1 / ${a}^${m1}.`,
+        },
+      ]);
+    }
+    case "completingSquare": {
+      const half = rand(1, 6);
+      const bCoef = 2 * half;
+      const cConst = rand(-4, 9);
+      const k = cConst - half * half;
+      const useMinus = Math.random() < 0.5;
+      const sign = useMinus ? "−" : "+";
+      const innerSign = useMinus ? "−" : "+";
+      const cStr = cConst >= 0 ? `+ ${cConst}` : `− ${Math.abs(cConst)}`;
+      const kStr = k >= 0 ? `+ ${k}` : `− ${Math.abs(k)}`;
+      const answer = `(x ${innerSign} ${half})² ${kStr}`;
+      const distractors = [
+        `(x ${useMinus ? "+" : "−"} ${half})² ${kStr}`,
+        `(x ${innerSign} ${bCoef})² ${cStr}`,
+        `(x ${innerSign} ${half})² ${cStr}`,
+      ];
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Complete the square: x² ${sign} ${bCoef}x ${cStr}.`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: `x² ${sign} ${bCoef}x ${cStr}`,
+            subtitle: "Convert to vertex form",
+          }),
+          hint: "Take half the x-coefficient and square it.",
+          hints: [
+            `Half of ${bCoef} is ${half}; ${half}² = ${half * half}.`,
+            `Adjust the constant: ${cConst} − ${half * half} = ${k}.`,
+          ],
+          explanation: `x² ${sign} ${bCoef}x ${cStr} = (x ${innerSign} ${half})² + (${cConst} − ${half * half}) = ${answer}.`,
+        },
+        answer,
+        distractors,
+      );
+    }
+    case "absValueInequality": {
+      const aOffset = rand(-5, 5);
+      const cVal = rand(2, 8);
+      const lessThan = Math.random() < 0.5;
+      const aStr = aOffset >= 0 ? `− ${aOffset}` : `+ ${Math.abs(aOffset)}`;
+      const opStr = lessThan ? "<" : ">";
+      const lo = aOffset - cVal;
+      const hi = aOffset + cVal;
+      const answer = lessThan
+        ? `${lo} < x < ${hi}`
+        : `x < ${lo} or x > ${hi}`;
+      const distractors = lessThan
+        ? [
+            `x < ${lo} or x > ${hi}`,
+            `${-hi} < x < ${-lo}`,
+            `${lo} ≤ x ≤ ${hi - 1}`,
+          ]
+        : [
+            `${lo} < x < ${hi}`,
+            `x > ${hi}`,
+            `x < ${lo}`,
+          ];
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Solve |x ${aStr}| ${opStr} ${cVal}.`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: `|x ${aStr}| ${opStr} ${cVal}`,
+            subtitle: "Absolute value inequality",
+          }),
+          hint: lessThan
+            ? `< means "inside": −${cVal} < x ${aStr} < ${cVal}.`
+            : `> means "outside": x ${aStr} > ${cVal} or x ${aStr} < −${cVal}.`,
+          hints: [
+            lessThan ? "Rewrite as a compound inequality." : "Rewrite as a disjunction (two parts).",
+            lessThan
+              ? `Add ${aOffset} to each part: ${lo} < x < ${hi}.`
+              : `Solve each: x > ${hi} or x < ${lo}.`,
+          ],
+          explanation: `|x ${aStr}| ${opStr} ${cVal} → ${answer}.`,
+        },
+        answer,
+        distractors,
+      );
+    }
+    case "logEquation": {
+      const baseA = pick([2, 3, 5, 10] as const);
+      const dExp = rand(2, baseA === 10 ? 3 : baseA === 2 ? 5 : 3);
+      const cOffset = rand(-5, 5);
+      const power = Math.pow(baseA, dExp);
+      const x = power - cOffset;
+      const cStr = cOffset >= 0 ? `+ ${cOffset}` : `− ${Math.abs(cOffset)}`;
+      return numpadEng(
+        m, difficulty,
+        `Solve log_${baseA}(x ${cStr}) = ${dExp}.`,
+        { kind: "icon", icon: m.emoji, title: `log_${baseA}(x ${cStr}) = ${dExp}`, subtitle: "Solve for x" },
+        x,
+        "Rewrite in exponential form, then isolate x.",
+        [`${baseA}^${dExp} = x ${cStr}.`, `${baseA}^${dExp} = ${power}.`, `x = ${power} ${cOffset >= 0 ? "−" : "+"} ${Math.abs(cOffset)}.`],
+        `x = ${baseA}^${dExp} − (${cOffset}) = ${power} − (${cOffset}) = ${x}.`,
+        true,
+      );
+    }
+    case "binomialExpansion": {
+      const n = pick([2, 3, 4] as const);
+      const k = rand(1, 4);
+      const variants = [
+        {
+          n: 2,
+          ans: `x² + ${2 * k}x + ${k * k}`,
+          distractors: [`x² + ${k}x + ${k * k}`, `x² + ${2 * k}x − ${k * k}`, `x² + ${k * k}`],
+          exp: `(x + ${k})² = x² + 2·${k}·x + ${k}² = x² + ${2 * k}x + ${k * k}.`,
+          row: "1, 2, 1",
+        },
+        {
+          n: 3,
+          ans: `x³ + ${3 * k}x² + ${3 * k * k}x + ${k * k * k}`,
+          distractors: [
+            `x³ + ${k}x² + ${k * k}x + ${k * k * k}`,
+            `x³ + ${3 * k}x² − ${3 * k * k}x + ${k * k * k}`,
+            `x³ + ${3 * k * k}x + ${k * k * k}`,
+          ],
+          exp: `(x + ${k})³ uses Pascal's row 1, 3, 3, 1 with descending x and ascending ${k}.`,
+          row: "1, 3, 3, 1",
+        },
+        {
+          n: 4,
+          ans: `x⁴ + ${4 * k}x³ + ${6 * k * k}x² + ${4 * k * k * k}x + ${k * k * k * k}`,
+          distractors: [
+            `x⁴ + ${k}x³ + ${k * k}x² + ${k * k * k}x + ${k * k * k * k}`,
+            `x⁴ + ${4 * k}x³ + ${4 * k * k}x² + ${4 * k * k * k}x + ${k * k * k * k}`,
+            `x⁴ + ${k * k * k * k}`,
+          ],
+          exp: `(x + ${k})⁴ uses Pascal's row 1, 4, 6, 4, 1.`,
+          row: "1, 4, 6, 4, 1",
+        },
+      ];
+      const v = variants.find((item) => item.n === n)!;
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Expand (x + ${k})^${n}.`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: `(x + ${k})^${n}`,
+            subtitle: "Binomial theorem",
+          }),
+          hint: `Use Pascal's triangle row for n = ${n}.`,
+          hints: [
+            `Row: ${v.row}.`,
+            `Multiply each coefficient by descending powers of x and ascending powers of ${k}.`,
+          ],
+          explanation: v.exp,
+        },
+        v.ans,
+        v.distractors,
+      );
     }
     case "exponentMatch": {
       const a = rand(2, 5);
