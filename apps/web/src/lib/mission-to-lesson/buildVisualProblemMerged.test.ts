@@ -196,4 +196,54 @@ describe("buildVisualProblemMergedCorrect", () => {
     const o = JSON.parse(merged) as { visual: { referenceImages?: unknown } };
     expect(o.visual.referenceImages).toBeUndefined();
   });
+
+  it("drops tap-to-shade workspace when the prompt asks for the final numeric result of an expression", () => {
+    const merged = buildVisualProblemMergedCorrect(
+      {
+        problemScenario: "You need to solve the following mathematical expression: **(8 + 2) × 5 - 6 ÷ 3**.",
+        finalPrompt: "What is the final result of the expression?",
+        visualWorkspace: { kind: "part_model", totalParts: 8, targetShadedCount: 1, match: "count" },
+      },
+      { answer: "48" }
+    );
+    const o = JSON.parse(merged) as { visual: { kind: string }; answer: string };
+    expect(o.visual.kind).toBe("none");
+    expect(o.answer).toBe("48");
+  });
+
+  it("corrects PEMDAS for (7+3)×2-4÷2 when the stored key is wrong", () => {
+    const merged = buildVisualProblemMergedCorrect(
+      {
+        problemScenario: "You have the expression **(7 + 3) × 2 - 4 ÷ 2**. Follow order of operations.",
+        finalPrompt: "What is the final result of the expression?",
+        visualWorkspace: { kind: "part_model", totalParts: 8, targetShadedCount: 1, match: "count" },
+      },
+      { answer: "20" }
+    );
+    const o = JSON.parse(merged) as { answer: string; visual: { kind: string } };
+    expect(o.answer).toBe("18");
+    expect(o.visual.kind).toBe("none");
+  });
+
+  it("drops expression-token tiles when the stem asks for a final result", () => {
+    const merged = buildVisualProblemMergedCorrect(
+      {
+        problemScenario: "Compute step by step.",
+        finalPrompt: "What is the final result of the expression?",
+        visualWorkspace: { kind: "part_model", totalParts: 4, targetShadedCount: 1, match: "count" },
+      },
+      {
+        answer: "99",
+        visual: {
+          kind: "part_model",
+          totalParts: 4,
+          targetShadedCount: 1,
+          match: "count",
+          cellLabels: ["(2+3)", "× 4", "- 1", "= ?"],
+        },
+      }
+    );
+    const o = JSON.parse(merged) as { visual: { kind: string } };
+    expect(o.visual.kind).toBe("none");
+  });
 });

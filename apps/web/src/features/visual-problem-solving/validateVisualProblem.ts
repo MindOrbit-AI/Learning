@@ -307,6 +307,12 @@ function textMatches(expected: string, got: string, loose: boolean): boolean {
   if (!loose) return false;
   const strip = (s: string) => s.replace(/\s+/g, "");
   if (strip(a) === strip(b)) return true;
+  const numLike = /^-?\d+(?:[.,]\d+)?$/;
+  if (numLike.test(strip(a)) && numLike.test(strip(b))) {
+    const na = Number(strip(a).replace(",", "."));
+    const nb = Number(strip(b).replace(",", "."));
+    if (Number.isFinite(na) && Number.isFinite(nb) && Math.abs(na - nb) < 1e-6) return true;
+  }
   return strip(b).includes(strip(a)) || strip(a).includes(strip(b));
 }
 

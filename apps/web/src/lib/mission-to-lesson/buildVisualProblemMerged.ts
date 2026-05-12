@@ -2,6 +2,7 @@ import { expandNumberLineBounds, inferNumericTarget } from "@/features/visual-pr
 import { normalizeBasePairTokens } from "@/features/visual-problem-solving/basePairSelectValidation";
 import { reconcilePartModelCountTarget } from "@/features/visual-problem-solving/partModelCountTarget";
 import { DEFAULT_PLANT_REFERENCE_IMAGE_PATH } from "@/features/visual-problem-solving/plantReferenceArt";
+import { correctTextAnswerIfExpressionEvalDiffers } from "@/lib/arithmetic-expression-eval";
 
 function isTapShadePartKind(kind: string): boolean {
   return (
@@ -24,6 +25,54 @@ function buildVisualStem(content: Record<string, unknown>): string {
   return [content.problemScenario, content.finalPrompt, content.title]
     .map((x) => String(x ?? ""))
     .join(" ");
+}
+
+/** Prompt asks for a single numeric outcome of evaluating an expression (not a tap-to-shade part model). */
+function stemAsksNumericExpressionResult(stem: string): boolean {
+  const s = stem.toLowerCase();
+  if (/\bfinal\s+result\b/.test(s)) return true;
+  if (/\bresult\s+of\s+(the\s+)?(following\s+)?expression\b/.test(s)) return true;
+  if (/\bvalue\s+of\s+(the\s+)?(following\s+)?expression\b/.test(s)) return true;
+  if (/\bwhat\s+is\s+the\s+(final\s+)?(numerical\s+)?result\b/.test(s)) return true;
+  if (/\bevaluate\s+(the\s+)?expression\b/.test(s)) return true;
+  if (/\bcompute\s+(the\s+)?value\b/.test(s)) return true;
+  if (/\bcalculate\s+(the\s+)?value\b/.test(s)) return true;
+  return false;
+}
+
+function answerLooksLikePlainNumberOrSimpleFraction(text: string): boolean {
+  const t = text.trim().replace(/\s+/g, "");
+  if (!t) return false;
+  if (/^-?\d+(?:[.,]\d+)?$/.test(t)) return true;
+  return /^\d+\/\d+$/.test(t);
+}
+
+/** AI often emits expression chunks as tile labels; that is not a coherent "shade N parts" model. */
+function cellLabelsLookLikeArithmeticTokens(vis: Record<string, unknown>): boolean {
+  const labels = vis.cellLabels ?? vis.partLabels ?? vis.labels;
+  if (!Array.isArray(labels) || labels.length < 2) return false;
+  const joined = labels.map((x) => String(x)).join(" ");
+  const hasParen = /[()]/.test(joined);
+  const hasOp = /[+\-×÷*/]|(\bdiv\b)|(\btimes\b)/i.test(joined);
+  if (hasParen && hasOp) return true;
+  const anyParen = labels.some((x) => /[()]/.test(String(x)));
+  const anyOp = labels.some((x) => /[+\-×÷*/]/.test(String(x)));
+  return anyParen && anyOp;
+}
+
+/** Use text-only grading when the story is "evaluate this expression" but the workspace is a generic tap grid. */
+function shouldUseTextOnlyVisualForArithmetic(
+  content: Record<string, unknown>,
+  textAnswer: string,
+  vis: Record<string, unknown>,
+  vk: string
+): boolean {
+  if (!isTapShadePartKind(vk)) return false;
+  if (String(vis.match ?? "count") !== "count") return false;
+  const stem = buildVisualStem(content);
+  if (!stemAsksNumericExpressionResult(stem)) return false;
+  if (answerLooksLikePlainNumberOrSimpleFraction(textAnswer)) return true;
+  return cellLabelsLookLikeArithmeticTokens(vis);
 }
 
 /**
@@ -227,6 +276,18 @@ function stemSuggestsPlantIllustration(content: Record<string, unknown>): boolea
 function tapModelHasReferenceImages(content: Record<string, unknown>, vis: Record<string, unknown>): boolean {
   const vw = (content.visualWorkspace ?? {}) as Record<string, unknown>;
   return Boolean(firstReferenceImageList(vis, vw, content));
+}
+
+/** Surface `contentJson.referenceImages` on the merged tap model when the answer key did not repeat them. */
+function attachContentReferenceImagesToTapModelVis(content: Record<string, unknown>, vis: Record<string, unknown>): void {
+  const k = String(vis.kind ?? "");
+  if (!isTapShadePartKind(k)) return;
+  const existing = vis.referenceImages;
+  if (Array.isArray(existing) && existing.length > 0) return;
+  const refs = firstReferenceImageList({}, {}, content);
+  if (refs && refs.length > 0) {
+    (vis as { referenceImages: typeof refs }).referenceImages = refs;
+  }
 }
 
 /** When the story is clearly about a plant but no thumbnails were authored, attach bundled reference art. */
@@ -617,6 +678,7 @@ export function buildVisualProblemMergedCorrect(content: Record<string, unknown>
   }
 
   if (!textAnswer) textAnswer = String(content.expectedAnswer ?? "");
+  textAnswer = correctTextAnswerIfExpressionEvalDiffers(content, textAnswer);
 
   if (
     explicitVisual &&
@@ -707,9 +769,19 @@ export function buildVisualProblemMergedCorrect(content: Record<string, unknown>
     if (String(vis.kind ?? "") === "node_link" || String(vis.kind ?? "") === "cause_effect_link") {
       vis = enrichNodeLinkVisualInPlace(vis);
     }
+    {
+      const tapKind = String(vis.kind ?? "");
+      if (
+        isTapShadePartKind(tapKind) &&
+        shouldUseTextOnlyVisualForArithmetic(content, textAnswer, vis, tapKind)
+      ) {
+        return JSON.stringify({ answer: textAnswer, visual: { kind: "none" } });
+      }
+    }
     if (partModelTotalTooSmall(vis)) {
       return JSON.stringify({ answer: textAnswer, visual: { kind: "none" } });
     }
+    attachContentReferenceImagesToTapModelVis(content, vis);
     finalizeTapModelDefaultPlantReference(content, vis);
     return JSON.stringify({ answer: textAnswer, visual: vis });
   }
@@ -856,6 +928,10 @@ export function buildVisualProblemMergedCorrect(content: Record<string, unknown>
       return JSON.stringify({ answer: textAnswer || "?", visual: { kind: "none" } });
     }
   }
+  if (shouldUseTextOnlyVisualForArithmetic(content, textAnswer || "?", implicitVis, "part_model")) {
+    return JSON.stringify({ answer: textAnswer || "?", visual: { kind: "none" } });
+  }
+  attachContentReferenceImagesToTapModelVis(content, implicitVis);
   finalizeTapModelDefaultPlantReference(content, implicitVis);
   return JSON.stringify({
     answer: textAnswer || "?",
