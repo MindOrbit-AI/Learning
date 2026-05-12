@@ -22,6 +22,12 @@ import type {
 import type { QuestionType } from "@mindorbit/types";
 import { mockAIProvider } from "./mock-provider";
 import { parseWeightScalePuzzle } from "./weight-scale-puzzle";
+import {
+  mockStemPuzzle,
+  parseStemPuzzle,
+  type StemPuzzleGenParams,
+  type StemPuzzleSpec,
+} from "./stem-puzzle";
 
 export type ResolvedLlm = { client: OpenAI; model: string };
 
@@ -623,6 +629,67 @@ Include at least one plausible wrong integer in choices that is not correctAnswe
         /* fall through */
       }
       return mockAIProvider.generateWeightScalePuzzle();
+    },
+
+    async generateStemPuzzle(params: StemPuzzleGenParams): Promise<StemPuzzleSpec> {
+      const schemaForMode = (() => {
+        switch (params.mode) {
+          case "choice":
+            return `"choice": { "choices": string[2-6], "answer": string (must equal one of choices) }`;
+          case "match":
+            return `"match": { "pairs": [{ "left": string, "right": string }] (3-6 unique pairs) }`;
+          case "sort":
+            return `"sort": { "categories": string[2-4], "items": [{ "label": string, "category": one-of-categories }] (4-10 items, every category used) }`;
+          case "reorder":
+            return `"reorder": { "correctOrder": string[3-8] (canonical sequence, no duplicates) }`;
+          case "numpad":
+            return `"numpad": { "answer": string (digits or "-" or "."), "allowDecimal": boolean, "allowMinus": boolean }`;
+        }
+      })();
+
+      const system = `You author premium, visual, mobile-first STEM puzzles for an arcade learning app.
+Domain: ${params.domain}. Subject: ${params.subject}. Skill: ${params.skill}. Grade: ${params.grade}. Difficulty: ${params.difficulty}.
+Title context: "${params.title}".
+
+Return ONLY JSON (no markdown). Strict schema:
+{
+  "prompt": string,
+  "hint": string,
+  "hints": string[2-3],
+  "explanation": string (1-3 sentences),
+  ${schemaForMode}
+}
+
+Rules:
+- Match the difficulty: "easy" should be a single-step problem, "medium" two-step, "hard" multi-step reasoning.
+- Stay age-appropriate for grade ${params.grade}.
+- For "choice", make distractors plausible but unambiguous; one and only one correct answer; 4 choices typical.
+- For "match", left/right entries must be short and uniquely pairable.
+- For "sort", categories must be mutually exclusive; spread items roughly evenly.
+- For "reorder", "correctOrder" must be the canonical sequence (we will shuffle for the player).
+- For "numpad", answer must be a numeric string (e.g. "12", "-3", "0.5"); set allowDecimal/allowMinus to match.
+- Reference real ${params.subject} content tied to "${params.skill}". Avoid generic letter labels (A/B/C) — use concrete entities.
+- Hints must build progressively (start broad, end with the key step).`;
+
+      try {
+        const content = await chatLLM(
+          llm,
+          [
+            { role: "system", content: system },
+            {
+              role: "user",
+              content: `Generate one new ${params.difficulty} ${params.mode} puzzle for "${params.title}" in ${params.subject}.`,
+            },
+          ],
+          { jsonMode: true, maxTokens: 900 },
+        );
+        const parsed = JSON.parse(content) as unknown;
+        const spec = parseStemPuzzle(parsed, params.mode);
+        if (spec) return spec;
+      } catch (e) {
+        console.error("stem-puzzle generate:", e);
+      }
+      return mockStemPuzzle(params);
     },
 
     async generateInteractiveGameConfig(

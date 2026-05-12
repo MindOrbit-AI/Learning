@@ -15,6 +15,7 @@ import type {
   InteractiveGameGenerationParams,
   WeightScalePuzzleSpec,
 } from "./interfaces";
+import { mockStemPuzzle, type StemPuzzleGenParams, type StemPuzzleSpec } from "./stem-puzzle";
 import type { QuestionType } from "@mindorbit/types";
 
 const REFLECTION_PROMPTS: Record<string, string> = {
@@ -965,5 +966,9 @@ export const mockAIProvider: AIProvider = {
         },
       ],
     };
+  },
+
+  async generateStemPuzzle(params: StemPuzzleGenParams): Promise<StemPuzzleSpec> {
+    return mockStemPuzzle(params);
   },
 };

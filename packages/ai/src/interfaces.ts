@@ -221,6 +221,11 @@ export interface AIProvider {
 
   /** Generate a solvable weight-scale puzzle (integer weights, consistent equations). */
   generateWeightScalePuzzle(): Promise<WeightScalePuzzleSpec>;
+
+  /** Generate a STEM puzzle (math/science/tech/engineering) with strict per-mode payload. */
+  generateStemPuzzle?(
+    params: import("./stem-puzzle").StemPuzzleGenParams,
+  ): Promise<import("./stem-puzzle").StemPuzzleSpec>;
 }
 
 /** ConceptExplainer - Node-aware concept explanation */
