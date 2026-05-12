@@ -145,6 +145,16 @@ type PuzzleId =
   | "expandedFormBuilder"
   | "unitConversionBridge"
   | "negativeNumberOperate"
+  | "factorPairFinder"
+  | "mixedNumberConvert"
+  | "numberLineCompare"
+  | "fractionMultiplyDivide"
+  | "decimalAddSubtract"
+  | "decimalMultiplyDivide"
+  | "reorderLeastGreatest"
+  | "percentChangeBasics"
+  | "meanMedianMode"
+  | "elapsedTimeClock"
   | "escapeRoom"
   | "linearBalance"
   | "slopeRunner"
@@ -682,6 +692,16 @@ const METAS: PuzzleMeta[] = [
   m("expandedFormBuilder", "Expanded Form Builder", "Stretch out the digits", "🧱", "from-rose-300 to-amber-700", "K-8", "MathFoundations", "Write numbers in expanded form", 2, "choice"),
   m("unitConversionBridge", "Unit Conversion Bridge", "Cross the units", "📐", "from-blue-300 to-cyan-700", "K-8", "MathFoundations", "Convert basic units", 3, "numpad", "Fill in number"),
   m("negativeNumberOperate", "Negative Number Lab", "Operate with negatives", "🧊", "from-indigo-300 to-blue-700", "K-8", "MathFoundations", "Add, subtract, multiply negatives", 3, "numpad", "Fill in number"),
+  m("factorPairFinder", "Factor Pair Finder", "Find a pair that multiplies", "🧩", "from-yellow-400 to-amber-700", "K-8", "MathFoundations", "Identify factor pairs", 2, "choice"),
+  m("mixedNumberConvert", "Mixed Number Convert", "Improper → mixed", "🔢", "from-rose-400 to-pink-700", "K-8", "MathFoundations", "Convert improper fractions to mixed", 3, "choice"),
+  m("numberLineCompare", "Number Line Compare", "Which is bigger?", "⚖️", "from-sky-400 to-indigo-700", "K-8", "MathFoundations", "Compare numbers with <, >, =", 2, "choice"),
+  m("fractionMultiplyDivide", "Fraction × ÷ Lab", "Multiply or divide fractions", "🧪", "from-emerald-300 to-teal-700", "K-8", "MathFoundations", "Multiply and divide fractions", 3, "choice"),
+  m("decimalAddSubtract", "Decimal Add & Subtract", "Line up the points", "➕", "from-cyan-400 to-blue-700", "K-8", "MathFoundations", "Add and subtract decimals", 3, "numpad", "Fill in number"),
+  m("decimalMultiplyDivide", "Decimal × ÷ Lab", "Place the decimal", "✖️", "from-violet-400 to-fuchsia-700", "K-8", "MathFoundations", "Multiply and divide decimals", 3, "numpad", "Fill in number"),
+  m("reorderLeastGreatest", "Least to Greatest", "Order the cards", "📊", "from-amber-300 to-orange-700", "K-8", "MathFoundations", "Order numbers least to greatest", 3, "reorder", "Order steps"),
+  m("percentChangeBasics", "Percent Change", "Increase or decrease", "📈", "from-green-400 to-emerald-700", "9", "MathFoundations", "Compute percent increase / decrease", 3, "numpad", "Fill in number"),
+  m("meanMedianMode", "Mean & Median Lab", "Compute the center", "📍", "from-blue-400 to-violet-700", "K-8", "MathFoundations", "Find mean and median of a list", 3, "numpad", "Fill in number"),
+  m("elapsedTimeClock", "Elapsed Time Clock", "How long passed?", "🕒", "from-indigo-300 to-purple-700", "K-8", "MathFoundations", "Compute elapsed clock time", 3, "choice"),
   m("escapeRoom", "Math Escape Room", "Unlock every door", "🚪", "from-zinc-300 to-violet-700", "K-8", "Algebra", "Chain operations", 3, "swipe"),
   m("absValueDistance", "Absolute Value Distance", "Measure the distance", "📏", "from-cyan-400 to-blue-700", "9", "Algebra", "Compute |a − b|", 3, "numpad", "Fill in number"),
   m("absoluteValueEquation", "Absolute Value Equation", "Solve |x + b| = c", "🪞", "from-fuchsia-400 to-pink-600", "9", "Algebra", "Split into two cases", 3, "choice"),
@@ -2488,6 +2508,367 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
         [op.hint, "Track signs carefully."],
         `${op.prompt} = ${op.answer}.`,
         true,
+      );
+    }
+    case "factorPairFinder": {
+      const factorPairs: Record<number, [number, number][]> = {
+        12: [[1, 12], [2, 6], [3, 4]],
+        18: [[1, 18], [2, 9], [3, 6]],
+        24: [[1, 24], [2, 12], [3, 8], [4, 6]],
+        30: [[1, 30], [2, 15], [3, 10], [5, 6]],
+        36: [[1, 36], [2, 18], [3, 12], [4, 9], [6, 6]],
+        40: [[1, 40], [2, 20], [4, 10], [5, 8]],
+        48: [[1, 48], [2, 24], [3, 16], [4, 12], [6, 8]],
+        60: [[1, 60], [2, 30], [3, 20], [4, 15], [5, 12], [6, 10]],
+      };
+      const n = pick(Object.keys(factorPairs).map(Number));
+      const correct = pick(factorPairs[n]!);
+      const ansStr = `${correct[0]} × ${correct[1]}`;
+      const distractorPool: string[] = [];
+      for (let a = 2; a <= 12; a++) {
+        for (let b = a; b <= 12; b++) {
+          if (a * b !== n) distractorPool.push(`${a} × ${b}`);
+        }
+      }
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Which is a factor pair of ${n}?`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: String(n),
+            subtitle: "Factor pair",
+          }),
+          hint: "A factor pair multiplies to the target number.",
+          hints: [`${correct[0]} × ${correct[1]} = ${n}.`, "Check by multiplying the candidates."],
+          explanation: `${correct[0]} × ${correct[1]} = ${n}.`,
+        },
+        ansStr,
+        sample(distractorPool, 3),
+      );
+    }
+    case "mixedNumberConvert": {
+      const den = pick([3, 4, 5, 6, 8] as const);
+      const whole = rand(1, 5);
+      const fracTop = rand(1, den - 1);
+      const numer = whole * den + fracTop;
+      const ans = `${whole} ${fracTop}/${den}`;
+      const distractors = [
+        `${whole} ${den}/${fracTop}`,
+        `${whole + 1} ${fracTop}/${den}`,
+        `${whole} ${(fracTop % (den - 1)) + 1}/${den}`,
+      ].filter((d) => d !== ans);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Write ${numer}/${den} as a mixed number.`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: `${numer}/${den}`,
+            subtitle: "Improper → mixed",
+          }),
+          hint: "Divide the numerator by the denominator.",
+          hints: [`${numer} ÷ ${den} = ${whole} remainder ${fracTop}.`, `Whole part: ${whole}; fraction: ${fracTop}/${den}.`],
+          explanation: `${numer}/${den} = ${ans}.`,
+        },
+        ans,
+        distractors,
+      );
+    }
+    case "numberLineCompare": {
+      const variants: (() => { aLabel: string; bLabel: string; n1: number; n2: number })[] = [
+        () => {
+          const a = rand(-12, 12);
+          let b = rand(-12, 12);
+          if (b === a) b = a + 1;
+          return { aLabel: String(a), bLabel: String(b), n1: a, n2: b };
+        },
+        () => {
+          const a = Number((rand(10, 99) / 10).toFixed(1));
+          let b = Number((rand(10, 99) / 10).toFixed(1));
+          if (b === a) b = Number((b + 0.1).toFixed(1));
+          return { aLabel: a.toFixed(1), bLabel: b.toFixed(1), n1: a, n2: b };
+        },
+        () => {
+          const den = pick([2, 3, 4, 5, 8] as const);
+          const numA = rand(1, den - 1);
+          let numB = rand(1, den - 1);
+          if (numB === numA) numB = ((numB) % (den - 1)) + 1;
+          return { aLabel: `${numA}/${den}`, bLabel: `${numB}/${den}`, n1: numA / den, n2: numB / den };
+        },
+      ];
+      const v = pick(variants)();
+      const op = v.n1 < v.n2 ? "<" : v.n1 > v.n2 ? ">" : "=";
+      const ans = `${v.aLabel} ${op} ${v.bLabel}`;
+      const distractors = (["<", ">", "="] as const).filter((o) => o !== op).map((o) => `${v.aLabel} ${o} ${v.bLabel}`);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Compare ${v.aLabel} and ${v.bLabel}.`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: `${v.aLabel}   ?   ${v.bLabel}`,
+            subtitle: "Choose <, >, or =",
+          }),
+          hint: "Visualize each number on the number line.",
+          hints: ["Negative numbers are less than positive numbers.", "For fractions with the same denominator, compare numerators."],
+          explanation: `${v.aLabel} ${op} ${v.bLabel}.`,
+        },
+        ans,
+        distractors,
+      );
+    }
+    case "fractionMultiplyDivide": {
+      const multiply = Math.random() < 0.6;
+      const aNum = rand(1, 5);
+      const aDen = rand(2, 8);
+      const bNum = rand(1, 5);
+      const bDen = rand(2, 8);
+      if (multiply) {
+        const top = aNum * bNum;
+        const bot = aDen * bDen;
+        const ans = frac(top, bot);
+        return makeChoice(
+          {
+            ...base(m, difficulty, "choice", `Compute ${aNum}/${aDen} × ${bNum}/${bDen}.`, {
+              kind: "icon",
+              icon: m.emoji,
+              title: `${aNum}/${aDen} × ${bNum}/${bDen}`,
+              subtitle: "Multiply fractions",
+            }),
+            hint: "Multiply numerators and denominators across.",
+            hints: [`Top: ${aNum} × ${bNum} = ${top}.`, `Bottom: ${aDen} × ${bDen} = ${bot}.`],
+            explanation: `${aNum}/${aDen} × ${bNum}/${bDen} = ${top}/${bot} = ${ans}.`,
+          },
+          ans,
+          [frac(aNum + bNum, aDen + bDen), frac(top, bot + 1), frac(top + 1, bot)].filter((d) => d !== ans),
+        );
+      }
+      const top = aNum * bDen;
+      const bot = aDen * bNum;
+      const ans = frac(top, bot);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Compute ${aNum}/${aDen} ÷ ${bNum}/${bDen}.`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: `${aNum}/${aDen} ÷ ${bNum}/${bDen}`,
+            subtitle: "Divide fractions",
+          }),
+          hint: "Keep, change, flip — multiply by the reciprocal.",
+          hints: [`Reciprocal of ${bNum}/${bDen} is ${bDen}/${bNum}.`, `Then multiply: ${aNum}/${aDen} × ${bDen}/${bNum}.`],
+          explanation: `${aNum}/${aDen} ÷ ${bNum}/${bDen} = ${top}/${bot} = ${ans}.`,
+        },
+        ans,
+        [frac(aNum * bNum, aDen * bDen), frac(top + 1, bot), frac(top, bot + 1)].filter((d) => d !== ans),
+      );
+    }
+    case "decimalAddSubtract": {
+      const aTenths = rand(10, 99);
+      const bTenths = rand(10, 99);
+      const add = Math.random() < 0.5;
+      const aVal = aTenths / 10;
+      const bVal = bTenths / 10;
+      const result = add ? (aTenths + bTenths) / 10 : (Math.max(aTenths, bTenths) - Math.min(aTenths, bTenths)) / 10;
+      const expression = add
+        ? `${aVal.toFixed(1)} + ${bVal.toFixed(1)}`
+        : `${Math.max(aVal, bVal).toFixed(1)} − ${Math.min(aVal, bVal).toFixed(1)}`;
+      return numpadEng(
+        m,
+        difficulty,
+        `Compute ${expression}.`,
+        { kind: "icon", icon: m.emoji, title: expression, subtitle: "Line up the decimal points" },
+        String(result),
+        "Line up the decimal points, then add or subtract as usual.",
+        ["Stack the decimals vertically with points aligned.", "Bring the decimal point straight down."],
+        `${expression} = ${result}.`,
+      );
+    }
+    case "decimalMultiplyDivide": {
+      const multiply = Math.random() < 0.6;
+      if (multiply) {
+        const decimal = rand(11, 99) / 10;
+        const multiplier = rand(2, 9);
+        const product = Math.round(decimal * 10 * multiplier);
+        const result = product / 10;
+        return numpadEng(
+          m,
+          difficulty,
+          `Compute ${decimal.toFixed(1)} × ${multiplier}.`,
+          { kind: "icon", icon: m.emoji, title: `${decimal.toFixed(1)} × ${multiplier}`, subtitle: "Decimal × whole" },
+          String(result),
+          "Multiply as whole numbers, then place the decimal.",
+          [`Ignore the decimal: ${decimal * 10} × ${multiplier} = ${product}.`, `Place the decimal one place from the right: ${result}.`],
+          `${decimal.toFixed(1)} × ${multiplier} = ${result}.`,
+        );
+      }
+      const divisor = rand(2, 9);
+      const quotientTenths = rand(11, 49);
+      const dividend = (quotientTenths * divisor) / 10;
+      const result = quotientTenths / 10;
+      return numpadEng(
+        m,
+        difficulty,
+        `Compute ${dividend.toFixed(1)} ÷ ${divisor}.`,
+        { kind: "icon", icon: m.emoji, title: `${dividend.toFixed(1)} ÷ ${divisor}`, subtitle: "Decimal ÷ whole" },
+        String(result),
+        "Divide as whole numbers, then place the decimal in the quotient.",
+        [`Ignore the decimal: ${quotientTenths * divisor} ÷ ${divisor} = ${quotientTenths}.`, `Place the decimal: ${result}.`],
+        `${dividend.toFixed(1)} ÷ ${divisor} = ${result}.`,
+      );
+    }
+    case "reorderLeastGreatest": {
+      const variants: { items: { value: number; label: string }[]; explanation: string }[] = [
+        {
+          items: [
+            { value: -3, label: "-3" },
+            { value: -1, label: "-1" },
+            { value: 0, label: "0" },
+            { value: 2, label: "2" },
+            { value: 5, label: "5" },
+          ],
+          explanation: "Negative numbers come first on the number line.",
+        },
+        {
+          items: [
+            { value: 0.2, label: "0.2" },
+            { value: 0.25, label: "0.25" },
+            { value: 0.5, label: "0.5" },
+            { value: 0.7, label: "0.7" },
+            { value: 0.9, label: "0.9" },
+          ],
+          explanation: "Line up decimals by place value to compare.",
+        },
+        {
+          items: [
+            { value: 1 / 8, label: "1/8" },
+            { value: 1 / 4, label: "1/4" },
+            { value: 3 / 8, label: "3/8" },
+            { value: 1 / 2, label: "1/2" },
+            { value: 3 / 4, label: "3/4" },
+          ],
+          explanation: "Find a common denominator or convert to decimals.",
+        },
+        {
+          items: [
+            { value: -1.5, label: "-1.5" },
+            { value: -0.5, label: "-0.5" },
+            { value: 0.5, label: "0.5" },
+            { value: 1.25, label: "1.25" },
+            { value: 2, label: "2" },
+          ],
+          explanation: "Walk left → right on the number line.",
+        },
+      ];
+      const v = pick(variants);
+      const sorted = [...v.items].sort((a, b) => a.value - b.value);
+      return reorderEng(
+        m,
+        difficulty,
+        "Order from least to greatest.",
+        sorted.map((it) => it.label),
+        "Smallest value goes first.",
+        ["Convert to a common form before comparing.", "Use the number line as a guide."],
+        v.explanation,
+      );
+    }
+    case "percentChangeBasics": {
+      const increase = Math.random() < 0.6;
+      const start = pick([20, 25, 40, 50, 80, 100, 200] as const);
+      const pct = pick([10, 20, 25, 30, 50] as const);
+      const change = (start * pct) / 100;
+      if (increase) {
+        const answer = start + change;
+        return numpadEng(
+          m,
+          difficulty,
+          `Increase ${start} by ${pct}%.`,
+          { kind: "icon", icon: m.emoji, title: `${start} + ${pct}%`, subtitle: "Percent increase" },
+          answer,
+          "Find the change, then add to the original.",
+          [`${pct}% of ${start} = ${change}.`, `${start} + ${change} = ${answer}.`],
+          `${start} increased by ${pct}% is ${answer}.`,
+        );
+      }
+      const answer = start - change;
+      return numpadEng(
+        m,
+        difficulty,
+        `Decrease ${start} by ${pct}%.`,
+        { kind: "icon", icon: m.emoji, title: `${start} − ${pct}%`, subtitle: "Percent decrease" },
+        answer,
+        "Find the change, then subtract from the original.",
+        [`${pct}% of ${start} = ${change}.`, `${start} − ${change} = ${answer}.`],
+        `${start} decreased by ${pct}% is ${answer}.`,
+      );
+    }
+    case "meanMedianMode": {
+      const stat = pick(["mean", "median"] as const);
+      const count = pick([5, 7] as const);
+      const list = Array.from({ length: count }, () => rand(2, 20));
+      if (stat === "mean") {
+        const initialSum = list.reduce((s, x) => s + x, 0);
+        const adjust = (count - (initialSum % count)) % count;
+        list[0] = (list[0] ?? 0) + adjust;
+        const sum = list.reduce((s, x) => s + x, 0);
+        const answer = sum / count;
+        return numpadEng(
+          m,
+          difficulty,
+          `Find the mean of ${list.join(", ")}.`,
+          { kind: "icon", icon: m.emoji, title: list.join(", "), subtitle: "Mean (average)" },
+          answer,
+          "Mean = sum ÷ count.",
+          [`Sum: ${sum}.`, `Count: ${count}.`, `${sum} ÷ ${count} = ${answer}.`],
+          `Mean = ${sum} / ${count} = ${answer}.`,
+        );
+      }
+      const sorted = [...list].sort((a, b) => a - b);
+      const median = sorted[Math.floor(count / 2)]!;
+      return numpadEng(
+        m,
+        difficulty,
+        `Find the median of ${list.join(", ")}.`,
+        { kind: "icon", icon: m.emoji, title: list.join(", "), subtitle: "Median (middle value)" },
+        median,
+        "Sort the numbers, then pick the middle.",
+        [`Sorted: ${sorted.join(", ")}.`, `Middle position is ${Math.floor(count / 2) + 1}.`],
+        `Median = ${median}.`,
+      );
+    }
+    case "elapsedTimeClock": {
+      const startHour = rand(1, 11);
+      const startMin = pick([0, 15, 30, 45] as const);
+      const durationMin = pick([15, 30, 45, 60, 75, 90, 120, 135] as const);
+      const totalStart = startHour * 60 + startMin;
+      let totalEnd = (totalStart + durationMin) % (12 * 60);
+      const endHour = Math.floor(totalEnd / 60) || 12;
+      const endMin = totalEnd % 60;
+      const fmtClock = (h: number, mn: number) => `${h}:${mn.toString().padStart(2, "0")}`;
+      const formatDuration = (mins: number) => {
+        const h = Math.floor(mins / 60);
+        const r = mins % 60;
+        if (h > 0 && r > 0) return `${h} hr ${r} min`;
+        if (h > 0) return `${h} hr`;
+        return `${r} min`;
+      };
+      const answer = formatDuration(durationMin);
+      const candidates = [durationMin + 15, durationMin - 15, durationMin + 30, durationMin + 60, durationMin - 30];
+      const distractors = sample(
+        candidates.filter((d) => d > 0 && formatDuration(d) !== answer).map(formatDuration),
+        3,
+      );
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `From ${fmtClock(startHour, startMin)} to ${fmtClock(endHour, endMin)}, how much time passed?`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: `${fmtClock(startHour, startMin)} → ${fmtClock(endHour, endMin)}`,
+            subtitle: "Elapsed time",
+          }),
+          hint: "Count up by hours and minutes.",
+          hints: [`Hours: ${Math.floor(durationMin / 60)}.`, `Minutes: ${durationMin % 60}.`],
+          explanation: `${durationMin} minutes total = ${answer}.`,
+        },
+        answer,
+        distractors,
       );
     }
     case "escapeRoom":
