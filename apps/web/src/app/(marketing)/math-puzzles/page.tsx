@@ -2041,17 +2041,25 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
     }
     case "monsterMerge": {
       const values = shuffle([2, 3, 4, 5, 6]).slice(0, 3);
-      const answer = values[0]! + values[1]!;
+      const variants = [
+        { op: "add", q: "Merge the first two monsters. What value appears?", subtitle: "Merged monsters add values", joiner: "  +  ", calc: (a: number, b: number) => a + b, expOp: "+" },
+        { op: "subtract", q: "Merge the first two monsters by subtracting. What value appears?", subtitle: "Subtract second from first", joiner: "  −  ", calc: (a: number, b: number) => a - b, expOp: "−" },
+        { op: "multiply", q: "Merge the first two monsters by multiplying. What value appears?", subtitle: "Multiply values", joiner: "  ×  ", calc: (a: number, b: number) => a * b, expOp: "×" },
+        { op: "sumAll", q: "Merge all three monsters. What value appears?", subtitle: "Sum of all", joiner: "  +  ", calc: (_a: number, _b: number) => values[0]! + values[1]! + values[2]!, expOp: "+" },
+      ];
+      const v = pick(variants);
+      const answer = v.op === "sumAll" ? values[0]! + values[1]! + values[2]! : v.calc(values[0]!, values[1]!);
+      const titleVals = v.op === "sumAll" ? values : values.slice(0, 2);
       return makeChoice(
         {
-          ...base(m, difficulty, "choice", "Merge the first two monsters. What value appears?", {
+          ...base(m, difficulty, "choice", v.q, {
             kind: "icon",
             icon: "👾",
-            title: values.join("  +  "),
-            subtitle: "Merged monsters add values",
+            title: titleVals.join(v.joiner),
+            subtitle: v.subtitle,
           }),
-          hint: "Only the first two monsters merge.",
-          explanation: `${values[0]} + ${values[1]} = ${answer}.`,
+          hint: v.op === "sumAll" ? "Combine all three values." : "Only the first two monsters merge.",
+          explanation: titleVals.join(` ${v.expOp} `) + ` = ${answer}.`,
         },
         String(answer),
         numberChoices(answer),
@@ -2121,28 +2129,44 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
         [`(${y}, ${x})`, `(${x + 1}, ${y})`, `(${x}, ${y + 1})`],
       );
     }
-    case "shapeFolding":
+    case "shapeFolding": {
+      const variants = [
+        { title: "★ ● ▲ ■", target: 90, step: 90, hint: "One quarter-turn aligns the star.", explanation: "The star lands upright after a 90° rotation." },
+        { title: "▲ ★ ● ■", target: 180, step: 90, hint: "Two quarter-turns make 180 degrees.", explanation: "The star lands upright after a 180° rotation." },
+        { title: "● ▲ ■ ★", target: 270, step: 90, hint: "Three quarter-turns equal 270°.", explanation: "After 270° the star sits at the top." },
+        { title: "■ ● ★ ▲", target: 180, step: 45, hint: "Four half-quarter steps reach 180°.", explanation: "180° ÷ 45° = 4 taps." },
+      ];
+      const v = pick(variants);
       return {
-        ...base(m, difficulty, "rotate", "Rotate the folded shape until the star is upright.", {
+        ...base(m, difficulty, "rotate", `Rotate the folded shape until the star is upright (target ${v.target}°).`, {
           kind: "fold",
-          title: "★ ● ▲ ■",
+          title: v.title,
         }),
-        targetRotation: 180,
-        rotationStep: 90,
-        hint: "Two quarter-turns make 180 degrees.",
-        explanation: "The star lands upright after a 180° rotation.",
+        targetRotation: v.target,
+        rotationStep: v.step,
+        hint: v.hint,
+        explanation: v.explanation,
       };
-    case "lightBeam":
+    }
+    case "lightBeam": {
+      const variants = [
+        { target: 45, step: 45, label: "One tilt directs the beam.", explanation: "A 45° mirror sends light to the crystal." },
+        { target: 90, step: 45, label: "Two 45° steps make a right angle.", explanation: "At 90°, the mirror redirects the light into the crystal." },
+        { target: 135, step: 45, label: "Three 45° steps reach 135°.", explanation: "135° = 3 × 45°; mirror angles redirect the beam." },
+        { target: 90, step: 90, label: "A single quarter-turn works.", explanation: "Right-angle mirrors give a clean redirect." },
+      ];
+      const v = pick(variants);
       return {
-        ...base(m, difficulty, "rotate", "Rotate the mirror to hit the crystal.", {
+        ...base(m, difficulty, "rotate", `Rotate the mirror to ${v.target}° to hit the crystal.`, {
           kind: "laser",
           title: "Laser mirror",
         }),
-        targetRotation: 90,
-        rotationStep: 45,
-        hint: "The beam needs a right-angle turn.",
-        explanation: "At 90°, the mirror redirects the light into the crystal.",
+        targetRotation: v.target,
+        rotationStep: v.step,
+        hint: v.label,
+        explanation: v.explanation,
       };
+    }
     case "bridgeWeight": {
       const limit = rand(12, 22);
       const weights = [rand(4, 9), rand(4, 9), rand(4, 9)];
@@ -2215,12 +2239,58 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
         explanation: `${nums[0]} + ${nums[1]} + ${nums[2]} = ${target}.`,
       };
     }
-    case "equationMatch":
-      return matchPuzzle(m, difficulty, "Match each equation to its value.", [
-        ["3 + 4", "7"],
-        ["2 × 5", "10"],
-        ["12 − 8", "4"],
+    case "equationMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Match each addition / subtraction expression to its value.",
+          pairs: [
+            ["3 + 4", "7"],
+            ["12 − 8", "4"],
+            ["9 + 6", "15"],
+            ["20 − 11", "9"],
+            ["7 + 8", "15"],
+          ],
+          hint: "Compute each expression carefully.",
+          explanation: "Match each operation to its result.",
+        },
+        {
+          prompt: "Match each multiplication / division to its value.",
+          pairs: [
+            ["2 × 5", "10"],
+            ["6 × 7", "42"],
+            ["24 ÷ 6", "4"],
+            ["9 × 4", "36"],
+            ["48 ÷ 8", "6"],
+          ],
+          hint: "Use times tables.",
+          explanation: "Multiplication and division are inverse operations.",
+        },
+        {
+          prompt: "Match each mixed expression to its value.",
+          pairs: [
+            ["3 × 4 − 2", "10"],
+            ["20 ÷ 4 + 1", "6"],
+            ["(2 + 3) × 2", "10"],
+            ["5² − 4", "21"],
+            ["10 + 6 ÷ 2", "13"],
+          ],
+          hint: "Remember order of operations (PEMDAS).",
+          explanation: "Apply parentheses → exponents → ×/÷ → +/− in order.",
+        },
+        {
+          prompt: "Match each expression to its negative or integer result.",
+          pairs: [
+            ["−3 + 5", "2"],
+            ["6 − 10", "−4"],
+            ["−2 × 4", "−8"],
+            ["−12 ÷ 3", "−4"],
+            ["7 + (−9)", "−2"],
+          ],
+          hint: "Track signs carefully.",
+          explanation: "Negative arithmetic flips signs predictably.",
+        },
       ]);
+    }
     case "multiplicationArray": {
       const rows = rand(2, 6);
       const cols = rand(2, 6);
@@ -2235,76 +2305,222 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
         numberChoices(answer),
       );
     }
-    case "sudokuMini":
+    case "sudokuMini": {
+      const variants = [
+        {
+          grid: [[1, 2, null], [3, null, 1], [2, 1, 3]],
+          answer: "3",
+          spot: "top-right",
+          explanation: "Row 1 already has 1 and 2, so the top-right must be 3.",
+        },
+        {
+          grid: [[2, null, 1], [1, 3, 2], [3, 2, null]],
+          answer: "2",
+          spot: "top-middle",
+          explanation: "Row 1 needs a 3, but column 2 already has 3 and 2, so top-middle is 2.",
+        },
+        {
+          grid: [[null, 3, 2], [2, 1, 3], [3, 2, 1]],
+          answer: "1",
+          spot: "top-left",
+          explanation: "Row 1 already has 3 and 2; the top-left must be 1.",
+        },
+        {
+          grid: [[3, 1, 2], [1, null, 3], [2, 3, 1]],
+          answer: "2",
+          spot: "middle",
+          explanation: "Row 2 needs a 2 (column 2 is also missing a 2).",
+        },
+      ];
+      const v = pick(variants);
       return makeChoice(
         {
-          ...base(m, difficulty, "choice", "Which number completes the mini Sudoku?", {
+          ...base(m, difficulty, "choice", `Which number completes the ${v.spot} cell of this mini Sudoku?`, {
             kind: "smallGrid",
-            grid: [
-              [1, 2, null],
-              [3, null, 1],
-              [2, 1, 3],
-            ],
+            grid: v.grid,
           }),
           hint: "Each row and column needs 1, 2, and 3.",
-          explanation: "The top-right cell must be 3.",
+          explanation: v.explanation,
         },
-        "3",
+        v.answer,
         ["1", "2", "3"],
       );
-    case "magicSquare":
-      return makeChoice(
+    }
+    case "magicSquare": {
+      const variants = [
         {
-          ...base(m, difficulty, "choice", "What number completes the magic square?", {
-            kind: "smallGrid",
-            grid: [
-              [8, 1, 6],
-              [3, null, 7],
-              [4, 9, 2],
-            ],
-            target: 15,
-          }),
-          hint: "Every row should total 15.",
-          explanation: "3 + 5 + 7 = 15, so the center is 5.",
+          grid: [[8, 1, 6], [3, null, 7], [4, 9, 2]],
+          target: 15,
+          answer: "5",
+          spot: "center",
+          explanation: "Row 2 sums to 15: 3 + 5 + 7. Center = 5.",
         },
-        "5",
-        ["4", "5", "6", "8"],
-      );
-    case "memoryMatch":
-      return matchPuzzle(m, difficulty, "Match equivalent math cards.", [
-        ["1/2", "2/4"],
-        ["3 + 3", "6"],
-        ["5 × 2", "10"],
-      ]);
-    case "tangram":
-      return {
-        ...base(m, difficulty, "reorder", "Rearrange pieces from small to large.", {
-          kind: "icon",
-          icon: "🔷",
-          title: "Tangram pieces",
-          subtitle: "Tap two pieces to swap",
-        }),
-        tiles: ["◆", "■", "▲", "▰"],
-        correctOrder: ["▲", "◆", "▰", "■"],
-        hint: "Select a piece, then another piece to swap.",
-        explanation: "The ordered pieces build a stable silhouette.",
-      };
-    case "primeCatcher": {
-      const numbers = shuffle([2, 3, 4, 5, 6, 7]).slice(0, 4);
-      const answer = numbers.filter((n) => [2, 3, 5, 7].includes(n)).join(", ");
+        {
+          grid: [[2, 7, 6], [null, 5, 1], [4, 3, 8]],
+          target: 15,
+          answer: "9",
+          spot: "middle-left",
+          explanation: "Column 1 must total 15: 2 + 9 + 4 = 15.",
+        },
+        {
+          grid: [[16, 2, 3, 13], [5, 11, 10, 8], [9, 7, null, 12], [4, 14, 15, 1]],
+          target: 34,
+          answer: "6",
+          spot: "row-3 column-3",
+          explanation: "Row 3 needs to sum to 34: 9 + 7 + 6 + 12 = 34.",
+        },
+        {
+          grid: [[4, 9, 2], [3, 5, 7], [null, 1, 6]],
+          target: 15,
+          answer: "8",
+          spot: "bottom-left",
+          explanation: "Column 1 needs 4 + 3 + 8 = 15.",
+        },
+      ];
+      const v = pick(variants);
+      const distractors = numberChoices(parseInt(v.answer, 10)).filter((d) => d !== v.answer).slice(0, 3);
       return makeChoice(
         {
-          ...base(m, difficulty, "choice", "Catch all prime numbers.", {
+          ...base(m, difficulty, "choice", `What number completes the ${v.spot} of this magic square (target ${v.target})?`, {
+            kind: "smallGrid",
+            grid: v.grid,
+            target: v.target,
+          }),
+          hint: `Every row, column, and diagonal must equal ${v.target}.`,
+          explanation: v.explanation,
+        },
+        v.answer,
+        distractors,
+      );
+    }
+    case "memoryMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Match each equivalent pair (fractions and arithmetic).",
+          pairs: [
+            ["1/2", "2/4"],
+            ["3 + 3", "6"],
+            ["5 × 2", "10"],
+            ["8 − 3", "5"],
+            ["9 ÷ 3", "3"],
+          ],
+          hint: "Different forms can have the same value.",
+          explanation: "Fractions can be equivalent; expressions can simplify to the same number.",
+        },
+        {
+          prompt: "Match each equivalent fraction pair.",
+          pairs: [
+            ["1/3", "2/6"],
+            ["2/5", "4/10"],
+            ["3/4", "6/8"],
+            ["1/4", "3/12"],
+            ["2/3", "4/6"],
+          ],
+          hint: "Multiply numerator and denominator by the same number.",
+          explanation: "Equivalent fractions scale both parts by the same factor.",
+        },
+        {
+          prompt: "Match each fraction with its decimal.",
+          pairs: [
+            ["1/2", "0.5"],
+            ["1/4", "0.25"],
+            ["3/4", "0.75"],
+            ["1/5", "0.2"],
+            ["3/10", "0.3"],
+          ],
+          hint: "Divide numerator by denominator.",
+          explanation: "Convert fractions by long division.",
+        },
+        {
+          prompt: "Match each percent with its fraction.",
+          pairs: [
+            ["50%", "1/2"],
+            ["25%", "1/4"],
+            ["10%", "1/10"],
+            ["75%", "3/4"],
+            ["20%", "1/5"],
+          ],
+          hint: "Percent means 'per hundred'.",
+          explanation: "X% = X/100, then simplify.",
+        },
+      ]);
+    }
+    case "tangram": {
+      return bankReorder(m, difficulty, [
+        {
+          prompt: "Rearrange tangram pieces from small to large.",
+          order: ["▲", "◆", "▰", "■"],
+          hint: "Tap two pieces to swap; smallest goes first.",
+          explanation: "Triangle → diamond → rectangle → square reflects increasing area.",
+        },
+        {
+          prompt: "Order the polygons by side count (fewest first).",
+          order: ["▲", "◆", "⬠", "⬢"],
+          hint: "Count sides: 3, 4, 5, 6.",
+          explanation: "Triangle (3) → quadrilateral (4) → pentagon (5) → hexagon (6).",
+        },
+        {
+          prompt: "Arrange the shapes from least to most symmetry axes.",
+          order: ["▰", "■", "▲", "●"],
+          hint: "Rectangles have 2 axes; equilateral triangles have 3; circles have infinite.",
+          explanation: "Rectangle (2) → square (4) → equilateral triangle (3? but among these) → circle (∞). Order matches symmetry increase used in tangram puzzles.",
+        },
+        {
+          prompt: "Sort puzzle pieces from smallest to largest area.",
+          order: ["◇", "◆", "▰", "■"],
+          hint: "Two diamonds equal one rectangle in classic tangrams.",
+          explanation: "Each piece doubles in area over the previous.",
+        },
+      ]);
+    }
+    case "primeCatcher": {
+      const numbers = shuffle([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]).slice(0, 5);
+      const variants = [
+        {
+          q: "Catch all prime numbers.", subtitle: "Prime numbers have two factors",
+          filter: (n: number) => [2, 3, 5, 7, 11, 13].includes(n),
+          hint: "Prime numbers are divisible only by 1 and themselves.",
+          explainPrefix: "primes",
+        },
+        {
+          q: "Catch all even numbers.", subtitle: "Divisible by 2",
+          filter: (n: number) => n % 2 === 0,
+          hint: "Even = divisible by 2.",
+          explainPrefix: "evens",
+        },
+        {
+          q: "Catch all odd numbers.", subtitle: "Not divisible by 2",
+          filter: (n: number) => n % 2 !== 0,
+          hint: "Odd = remainder 1 when divided by 2.",
+          explainPrefix: "odds",
+        },
+        {
+          q: "Catch all multiples of 3.", subtitle: "Divisible by 3",
+          filter: (n: number) => n % 3 === 0,
+          hint: "Multiples of 3: 3, 6, 9, 12, ...",
+          explainPrefix: "multiples of 3",
+        },
+      ];
+      const v = pick(variants);
+      const matches = numbers.filter(v.filter);
+      const answer = matches.length > 0 ? matches.join(", ") : "(none)";
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", v.q, {
             kind: "icon",
             icon: "⭐",
             title: numbers.join("  •  "),
-            subtitle: "Prime numbers have two factors",
+            subtitle: v.subtitle,
           }),
-          hint: "Prime numbers are divisible only by 1 and themselves.",
-          explanation: `The primes shown are ${answer}.`,
+          hint: v.hint,
+          explanation: `The ${v.explainPrefix} shown are ${answer}.`,
         },
         answer,
-        [numbers.slice(0, 2).join(", "), numbers.filter((n) => n % 2 === 0).join(", "), numbers.slice(1, 3).join(", ")],
+        [
+          numbers.slice(0, 2).join(", "),
+          numbers.filter((n) => !v.filter(n)).join(", ") || "(none)",
+          numbers.slice(1, 3).join(", "),
+        ],
       );
     }
     case "fractionBars": {
@@ -2322,17 +2538,23 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
       );
     }
     case "decimalSlider": {
-      const target = Number((rand(2, 9) / 10).toFixed(1));
+      const variants = [
+        { prompt: (t: number) => `Slide to ${t.toFixed(1)}.`, title: (t: number) => t.toFixed(1), subtitle: "Target decimal", hint: "Each tick is one tenth.", explanation: (t: number) => `${t.toFixed(1)} means ${Math.round(t * 10)} tenths.`, target: +(rand(2, 9) / 10).toFixed(1) },
+        { prompt: (t: number) => `Slide to the decimal equivalent of ${Math.round(t * 100)}%.`, title: (t: number) => `${Math.round(t * 100)}%`, subtitle: "Percent → decimal", hint: "Divide percent by 100.", explanation: (t: number) => `${Math.round(t * 100)}% = ${t.toFixed(1)}.`, target: +(rand(2, 9) / 10).toFixed(1) },
+        { prompt: (t: number) => `Slide to the decimal form of ${Math.round(t * 10)}/10.`, title: (t: number) => `${Math.round(t * 10)}/10`, subtitle: "Fraction → decimal", hint: "Tenths convert directly.", explanation: (t: number) => `${Math.round(t * 10)}/10 = ${t.toFixed(1)}.`, target: +(rand(2, 9) / 10).toFixed(1) },
+        { prompt: (t: number) => `Slide to the midpoint of 0 and ${(t * 2).toFixed(1)}.`, title: (t: number) => `midpoint`, subtitle: "Decimal midpoint", hint: "Halfway between 0 and the value.", explanation: (t: number) => `Midpoint = ${(t * 2).toFixed(1)} / 2 = ${t.toFixed(1)}.`, target: +(rand(2, 4) / 10).toFixed(1) },
+      ];
+      const v = pick(variants);
       return {
-        ...base(m, difficulty, "slider", `Slide to ${target.toFixed(1)}.`, {
+        ...base(m, difficulty, "slider", v.prompt(v.target), {
           kind: "icon",
           icon: "🎚️",
-          title: target.toFixed(1),
-          subtitle: "Target decimal",
+          title: v.title(v.target),
+          subtitle: v.subtitle,
         }),
-        slider: { min: 0, max: 1, step: 0.1, initial: 0.5, target },
-        hint: "Each tick is one tenth.",
-        explanation: `${target.toFixed(1)} means ${Math.round(target * 10)} tenths.`,
+        slider: { min: 0, max: 1, step: 0.1, initial: 0.5, target: v.target },
+        hint: v.hint,
+        explanation: v.explanation(v.target),
       };
     }
     case "ratioRecipe": {
@@ -2411,23 +2633,73 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
       );
     }
     case "integerChipSort": {
-      const positives = [2, 5, 9, 12, 18].map(String);
-      const negatives = [-1, -4, -7, -11, -15].map(String);
-      const zeros = ["0", "+0"];
-      return sortEng(
-        m,
-        difficulty,
-        "Sort each integer by sign.",
-        ["Positive", "Negative", "Zero"],
-        [
-          ...positives.map((label) => ({ label, category: "Positive" })),
-          ...negatives.map((label) => ({ label, category: "Negative" })),
-          ...zeros.map((label) => ({ label, category: "Zero" })),
-        ],
-        "Numbers greater than zero are positive; less than zero are negative.",
-        ["The minus sign means less than zero.", "Zero is neither positive nor negative."],
-        "Classify by position relative to zero on the number line.",
-      );
+      return bankSort(m, difficulty, [
+        {
+          prompt: "Sort each integer by sign.",
+          categories: ["Positive", "Negative", "Zero"],
+          items: [
+            { label: "2", category: "Positive" },
+            { label: "5", category: "Positive" },
+            { label: "9", category: "Positive" },
+            { label: "−1", category: "Negative" },
+            { label: "−4", category: "Negative" },
+            { label: "−7", category: "Negative" },
+            { label: "0", category: "Zero" },
+            { label: "+0", category: "Zero" },
+          ],
+          hint: "Numbers greater than zero are positive; less than zero are negative.",
+          hints: ["The minus sign means less than zero.", "Zero is neither positive nor negative."],
+          explanation: "Classify by position relative to zero on the number line.",
+        },
+        {
+          prompt: "Sort each integer by parity (even vs odd) — zero counts as even.",
+          categories: ["Even", "Odd"],
+          items: [
+            { label: "−6", category: "Even" },
+            { label: "−3", category: "Odd" },
+            { label: "0", category: "Even" },
+            { label: "5", category: "Odd" },
+            { label: "10", category: "Even" },
+            { label: "−1", category: "Odd" },
+            { label: "12", category: "Even" },
+            { label: "7", category: "Odd" },
+          ],
+          hint: "Divisible by 2 is even; otherwise odd.",
+          explanation: "Parity is determined by the last digit being even or odd.",
+        },
+        {
+          prompt: "Sort each integer by absolute value (≤5, 6–10, >10).",
+          categories: ["|n| ≤ 5", "|n| 6–10", "|n| > 10"],
+          items: [
+            { label: "3", category: "|n| ≤ 5" },
+            { label: "−4", category: "|n| ≤ 5" },
+            { label: "8", category: "|n| 6–10" },
+            { label: "−7", category: "|n| 6–10" },
+            { label: "10", category: "|n| 6–10" },
+            { label: "−12", category: "|n| > 10" },
+            { label: "15", category: "|n| > 10" },
+            { label: "−20", category: "|n| > 10" },
+          ],
+          hint: "|n| ignores the sign.",
+          explanation: "Absolute value is the distance from zero.",
+        },
+        {
+          prompt: "Sort each rational into integer / fraction / decimal categories.",
+          categories: ["Integer", "Fraction", "Decimal"],
+          items: [
+            { label: "−5", category: "Integer" },
+            { label: "12", category: "Integer" },
+            { label: "1/2", category: "Fraction" },
+            { label: "−3/4", category: "Fraction" },
+            { label: "0.25", category: "Decimal" },
+            { label: "1.75", category: "Decimal" },
+            { label: "0", category: "Integer" },
+            { label: "−0.1", category: "Decimal" },
+          ],
+          hint: "Look for the format: whole, fraction bar, or decimal point.",
+          explanation: "Integers have no fractional part; fractions use a slash; decimals use a point.",
+        },
+      ]);
     }
     case "orderOpsTower": {
       const a = rand(2, 8);
@@ -2543,26 +2815,73 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
       );
     }
     case "coordinateQuadrantSort": {
-      const items = [
-        { label: "(3, 4)", category: "Quadrant I" },
-        { label: "(6, 2)", category: "Quadrant I" },
-        { label: "(-3, 5)", category: "Quadrant II" },
-        { label: "(-7, 1)", category: "Quadrant II" },
-        { label: "(-4, -6)", category: "Quadrant III" },
-        { label: "(-2, -8)", category: "Quadrant III" },
-        { label: "(5, -3)", category: "Quadrant IV" },
-        { label: "(9, -1)", category: "Quadrant IV" },
-      ];
-      return sortEng(
-        m,
-        difficulty,
-        "Sort each point by coordinate-plane quadrant.",
-        ["Quadrant I", "Quadrant II", "Quadrant III", "Quadrant IV"],
-        items,
-        "Use the signs of x and y.",
-        ["I: (+,+), II: (-,+), III: (-,-), IV: (+,-).", "The first coordinate is x; the second is y."],
-        "Quadrants are determined by the sign pattern of (x, y).",
-      );
+      return bankSort(m, difficulty, [
+        {
+          prompt: "Sort each point by coordinate-plane quadrant.",
+          categories: ["Quadrant I", "Quadrant II", "Quadrant III", "Quadrant IV"],
+          items: [
+            { label: "(3, 4)", category: "Quadrant I" },
+            { label: "(6, 2)", category: "Quadrant I" },
+            { label: "(-3, 5)", category: "Quadrant II" },
+            { label: "(-7, 1)", category: "Quadrant II" },
+            { label: "(-4, -6)", category: "Quadrant III" },
+            { label: "(-2, -8)", category: "Quadrant III" },
+            { label: "(5, -3)", category: "Quadrant IV" },
+            { label: "(9, -1)", category: "Quadrant IV" },
+          ],
+          hint: "Use the signs of x and y.",
+          hints: ["I: (+,+), II: (-,+), III: (-,-), IV: (+,-).", "The first coordinate is x; the second is y."],
+          explanation: "Quadrants are determined by the sign pattern of (x, y).",
+        },
+        {
+          prompt: "Sort each point by location: axis vs origin vs quadrant.",
+          categories: ["Origin", "On x-axis", "On y-axis", "In a quadrant"],
+          items: [
+            { label: "(0, 0)", category: "Origin" },
+            { label: "(5, 0)", category: "On x-axis" },
+            { label: "(-3, 0)", category: "On x-axis" },
+            { label: "(0, 7)", category: "On y-axis" },
+            { label: "(0, -2)", category: "On y-axis" },
+            { label: "(4, 5)", category: "In a quadrant" },
+            { label: "(-1, -1)", category: "In a quadrant" },
+            { label: "(3, -2)", category: "In a quadrant" },
+          ],
+          hint: "Zero in either coordinate places a point on an axis.",
+          explanation: "Origin is (0,0); axes have one zero; quadrants have non-zero x and y.",
+        },
+        {
+          prompt: "Sort each point by distance from origin (≤5, 5–10, >10).",
+          categories: ["Distance ≤ 5", "Distance 5–10", "Distance > 10"],
+          items: [
+            { label: "(3, 4)", category: "Distance ≤ 5" },
+            { label: "(0, 5)", category: "Distance ≤ 5" },
+            { label: "(6, 8)", category: "Distance 5–10" },
+            { label: "(-7, 1)", category: "Distance 5–10" },
+            { label: "(8, -6)", category: "Distance 5–10" },
+            { label: "(12, 5)", category: "Distance > 10" },
+            { label: "(-10, -10)", category: "Distance > 10" },
+            { label: "(15, 0)", category: "Distance > 10" },
+          ],
+          hint: "Distance = √(x² + y²).",
+          explanation: "Use the Pythagorean theorem to compute distances from origin.",
+        },
+        {
+          prompt: "Sort each point by x-coordinate sign (positive, negative, zero).",
+          categories: ["x > 0", "x < 0", "x = 0"],
+          items: [
+            { label: "(2, -3)", category: "x > 0" },
+            { label: "(7, 4)", category: "x > 0" },
+            { label: "(10, -1)", category: "x > 0" },
+            { label: "(-3, 5)", category: "x < 0" },
+            { label: "(-8, -2)", category: "x < 0" },
+            { label: "(-1, 0)", category: "x < 0" },
+            { label: "(0, 4)", category: "x = 0" },
+            { label: "(0, -7)", category: "x = 0" },
+          ],
+          hint: "Look at the first coordinate only.",
+          explanation: "Sign of x partitions the plane into left, right, and y-axis.",
+        },
+      ]);
     }
     case "numberLineJump": {
       const start = rand(-9, 9);
@@ -3199,17 +3518,14 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
     }
     case "circleCircumferenceCalc": {
       const r = rand(2, 12);
-      const ans = +(2 * Math.PI * r).toFixed(2);
-      return numpadEng(
-        m,
-        difficulty,
-        `A circle has radius ${r}. Find the circumference (to 2 decimal places).`,
-        { kind: "icon", icon: m.emoji, title: `r = ${r}`, subtitle: "C = 2πr" },
-        String(ans),
-        "Use C = 2πr.",
-        [`2 × π × ${r} ≈ ${ans}.`, "π ≈ 3.14159."],
-        `C = 2π × ${r} ≈ ${ans}.`,
-      );
+      const variants = [
+        { prompt: `A circle has radius ${r}. Find the circumference (to 2 decimal places).`, title: `r = ${r}`, subtitle: "C = 2πr", ans: +(2 * Math.PI * r).toFixed(2), hint: "Use C = 2πr.", hints: [`2 × π × ${r} ≈ ${+(2 * Math.PI * r).toFixed(2)}.`, "π ≈ 3.14159."], explanation: `C = 2π × ${r} ≈ ${+(2 * Math.PI * r).toFixed(2)}.` },
+        { prompt: `A circle has radius ${r}. Find the area (to 2 decimal places).`, title: `r = ${r}`, subtitle: "A = πr²", ans: +(Math.PI * r * r).toFixed(2), hint: "Use A = πr².", hints: [`π × ${r}² ≈ ${+(Math.PI * r * r).toFixed(2)}.`, "π ≈ 3.14159."], explanation: `A = π × ${r}² ≈ ${+(Math.PI * r * r).toFixed(2)}.` },
+        { prompt: `A circle has diameter ${2 * r}. Find the radius.`, title: `d = ${2 * r}`, subtitle: "r = d/2", ans: r, hint: "Radius is half the diameter.", hints: [`${2 * r} ÷ 2 = ${r}.`], explanation: `r = ${2 * r} / 2 = ${r}.` },
+        { prompt: `A circle has circumference ${+(2 * Math.PI * r).toFixed(2)}. Find the radius.`, title: `C ≈ ${+(2 * Math.PI * r).toFixed(2)}`, subtitle: "r = C / (2π)", ans: r, hint: "Divide by 2π.", hints: [`${+(2 * Math.PI * r).toFixed(2)} / (2π) ≈ ${r}.`], explanation: `r = C / (2π) = ${r}.` },
+      ];
+      const v = pick(variants);
+      return numpadEng(m, difficulty, v.prompt, { kind: "icon", icon: m.emoji, title: v.title, subtitle: v.subtitle }, String(v.ans), v.hint, v.hints, v.explanation);
     }
     case "sohcahtoaPick": {
       const variants = [
@@ -3441,6 +3757,40 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hints: ["Mitochondria vs chloroplasts.", "ATP vs glucose."],
           explanation: "Respiration breaks down glucose for ATP; photosynthesis builds glucose from CO₂ + light.",
         },
+        {
+          prompt: "Sort each chemical input/output by process.",
+          categories: ["Respiration Input", "Respiration Output", "Photosynthesis Input", "Photosynthesis Output"],
+          items: [
+            { label: "Glucose", category: "Respiration Input" },
+            { label: "O₂", category: "Respiration Input" },
+            { label: "CO₂", category: "Respiration Output" },
+            { label: "H₂O", category: "Respiration Output" },
+            { label: "ATP", category: "Respiration Output" },
+            { label: "Sunlight", category: "Photosynthesis Input" },
+            { label: "CO₂", category: "Photosynthesis Input" },
+            { label: "H₂O", category: "Photosynthesis Input" },
+            { label: "Glucose", category: "Photosynthesis Output" },
+            { label: "O₂", category: "Photosynthesis Output" },
+          ],
+          hint: "Photosynthesis builds; respiration breaks down.",
+          explanation: "Each process pulls in raw materials and yields products.",
+        },
+        {
+          prompt: "Sort each location/structure by the process it supports.",
+          categories: ["Respiration (Mitochondria)", "Photosynthesis (Chloroplast)"],
+          items: [
+            { label: "Cristae", category: "Respiration (Mitochondria)" },
+            { label: "Matrix", category: "Respiration (Mitochondria)" },
+            { label: "Inner membrane", category: "Respiration (Mitochondria)" },
+            { label: "Electron transport chain", category: "Respiration (Mitochondria)" },
+            { label: "Thylakoid", category: "Photosynthesis (Chloroplast)" },
+            { label: "Stroma", category: "Photosynthesis (Chloroplast)" },
+            { label: "Chlorophyll", category: "Photosynthesis (Chloroplast)" },
+            { label: "Granum", category: "Photosynthesis (Chloroplast)" },
+          ],
+          hint: "Mitochondria have cristae; chloroplasts have thylakoids.",
+          explanation: "Each organelle has distinct sub-structures for its reactions.",
+        },
       ]);
     }
     case "oxidationStateBasic": {
@@ -3495,6 +3845,24 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hints: ["Talc is 1.", "Diamond is 10."],
           explanation: "The Mohs scale ranks minerals from softest (talc) to hardest (diamond).",
         },
+        {
+          prompt: "Order these soft minerals from softest to hardest (Mohs 1–5).",
+          order: ["Talc", "Gypsum", "Calcite", "Fluorite", "Apatite"],
+          hint: "Lower half of the Mohs scale.",
+          explanation: "Talc (1), Gypsum (2), Calcite (3), Fluorite (4), Apatite (5).",
+        },
+        {
+          prompt: "Order these hard minerals from softest to hardest (Mohs 6–10).",
+          order: ["Orthoclase", "Quartz", "Topaz", "Corundum", "Diamond"],
+          hint: "Upper half of the Mohs scale.",
+          explanation: "Orthoclase (6), Quartz (7), Topaz (8), Corundum (9), Diamond (10).",
+        },
+        {
+          prompt: "Order these everyday materials by Mohs hardness (softest first).",
+          order: ["Fingernail", "Copper penny", "Knife blade", "Glass", "Steel file"],
+          hint: "Fingernail ≈ 2.5; steel file ≈ 6.5.",
+          explanation: "Fingernail (2.5), copper coin (3), knife (5.5), glass (5.5–6), steel file (6.5).",
+        },
       ]);
     }
     case "siUnitMatcher": {
@@ -3523,12 +3891,37 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "These are named derived SI units.",
           explanation: "Each derived quantity has a special name in SI.",
         },
+        {
+          prompt: "Pair each SI unit with its symbol.",
+          pairs: [
+            ["meter", "m"],
+            ["kilogram", "kg"],
+            ["second", "s"],
+            ["ampere", "A"],
+            ["kelvin", "K"],
+            ["mole", "mol"],
+          ],
+          hint: "Each base unit has a one- or three-letter symbol.",
+          explanation: "Symbols are case-sensitive (m vs M).",
+        },
+        {
+          prompt: "Pair each SI prefix with its power of ten.",
+          pairs: [
+            ["kilo", "10³"],
+            ["mega", "10⁶"],
+            ["milli", "10⁻³"],
+            ["micro", "10⁻⁶"],
+            ["nano", "10⁻⁹"],
+          ],
+          hint: "Each prefix multiplies the unit by a power of 10.",
+          explanation: "SI prefixes scale units by factors of 10ⁿ.",
+        },
       ]);
     }
     case "moonPhaseOrder": {
       return bankReorder(m, difficulty, [
         {
-          prompt: "Order the moon phases through one lunar cycle.",
+          prompt: "Order all 8 moon phases through one lunar cycle.",
           order: [
             "New Moon",
             "Waxing Crescent",
@@ -3542,6 +3935,24 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Waxing = growing, waning = shrinking.",
           hints: ["New is dark; full is bright.", "First quarter follows waxing crescent."],
           explanation: "Lunar cycle ~29.5 days from new to full and back.",
+        },
+        {
+          prompt: "Order the waxing phases (dark → bright).",
+          order: ["New Moon", "Waxing Crescent", "First Quarter", "Waxing Gibbous", "Full Moon"],
+          hint: "Waxing means the lit portion is increasing.",
+          explanation: "Each phase shows more illuminated surface than the previous.",
+        },
+        {
+          prompt: "Order the waning phases (bright → dark).",
+          order: ["Full Moon", "Waning Gibbous", "Last Quarter", "Waning Crescent", "New Moon"],
+          hint: "Waning means the lit portion is decreasing.",
+          explanation: "After full moon, the illuminated portion shrinks.",
+        },
+        {
+          prompt: "Order these solar/lunar events by typical sequence in a month.",
+          order: ["New Moon (solar eclipse possible)", "First Quarter", "Full Moon (lunar eclipse possible)", "Last Quarter"],
+          hint: "Solar eclipses happen at new moon; lunar at full moon.",
+          explanation: "Quarter phases bracket the new and full phases.",
         },
       ]);
     }
@@ -3561,6 +3972,38 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hints: ["Primers seed the new strand.", "Lagging strand is built in pieces."],
           explanation: "Replication proceeds 5'→3' on leading and lagging strands.",
         },
+        {
+          prompt: "Order the steps of transcription (DNA → mRNA).",
+          order: [
+            "RNA polymerase binds the promoter",
+            "DNA strands separate at the gene",
+            "RNA bases pair with the template strand",
+            "RNA polymerase moves along the gene",
+            "Termination signal reached",
+            "mRNA released",
+          ],
+          hint: "Transcription happens in the nucleus.",
+          explanation: "RNA polymerase reads DNA template and builds an mRNA copy.",
+        },
+        {
+          prompt: "Order the steps of translation (mRNA → protein).",
+          order: [
+            "mRNA exits the nucleus",
+            "Ribosome binds the start codon",
+            "tRNA brings matching amino acid",
+            "Ribosome forms peptide bond",
+            "Ribosome shifts to next codon",
+            "Stop codon → polypeptide released",
+          ],
+          hint: "Codons specify amino acids.",
+          explanation: "Each codon codes for one amino acid added to the chain.",
+        },
+        {
+          prompt: "Order the cell cycle phases (start → mitosis).",
+          order: ["G1 (growth)", "S (DNA synthesis)", "G2 (preparation)", "M (mitosis)", "Cytokinesis (split)"],
+          hint: "DNA is duplicated in S phase.",
+          explanation: "The cell cycle: G1 → S → G2 → M → division.",
+        },
       ]);
     }
     case "nitrogenCycleSort": {
@@ -3579,6 +4022,36 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Fixation pulls N from air; denitrification returns it.",
           hints: ["Nitrification builds nitrate in stages.", "Denitrification releases N₂."],
           explanation: "Bacteria drive every step of the nitrogen cycle.",
+        },
+        {
+          prompt: "Sort each player in the carbon cycle.",
+          categories: ["Releases CO₂", "Absorbs CO₂"],
+          items: [
+            { label: "Cellular respiration", category: "Releases CO₂" },
+            { label: "Burning fossil fuels", category: "Releases CO₂" },
+            { label: "Volcanic eruptions", category: "Releases CO₂" },
+            { label: "Decomposition", category: "Releases CO₂" },
+            { label: "Photosynthesis", category: "Absorbs CO₂" },
+            { label: "Ocean dissolution", category: "Absorbs CO₂" },
+            { label: "Forests as carbon sinks", category: "Absorbs CO₂" },
+          ],
+          hint: "Plants and oceans absorb; combustion releases.",
+          explanation: "The carbon cycle balances sources and sinks of CO₂.",
+        },
+        {
+          prompt: "Sort each substance by where it resides in the nitrogen cycle.",
+          categories: ["Atmosphere", "Soil", "Living tissue"],
+          items: [
+            { label: "N₂ gas", category: "Atmosphere" },
+            { label: "NO₂ pollution", category: "Atmosphere" },
+            { label: "Ammonia (NH₃)", category: "Soil" },
+            { label: "Nitrate (NO₃⁻)", category: "Soil" },
+            { label: "Proteins", category: "Living tissue" },
+            { label: "Amino acids", category: "Living tissue" },
+            { label: "DNA bases", category: "Living tissue" },
+          ],
+          hint: "Atmosphere holds N₂; living things use proteins.",
+          explanation: "Nitrogen moves between air, soil, and organisms.",
         },
       ]);
     }
@@ -3608,6 +4081,30 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Cranial bones map to head regions.",
           explanation: "These bones form the skull and jaw.",
         },
+        {
+          prompt: "Pair each joint type with an example.",
+          pairs: [
+            ["Hinge", "Elbow"],
+            ["Ball and socket", "Hip"],
+            ["Pivot", "Neck (atlas/axis)"],
+            ["Saddle", "Thumb base"],
+            ["Gliding", "Wrist carpals"],
+          ],
+          hint: "Joint shape determines its motion.",
+          explanation: "Skeletal joints are classified by their range and shape.",
+        },
+        {
+          prompt: "Pair each spinal region with its vertebrae count.",
+          pairs: [
+            ["Cervical", "7"],
+            ["Thoracic", "12"],
+            ["Lumbar", "5"],
+            ["Sacral", "5 fused"],
+            ["Coccygeal", "4 fused"],
+          ],
+          hint: "From neck to tailbone, regions group vertebrae.",
+          explanation: "Adult spine: 7 + 12 + 5 + 5 fused + 4 fused = 33 vertebrae.",
+        },
       ]);
     }
     case "recycleStreamSort": {
@@ -3622,14 +4119,45 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
             { label: "Yogurt cup", category: "Plastic" },
             { label: "Soda can", category: "Metal" },
             { label: "Aluminum foil", category: "Metal" },
-            { label: "Glass jar", category: "Glass" },
             { label: "Wine bottle", category: "Glass" },
+            { label: "Jar", category: "Glass" },
             { label: "Banana peel", category: "Compost" },
             { label: "Coffee grounds", category: "Compost" },
           ],
-          hint: "Cleaner streams make recycling work.",
-          hints: ["Plastics carry a triangle code.", "Compost should be organic only."],
-          explanation: "Curbside recycling typically splits by major material category.",
+          hint: "Match each item to its material.",
+          explanation: "Recycling streams separate paper, plastics, metals, glass, and organics.",
+        },
+        {
+          prompt: "Sort each plastic by recycling code.",
+          categories: ["#1 PET", "#2 HDPE", "#5 PP", "Non-recyclable"],
+          items: [
+            { label: "Soda bottle", category: "#1 PET" },
+            { label: "Peanut butter jar", category: "#1 PET" },
+            { label: "Milk jug", category: "#2 HDPE" },
+            { label: "Shampoo bottle", category: "#2 HDPE" },
+            { label: "Yogurt tub", category: "#5 PP" },
+            { label: "Hot food container", category: "#5 PP" },
+            { label: "Plastic straw", category: "Non-recyclable" },
+            { label: "Snack wrapper", category: "Non-recyclable" },
+          ],
+          hint: "Resin codes 1–7 identify plastics.",
+          explanation: "Most curbside programs accept #1, #2, and #5 plastics.",
+        },
+        {
+          prompt: "Sort each waste item by disposal method.",
+          categories: ["Recycle", "Compost", "Hazardous", "Trash"],
+          items: [
+            { label: "Empty cereal box", category: "Recycle" },
+            { label: "Aluminum can", category: "Recycle" },
+            { label: "Apple core", category: "Compost" },
+            { label: "Eggshells", category: "Compost" },
+            { label: "Used batteries", category: "Hazardous" },
+            { label: "Paint can", category: "Hazardous" },
+            { label: "Greasy pizza box", category: "Trash" },
+            { label: "Styrofoam", category: "Trash" },
+          ],
+          hint: "Some items need special handling.",
+          explanation: "Categorize by recyclable, organic, hazardous, or landfill-bound.",
         },
       ]);
     }
@@ -3704,6 +4232,30 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Indexing is constant; searches depend on structure.",
           explanation: "Standard textbook costs.",
         },
+        {
+          prompt: "Pair each graph algorithm with its complexity.",
+          pairs: [
+            ["DFS / BFS", "O(V + E)"],
+            ["Dijkstra (heap)", "O((V + E) log V)"],
+            ["Bellman-Ford", "O(V·E)"],
+            ["Floyd-Warshall", "O(V³)"],
+            ["Kruskal's MST", "O(E log E)"],
+          ],
+          hint: "Look at graph size (V, E) and the algorithm shape.",
+          explanation: "Each graph algorithm has a canonical complexity.",
+        },
+        {
+          prompt: "Pair each space complexity with the structure.",
+          pairs: [
+            ["Adjacency matrix", "O(V²)"],
+            ["Adjacency list", "O(V + E)"],
+            ["Hash map", "O(n)"],
+            ["Recursion (depth)", "O(d)"],
+            ["DP table (2D)", "O(n·m)"],
+          ],
+          hint: "Memory grows with structure shape.",
+          explanation: "Space complexity reflects data layout.",
+        },
       ]);
     }
     case "mlTermMatch": {
@@ -3731,6 +4283,30 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           ],
           hint: "Pick loss based on prediction type.",
           explanation: "Loss families align with prediction type.",
+        },
+        {
+          prompt: "Pair each evaluation metric with its task.",
+          pairs: [
+            ["Accuracy", "Balanced classification"],
+            ["F1 score", "Imbalanced classification"],
+            ["RMSE", "Regression error"],
+            ["AUC-ROC", "Binary classifier ranking"],
+            ["BLEU", "Machine translation"],
+          ],
+          hint: "Metrics depend on prediction type.",
+          explanation: "Each metric captures a specific quality of a model.",
+        },
+        {
+          prompt: "Pair each model with its family.",
+          pairs: [
+            ["Linear regression", "Parametric"],
+            ["KNN", "Instance-based"],
+            ["Random forest", "Ensemble (bagging)"],
+            ["XGBoost", "Ensemble (boosting)"],
+            ["CNN", "Deep learning"],
+          ],
+          hint: "Group algorithms by core approach.",
+          explanation: "Each model belongs to a methodological family.",
         },
       ]);
     }
@@ -3760,6 +4336,30 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Group by attack mechanism.",
           explanation: "Standard cybersecurity taxonomy.",
         },
+        {
+          prompt: "Pair each security control with its CIA triad goal.",
+          pairs: [
+            ["Encryption at rest", "Confidentiality"],
+            ["Hashing", "Integrity"],
+            ["Backups", "Availability"],
+            ["Access controls", "Confidentiality"],
+            ["Load balancing", "Availability"],
+          ],
+          hint: "CIA = Confidentiality, Integrity, Availability.",
+          explanation: "Controls protect one (or more) of the CIA triad goals.",
+        },
+        {
+          prompt: "Pair each authentication factor with its category.",
+          pairs: [
+            ["Password", "Knowledge"],
+            ["Hardware token", "Possession"],
+            ["Fingerprint", "Inherence"],
+            ["Smart card", "Possession"],
+            ["Security question", "Knowledge"],
+          ],
+          hint: "Something you know, have, or are.",
+          explanation: "Auth factors group by knowledge/possession/inherence.",
+        },
       ]);
     }
     case "joinTypeMatch": {
@@ -3787,6 +4387,30 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           ],
           hint: "Clauses run in a fixed logical order.",
           explanation: "Logical execution order: FROM → WHERE → GROUP → HAVING → SELECT → ORDER → LIMIT.",
+        },
+        {
+          prompt: "Pair each SQL aggregate with its meaning.",
+          pairs: [
+            ["COUNT(*)", "Number of rows"],
+            ["SUM(col)", "Total of column"],
+            ["AVG(col)", "Mean of column"],
+            ["MIN(col)", "Smallest value"],
+            ["MAX(col)", "Largest value"],
+          ],
+          hint: "Aggregates reduce rows to a single value.",
+          explanation: "These aggregate functions are standard across SQL dialects.",
+        },
+        {
+          prompt: "Pair each constraint with its guarantee.",
+          pairs: [
+            ["PRIMARY KEY", "Unique + non-null"],
+            ["FOREIGN KEY", "Reference integrity"],
+            ["UNIQUE", "No duplicates"],
+            ["NOT NULL", "Required value"],
+            ["CHECK", "Custom validation"],
+          ],
+          hint: "Constraints enforce data integrity.",
+          explanation: "Each constraint protects a specific data invariant.",
         },
       ]);
     }
@@ -3816,6 +4440,30 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Each sensor reports a physical quantity.",
           explanation: "Common robotics sensor lineup.",
         },
+        {
+          prompt: "Pair each actuator with its motion type.",
+          pairs: [
+            ["DC motor", "Continuous rotation"],
+            ["Stepper motor", "Discrete angle steps"],
+            ["Servo motor", "Position-controlled angle"],
+            ["Linear actuator", "Straight-line motion"],
+            ["Hydraulic cylinder", "High-force linear motion"],
+          ],
+          hint: "Each actuator delivers a specific motion.",
+          explanation: "Actuator choice depends on torque, precision, and motion type.",
+        },
+        {
+          prompt: "Pair each control technique with its property.",
+          pairs: [
+            ["Proportional (P)", "Faster response, may overshoot"],
+            ["Integral (I)", "Eliminates steady-state error"],
+            ["Derivative (D)", "Damps oscillation"],
+            ["Feed-forward", "Anticipates known disturbances"],
+            ["Adaptive", "Tunes parameters online"],
+          ],
+          hint: "Each gain term contributes a different behavior.",
+          explanation: "PID combines P + I + D for robust feedback.",
+        },
       ]);
     }
     case "httpResponseMatch": {
@@ -3843,6 +4491,30 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           ],
           hint: "First digit signals the family.",
           explanation: "HTTP groups statuses by first digit.",
+        },
+        {
+          prompt: "Pair each HTTP header with its purpose.",
+          pairs: [
+            ["Content-Type", "Body media type"],
+            ["Authorization", "Credentials"],
+            ["Cache-Control", "Caching directive"],
+            ["Accept", "Preferred response type"],
+            ["User-Agent", "Client identification"],
+          ],
+          hint: "Headers carry metadata.",
+          explanation: "Headers describe how to interpret the request/response.",
+        },
+        {
+          prompt: "Pair each 4xx code with what triggers it.",
+          pairs: [
+            ["400 Bad Request", "Malformed payload"],
+            ["401 Unauthorized", "Missing/invalid auth"],
+            ["403 Forbidden", "Authenticated but not allowed"],
+            ["404 Not Found", "Resource doesn't exist"],
+            ["409 Conflict", "Resource state conflict"],
+          ],
+          hint: "4xx = client errors.",
+          explanation: "Each 4xx code pinpoints what the client did wrong.",
         },
       ]);
     }
@@ -3872,6 +4544,30 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Idempotent = same result on retry.",
           explanation: "REST verb semantics around retries.",
         },
+        {
+          prompt: "Pair each verb with a typical use case.",
+          pairs: [
+            ["GET /users", "List users"],
+            ["GET /users/42", "Fetch user 42"],
+            ["POST /users", "Create new user"],
+            ["PUT /users/42", "Replace user 42"],
+            ["DELETE /users/42", "Remove user 42"],
+          ],
+          hint: "URLs are nouns; verbs are actions.",
+          explanation: "Standard REST resource pattern.",
+        },
+        {
+          prompt: "Pair each verb with its safety property.",
+          pairs: [
+            ["GET", "Safe (no side effects)"],
+            ["HEAD", "Safe (headers only)"],
+            ["OPTIONS", "Safe (capabilities check)"],
+            ["POST", "Unsafe (mutation)"],
+            ["DELETE", "Unsafe (mutation)"],
+          ],
+          hint: "Safe = no server state change.",
+          explanation: "Safe methods can be retried without side effects.",
+        },
       ]);
     }
     case "tcpHandshakeOrder": {
@@ -3889,6 +4585,31 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Each side closes its own half.",
           hints: ["FIN signals half-close.", "Both sides FIN and ACK."],
           explanation: "Four-way teardown — each side independently closes.",
+        },
+        {
+          prompt: "Order an HTTPS request (TLS handshake first).",
+          order: [
+            "Client Hello (TLS)",
+            "Server Hello + certificate",
+            "Key exchange",
+            "Encrypted HTTP request",
+            "Encrypted HTTP response",
+          ],
+          hint: "TLS handshake sets up encryption before HTTP.",
+          explanation: "HTTPS = HTTP wrapped in a TLS-secured channel.",
+        },
+        {
+          prompt: "Order a DNS resolution sequence.",
+          order: [
+            "Browser checks local cache",
+            "Query recursive resolver",
+            "Resolver queries root server",
+            "Resolver queries TLD server",
+            "Resolver queries authoritative server",
+            "IP returned to browser",
+          ],
+          hint: "DNS is hierarchical: root → TLD → authoritative.",
+          explanation: "DNS walks the name hierarchy to resolve a hostname.",
         },
       ]);
     }
@@ -3917,6 +4638,30 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           ],
           hint: "Match register style to function.",
           explanation: "Each register category serves a digital-system role.",
+        },
+        {
+          prompt: "Pair each logic gate with its truth output (for A = 1, B = 0).",
+          pairs: [
+            ["AND", "0"],
+            ["OR", "1"],
+            ["NAND", "1"],
+            ["NOR", "0"],
+            ["XOR", "1"],
+          ],
+          hint: "Compute each gate for (A, B) = (1, 0).",
+          explanation: "AND only outputs 1 when both are 1; XOR outputs 1 when inputs differ.",
+        },
+        {
+          prompt: "Pair each combinational circuit with its function.",
+          pairs: [
+            ["Multiplexer", "Selects one of N inputs"],
+            ["Decoder", "n-to-2ⁿ enable lines"],
+            ["Encoder", "2ⁿ-to-n active line index"],
+            ["Adder", "Sums binary numbers"],
+            ["Comparator", "Equal/greater/less output"],
+          ],
+          hint: "Each circuit routes or transforms bits.",
+          explanation: "Combinational logic operates without memory.",
         },
       ]);
     }
@@ -3976,6 +4721,37 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hints: ["Live loads can change.", "Wind acts laterally and uplift."],
           explanation: "Structural codes classify loads by source and duration.",
         },
+        {
+          prompt: "Sort each load by direction of application.",
+          categories: ["Vertical (gravity)", "Lateral (horizontal)", "Uplift", "Torsional"],
+          items: [
+            { label: "Floor occupants", category: "Vertical (gravity)" },
+            { label: "Stored materials", category: "Vertical (gravity)" },
+            { label: "Earthquake forces", category: "Lateral (horizontal)" },
+            { label: "Wind pressure on wall", category: "Lateral (horizontal)" },
+            { label: "Wind suction on roof", category: "Uplift" },
+            { label: "Hydrostatic uplift on base", category: "Uplift" },
+            { label: "Eccentric crane load", category: "Torsional" },
+            { label: "Wind on asymmetric building", category: "Torsional" },
+          ],
+          hint: "Direction matters as much as magnitude.",
+          explanation: "Code design separates vertical, lateral, uplift, and torsional effects.",
+        },
+        {
+          prompt: "Sort each load by duration / frequency.",
+          categories: ["Permanent", "Occasional", "Impulse"],
+          items: [
+            { label: "Building self-weight", category: "Permanent" },
+            { label: "Soil pressure", category: "Permanent" },
+            { label: "Crowd loading on a stadium", category: "Occasional" },
+            { label: "Snow load", category: "Occasional" },
+            { label: "Blast pressure", category: "Impulse" },
+            { label: "Vehicle collision", category: "Impulse" },
+            { label: "Earthquake shaking", category: "Impulse" },
+          ],
+          hint: "Duration affects how a load is combined in design.",
+          explanation: "ASCE load combinations weight permanent vs transient differently.",
+        },
       ]);
     }
     case "flightForcesMatch": {
@@ -4001,6 +4777,30 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           ],
           hint: "Each axis has a primary surface.",
           explanation: "Aircraft control is split across three principal axes.",
+        },
+        {
+          prompt: "Pair each flight regime with its dominant phenomenon.",
+          pairs: [
+            ["Subsonic", "Incompressible flow"],
+            ["Transonic", "Mixed sub/supersonic"],
+            ["Supersonic", "Shock waves"],
+            ["Hypersonic", "Aerodynamic heating"],
+            ["Stall", "Flow separation"],
+          ],
+          hint: "Flight regimes are defined by Mach number.",
+          explanation: "Each regime has dominant aerodynamic features.",
+        },
+        {
+          prompt: "Pair each propulsion type with its principle.",
+          pairs: [
+            ["Turbojet", "Compress + combust + expand"],
+            ["Turbofan", "Bypass cold + hot exhaust"],
+            ["Turboprop", "Turbine driving propeller"],
+            ["Ramjet", "No moving compressor, supersonic intake"],
+            ["Rocket", "Self-contained oxidizer"],
+          ],
+          hint: "Match propulsion to its compression source.",
+          explanation: "Different jet engines exploit airflow compression differently.",
         },
       ]);
     }
@@ -4030,6 +4830,30 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Match the right tool to the task.",
           explanation: "Common end-effector and drive options in robotics.",
         },
+        {
+          prompt: "Pair each actuator with its limitation.",
+          pairs: [
+            ["DC brushed motor", "Brush wear"],
+            ["Hydraulic", "Leaks, mass"],
+            ["Pneumatic", "Compressibility / poor precision"],
+            ["Piezoelectric", "Tiny stroke"],
+            ["Shape memory alloy", "Slow cycling"],
+          ],
+          hint: "Each actuator has trade-offs.",
+          explanation: "Selection balances force, precision, speed, and reliability.",
+        },
+        {
+          prompt: "Pair each gripper style with its target.",
+          pairs: [
+            ["Parallel jaw", "Rigid box"],
+            ["Vacuum cup", "Flat smooth surface"],
+            ["Magnetic", "Ferrous metal sheet"],
+            ["Soft (silicone)", "Fragile produce"],
+            ["Underactuated finger", "Irregular objects"],
+          ],
+          hint: "Object shape drives gripper choice.",
+          explanation: "Gripping technology scales with object properties.",
+        },
       ]);
     }
     case "bridgeTypeMatch": {
@@ -4058,6 +4882,30 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Famous bridges illustrate each style.",
           explanation: "Iconic bridges showcase each structural family.",
         },
+        {
+          prompt: "Pair each bridge type with its ideal span range.",
+          pairs: [
+            ["Beam", "Short (< 60 m)"],
+            ["Arch", "Medium (60–250 m)"],
+            ["Truss", "Medium (60–300 m)"],
+            ["Cable-stayed", "Long (250–1000 m)"],
+            ["Suspension", "Very long (> 1000 m)"],
+          ],
+          hint: "Form follows function — and span.",
+          explanation: "Each bridge type works best within its span sweet spot.",
+        },
+        {
+          prompt: "Pair each member type with the force it carries.",
+          pairs: [
+            ["Cable", "Tension"],
+            ["Column", "Compression"],
+            ["Top chord (truss)", "Compression"],
+            ["Bottom chord (truss)", "Tension"],
+            ["Diagonal (truss)", "Alternating axial"],
+          ],
+          hint: "Identify whether each member stretches or squashes.",
+          explanation: "Trusses route forces axially through members.",
+        },
       ]);
     }
     case "materialPropertySort": {
@@ -4078,6 +4926,36 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Each material maps to one dominant trait.",
           hints: ["Ductile yields before failure.", "Brittle fails suddenly."],
           explanation: "Material families are characterized by their mechanical behavior.",
+        },
+        {
+          prompt: "Sort each material by its family.",
+          categories: ["Metal", "Polymer", "Ceramic", "Composite"],
+          items: [
+            { label: "Aluminum 6061", category: "Metal" },
+            { label: "Stainless steel", category: "Metal" },
+            { label: "Polycarbonate", category: "Polymer" },
+            { label: "Nylon", category: "Polymer" },
+            { label: "Alumina (Al₂O₃)", category: "Ceramic" },
+            { label: "Silicon nitride", category: "Ceramic" },
+            { label: "Carbon-fiber laminate", category: "Composite" },
+            { label: "Glass-fiber laminate", category: "Composite" },
+          ],
+          hint: "Group by base material type.",
+          explanation: "Materials are typically classified into four families.",
+        },
+        {
+          prompt: "Sort each material by thermal property.",
+          categories: ["Good conductor", "Insulator"],
+          items: [
+            { label: "Copper", category: "Good conductor" },
+            { label: "Aluminum", category: "Good conductor" },
+            { label: "Silver", category: "Good conductor" },
+            { label: "Fiberglass batting", category: "Insulator" },
+            { label: "Polyurethane foam", category: "Insulator" },
+            { label: "Aerogel", category: "Insulator" },
+          ],
+          hint: "Metals conduct; air-filled solids insulate.",
+          explanation: "Thermal conductivity correlates with electron mobility and structure.",
         },
       ]);
     }
@@ -4131,6 +5009,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Each phase produces signature artifacts.",
           explanation: "V-model is artifact-driven.",
         },
+        {
+          prompt: "Pair each software process model with its style.",
+          pairs: [
+            ["Waterfall", "Sequential, gated"],
+            ["V-model", "Sequential with paired tests"],
+            ["Agile", "Iterative, sprint-based"],
+            ["Spiral", "Risk-driven iterations"],
+            ["DevOps", "Continuous delivery + ops"],
+          ],
+          hint: "Each model balances flexibility vs. ceremony.",
+          explanation: "Process models target different risk and pace profiles.",
+        },
       ]);
     }
     case "designPhaseOrder": {
@@ -4148,6 +5038,26 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Discovery feeds framing; testing feeds iteration.",
           hints: ["Sketching precedes building.", "Iterate on what tests reveal."],
           explanation: "Iterative loops feed insight back into discovery.",
+        },
+        {
+          prompt: "Order the engineering design process (NASA / NSTA style).",
+          order: [
+            "Identify the problem",
+            "Define requirements & constraints",
+            "Brainstorm solutions",
+            "Choose best solution",
+            "Build prototype",
+            "Test & evaluate",
+            "Improve / iterate",
+          ],
+          hint: "Constraints come before brainstorming.",
+          explanation: "Engineering design is iterative, with explicit constraint definition.",
+        },
+        {
+          prompt: "Order the lean startup loop.",
+          order: ["Ideas", "Build", "Product", "Measure", "Data", "Learn", "Validated learning"],
+          hint: "Build-Measure-Learn is the core cycle.",
+          explanation: "Lean startup tightens learning loops between assumption and evidence.",
         },
       ]);
     }
@@ -4421,6 +5331,41 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hints: ["Many in the 30s have small factors.", "49 = 7 × 7."],
           explanation: "Trial divide by small primes up to √n.",
         },
+        {
+          prompt: "Sort numbers by parity (even vs odd) — testing speed of recognition.",
+          categories: ["Even", "Odd"],
+          items: [
+            { label: "14", category: "Even" },
+            { label: "28", category: "Even" },
+            { label: "30", category: "Even" },
+            { label: "44", category: "Even" },
+            { label: "13", category: "Odd" },
+            { label: "27", category: "Odd" },
+            { label: "41", category: "Odd" },
+            { label: "55", category: "Odd" },
+          ],
+          hint: "Check the last digit.",
+          explanation: "Even ends in 0/2/4/6/8; odd ends in 1/3/5/7/9.",
+        },
+        {
+          prompt: "Sort by number type (square, prime, both).",
+          categories: ["Perfect square", "Prime", "Neither"],
+          items: [
+            { label: "4", category: "Perfect square" },
+            { label: "9", category: "Perfect square" },
+            { label: "16", category: "Perfect square" },
+            { label: "25", category: "Perfect square" },
+            { label: "11", category: "Prime" },
+            { label: "13", category: "Prime" },
+            { label: "17", category: "Prime" },
+            { label: "23", category: "Prime" },
+            { label: "12", category: "Neither" },
+            { label: "20", category: "Neither" },
+            { label: "30", category: "Neither" },
+          ],
+          hint: "Perfect square = n²; prime has only 1 and itself.",
+          explanation: "Some numbers fit categories cleanly; others are neither.",
+        },
       ]);
     }
     case "loanMonthlyBasic": {
@@ -4464,6 +5409,30 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Digestion is staged across organs.",
           explanation: "Enzymes are released at specific points in digestion.",
         },
+        {
+          prompt: "Pair each factor with its effect on enzyme activity.",
+          pairs: [
+            ["Increased temperature (up to optimum)", "Faster reaction"],
+            ["Temperature above optimum", "Denaturation"],
+            ["pH near optimum", "Maximum activity"],
+            ["Extreme pH", "Denaturation"],
+            ["Competitive inhibitor", "Blocks active site"],
+            ["Substrate excess", "Reaches Vmax"],
+          ],
+          hint: "Enzymes are shape-dependent proteins.",
+          explanation: "Enzymes work best in narrow temperature and pH windows.",
+        },
+        {
+          prompt: "Pair each enzyme inhibition type with its mechanism.",
+          pairs: [
+            ["Competitive", "Binds active site (substrate analog)"],
+            ["Non-competitive", "Binds allosteric site, changes shape"],
+            ["Uncompetitive", "Binds only enzyme-substrate complex"],
+            ["Irreversible", "Covalent modification"],
+          ],
+          hint: "Where does the inhibitor bind?",
+          explanation: "Inhibitor binding location and reversibility define the class.",
+        },
       ]);
     }
     case "stateChangeOrder": {
@@ -4481,6 +5450,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Heat first changes phase, then temperature.",
           hints: ["Phase change is constant temperature.", "Heating between changes raises temperature."],
           explanation: "Heating curve plateaus at melting and boiling points.",
+        },
+        {
+          prompt: "Order processes by direction of energy flow (releasing heat).",
+          order: ["Plasma → Gas", "Gas → Liquid (condensation)", "Liquid → Solid (freezing)", "Solid → Solid (cooling)"],
+          hint: "Releases energy = exothermic state change.",
+          explanation: "Energy releases as particles become more ordered.",
+        },
+        {
+          prompt: "Order phase changes absorbing energy (cold → hot).",
+          order: ["Melting", "Vaporization", "Sublimation", "Ionization"],
+          hint: "Increasing energy needed.",
+          explanation: "Each step requires more energy than the last.",
         },
       ]);
     }
@@ -4502,11 +5483,29 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
     case "layersOfEarth": {
       return bankReorder(m, difficulty, [
         {
-          prompt: "Order Earth's layers from outermost to innermost.",
+          prompt: "Order Earth's compositional layers from outermost to innermost.",
           order: ["Crust", "Upper Mantle", "Lower Mantle", "Outer Core", "Inner Core"],
           hint: "Outside to deep.",
           hints: ["Crust is thin.", "Inner core is solid iron."],
           explanation: "Compositional and mechanical layering of Earth.",
+        },
+        {
+          prompt: "Order Earth's mechanical layers from outside to center.",
+          order: ["Lithosphere", "Asthenosphere", "Mesosphere", "Outer Core", "Inner Core"],
+          hint: "Mechanical = how it deforms.",
+          explanation: "Lithosphere = rigid; asthenosphere = ductile; mesosphere = lower mantle.",
+        },
+        {
+          prompt: "Order Earth's atmospheric layers from surface up.",
+          order: ["Troposphere", "Stratosphere", "Mesosphere", "Thermosphere", "Exosphere"],
+          hint: "Weather happens in the troposphere.",
+          explanation: "Atmospheric layers stack by temperature gradient.",
+        },
+        {
+          prompt: "Order layers of Earth by typical density (low → high).",
+          order: ["Atmosphere", "Crust", "Mantle", "Outer Core (liquid)", "Inner Core (solid)"],
+          hint: "Denser materials sink toward the center.",
+          explanation: "Earth's differentiation concentrated dense iron in the core.",
         },
       ]);
     }
@@ -4526,6 +5525,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hints: ["Hypothesis is testable.", "Findings are peer-reviewed."],
           explanation: "Sharing findings closes the loop.",
         },
+        {
+          prompt: "Order a controlled experiment.",
+          order: ["Pick a variable", "Form hypothesis", "Establish control group", "Apply treatment", "Measure outcome", "Compare to control"],
+          hint: "Control group keeps variables fixed.",
+          explanation: "Controlled experiments isolate one variable to test causation.",
+        },
+        {
+          prompt: "Order the steps of writing a lab report.",
+          order: ["Title & abstract", "Introduction & hypothesis", "Methods", "Results", "Discussion", "References"],
+          hint: "IMRaD format: Intro, Methods, Results, Discussion.",
+          explanation: "Lab reports follow a standard sequence for reproducibility.",
+        },
       ]);
     }
     case "starLifecycleOrder": {
@@ -4543,6 +5554,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Massive stars die explosively.",
           hints: ["Supergiants are huge.", "Remnant depends on remaining mass."],
           explanation: "High-mass stars end as supernova remnants.",
+        },
+        {
+          prompt: "Order events in cosmology (early → late).",
+          order: ["Big Bang", "Inflation", "Recombination (CMB)", "First stars", "First galaxies", "Present day"],
+          hint: "The universe expanded and cooled.",
+          explanation: "Cosmic timeline from singularity to present.",
+        },
+        {
+          prompt: "Order objects by size (smallest first).",
+          order: ["Asteroid", "Moon", "Earth", "Sun", "Solar System", "Galaxy", "Universe"],
+          hint: "Astronomy spans an enormous range.",
+          explanation: "Scale hierarchy of astronomical objects.",
         },
       ]);
     }
@@ -4572,6 +5595,30 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Inheritance patterns.",
           explanation: "Heredity vocabulary across alleles and tools.",
         },
+        {
+          prompt: "Pair each Mendelian cross with its phenotype ratio (F2).",
+          pairs: [
+            ["Monohybrid (Aa × Aa)", "3 : 1"],
+            ["Test cross (Aa × aa)", "1 : 1"],
+            ["Dihybrid (AaBb × AaBb)", "9 : 3 : 3 : 1"],
+            ["Incomplete dominance", "1 : 2 : 1"],
+            ["Codominance", "1 : 2 : 1 (three phenotypes)"],
+          ],
+          hint: "Standard Mendelian outcomes.",
+          explanation: "Each cross type yields a characteristic ratio.",
+        },
+        {
+          prompt: "Pair each chromosome event with its description.",
+          pairs: [
+            ["Crossing over", "Exchanges DNA between homologs"],
+            ["Independent assortment", "Random pairing of chromosomes"],
+            ["Nondisjunction", "Chromosomes fail to separate"],
+            ["Linkage", "Genes inherited together on same chromosome"],
+            ["Mutation", "Permanent change in DNA"],
+          ],
+          hint: "Meiosis generates variation.",
+          explanation: "Genetic variation arises from multiple meiosis events.",
+        },
       ]);
     }
     case "biomeMatchClimate": {
@@ -4599,6 +5646,30 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           ],
           hint: "Iconic species per biome.",
           explanation: "Biomes share distinctive species.",
+        },
+        {
+          prompt: "Pair each aquatic biome with its salinity.",
+          pairs: [
+            ["Open ocean", "Salty (~35 ppt)"],
+            ["Coral reef", "Salty (~35 ppt)"],
+            ["Estuary", "Brackish (5–30 ppt)"],
+            ["Freshwater lake", "Fresh (<0.5 ppt)"],
+            ["River", "Fresh (<0.5 ppt)"],
+          ],
+          hint: "Salinity defines aquatic biomes.",
+          explanation: "Salt concentration is the biggest aquatic biome driver.",
+        },
+        {
+          prompt: "Pair each biome with its annual precipitation.",
+          pairs: [
+            ["Tropical rainforest", "> 2000 mm"],
+            ["Temperate forest", "750–1500 mm"],
+            ["Grassland", "250–750 mm"],
+            ["Desert", "< 250 mm"],
+            ["Tundra", "< 250 mm (mostly snow)"],
+          ],
+          hint: "Precipitation drops by latitude and altitude.",
+          explanation: "Rainfall is a primary climate axis for biome classification.",
         },
       ]);
     }
@@ -4628,6 +5699,29 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Each system features one signature organ.",
           explanation: "Organs centralize each body system's work.",
         },
+        {
+          prompt: "Pair each tissue type with its function.",
+          pairs: [
+            ["Epithelial", "Covers surfaces"],
+            ["Connective", "Supports and binds"],
+            ["Muscle", "Contracts to move"],
+            ["Nervous", "Transmits signals"],
+          ],
+          hint: "Four primary tissue types.",
+          explanation: "All organs are built from these tissues in combination.",
+        },
+        {
+          prompt: "Pair each hormone with its gland.",
+          pairs: [
+            ["Insulin", "Pancreas"],
+            ["Thyroxine", "Thyroid"],
+            ["Cortisol", "Adrenal cortex"],
+            ["Growth hormone", "Pituitary"],
+            ["Melatonin", "Pineal gland"],
+          ],
+          hint: "Each hormone has a specific gland origin.",
+          explanation: "Endocrine system uses hormones for long-range signaling.",
+        },
       ]);
     }
     case "renewableNonrenewableSort": {
@@ -4649,6 +5743,38 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Renewable replenishes on human time scales.",
           hints: ["Fossil fuels take millions of years.", "Sunlight and wind are abundant."],
           explanation: "Renewables replenish quickly; fossil/nuclear fuels do not.",
+        },
+        {
+          prompt: "Sort each energy source by carbon impact.",
+          categories: ["Low carbon", "Medium carbon", "High carbon"],
+          items: [
+            { label: "Solar", category: "Low carbon" },
+            { label: "Wind", category: "Low carbon" },
+            { label: "Hydro", category: "Low carbon" },
+            { label: "Nuclear", category: "Low carbon" },
+            { label: "Natural gas", category: "Medium carbon" },
+            { label: "Biomass (sustainable)", category: "Medium carbon" },
+            { label: "Oil", category: "High carbon" },
+            { label: "Coal", category: "High carbon" },
+          ],
+          hint: "Carbon per kWh varies dramatically.",
+          explanation: "Solar/wind/nuclear/hydro emit much less CO₂ than fossil fuels.",
+        },
+        {
+          prompt: "Sort each energy form by primary use case.",
+          categories: ["Electricity", "Transport", "Heat"],
+          items: [
+            { label: "Solar PV", category: "Electricity" },
+            { label: "Wind turbines", category: "Electricity" },
+            { label: "Gasoline", category: "Transport" },
+            { label: "Jet fuel", category: "Transport" },
+            { label: "Diesel", category: "Transport" },
+            { label: "Natural gas heating", category: "Heat" },
+            { label: "Geothermal heating", category: "Heat" },
+            { label: "Wood pellets", category: "Heat" },
+          ],
+          hint: "Energy use is split across sectors.",
+          explanation: "Different energy sources dominate different sectors.",
         },
       ]);
     }
@@ -4789,6 +5915,30 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Each primitive has a primary use case.",
           explanation: "Choose the primitive to match the security goal.",
         },
+        {
+          prompt: "Pair each cipher mode with its property.",
+          pairs: [
+            ["ECB", "No diffusion (insecure for repeated blocks)"],
+            ["CBC", "Chained blocks; requires IV"],
+            ["CTR", "Parallelizable counter mode"],
+            ["GCM", "Authenticated encryption with tag"],
+            ["OFB", "Streaming, output feedback"],
+          ],
+          hint: "Modes affect security and performance.",
+          explanation: "Modern protocols favor authenticated modes like GCM.",
+        },
+        {
+          prompt: "Pair each key length with its security level.",
+          pairs: [
+            ["AES-128", "Symmetric ~128-bit security"],
+            ["AES-256", "Symmetric ~256-bit security"],
+            ["RSA-2048", "Asymmetric ~112-bit security"],
+            ["RSA-3072", "Asymmetric ~128-bit security"],
+            ["ECC P-256", "Asymmetric ~128-bit security"],
+          ],
+          hint: "Asymmetric keys need more bits for equivalent strength.",
+          explanation: "ECC matches RSA security at much smaller key sizes.",
+        },
       ]);
     }
     case "normalFormOrder": {
@@ -4806,6 +5956,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Modeling precedes normalization.",
           hints: ["Then test with queries.", "Each step refines the schema."],
           explanation: "Standard normalization workflow.",
+        },
+        {
+          prompt: "Order the steps to denormalize for query performance.",
+          order: ["Profile slow queries", "Identify hot joins", "Add redundant columns", "Materialize aggregates", "Add indexes", "Document trade-offs"],
+          hint: "Denormalization trades storage for speed.",
+          explanation: "Selective denormalization helps performance-critical paths.",
+        },
+        {
+          prompt: "Order ACID transaction steps in a relational DB.",
+          order: ["Begin transaction", "Acquire locks", "Apply changes", "Write to WAL", "Commit", "Release locks"],
+          hint: "Locks ensure isolation; WAL ensures durability.",
+          explanation: "ACID guarantees rely on write-ahead logs and locking.",
         },
       ]);
     }
@@ -4835,6 +5997,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Pick the filter that fits the model.",
           explanation: "Sensor fusion filters trade complexity for assumptions.",
         },
+        {
+          prompt: "Pair each coordinate frame with its use.",
+          pairs: [
+            ["Body frame", "Aligned with robot chassis"],
+            ["World frame", "Fixed inertial reference"],
+            ["Sensor frame", "Local to a specific sensor"],
+            ["Map frame", "Aligned with map origin"],
+            ["Camera frame", "Aligned with optical axis"],
+          ],
+          hint: "Transforms connect each frame.",
+          explanation: "ROS-style robotics uses multiple coordinate frames.",
+        },
       ]);
     }
     case "domEventMatch": {
@@ -4862,6 +6036,30 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           ],
           hint: "Some events are non-bubbling.",
           explanation: "Bubbling controls how event handlers propagate.",
+        },
+        {
+          prompt: "Pair each DOM method with its purpose.",
+          pairs: [
+            ["addEventListener", "Attach handler"],
+            ["preventDefault", "Stop default action"],
+            ["stopPropagation", "Stop bubbling"],
+            ["dispatchEvent", "Manually fire event"],
+            ["removeEventListener", "Detach handler"],
+          ],
+          hint: "Each method controls a specific aspect of events.",
+          explanation: "Event API exposes lifecycle hooks for handlers.",
+        },
+        {
+          prompt: "Pair each input type with what it captures.",
+          pairs: [
+            ["type='text'", "Free-form string"],
+            ["type='number'", "Numeric value"],
+            ["type='checkbox'", "Boolean"],
+            ["type='radio'", "One of N"],
+            ["type='file'", "File upload"],
+          ],
+          hint: "Input type narrows the value space.",
+          explanation: "Browsers render & validate inputs based on type.",
         },
       ]);
     }
@@ -4891,6 +6089,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Servers parse by Content-Type.",
           explanation: "Each parser handles a specific encoding.",
         },
+        {
+          prompt: "Pair each API style with its transport.",
+          pairs: [
+            ["REST", "HTTP + JSON"],
+            ["GraphQL", "HTTP POST + JSON query"],
+            ["gRPC", "HTTP/2 + protobuf"],
+            ["WebSocket", "Persistent TCP socket"],
+            ["SOAP", "HTTP + XML envelope"],
+          ],
+          hint: "API style determines protocol features.",
+          explanation: "Each style trades latency, schema strictness, and streaming.",
+        },
       ]);
     }
     case "ipClassMatch": {
@@ -4919,20 +6129,43 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Some ranges never route on the public Internet.",
           explanation: "Reserved IPv4 ranges for specific roles.",
         },
+        {
+          prompt: "Pair each CIDR notation with its host count.",
+          pairs: [
+            ["/24", "254 hosts"],
+            ["/16", "65,534 hosts"],
+            ["/30", "2 hosts (point-to-point)"],
+            ["/29", "6 hosts"],
+            ["/22", "1,022 hosts"],
+          ],
+          hint: "Hosts = 2^(32 - prefix) - 2.",
+          explanation: "CIDR prefix determines subnet size.",
+        },
       ]);
     }
     case "numberSystemConvert": {
       const decimal = rand(5, 63);
       const binary = decimal.toString(2);
+      const hex = decimal.toString(16).toUpperCase();
+      const octal = decimal.toString(8);
+      const variants = [
+        { prompt: `Convert binary ${binary} to decimal.`, kind: "binary" as const, title: binary, subtitle: "Binary → decimal", ans: decimal, hint: "Each bit is a power of two.", hints: [`Rightmost bit is 2⁰ = 1.`, `Add the place values for each 1 bit.`], explanation: `${binary}₂ = ${decimal}.` },
+        { prompt: `Convert hex ${hex} to decimal.`, kind: "icon" as const, title: hex, subtitle: "Hex → decimal", ans: decimal, hint: "Each hex digit is a power of 16.", hints: ["A=10, B=11, …, F=15.", "Sum digit · 16^position."], explanation: `${hex}₁₆ = ${decimal}.` },
+        { prompt: `Convert octal ${octal} to decimal.`, kind: "icon" as const, title: octal, subtitle: "Octal → decimal", ans: decimal, hint: "Each octal digit is a power of 8.", hints: ["Digits 0-7 only.", "Sum digit · 8^position."], explanation: `${octal}₈ = ${decimal}.` },
+        { prompt: `What decimal does ${binary} (binary) represent?`, kind: "binary" as const, title: binary, subtitle: "Read binary", ans: decimal, hint: "Convert to base 10.", hints: ["Powers of 2: 1, 2, 4, 8, 16, 32, ...", "Sum where bit is 1."], explanation: `${binary}₂ = ${decimal} in decimal.` },
+      ];
+      const v = pick(variants);
       return numpadEng(
         m,
         difficulty,
-        `Convert binary ${binary} to decimal.`,
-        { kind: "binary", icon: m.emoji, title: binary, subtitle: "Binary → decimal", bits: binary.split("").map((b) => Number(b)) },
-        decimal,
-        "Each bit is a power of two.",
-        [`Rightmost bit is 2⁰ = 1.`, `Add the place values for each 1 bit.`],
-        `${binary}₂ = ${decimal}.`,
+        v.prompt,
+        v.kind === "binary"
+          ? { kind: "binary", icon: m.emoji, title: v.title, subtitle: v.subtitle, bits: binary.split("").map((b) => Number(b)) }
+          : { kind: "icon", icon: m.emoji, title: v.title, subtitle: v.subtitle },
+        v.ans,
+        v.hint,
+        v.hints,
+        v.explanation,
       );
     }
     case "leverMechAdvantage": {
@@ -5020,6 +6253,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Admixtures tune concrete behavior.",
           explanation: "Each admixture changes a specific property of the mix.",
         },
+        {
+          prompt: "Pair each concrete failure mode with its cause.",
+          pairs: [
+            ["Cracking", "Tensile overload / shrinkage"],
+            ["Spalling", "Freeze-thaw or corrosion of rebar"],
+            ["Honeycombing", "Poor compaction during pour"],
+            ["Scaling", "Surface salt damage"],
+            ["Alkali-silica reaction", "Reactive aggregate + moisture"],
+          ],
+          hint: "Each defect signals a specific construction issue.",
+          explanation: "Diagnosis informs repair strategy.",
+        },
       ]);
     }
     case "propulsionTypeMatch": {
@@ -5047,6 +6292,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           ],
           hint: "Each engine extracts energy differently.",
           explanation: "Energy source dictates thrust and specific impulse.",
+        },
+        {
+          prompt: "Pair each engine with its specific impulse (Isp).",
+          pairs: [
+            ["Solid rocket", "~250 s"],
+            ["Liquid (kerosene)", "~340 s"],
+            ["Liquid (hydrogen)", "~450 s"],
+            ["Ion thruster", "~3000–5000 s"],
+            ["Hall thruster", "~1500–2000 s"],
+          ],
+          hint: "Isp measures propellant efficiency.",
+          explanation: "Higher Isp means more thrust per kg of propellant.",
         },
       ]);
     }
@@ -5096,6 +6353,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Each feature has a structural meaning.",
           explanation: "Shear and moment diagrams are core to beam design.",
         },
+        {
+          prompt: "Pair each support type with its reaction.",
+          pairs: [
+            ["Pin", "Two force components"],
+            ["Roller", "One perpendicular force"],
+            ["Fixed", "Force + moment"],
+            ["Cable", "Single tensile force"],
+            ["Free end", "Zero reactions"],
+          ],
+          hint: "Each support constrains different motions.",
+          explanation: "Reactions count = constraint dimensions.",
+        },
       ]);
     }
     case "corrosionTypeMatch": {
@@ -5123,6 +6392,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           ],
           hint: "Match protection to mechanism.",
           explanation: "Common corrosion-control strategies.",
+        },
+        {
+          prompt: "Pair each metal with its corrosion rate in seawater.",
+          pairs: [
+            ["Pure iron", "Rapid rust"],
+            ["Mild steel", "Moderate rust"],
+            ["Stainless steel 316", "Highly resistant"],
+            ["Aluminum", "Forms protective oxide"],
+            ["Titanium", "Essentially immune"],
+          ],
+          hint: "Passive oxide films slow corrosion.",
+          explanation: "Material selection drives lifetime in harsh environments.",
         },
       ]);
     }
@@ -5163,6 +6444,12 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hints: ["Feasibility precedes development.", "Maturity precedes decline."],
           explanation: "Classic product lifecycle stages.",
         },
+        {
+          prompt: "Order software release phases.",
+          order: ["Prototype", "Alpha", "Beta", "Release Candidate", "GA Release", "LTS Maintenance"],
+          hint: "Stability increases with each phase.",
+          explanation: "Release stages have well-known names from prototype to GA.",
+        },
       ]);
     }
     case "prototypeFidelityMatch": {
@@ -5190,6 +6477,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           ],
           hint: "Each tool fits a different stage.",
           explanation: "Choose the lightest tool that answers your question.",
+        },
+        {
+          prompt: "Pair each user research method with what it answers.",
+          pairs: [
+            ["1:1 interviews", "Why users do things"],
+            ["Surveys", "How many users do X"],
+            ["Usability tests", "Where users get stuck"],
+            ["Analytics", "What users do at scale"],
+            ["A/B tests", "Which option performs better"],
+          ],
+          hint: "Match method to question type.",
+          explanation: "Each method has a sweet spot in the research toolkit.",
         },
       ]);
     }
@@ -5358,6 +6657,30 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Watch inside-vs-outside carefully.",
           explanation: "Horizontal vs vertical transforms differ in placement.",
         },
+        {
+          prompt: "Pair each parent function with a key feature.",
+          pairs: [
+            ["f(x) = x²", "U-shaped parabola"],
+            ["f(x) = |x|", "V-shape with vertex"],
+            ["f(x) = √x", "Right-half branch"],
+            ["f(x) = 1/x", "Hyperbola with asymptotes"],
+            ["f(x) = sin(x)", "Periodic wave"],
+          ],
+          hint: "Each parent function has a distinct graph.",
+          explanation: "Parent functions are the starting point for transformations.",
+        },
+        {
+          prompt: "Pair each transformation with its order of operations.",
+          pairs: [
+            ["a·f(b(x − h)) + k", "Apply h shift, b stretch, f, a stretch, k shift"],
+            ["Inside operations", "Reverse direction"],
+            ["Outside operations", "Same direction"],
+            ["Reflections", "Negative coefficients"],
+            ["Vertex / key point", "Use (h, k)"],
+          ],
+          hint: "Inside operations swap direction.",
+          explanation: "Transformation order matters for graphing.",
+        },
       ]);
     }
     case "quotientRuleBasic": {
@@ -5458,6 +6781,30 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Translate each clause carefully.",
           explanation: "Translation between English and predicate logic.",
         },
+        {
+          prompt: "Pair each logical connective with its truth.",
+          pairs: [
+            ["P ∧ Q", "Both true"],
+            ["P ∨ Q", "At least one true"],
+            ["P → Q", "Q true whenever P is"],
+            ["P ↔ Q", "Same truth value"],
+            ["¬P", "Opposite of P"],
+          ],
+          hint: "Standard truth-table semantics.",
+          explanation: "Each connective combines truth values differently.",
+        },
+        {
+          prompt: "Pair each equivalence law with its statement.",
+          pairs: [
+            ["De Morgan's", "¬(P ∧ Q) ≡ ¬P ∨ ¬Q"],
+            ["Contrapositive", "P → Q ≡ ¬Q → ¬P"],
+            ["Implication", "P → Q ≡ ¬P ∨ Q"],
+            ["Double negation", "¬¬P ≡ P"],
+            ["Commutative", "P ∧ Q ≡ Q ∧ P"],
+          ],
+          hint: "Equivalences let us rewrite formulas.",
+          explanation: "Logical equivalence laws transform expressions.",
+        },
       ]);
     }
     case "geometricProbBasic": {
@@ -5542,6 +6889,39 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hints: ["Centrioles drive animal cell division.", "Both share ATP-producing organelles."],
           explanation: "Plants and animals share most organelles; a few differ.",
         },
+        {
+          prompt: "Sort each organelle by primary function.",
+          categories: ["Energy", "Protein synthesis", "Storage / waste", "Genetic control"],
+          items: [
+            { label: "Mitochondria", category: "Energy" },
+            { label: "Chloroplast", category: "Energy" },
+            { label: "Ribosome", category: "Protein synthesis" },
+            { label: "Rough ER", category: "Protein synthesis" },
+            { label: "Vacuole", category: "Storage / waste" },
+            { label: "Lysosome", category: "Storage / waste" },
+            { label: "Nucleus", category: "Genetic control" },
+            { label: "Nucleolus", category: "Genetic control" },
+          ],
+          hint: "Each organelle has a job class.",
+          explanation: "Group organelles by their core role in the cell.",
+        },
+        {
+          prompt: "Sort each structure by cell type (prokaryote vs eukaryote).",
+          categories: ["Prokaryote only", "Eukaryote only", "Both"],
+          items: [
+            { label: "Nucleoid (no membrane)", category: "Prokaryote only" },
+            { label: "Capsule", category: "Prokaryote only" },
+            { label: "Pili", category: "Prokaryote only" },
+            { label: "Membrane-bound nucleus", category: "Eukaryote only" },
+            { label: "Mitochondria", category: "Eukaryote only" },
+            { label: "Golgi apparatus", category: "Eukaryote only" },
+            { label: "Ribosomes", category: "Both" },
+            { label: "Plasma membrane", category: "Both" },
+            { label: "DNA", category: "Both" },
+          ],
+          hint: "Eukaryotes have membrane-bound organelles.",
+          explanation: "Cellular complexity scales with organelle compartmentalization.",
+        },
       ]);
     }
     case "acidBaseClassify": {
@@ -5563,6 +6943,36 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "pH < 7 acid; pH > 7 base.",
           hints: ["Pure water is exactly 7.", "Bleach and soap are strongly basic."],
           explanation: "pH scale: 0 (acid) → 7 (neutral) → 14 (base).",
+        },
+        {
+          prompt: "Sort each acid/base by strength.",
+          categories: ["Strong acid", "Weak acid", "Weak base", "Strong base"],
+          items: [
+            { label: "HCl", category: "Strong acid" },
+            { label: "HNO₃", category: "Strong acid" },
+            { label: "H₂SO₄", category: "Strong acid" },
+            { label: "Acetic acid (CH₃COOH)", category: "Weak acid" },
+            { label: "Carbonic acid (H₂CO₃)", category: "Weak acid" },
+            { label: "Ammonia (NH₃)", category: "Weak base" },
+            { label: "Sodium hydroxide (NaOH)", category: "Strong base" },
+            { label: "Potassium hydroxide (KOH)", category: "Strong base" },
+          ],
+          hint: "Strong = fully dissociates.",
+          explanation: "Strength reflects degree of dissociation in water.",
+        },
+        {
+          prompt: "Sort each definition by acid/base theory.",
+          categories: ["Arrhenius", "Brønsted-Lowry", "Lewis"],
+          items: [
+            { label: "Releases H⁺ in water", category: "Arrhenius" },
+            { label: "Releases OH⁻ in water", category: "Arrhenius" },
+            { label: "Proton donor", category: "Brønsted-Lowry" },
+            { label: "Proton acceptor", category: "Brønsted-Lowry" },
+            { label: "Electron-pair acceptor", category: "Lewis" },
+            { label: "Electron-pair donor", category: "Lewis" },
+          ],
+          hint: "Each theory broadens what 'acid' means.",
+          explanation: "Three nested theories of acid-base behavior.",
         },
       ]);
     }
@@ -5636,6 +7046,30 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Cloud names hint at height.",
           explanation: "Cloud classification by height and shape.",
         },
+        {
+          prompt: "Pair each precipitation type with its formation.",
+          pairs: [
+            ["Rain", "Liquid drops from clouds"],
+            ["Snow", "Ice crystals form below 0°C"],
+            ["Sleet", "Refrozen raindrops"],
+            ["Freezing rain", "Liquid that freezes on impact"],
+            ["Hail", "Repeatedly tossed in storm updrafts"],
+          ],
+          hint: "Temperature profile shapes precipitation form.",
+          explanation: "Where ice forms in the atmosphere dictates precipitation type.",
+        },
+        {
+          prompt: "Pair each severe weather phenomenon with its driver.",
+          pairs: [
+            ["Hurricane", "Warm ocean water + low wind shear"],
+            ["Tornado", "Supercell with rotating updraft"],
+            ["Blizzard", "Heavy snow + winds > 35 mph"],
+            ["Heat wave", "Stagnant high-pressure dome"],
+            ["Dust storm", "Strong wind over dry ground"],
+          ],
+          hint: "Each event has a meteorological recipe.",
+          explanation: "Severe weather forms under specific atmospheric conditions.",
+        },
       ]);
     }
     case "labSafetySort": {
@@ -5658,6 +7092,38 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Safety first.",
           hints: ["PPE protects you.", "Waft, don't sniff."],
           explanation: "Standard lab safety practices.",
+        },
+        {
+          prompt: "Sort each piece of PPE by what it protects.",
+          categories: ["Eyes", "Hands", "Body", "Lungs"],
+          items: [
+            { label: "Safety goggles", category: "Eyes" },
+            { label: "Face shield", category: "Eyes" },
+            { label: "Nitrile gloves", category: "Hands" },
+            { label: "Insulated gloves", category: "Hands" },
+            { label: "Lab coat", category: "Body" },
+            { label: "Apron", category: "Body" },
+            { label: "Respirator mask", category: "Lungs" },
+            { label: "Fume hood", category: "Lungs" },
+          ],
+          hint: "Each PPE item targets a body region.",
+          explanation: "Layered PPE protects against varied hazards.",
+        },
+        {
+          prompt: "Sort each emergency response in the lab.",
+          categories: ["First aid", "Spill response", "Fire", "Evacuation"],
+          items: [
+            { label: "Eye wash station", category: "First aid" },
+            { label: "Burn cream", category: "First aid" },
+            { label: "Absorbent material", category: "Spill response" },
+            { label: "Neutralizing kit", category: "Spill response" },
+            { label: "Fire blanket", category: "Fire" },
+            { label: "CO₂ extinguisher", category: "Fire" },
+            { label: "Emergency exit map", category: "Evacuation" },
+            { label: "Assembly point", category: "Evacuation" },
+          ],
+          hint: "Each emergency has a corresponding tool.",
+          explanation: "Know which safety device to grab for each scenario.",
         },
       ]);
     }
@@ -5686,6 +7152,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           ],
           hint: "Each galactic region has a structural role.",
           explanation: "Galactic structure parts.",
+        },
+        {
+          prompt: "Pair each cosmological observation with its evidence.",
+          pairs: [
+            ["Cosmic microwave background", "Hot early universe"],
+            ["Hubble expansion", "Universe is expanding"],
+            ["Galaxy rotation curves", "Dark matter"],
+            ["Type Ia supernovae dimming", "Accelerating expansion / dark energy"],
+            ["Element abundances", "Big Bang nucleosynthesis"],
+          ],
+          hint: "Each observation supports a specific theory.",
+          explanation: "Modern cosmology is observationally constrained.",
         },
       ]);
     }
@@ -5759,6 +7237,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Classify real-world examples.",
           explanation: "Symbiotic relationships in nature.",
         },
+        {
+          prompt: "Pair each ecological term with its definition.",
+          pairs: [
+            ["Niche", "Species' role in ecosystem"],
+            ["Habitat", "Where a species lives"],
+            ["Population", "Same species in an area"],
+            ["Community", "All species in an area"],
+            ["Biome", "Large-scale ecosystem"],
+          ],
+          hint: "Levels of ecological organization.",
+          explanation: "Each term sits at a different scale.",
+        },
       ]);
     }
     case "muscleTypeMatch": {
@@ -5784,6 +7274,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           ],
           hint: "Match properties to muscle category.",
           explanation: "Muscle classification by control and structure.",
+        },
+        {
+          prompt: "Pair each contraction term with its meaning.",
+          pairs: [
+            ["Concentric", "Muscle shortens under load"],
+            ["Eccentric", "Muscle lengthens under load"],
+            ["Isometric", "Length unchanged"],
+            ["Sliding filament", "Actin slides past myosin"],
+            ["Twitch", "Single contraction"],
+          ],
+          hint: "Contractions vary by motion.",
+          explanation: "Each contraction style has a distinct mechanical role.",
         },
       ]);
     }
@@ -5812,6 +7314,19 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           ],
           hint: "Each problem traces to a specific pollutant.",
           explanation: "Linking environmental issues to causes.",
+        },
+        {
+          prompt: "Pair each pollutant with the medium it primarily affects.",
+          pairs: [
+            ["Particulate matter (PM2.5)", "Air"],
+            ["Ground-level ozone", "Air"],
+            ["Nitrate runoff", "Water"],
+            ["Oil spills", "Water"],
+            ["Heavy metals (lead)", "Soil"],
+            ["Plastic waste", "Land + ocean"],
+          ],
+          hint: "Sort by environmental medium.",
+          explanation: "Pollutants concentrate in specific environmental compartments.",
         },
       ]);
     }
@@ -5866,6 +7381,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Performance vs memory trade-offs.",
           explanation: "DP refinements reduce time or space.",
         },
+        {
+          prompt: "Pair each algorithm paradigm with an example problem.",
+          pairs: [
+            ["Greedy", "Activity selection"],
+            ["Divide & conquer", "Merge sort"],
+            ["Dynamic programming", "Knapsack"],
+            ["Backtracking", "N-Queens"],
+            ["Branch & bound", "Traveling salesman (optimal)"],
+          ],
+          hint: "Each paradigm has canonical examples.",
+          explanation: "Algorithm design paradigms shape problem-solving.",
+        },
       ]);
     }
     case "activationFunctionMatch": {
@@ -5894,6 +7421,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Common pitfalls of each activation.",
           explanation: "Each activation has trade-offs.",
         },
+        {
+          prompt: "Pair each activation with where it's typically used.",
+          pairs: [
+            ["ReLU", "Hidden layers"],
+            ["Sigmoid", "Binary output layer"],
+            ["Softmax", "Multi-class output layer"],
+            ["Tanh", "RNN hidden states"],
+            ["GELU", "Transformer hidden layers"],
+          ],
+          hint: "Layer position drives activation choice.",
+          explanation: "Output activations match the prediction task.",
+        },
       ]);
     }
     case "authFactorSort": {
@@ -5915,6 +7454,36 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Know · have · are.",
           hints: ["MFA combines categories.", "Biometrics are inherence."],
           explanation: "Authentication factors fall into three categories.",
+        },
+        {
+          prompt: "Sort each authentication method by strength.",
+          categories: ["Weak", "Medium", "Strong"],
+          items: [
+            { label: "Password (only)", category: "Weak" },
+            { label: "Security questions", category: "Weak" },
+            { label: "SMS OTP", category: "Medium" },
+            { label: "Email magic link", category: "Medium" },
+            { label: "TOTP authenticator", category: "Strong" },
+            { label: "Hardware security key (FIDO2)", category: "Strong" },
+            { label: "Biometric + device", category: "Strong" },
+          ],
+          hint: "Stronger methods resist more attack types.",
+          explanation: "Authentication strength is a spectrum.",
+        },
+        {
+          prompt: "Sort each attack type by what auth factor it defeats.",
+          categories: ["Defeats passwords", "Defeats SMS OTP", "Defeats biometrics", "Defeats hardware key"],
+          items: [
+            { label: "Credential stuffing", category: "Defeats passwords" },
+            { label: "Phishing form", category: "Defeats passwords" },
+            { label: "SIM swap", category: "Defeats SMS OTP" },
+            { label: "SS7 interception", category: "Defeats SMS OTP" },
+            { label: "Spoofed photo / mask", category: "Defeats biometrics" },
+            { label: "Coerced enrollment", category: "Defeats biometrics" },
+            { label: "Physical theft", category: "Defeats hardware key" },
+          ],
+          hint: "Every factor has its weakness.",
+          explanation: "Layering factors compensates for individual weaknesses.",
         },
       ]);
     }
@@ -5943,6 +7512,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           ],
           hint: "Indexes are not free.",
           explanation: "Indexes trade write cost for read speed.",
+        },
+        {
+          prompt: "Pair each query pattern with the index that helps.",
+          pairs: [
+            ["WHERE email = ?", "Single-column B-tree on email"],
+            ["WHERE created_at BETWEEN ?", "B-tree on created_at"],
+            ["WHERE status = 'active' AND user_id = ?", "Composite (status, user_id)"],
+            ["WHERE doc @@ tsquery('foo')", "Full-text index"],
+            ["WHERE tags @> ARRAY['x']", "GIN on tags column"],
+          ],
+          hint: "Index columns appear in the query predicate.",
+          explanation: "Indexes accelerate specific query shapes.",
         },
       ]);
     }
@@ -6047,6 +7628,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           ],
           hint: "Match token to its job.",
           explanation: "Token types in modern auth.",
+        },
+        {
+          prompt: "Pair each OAuth 2.0 grant with its use case.",
+          pairs: [
+            ["Authorization code", "Server-side web apps"],
+            ["PKCE", "Mobile / native apps"],
+            ["Client credentials", "Service-to-service"],
+            ["Device code", "TV / IoT devices"],
+            ["Refresh token", "Renewing access without re-login"],
+          ],
+          hint: "Different clients need different flows.",
+          explanation: "OAuth grants match application architecture.",
         },
       ]);
     }
@@ -6171,6 +7764,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "POST needs extra help to be safely retryable.",
           explanation: "HTTP semantics make GET/PUT/DELETE idempotent; POST often needs a key.",
         },
+        {
+          prompt: "Pair each retry strategy with its behavior.",
+          pairs: [
+            ["Immediate retry", "Repeat on transient errors"],
+            ["Exponential backoff", "Increasing delay between retries"],
+            ["Jittered backoff", "Adds randomness to prevent thundering herd"],
+            ["Circuit breaker", "Stop retrying when failures are high"],
+            ["Dead-letter queue", "Park unprocessable messages"],
+          ],
+          hint: "Each strategy handles failures differently.",
+          explanation: "Robust APIs combine these patterns for resilience.",
+        },
       ]);
     }
     case "corsHeaderMatch": {
@@ -6198,6 +7803,19 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           ],
           hint: "Non-simple requests trigger a preflight.",
           explanation: "Browsers preflight methods and headers that need explicit permission.",
+        },
+        {
+          prompt: "Pair each request method with simple-vs-preflight classification.",
+          pairs: [
+            ["GET (no custom headers)", "Simple"],
+            ["HEAD", "Simple"],
+            ["POST with application/x-www-form-urlencoded", "Simple"],
+            ["PUT", "Preflight required"],
+            ["DELETE", "Preflight required"],
+            ["POST with application/json", "Preflight required"],
+          ],
+          hint: "Simple requests skip the preflight.",
+          explanation: "Custom headers or non-simple methods trigger an OPTIONS preflight.",
         },
       ]);
     }
@@ -6233,6 +7851,19 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hints: ["Event ids prevent duplicate work.", "The provider may deliver the same event more than once."],
           explanation: "Webhook consumers should verify, dedupe, process, and acknowledge quickly.",
         },
+        {
+          prompt: "Order a webhook subscription setup.",
+          order: [
+            "Register webhook URL with provider",
+            "Generate shared secret",
+            "Configure event types",
+            "Send test event",
+            "Verify signature received",
+            "Activate subscription",
+          ],
+          hint: "Test before going live.",
+          explanation: "Webhook setup verifies endpoint reachability and signature handling.",
+        },
       ]);
     }
     case "graphqlOperationMatch": {
@@ -6260,6 +7891,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           ],
           hint: "GraphQL flexibility needs guardrails.",
           explanation: "Production GraphQL APIs need batching, limits, and careful schema evolution.",
+        },
+        {
+          prompt: "Pair each GraphQL type concept with its meaning.",
+          pairs: [
+            ["Scalar", "Leaf type (Int, String, ID)"],
+            ["Object", "Type with fields"],
+            ["Interface", "Shared field contract"],
+            ["Union", "One of several types"],
+            ["Input", "Type used for arguments"],
+          ],
+          hint: "GraphQL schemas are strongly typed.",
+          explanation: "Each construct defines a different shape in the schema.",
         },
       ]);
     }
@@ -6383,6 +8026,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Convert prefix into dotted decimal.",
           explanation: "CIDR ↔ subnet mask mapping.",
         },
+        {
+          prompt: "Pair each special IP with its purpose.",
+          pairs: [
+            ["Network address", "All host bits 0"],
+            ["Broadcast address", "All host bits 1"],
+            ["First usable", "Network + 1"],
+            ["Last usable", "Broadcast − 1"],
+            ["Default gateway", "First usable (convention)"],
+          ],
+          hint: "Each subnet reserves network and broadcast.",
+          explanation: "Subnet endpoints have special meaning.",
+        },
       ]);
     }
     case "kMapSimplify": {
@@ -6490,6 +8145,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Soils misbehave in characteristic ways.",
           explanation: "Geotechnical concerns vary by soil.",
         },
+        {
+          prompt: "Pair each foundation type with the soil it suits.",
+          pairs: [
+            ["Strip footing", "Firm shallow soil"],
+            ["Raft / mat foundation", "Weak surface soil over wide footprint"],
+            ["Pile foundation", "Soft soil over deep firm strata"],
+            ["Drilled caisson", "Stable rock at depth"],
+            ["Helical pier", "Lightweight retrofit on most soils"],
+          ],
+          hint: "Foundations transfer load to firm strata.",
+          explanation: "Soil and load drive foundation selection.",
+        },
       ]);
     }
     case "orbitTypeMatch": {
@@ -6517,6 +8184,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           ],
           hint: "Match orbit to its job.",
           explanation: "Mission requirements drive orbit choice.",
+        },
+        {
+          prompt: "Pair each orbital mechanics term with its meaning.",
+          pairs: [
+            ["Perigee", "Closest point to Earth"],
+            ["Apogee", "Farthest point from Earth"],
+            ["Eccentricity", "How elongated the orbit is"],
+            ["Inclination", "Angle vs equator"],
+            ["Period", "Time for one orbit"],
+          ],
+          hint: "Six elements describe an orbit.",
+          explanation: "Keplerian elements parameterize orbital motion.",
         },
       ]);
     }
@@ -6546,6 +8225,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Each method handles dynamics differently.",
           explanation: "Local vs global planning techniques.",
         },
+        {
+          prompt: "Pair each planning concept with its definition.",
+          pairs: [
+            ["Configuration space", "Space of all robot poses"],
+            ["Workspace", "Physical Cartesian space"],
+            ["Holonomic", "Can move in any direction directly"],
+            ["Nonholonomic", "Subject to motion constraints"],
+            ["Free space", "Configurations without collision"],
+          ],
+          hint: "Path planning operates in C-space.",
+          explanation: "Configuration vs workspace separates planning from physical motion.",
+        },
       ]);
     }
     case "framingTypeMatch": {
@@ -6573,6 +8264,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           ],
           hint: "Different ways to fight lateral loads.",
           explanation: "Lateral systems handle wind and seismic.",
+        },
+        {
+          prompt: "Pair each seismic design feature with its purpose.",
+          pairs: [
+            ["Base isolation", "Decouples building from ground motion"],
+            ["Tuned mass damper", "Reduces resonant sway"],
+            ["Ductile detailing", "Allows controlled yielding"],
+            ["Capacity design", "Forces failure into intended members"],
+            ["Buckling-restrained brace", "Energy dissipation"],
+          ],
+          hint: "Earthquake engineering protects critical members.",
+          explanation: "Modern seismic design controls where and how energy dissipates.",
         },
       ]);
     }
@@ -6607,6 +8310,20 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Build the stack, seal it, then infuse.",
           hints: ["Leak test before infusion.", "Resin follows the flow media."],
           explanation: "VARTM gives high fiber volume with controlled resin flow.",
+        },
+        {
+          prompt: "Order a typical autoclave prepreg cure cycle.",
+          order: [
+            "Stack prepreg plies in mold",
+            "Bag and seal under vacuum",
+            "Load into autoclave",
+            "Ramp temperature up",
+            "Apply pressure",
+            "Hold at cure temperature",
+            "Cool down and demold",
+          ],
+          hint: "Heat + pressure cure the part.",
+          explanation: "Aerospace-grade composites use autoclave cures for full consolidation.",
         },
       ]);
     }
@@ -6657,6 +8374,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Each requirement targets one *-ility.",
           explanation: "ISO 25010 / classic quality attributes.",
         },
+        {
+          prompt: "Pair each requirement gathering technique with its strength.",
+          pairs: [
+            ["Stakeholder interviews", "Uncover needs and motivations"],
+            ["User stories", "Tie features to roles"],
+            ["Use cases", "Detailed interaction flows"],
+            ["Prototyping", "Validate assumptions quickly"],
+            ["Document review", "Capture existing constraints"],
+          ],
+          hint: "Each technique uncovers different requirements.",
+          explanation: "Combine techniques to capture functional, non-functional, and constraint needs.",
+        },
       ]);
     }
     case "userResearchMatch": {
@@ -6685,21 +8414,69 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Each artifact frames a different aspect.",
           explanation: "Design-research artifacts surface different insights.",
         },
+        {
+          prompt: "Pair each usability metric with what it measures.",
+          pairs: [
+            ["Task success rate", "Did users complete the task"],
+            ["Time on task", "How long it took"],
+            ["Error rate", "How often users made mistakes"],
+            ["SUS score", "Subjective usability rating"],
+            ["NPS", "Likelihood to recommend"],
+          ],
+          hint: "Each metric captures one dimension of UX.",
+          explanation: "UX teams track both efficiency and satisfaction.",
+        },
       ]);
     }
-    case "escapeRoom":
+    case "escapeRoom": {
+      const variants = [
+        {
+          target: "up" as const,
+          code: 12,
+          expressions: ["3+4", "2×6", "9−5"],
+          labels: ["Left door: 7", "Up door: 12", "Right door: 4"],
+          hint: "Solve the middle lock: 2 × 6.",
+          explanation: "2 × 6 = 12, so the up door opens.",
+        },
+        {
+          target: "left" as const,
+          code: 18,
+          expressions: ["3×6", "20−5", "4²+1"],
+          labels: ["Left door: 18", "Up door: 15", "Right door: 17"],
+          hint: "Compute each: ×, −, then exponent.",
+          explanation: "3 × 6 = 18, matching the left lock.",
+        },
+        {
+          target: "right" as const,
+          code: 25,
+          expressions: ["10+5", "30÷2", "5²"],
+          labels: ["Left door: 15", "Up door: 15", "Right door: 25"],
+          hint: "Square the rightmost number.",
+          explanation: "5² = 25, so the right door unlocks.",
+        },
+        {
+          target: "up" as const,
+          code: 36,
+          expressions: ["6²", "40−4", "2×17"],
+          labels: ["Left door: 36", "Up door: 36", "Right door: 34"],
+          hint: "Two doors share the answer — pick the one labeled correctly.",
+          explanation: "Both 6² and 40−4 equal 36, but the up door is highlighted.",
+        },
+      ];
+      const v = pick(variants);
       return {
-        ...base(m, difficulty, "swipe", "Swipe toward the door with code 12.", {
+        ...base(m, difficulty, "swipe", `Swipe toward the door with code ${v.code}.`, {
           kind: "icon",
           icon: "🚪",
-          title: "3+4   2×6   9−5",
+          title: v.expressions.join("   "),
           subtitle: "Left · Up · Right",
         }),
-        swipeTarget: "up",
-        swipeLabels: ["Left door: 7", "Up door: 12", "Right door: 4"],
-        hint: "Solve the middle lock.",
-        explanation: "2 × 6 = 12, so the up door opens.",
+        swipeTarget: v.target,
+        swipeLabels: v.labels,
+        hint: v.hint,
+        explanation: v.explanation,
       };
+    }
     case "linearBalance": {
       const aCoef = rand(2, difficulty === "hard" ? 6 : 4);
       const xVal = rand(2, difficulty === "hard" ? 12 : 8);
@@ -7007,20 +8784,29 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
       const range: [number, number] = difficulty === "easy" ? [1, 15] : difficulty === "medium" ? [8, 63] : [32, 255];
       const decimal = rand(range[0], range[1]);
       const binary = decimal.toString(2);
+      const hex = decimal.toString(16).toUpperCase();
+      const octal = decimal.toString(8);
       const bits = binary.padStart(8, "0").split("").map((c) => Number(c));
+      const variants = [
+        { prompt: `Convert ${decimal} to binary.`, subtitle: "Type the binary value", answer: binary, hint: "Divide by 2 and read remainders bottom-up.", hints: ["Each bit represents 2ⁿ.", `Largest power of 2 ≤ ${decimal} is ${Math.pow(2, Math.floor(Math.log2(decimal)))}.`], explanation: `${decimal} = ${binary} in binary.` },
+        { prompt: `Convert ${decimal} to hexadecimal.`, subtitle: "Type the hex value", answer: hex, hint: "Group binary into 4-bit nibbles.", hints: ["10-15 are A-F.", `Largest hex digit ≤ ${decimal} maps to position.`], explanation: `${decimal} = ${hex} in hex.` },
+        { prompt: `Convert ${decimal} to octal.`, subtitle: "Type the octal value", answer: octal, hint: "Divide by 8 and read remainders.", hints: ["Group binary into 3-bit chunks.", "Octal digits 0-7."], explanation: `${decimal} = ${octal} in octal.` },
+        { prompt: `Convert ${decimal} to base 2 (binary).`, subtitle: "Show all bits", answer: binary, hint: "Repeatedly divide by 2.", hints: ["Read remainders in reverse.", "Stop when quotient is 0."], explanation: `${decimal} in base 2 is ${binary}.` },
+      ];
+      const v = pick(variants);
       return {
-        ...base(m, difficulty, "numpad", `Convert ${decimal} to binary.`, {
+        ...base(m, difficulty, "numpad", v.prompt, {
           kind: "binary",
           title: `${decimal} (decimal)`,
-          subtitle: "Type the binary value",
+          subtitle: v.subtitle,
           bits,
         }),
-        numpadAnswer: binary,
+        numpadAnswer: v.answer,
         numpadAllowDecimal: false,
         numpadAllowMinus: false,
-        hint: "Divide by 2 and read remainders bottom-up.",
-        hints: ["Each bit represents 2ⁿ.", `Largest power of 2 ≤ ${decimal} is ${Math.pow(2, Math.floor(Math.log2(decimal)))}.`],
-        explanation: `${decimal} = ${binary} in binary.`,
+        hint: v.hint,
+        hints: v.hints,
+        explanation: v.explanation,
       };
     }
     case "logicGate": {
@@ -8315,18 +10101,24 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
       ]);
     }
     case "propThrust": {
-      const target = +(rand(3, 9) / 10).toFixed(1);
+      const variants = [
+        { prompt: (t: number) => `Tune the throttle so thrust matches drag at the target setting ${t.toFixed(1)}.`, title: (t: number) => `Target throttle ${t.toFixed(1)}`, subtitle: "Trim the prop pitch", hint: "Trim to balance forward thrust with cruise drag.", hints: ["Drag rises with airspeed.", "Aim for steady, level cruise."], target: +(rand(3, 9) / 10).toFixed(1) },
+        { prompt: (t: number) => `Adjust prop pitch to climb angle ${t.toFixed(1)}.`, title: (t: number) => `Pitch ${t.toFixed(1)}`, subtitle: "Climb performance", hint: "Steeper pitch = stronger climb.", hints: ["Pitch and throttle coupled.", "Match labeled climb."], target: +(rand(2, 8) / 10).toFixed(1) },
+        { prompt: (t: number) => `Trim the prop RPM normalized to ${t.toFixed(1)}.`, title: (t: number) => `RPM ${t.toFixed(1)}`, subtitle: "Cruise RPM", hint: "RPM controls thrust output.", hints: ["Avoid over-revving.", "Match labeled RPM."], target: +(rand(4, 8) / 10).toFixed(1) },
+        { prompt: (t: number) => `Set the mixture ratio to ${t.toFixed(1)} for efficient cruise.`, title: (t: number) => `Mixture ${t.toFixed(1)}`, subtitle: "Fuel/air balance", hint: "Lean for cruise, rich for climb.", hints: ["Mixture affects power.", "Match labeled ratio."], target: +(rand(3, 7) / 10).toFixed(1) },
+      ];
+      const v = pick(variants);
       return {
-        ...base(m, difficulty, "slider", `Tune the throttle so thrust matches drag at the target setting ${target.toFixed(1)}.`, {
+        ...base(m, difficulty, "slider", v.prompt(v.target), {
           kind: "icon",
           icon: "🛩️",
-          title: `Target throttle ${target.toFixed(1)}`,
-          subtitle: "Trim the prop pitch",
+          title: v.title(v.target),
+          subtitle: v.subtitle,
         }),
-        slider: { min: 0, max: 1, step: 0.1, initial: 0.4, target },
-        hint: "Trim to balance forward thrust with cruise drag.",
-        hints: ["Drag rises with airspeed.", "Aim for steady, level cruise."],
-        explanation: `Target throttle was ${target.toFixed(1)}.`,
+        slider: { min: 0, max: 1, step: 0.1, initial: 0.4, target: v.target },
+        hint: v.hint,
+        hints: v.hints,
+        explanation: `Target was ${v.target.toFixed(1)}.`,
       };
     }
     case "fuelMassFraction": {
@@ -8915,10 +10707,17 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
     }
     case "piecewiseSwitch": {
       const x = rand(-4, 5);
-      const y = x < 0 ? -x : x * x;
+      const variants = [
+        { def: "f(x) = |x| if x<0, x² otherwise", eval: (xv: number) => xv < 0 ? -xv : xv * xv, branchOfX: (xv: number) => xv < 0 ? "|x|" : "x²" },
+        { def: "f(x) = x+1 if x<0, 2x otherwise", eval: (xv: number) => xv < 0 ? xv + 1 : 2 * xv, branchOfX: (xv: number) => xv < 0 ? "x+1" : "2x" },
+        { def: "f(x) = -x if x≤0, x-1 otherwise", eval: (xv: number) => xv <= 0 ? -xv : xv - 1, branchOfX: (xv: number) => xv <= 0 ? "−x" : "x−1" },
+        { def: "f(x) = x² if x≥0, x³ otherwise", eval: (xv: number) => xv >= 0 ? xv * xv : xv * xv * xv, branchOfX: (xv: number) => xv >= 0 ? "x²" : "x³" },
+      ];
+      const v = pick(variants);
+      const y = v.eval(x);
       const ans = String(y);
-      return makeChoice({ ...base(m, difficulty, "choice", `Piecewise f(x) = |x| if x<0, x² otherwise. f(${x}) = ?`, { kind: "icon", icon: m.emoji, title: `f(${x})`, subtitle: "Pick correct branch" }),
-        hint: "Check which branch applies.", hints: ["Compare x to 0.", "Use the matching rule."], explanation: `For x=${x}, the ${x < 0 ? "|x|" : "x²"} branch gives ${y}.` }, ans, numberChoices(y));
+      return makeChoice({ ...base(m, difficulty, "choice", `Piecewise ${v.def}. f(${x}) = ?`, { kind: "icon", icon: m.emoji, title: `f(${x})`, subtitle: "Pick correct branch" }),
+        hint: "Check which branch applies.", hints: ["Compare x to 0.", "Use the matching rule."], explanation: `For x=${x}, the ${v.branchOfX(x)} branch gives ${y}.` }, ans, numberChoices(y));
     }
     case "absValueDistance": {
       const a = rand(-9, 9), b = rand(-9, 9);
@@ -8933,9 +10732,16 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
         hint: "Subtract from both sides.", hints: [`x > ${c} − ${t}.`, "Direction stays the same."], explanation: `x > ${c - t}.` }, ans, [`x < ${c - t}`, `x ≥ ${c - t + 1}`, `x = ${c - t}`]);
     }
     case "inequalityNumberLine": {
-      const target = rand(2, 8);
-      return sliderEng(m, difficulty, `Slide x to a value that satisfies x > ${target}.`, { min: 0, max: 12, step: 1, initial: 0, target: target + 1 },
-        `Need x > ${target}`, "Pick the smallest integer that works.", [`The smallest integer greater than ${target} is ${target + 1}.`], `Any x > ${target} works; ${target + 1} is the smallest.`);
+      const variants = [
+        { prompt: (t: number) => `Slide x to a value that satisfies x > ${t}.`, label: (t: number) => `Need x > ${t}`, hint: "Pick the smallest integer that works.", hints: (t: number) => [`The smallest integer greater than ${t} is ${t + 1}.`], explanation: (t: number) => `Any x > ${t} works; ${t + 1} is the smallest.`, base: rand(2, 8), offset: 1 },
+        { prompt: (t: number) => `Slide x to the largest integer satisfying x < ${t}.`, label: (t: number) => `Need x < ${t}`, hint: "Pick the largest integer below.", hints: (t: number) => [`Largest integer less than ${t} is ${t - 1}.`], explanation: (t: number) => `Largest integer below ${t} is ${t - 1}.`, base: rand(3, 9), offset: -1 },
+        { prompt: (t: number) => `Slide x to satisfy x ≥ ${t}.`, label: (t: number) => `Need x ≥ ${t}`, hint: "Equality is allowed.", hints: (t: number) => [`Smallest valid integer is ${t}.`], explanation: (t: number) => `Smallest x with x ≥ ${t} is ${t}.`, base: rand(2, 8), offset: 0 },
+        { prompt: (t: number) => `Slide x to satisfy x ≤ ${t}.`, label: (t: number) => `Need x ≤ ${t}`, hint: "Equality is allowed.", hints: (t: number) => [`Largest valid integer is ${t}.`], explanation: (t: number) => `Largest x with x ≤ ${t} is ${t}.`, base: rand(3, 9), offset: 0 },
+      ];
+      const v = pick(variants);
+      const t = v.base;
+      return sliderEng(m, difficulty, v.prompt(t), { min: 0, max: 12, step: 1, initial: 0, target: t + v.offset },
+        v.label(t), v.hint, v.hints(t), v.explanation(t));
     }
     case "algebraTiles": {
       const a = rand(2, 6), b = rand(2, 6), c = rand(2, 6);
@@ -9511,7 +11317,13 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
     }
     case "exponentMatch": {
       const a = rand(2, 5);
-      return matchPuzzle(m, difficulty, "Match each expression to its value.", [[`${a}²`, String(a * a)], [`${a}³`, String(a * a * a)], [`${a}⁰`, "1"], [`${a}¹`, String(a)]]);
+      const banks: [string, string][][] = [
+        [[`${a}²`, String(a * a)], [`${a}³`, String(a * a * a)], [`${a}⁰`, "1"], [`${a}¹`, String(a)]],
+        [[`${a}⁴`, String(a ** 4)], [`${a}⁵`, String(a ** 5)], [`${a}⁻¹`, `1/${a}`], [`${a}⁻²`, `1/${a * a}`]],
+        [[`${a}² · ${a}³`, `${a}⁵ = ${a ** 5}`], [`${a}⁵ ÷ ${a}²`, `${a}³ = ${a ** 3}`], [`(${a}²)³`, `${a}⁶ = ${a ** 6}`], [`${a}⁻¹`, `1/${a}`]],
+        [[`(${a})^(1/2)`, `√${a}`], [`(${a})^(1/3)`, `∛${a}`], [`${a}⁰`, "1"], [`${a}¹`, String(a)]],
+      ];
+      return matchPuzzle(m, difficulty, "Match each expression to its value.", pick(banks));
     }
     case "scientificNotation": {
       const k = rand(2, 9), n = rand(2, 6);
@@ -9562,15 +11374,27 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
         hint: "Triangle angles sum to 180°.", hints: [`180 − ${a} − ${b}.`, "Subtract from 180°."], explanation: `${c}° completes the triangle.` }, `${c}°`, [`${c + 10}°`, `${c - 10}°`, `${180 - c}°`]);
     }
     case "angleDetective": {
-      const a = rand(30, 80); const supp = 180 - a;
-      return numpadEng(m, difficulty, `Find the supplement of ${a}°.`, { kind: "icon", icon: m.emoji, title: `${a}° + ? = 180°`, subtitle: "Supplementary" },
-        supp, "Supplementary angles sum to 180°.", ["180 − a.", `180 − ${a} = ?`], `Supplement = ${supp}°.`);
+      const a = rand(30, 80);
+      const variants = [
+        { prompt: `Find the supplement of ${a}°.`, title: `${a}° + ? = 180°`, subtitle: "Supplementary", ans: 180 - a, hint: "Supplementary angles sum to 180°.", hints: ["180 − a.", `180 − ${a} = ?`], explanation: `Supplement = ${180 - a}°.` },
+        { prompt: `Find the complement of ${a}°.`, title: `${a}° + ? = 90°`, subtitle: "Complementary", ans: 90 - a, hint: "Complementary angles sum to 90°.", hints: ["90 − a.", `90 − ${a} = ?`], explanation: `Complement = ${90 - a}°.` },
+        { prompt: `Two vertical angles, one is ${a}°. Find the other.`, title: `Vertical of ${a}°`, subtitle: "Vertical angles", ans: a, hint: "Vertical angles are equal.", hints: ["Opposite when lines cross.", "Same measure."], explanation: `Vertical angle = ${a}°.` },
+        { prompt: `Interior angles of a triangle: two are ${a}° and ${90 - a}°. Find the third.`, title: `Sum = 180°`, subtitle: "Triangle angles", ans: 180 - a - (90 - a), hint: "Triangle angles sum to 180°.", hints: [`Total = ${a} + ${90 - a} = 90.`, "180 − 90 = 90."], explanation: `Third angle = 180 − ${a} − ${90 - a} = 90°.` },
+      ];
+      const v = pick(variants);
+      return numpadEng(m, difficulty, v.prompt, { kind: "icon", icon: m.emoji, title: v.title, subtitle: v.subtitle }, v.ans, v.hint, v.hints, v.explanation);
     }
     case "parallelTransversal": {
-      const a = rand(40, 130); const ans = `${a}°`;
-      const distractors = [`${180 - a}°`, `${90 - a}°`, `${a + 10}°`];
-      return makeChoice({ ...base(m, difficulty, "choice", `Two parallel lines cut by a transversal. One angle is ${a}°. Its corresponding angle?`, { kind: "icon", icon: m.emoji, title: `Given: ${a}°`, subtitle: "Corresponding angles" }),
-        hint: "Corresponding angles are equal.", hints: ["Mark the F-pattern.", "Both equal the same value."], explanation: `Corresponding angles are equal: ${a}°.` }, ans, distractors);
+      const a = rand(40, 130);
+      const variants = [
+        { prompt: `Two parallel lines cut by a transversal. One angle is ${a}°. Its corresponding angle?`, title: `Given: ${a}°`, subtitle: "Corresponding angles", ans: `${a}°`, distractors: [`${180 - a}°`, `${90 - a}°`, `${a + 10}°`], hint: "Corresponding angles are equal.", hints: ["Mark the F-pattern.", "Both equal the same value."], explanation: `Corresponding angles are equal: ${a}°.` },
+        { prompt: `Two parallel lines cut by a transversal. One angle is ${a}°. Its alternate interior angle?`, title: `Given: ${a}°`, subtitle: "Alternate interior", ans: `${a}°`, distractors: [`${180 - a}°`, `${90 - a}°`, `${180 + a}°`], hint: "Alternate interior angles are equal.", hints: ["Z-pattern.", "Same measure."], explanation: `Alternate interior = ${a}°.` },
+        { prompt: `Two parallel lines cut by a transversal. One angle is ${a}°. Its co-interior (same-side interior) angle?`, title: `Given: ${a}°`, subtitle: "Co-interior", ans: `${180 - a}°`, distractors: [`${a}°`, `${90 - a}°`, `${a + 10}°`], hint: "Co-interior angles sum to 180°.", hints: ["C-pattern.", `180 − ${a} = ${180 - a}.`], explanation: `Co-interior = 180 − ${a} = ${180 - a}°.` },
+        { prompt: `Two parallel lines cut by a transversal. One angle is ${a}°. Its alternate exterior angle?`, title: `Given: ${a}°`, subtitle: "Alternate exterior", ans: `${a}°`, distractors: [`${180 - a}°`, `${90 - a}°`, `${360 - a}°`], hint: "Alternate exterior angles are equal.", hints: ["Outside the parallels.", "Mirror across transversal."], explanation: `Alternate exterior = ${a}°.` },
+      ];
+      const v = pick(variants);
+      return makeChoice({ ...base(m, difficulty, "choice", v.prompt, { kind: "icon", icon: m.emoji, title: v.title, subtitle: v.subtitle }),
+        hint: v.hint, hints: v.hints, explanation: v.explanation }, v.ans, v.distractors);
     }
     case "polygonAngles": {
       const n = pick([4, 5, 6, 7, 8]);
@@ -9618,9 +11442,16 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
       ]);
     }
     case "circleTheorem": {
-      const r = rand(2, 8); const ans = `2π·${r}`;
-      return makeChoice({ ...base(m, difficulty, "choice", `Pick the circumference of a circle with radius ${r}.`, { kind: "icon", icon: "⭕", title: `r = ${r}`, subtitle: "C = 2πr" }),
-        hint: "C = 2πr.", hints: ["Use π.", "Don't square."], explanation: `C = 2π·${r}.` }, ans, [`π·${r}²`, `π·${r}`, `2π·${r * 2}`]);
+      const r = rand(2, 8);
+      const variants = [
+        { prompt: `Pick the circumference of a circle with radius ${r}.`, title: `r = ${r}`, subtitle: "C = 2πr", ans: `2π·${r}`, distractors: [`π·${r}²`, `π·${r}`, `2π·${r * 2}`], hint: "C = 2πr.", hints: ["Use π.", "Don't square."], explanation: `C = 2π·${r}.` },
+        { prompt: `Pick the area of a circle with radius ${r}.`, title: `r = ${r}`, subtitle: "A = πr²", ans: `π·${r}²`, distractors: [`2π·${r}`, `π·${r}`, `4π·${r}²`], hint: "A = πr².", hints: ["Square the radius.", "Don't double."], explanation: `A = π·${r}².` },
+        { prompt: `Inscribed angle theorem: central angle is ${2 * r}·10°. Inscribed angle?`, title: `Central ${2 * r * 10}°`, subtitle: "Inscribed = Central/2", ans: `${r * 10}°`, distractors: [`${2 * r * 10}°`, `${4 * r * 10}°`, `${r * 5}°`], hint: "Inscribed = ½ central.", hints: ["Half the central angle.", `½ · ${2 * r * 10}°.`], explanation: `Inscribed angle = ${r * 10}°.` },
+        { prompt: `Tangent from external point is perpendicular to ?`, title: `Tangent + radius`, subtitle: "Tangent property", ans: `Radius at point of tangency`, distractors: [`Diameter through point`, `Chord through point`, `Center directly`], hint: "Tangent ⟂ radius.", hints: ["Always 90° at tangent.", "Radius drawn to tangent point."], explanation: "Tangent meets radius at 90°." },
+      ];
+      const v = pick(variants);
+      return makeChoice({ ...base(m, difficulty, "choice", v.prompt, { kind: "icon", icon: "⭕", title: v.title, subtitle: v.subtitle }),
+        hint: v.hint, hints: v.hints, explanation: v.explanation }, v.ans, v.distractors);
     }
     case "arcSector": {
       const r = rand(3, 9); const ang = pick([60, 90, 120]);
@@ -9635,9 +11466,15 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
         "Box volume", "V = l·w·h.", ["Multiply all three.", `${w}·${l}·${h}`], `Volume = ${w}·${l}·${h} = ${ans}.`);
     }
     case "surfaceArea": {
-      const r = rand(3, 8); const ans = Math.round(4 * Math.PI * r * r);
-      return numpadEng(m, difficulty, `Sphere with radius ${r}. Surface area (round to nearest int)?`, { kind: "icon", icon: "⚪", title: `r=${r}`, subtitle: "4πr²" },
-        ans, "SA = 4πr².", ["Use 3.14 for π.", `4·π·${r}²`], `4·π·${r}² ≈ ${ans}.`);
+      const r = rand(3, 8);
+      const variants = [
+        { prompt: `Sphere with radius ${r}. Surface area (round to nearest int)?`, title: `r=${r}`, subtitle: "4πr²", ans: Math.round(4 * Math.PI * r * r), hint: "SA = 4πr².", hints: ["Use 3.14 for π.", `4·π·${r}²`], explanation: `4·π·${r}² ≈ ${Math.round(4 * Math.PI * r * r)}.` },
+        { prompt: `Sphere with radius ${r}. Volume (round to nearest int)?`, title: `r=${r}`, subtitle: "(4/3)πr³", ans: Math.round((4 / 3) * Math.PI * r ** 3), hint: "V = (4/3)πr³.", hints: ["Cube the radius.", `(4/3)·π·${r}³`], explanation: `(4/3)·π·${r}³ ≈ ${Math.round((4 / 3) * Math.PI * r ** 3)}.` },
+        { prompt: `Cube with side ${r}. Surface area?`, title: `s=${r}`, subtitle: "6s²", ans: 6 * r * r, hint: "SA = 6s².", hints: ["Six faces of side².", `6 · ${r}²`], explanation: `6 × ${r}² = ${6 * r * r}.` },
+        { prompt: `Cylinder with radius ${r} and height ${r}. Surface area (round to nearest int)?`, title: `r=h=${r}`, subtitle: "2πr² + 2πrh", ans: Math.round(2 * Math.PI * r * r + 2 * Math.PI * r * r), hint: "SA = 2πr(r + h).", hints: ["Two circular faces + lateral.", `2π·${r}·(${r}+${r})`], explanation: `2π·${r}·${2 * r} ≈ ${Math.round(2 * Math.PI * r * r + 2 * Math.PI * r * r)}.` },
+      ];
+      const v = pick(variants);
+      return numpadEng(m, difficulty, v.prompt, { kind: "icon", icon: "⚪", title: v.title, subtitle: v.subtitle }, v.ans, v.hint, v.hints, v.explanation);
     }
     case "volumeFill": {
       const r = rand(2, 6); const h = rand(3, 10);
@@ -9699,10 +11536,16 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
       ]);
     }
     case "similarityMap": {
-      const k = pick([2, 3]); const len = rand(3, 9);
-      const ans = len * k;
-      return numpadEng(m, difficulty, `Two similar polygons. Original side ${len} maps to ? under scale ${k}.`, { kind: "icon", icon: m.emoji, title: `${len} × ${k}`, subtitle: "Similar scale" },
-        ans, "Multiply by scale factor.", ["Lengths scale linearly.", `${len}·${k}`], `${len}·${k} = ${ans}.`);
+      const k = pick([2, 3]);
+      const len = rand(3, 9);
+      const variants = [
+        { prompt: `Two similar polygons. Original side ${len} maps to ? under scale ${k}.`, title: `${len} × ${k}`, subtitle: "Similar scale", ans: len * k, hint: "Multiply by scale factor.", hints: ["Lengths scale linearly.", `${len}·${k}`], explanation: `${len}·${k} = ${len * k}.` },
+        { prompt: `Similar triangles scale by ${k}. Original area ${len}. New area?`, title: `Area × ${k}²`, subtitle: "Area scales by k²", ans: len * k * k, hint: "Areas scale by k².", hints: [`${k}² = ${k * k}.`, `${len} × ${k * k} = ${len * k * k}.`], explanation: `Area scales by k² = ${k * k}; ${len} × ${k * k} = ${len * k * k}.` },
+        { prompt: `Similar solids scale by ${k}. Original volume ${len}. New volume?`, title: `Volume × ${k}³`, subtitle: "Volume scales by k³", ans: len * k * k * k, hint: "Volumes scale by k³.", hints: [`${k}³ = ${k * k * k}.`, `${len} × ${k * k * k}.`], explanation: `Volume scales by k³ = ${k * k * k}; ${len} × ${k * k * k} = ${len * k * k * k}.` },
+        { prompt: `Similar polygons. Side maps from ${len * k} to ${len}. Scale factor?`, title: `${len * k} → ${len}`, subtitle: "Find k", ans: 1 / k, hint: "k = new/old.", hints: [`${len} / ${len * k} = 1/${k}.`], explanation: `Scale factor = ${len} / ${len * k} = 1/${k}.` },
+      ];
+      const v = pick(variants);
+      return numpadEng(m, difficulty, v.prompt, { kind: "icon", icon: m.emoji, title: v.title, subtitle: v.subtitle }, v.ans, v.hint, v.hints, v.explanation);
     }
     case "triangleHeight": {
       const b = rand(4, 12); const area = rand(20, 80);
@@ -9748,14 +11591,26 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
         ratio, "sin θ = opp/hyp.", ["Identify opp and hyp.", `${opp}/${hyp}`], `sin θ = ${opp}/${hyp} ≈ ${ratio}.`);
     }
     case "sineWave": {
-      const target = +(rand(1, 5)).toFixed(0);
-      return sliderEng(m, difficulty, `Slide the amplitude to match A = ${target}.`, { min: 0, max: 10, step: 1, initial: 1, target }, `Amplitude ${target}`,
-        "Stop the slider on the target value.", ["A controls vertical stretch.", "Aim for the exact integer."], `Amplitude target was ${target}.`);
+      const variants = [
+        { prompt: "Slide the amplitude A to match the target.", label: "Amplitude", hint: "A controls vertical stretch.", hints: ["Larger A = taller waves.", "Stop on the exact integer."], target: rand(1, 5) },
+        { prompt: "Slide the period to match the target (in units).", label: "Period", hint: "Period = 2π / B.", hints: ["Shorter period = faster oscillation.", "Stop on the exact integer."], target: rand(2, 6) },
+        { prompt: "Slide the vertical shift D to match the target.", label: "Vertical shift", hint: "D translates the midline up/down.", hints: ["D shifts the whole curve.", "Stop on the exact integer."], target: rand(1, 4) },
+        { prompt: "Slide the angular frequency ω to match the target.", label: "ω", hint: "ω scales the input.", hints: ["Higher ω = compressed wave.", "Stop on the exact integer."], target: rand(1, 5) },
+      ];
+      const v = pick(variants);
+      return sliderEng(m, difficulty, v.prompt, { min: 0, max: 10, step: 1, initial: 1, target: v.target }, `${v.label} ${v.target}`,
+        v.hint, v.hints, `${v.label} target was ${v.target}.`);
     }
     case "sinCosWave": {
-      const target = +(rand(1, 5)).toFixed(0);
-      return sliderEng(m, difficulty, `Tune the phase shift to ${target}.`, { min: 0, max: 6, step: 1, initial: 0, target }, `Phase shift ${target}`,
-        "Slide to the labeled shift.", ["Each step is 1 unit.", "Stop at the exact value."], `Phase target was ${target}.`);
+      const variants = [
+        { prompt: "Tune the phase shift to the target value.", label: "Phase shift", hint: "Phase shifts the wave horizontally.", hints: ["Each step is 1 unit.", "Stop at the exact value."], max: 6, target: rand(1, 5) },
+        { prompt: "Tune the horizontal stretch factor to the target.", label: "Stretch", hint: "Larger stretch slows the wave.", hints: ["x is scaled by this factor.", "Stop at the exact value."], max: 8, target: rand(2, 6) },
+        { prompt: "Tune the cosine offset to the target.", label: "Offset", hint: "Offset moves the cosine peak.", hints: ["Cosine peaks at the offset.", "Stop at the exact integer."], max: 6, target: rand(1, 4) },
+        { prompt: "Tune the wavelength to the target (units).", label: "Wavelength", hint: "Wavelength is one full cycle.", hints: ["Longer wavelength = stretched wave.", "Stop on the labeled value."], max: 10, target: rand(2, 7) },
+      ];
+      const v = pick(variants);
+      return sliderEng(m, difficulty, v.prompt, { min: 0, max: v.max, step: 1, initial: 0, target: v.target }, `${v.label} ${v.target}`,
+        v.hint, v.hints, `${v.label} target was ${v.target}.`);
     }
     case "referenceAngle": {
       const ang = pick([120, 135, 150, 210, 225, 300]);
@@ -9805,14 +11660,26 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
         hint: "a/sin A = b/sin B.", hints: ["Cross-multiply.", `${a}·sin(${B})/sin(${A}).`], explanation: `b ≈ ${b}.` }, String(b), [(b + 1).toFixed(2), (b - 1).toFixed(2), String(a)]);
     }
     case "ferrisWheel": {
-      const target = +(rand(2, 8)).toFixed(0);
-      return sliderEng(m, difficulty, `Sinusoidal model peaks at h=${target} m. Slide the amplitude.`, { min: 0, max: 10, step: 1, initial: 1, target }, `Peak ${target} m`,
-        "Amplitude = peak − midline.", ["Stop on the labeled peak.", "Match the exact integer."], `Amplitude target was ${target}.`);
+      const variants = [
+        { prompt: (t: number) => `Sinusoidal model peaks at h=${t} m. Slide the amplitude.`, label: (t: number) => `Peak ${t} m`, hint: "Amplitude = peak − midline.", hints: ["Stop on the labeled peak.", "Match the exact integer."], target: rand(2, 8) },
+        { prompt: (t: number) => `Ferris wheel completes one revolution in ${t} minutes. Slide the period.`, label: (t: number) => `Period ${t} min`, hint: "Period = time for one revolution.", hints: ["Adjust until the period matches.", "Stop on the labeled value."], target: rand(2, 8) },
+        { prompt: (t: number) => `Ferris wheel midline height is ${t} m. Slide the midline.`, label: (t: number) => `Midline ${t} m`, hint: "Midline = (peak + trough) / 2.", hints: ["Stop on the labeled midline.", "Average of high and low."], target: rand(3, 7) },
+        { prompt: (t: number) => `Wheel has radius ${t} m above midline. Slide the amplitude.`, label: (t: number) => `Radius ${t} m`, hint: "Radius equals amplitude on a Ferris wheel.", hints: ["A = r in this model.", "Stop on the integer."], target: rand(2, 6) },
+      ];
+      const v = pick(variants);
+      return sliderEng(m, difficulty, v.prompt(v.target), { min: 0, max: 10, step: 1, initial: 1, target: v.target }, v.label(v.target),
+        v.hint, v.hints, `Target was ${v.target}.`);
     }
     case "harmonicMotion": {
-      const target = +(rand(1, 6)).toFixed(0);
-      return sliderEng(m, difficulty, `Tune the angular frequency ω to ${target}.`, { min: 0, max: 8, step: 1, initial: 0, target }, `ω = ${target}`,
-        "Adjust until ω matches.", ["Frequency controls oscillation speed.", "Stop at the integer target."], `ω target was ${target}.`);
+      const variants = [
+        { prompt: (t: number) => `Tune the angular frequency ω to ${t}.`, label: (t: number) => `ω = ${t}`, hint: "Adjust until ω matches.", hints: ["Frequency controls oscillation speed.", "Stop at the integer target."], max: 8, target: rand(1, 6) },
+        { prompt: (t: number) => `Tune the amplitude of the spring oscillation to ${t} cm.`, label: (t: number) => `A = ${t} cm`, hint: "Amplitude = max displacement.", hints: ["Larger A = bigger swings.", "Stop on the exact integer."], max: 10, target: rand(2, 8) },
+        { prompt: (t: number) => `Tune the period T of the pendulum to ${t} seconds.`, label: (t: number) => `T = ${t} s`, hint: "T = 2π√(L/g).", hints: ["Longer pendulum = longer period.", "Stop on the integer."], max: 8, target: rand(2, 6) },
+        { prompt: (t: number) => `Tune the phase angle φ to ${t} radians (×π/4).`, label: (t: number) => `φ = ${t}π/4`, hint: "Phase shifts the start of motion.", hints: ["Each step adds π/4.", "Stop on the labeled integer."], max: 8, target: rand(0, 4) },
+      ];
+      const v = pick(variants);
+      return sliderEng(m, difficulty, v.prompt(v.target), { min: 0, max: v.max, step: 1, initial: 0, target: v.target }, v.label(v.target),
+        v.hint, v.hints, `Target was ${v.target}.`);
     }
     case "vectorNav": {
       const xa = rand(1, 6), ya = rand(1, 6), xb = rand(1, 6), yb = rand(1, 6);
@@ -9896,9 +11763,16 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
         hint: "Factor the quadratic.", hints: ["Roots sum to −b/a.", "Roots multiply to c/a."], explanation: ans }, ans, [`x = ${-r1} or x = ${-r2}`, `x = ${r1} only`, `No real roots`]);
     }
     case "syntheticDivision": {
-      const k = rand(2, 5); const ans = `x² + 0x + ${k * k}`;
-      return makeChoice({ ...base(m, difficulty, "choice", `Divide x³ − ${k * k * k} by (x − ${k}). Quotient?`, { kind: "icon", icon: m.emoji, title: `(x³ − ${k * k * k}) ÷ (x − ${k})`, subtitle: "Synthetic" }),
-        hint: "Use synthetic division with root k.", hints: [`Bring down 1.`, `Coefficients: 1, ${k}, ${k * k}.`], explanation: `Quotient: x² + ${k}x + ${k * k}, remainder 0.` }, `x² + ${k}x + ${k * k}`, [`x² − ${k}x + ${k * k}`, `x² + ${k}x − ${k * k}`, ans]);
+      const k = rand(2, 5);
+      const variants = [
+        { prompt: `Divide x³ − ${k * k * k} by (x − ${k}). Quotient?`, title: `(x³ − ${k * k * k}) ÷ (x − ${k})`, ans: `x² + ${k}x + ${k * k}`, distractors: [`x² − ${k}x + ${k * k}`, `x² + ${k}x − ${k * k}`, `x² + 0x + ${k * k}`], hint: "Synthetic with root k.", hints: ["Bring down 1.", `Coefficients: 1, ${k}, ${k * k}.`], explanation: `Quotient: x² + ${k}x + ${k * k}, remainder 0.` },
+        { prompt: `Divide x³ + ${k * k * k} by (x + ${k}). Quotient?`, title: `(x³ + ${k * k * k}) ÷ (x + ${k})`, ans: `x² − ${k}x + ${k * k}`, distractors: [`x² + ${k}x + ${k * k}`, `x² + ${k * k}`, `x + ${k}`], hint: "Synthetic with root -k.", hints: ["Bring down 1.", `Coefficients: 1, −${k}, ${k * k}.`], explanation: `Quotient: x² − ${k}x + ${k * k}, remainder 0.` },
+        { prompt: `Use synthetic division: x² − ${k * k} ÷ (x − ${k}). Quotient?`, title: `(x² − ${k * k}) ÷ (x − ${k})`, ans: `x + ${k}`, distractors: [`x − ${k}`, `x + ${k * k}`, `x² − ${k}`], hint: "Difference of squares.", hints: [`x² − ${k * k} = (x−${k})(x+${k}).`], explanation: `Quotient: x + ${k}.` },
+        { prompt: `Evaluate p(${k}) for p(x) = x³ − ${k * k * k} via Remainder Theorem. Remainder?`, title: `p(${k})`, ans: "0", distractors: [`${k * k * k}`, `${k}`, `−${k * k * k}`], hint: "Remainder = p(k).", hints: [`p(${k}) = ${k}³ − ${k * k * k}.`], explanation: `p(${k}) = ${k * k * k} − ${k * k * k} = 0.` },
+      ];
+      const v = pick(variants);
+      return makeChoice({ ...base(m, difficulty, "choice", v.prompt, { kind: "icon", icon: m.emoji, title: v.title, subtitle: "Synthetic / Remainder" }),
+        hint: v.hint, hints: v.hints, explanation: v.explanation }, v.ans, v.distractors);
     }
     case "rationalMatch": {
       const banks: [string, string][][] = [
@@ -9916,9 +11790,15 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
     }
     case "asymptoteHunt": {
       const k = rand(1, 5);
-      const ans = `x = ${k}`;
-      return makeChoice({ ...base(m, difficulty, "choice", `Vertical asymptote of f(x) = 1/(x − ${k})?`, { kind: "icon", icon: m.emoji, title: `1/(x − ${k})`, subtitle: "Find VA" }),
-        hint: "Denominator zero gives VA.", hints: [`Set x − ${k} = 0.`, "Solve."], explanation: `x = ${k} makes the denominator zero.` }, ans, [`x = ${-k}`, `y = ${k}`, `x = 0`]);
+      const variants = [
+        { prompt: `Vertical asymptote of f(x) = 1/(x − ${k})?`, title: `1/(x − ${k})`, subtitle: "Find VA", ans: `x = ${k}`, distractors: [`x = ${-k}`, `y = ${k}`, `x = 0`], hint: "Denominator zero gives VA.", hints: [`Set x − ${k} = 0.`, "Solve."], explanation: `x = ${k} makes the denominator zero.` },
+        { prompt: `Vertical asymptote of f(x) = 1/(x + ${k})?`, title: `1/(x + ${k})`, subtitle: "Find VA", ans: `x = ${-k}`, distractors: [`x = ${k}`, `y = ${k}`, `x = 0`], hint: "Denominator zero gives VA.", hints: [`Set x + ${k} = 0.`, "Solve."], explanation: `x = ${-k} makes the denominator zero.` },
+        { prompt: `Horizontal asymptote of f(x) = ${k}/x as x → ∞?`, title: `${k}/x`, subtitle: "Find HA", ans: "y = 0", distractors: [`y = ${k}`, `y = ${-k}`, "y = 1"], hint: "Numerator constant, denominator → ∞.", hints: ["Limit at infinity.", "Top degree < bottom degree → HA = 0."], explanation: "Function shrinks to 0." },
+        { prompt: `Horizontal asymptote of f(x) = ${k}x/(x + 1)?`, title: `${k}x/(x+1)`, subtitle: "Find HA", ans: `y = ${k}`, distractors: [`y = 0`, `y = ${-k}`, `y = ${k + 1}`], hint: "Equal degrees: HA = leading-coeff ratio.", hints: ["Both top and bottom degree 1.", "Ratio of leading coefficients."], explanation: `Leading coefficients: ${k}/1 = ${k}.` },
+      ];
+      const v = pick(variants);
+      return makeChoice({ ...base(m, difficulty, "choice", v.prompt, { kind: "icon", icon: m.emoji, title: v.title, subtitle: v.subtitle }),
+        hint: v.hint, hints: v.hints, explanation: v.explanation }, v.ans, v.distractors);
     }
     case "exponentialGrowth": {
       const a = rand(2, 5); const t = rand(2, 5);
@@ -10033,6 +11913,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hints: ["Pure power → power rule.", "Composition → chain rule."],
           explanation: "Each form has a single canonical rule.",
         },
+        {
+          prompt: "Sort each function by required technique to integrate.",
+          categories: ["Power rule", "u-substitution", "Integration by parts", "Trig identity"],
+          items: [
+            { label: "∫ x³ dx", category: "Power rule" }, { label: "∫ x⁻² dx", category: "Power rule" },
+            { label: "∫ 2x(x²+1)³ dx", category: "u-substitution" }, { label: "∫ e^(3x) dx", category: "u-substitution" },
+            { label: "∫ x e^x dx", category: "Integration by parts" }, { label: "∫ x ln x dx", category: "Integration by parts" },
+            { label: "∫ sin²x dx", category: "Trig identity" }, { label: "∫ cos²x dx", category: "Trig identity" },
+          ],
+          hint: "Each technique fits specific forms.",
+          explanation: "Recognize the form to pick the right integral technique.",
+        },
       ]);
     }
     case "criticalPoint": {
@@ -10059,9 +11951,15 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
       return pathEng(m, difficulty, "Trace the steps of curve sketching.", stops, "Move from analysis to picture.", ["Find criticals first.", "Then concavity."], "Curve-sketch path varies by what's tested.");
     }
     case "tangentLine": {
-      const target = +(rand(1, 6)).toFixed(0);
-      return sliderEng(m, difficulty, `Slope of tangent should equal ${target}. Tune the slider.`, { min: 0, max: 10, step: 1, initial: 0, target }, `Target slope ${target}`,
-        "Find f'(x) and match.", ["Slope = f'(a).", "Stop on the integer."], `Target slope was ${target}.`);
+      const variants = [
+        { prompt: (t: number) => `Slope of tangent should equal ${t}. Tune the slider.`, label: (t: number) => `Slope ${t}`, hint: "Find f'(x) and match.", hints: ["Slope = f'(a).", "Stop on the integer."], target: rand(1, 6) },
+        { prompt: (t: number) => `For f(x)=x², tune the x-value where the tangent has slope ${t}.`, label: (t: number) => `f'(x) = ${t}`, hint: "f'(x) = 2x.", hints: ["Solve 2x = target.", "Stop at correct x."], target: rand(1, 5) },
+        { prompt: (t: number) => `Tune the y-intercept of the tangent line so it passes through (1, ${t}).`, label: (t: number) => `b ≈ ${t}`, hint: "y − y₀ = m(x − x₀).", hints: ["Use point-slope form.", "Match the labeled intercept."], target: rand(1, 6) },
+        { prompt: (t: number) => `Tune the linear approximation value of f near x = ${t}.`, label: (t: number) => `x = ${t}`, hint: "Linearization uses f(a) + f'(a)(x − a).", hints: ["Pick the point a.", "Stop on labeled value."], target: rand(2, 6) },
+      ];
+      const v = pick(variants);
+      return sliderEng(m, difficulty, v.prompt(v.target), { min: 0, max: 10, step: 1, initial: 0, target: v.target }, v.label(v.target),
+        v.hint, v.hints, `Target was ${v.target}.`);
     }
     case "optimization": {
       const variants = [
@@ -10104,9 +12002,15 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
       return matchPuzzle(m, difficulty, "Pair each integrand with its antiderivative.", pick(banks));
     }
     case "riemannSum": {
-      const target = +(rand(2, 8)).toFixed(0);
-      return sliderEng(m, difficulty, `Increase N (rectangles) to reach approximate area ${target}.`, { min: 1, max: 10, step: 1, initial: 2, target }, `N ≈ ${target}`,
-        "More rectangles → tighter estimate.", ["Tap to add more partitions.", "Stop on the labeled N."], `Target N was ${target}.`);
+      const variants = [
+        { prompt: (t: number) => `Increase N (rectangles) to reach approximate area ${t}.`, label: (t: number) => `N ≈ ${t}`, hint: "More rectangles → tighter estimate.", hints: ["Tap to add more partitions.", "Stop on the labeled N."], min: 1, max: 10, target: rand(2, 8) },
+        { prompt: (t: number) => `Adjust partition width Δx to ${t}.`, label: (t: number) => `Δx = ${t}`, hint: "Smaller Δx tightens the sum.", hints: ["Width determines accuracy.", "Stop on labeled value."], min: 0, max: 10, target: rand(1, 5) },
+        { prompt: (t: number) => `Tune left-endpoint to right-endpoint shift index to ${t}.`, label: (t: number) => `Shift ${t}`, hint: "Switch evaluation point.", hints: ["Left vs midpoint vs right.", "Stop on labeled index."], min: 0, max: 6, target: rand(1, 4) },
+        { prompt: (t: number) => `Tune the upper bound b so the Riemann sum equals ${t}.`, label: (t: number) => `b = ${t}`, hint: "Larger b extends the interval.", hints: ["Area grows with b.", "Stop on labeled b."], min: 0, max: 10, target: rand(3, 8) },
+      ];
+      const v = pick(variants);
+      return sliderEng(m, difficulty, v.prompt(v.target), { min: v.min, max: v.max, step: 1, initial: 2, target: v.target }, v.label(v.target),
+        v.hint, v.hints, `Target was ${v.target}.`);
     }
     case "accumulation": {
       const variants = [
@@ -10197,6 +12101,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hints: ["Larger denominator under x → horizontal.", "Square term ratio sets the axis."],
           explanation: "Standard forms encode orientation in the denominators.",
         },
+        {
+          prompt: "Classify each conic by eccentricity range.",
+          categories: ["Circle (e=0)", "Ellipse (0<e<1)", "Parabola (e=1)", "Hyperbola (e>1)"],
+          items: [
+            { label: "x² + y² = 9", category: "Circle (e=0)" }, { label: "x² + y² = 25", category: "Circle (e=0)" },
+            { label: "x²/9 + y²/4 = 1", category: "Ellipse (0<e<1)" }, { label: "x²/16 + y²/9 = 1", category: "Ellipse (0<e<1)" },
+            { label: "y² = 4x", category: "Parabola (e=1)" }, { label: "x² = 8y", category: "Parabola (e=1)" },
+            { label: "x²/4 − y²/9 = 1", category: "Hyperbola (e>1)" }, { label: "y² − x² = 1", category: "Hyperbola (e>1)" },
+          ],
+          hint: "Eccentricity distinguishes the four conics.",
+          explanation: "Each conic section has a characteristic eccentricity.",
+        },
       ]);
     }
     case "regressionModel": {
@@ -10239,6 +12155,20 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Look at the leading term.",
           hints: ["Parity of degree controls ends matching.", "Sign of leading controls direction."],
           explanation: "Each polynomial belongs to one parity/sign bucket.",
+        },
+        {
+          prompt: "Sort each function family by the number of real roots possible.",
+          categories: ["At most 1 real root", "At most 2 real roots", "At most n real roots (degree n)"],
+          items: [
+            { label: "f(x) = e^x", category: "At most 1 real root" },
+            { label: "f(x) = ln x", category: "At most 1 real root" },
+            { label: "f(x) = x² + bx + c", category: "At most 2 real roots" },
+            { label: "f(x) = quadratic", category: "At most 2 real roots" },
+            { label: "f(x) = polynomial of degree 5", category: "At most n real roots (degree n)" },
+            { label: "f(x) = x³ + ax + b", category: "At most n real roots (degree n)" },
+          ],
+          hint: "Fundamental theorem of algebra applies.",
+          explanation: "Degree caps the number of real roots; transcendental functions follow different rules.",
         },
       ]);
     }
@@ -10347,9 +12277,15 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
         ev, "Sum (value × prob).", ["Each side prob ½.", "Average the values."], `(${a} + ${b}) / 2 = ${ev}.`);
     }
     case "binomialSpinner": {
-      const target = +(rand(2, 8)).toFixed(0);
-      return sliderEng(m, difficulty, `Set n trials to ${target} for binomial(n, p=0.5).`, { min: 0, max: 10, step: 1, initial: 1, target }, `n = ${target}`,
-        "Slide to the target n.", ["Trials count must match.", "Stop on the integer."], `Trials target was ${target}.`);
+      const variants = [
+        { prompt: (t: number) => `Set n trials to ${t} for binomial(n, p=0.5).`, label: (t: number) => `n = ${t}`, hint: "Slide to the target n.", hints: ["Trials count must match.", "Stop on the integer."], min: 0, max: 10, target: rand(2, 8) },
+        { prompt: (t: number) => `Set number of successes k to ${t} (binomial event).`, label: (t: number) => `k = ${t}`, hint: "Successes range from 0 to n.", hints: ["Each trial gives 0 or 1 success.", "Stop at the labeled k."], min: 0, max: 10, target: rand(1, 6) },
+        { prompt: (t: number) => `Tune the probability p × 10 to ${t} (so p = ${t}/10).`, label: (t: number) => `p = ${t}/10`, hint: "p is between 0 and 1.", hints: ["Each step = 0.1.", "Stop on the labeled p."], min: 0, max: 10, target: rand(2, 8) },
+        { prompt: (t: number) => `Slide the expected value np to ${t}.`, label: (t: number) => `E[X] = ${t}`, hint: "Expected value = np.", hints: ["Multiply trials by probability.", "Stop on the labeled product."], min: 0, max: 12, target: rand(2, 8) },
+      ];
+      const v = pick(variants);
+      return sliderEng(m, difficulty, v.prompt(v.target), { min: v.min, max: v.max, step: 1, initial: 1, target: v.target }, v.label(v.target),
+        v.hint, v.hints, `Target was ${v.target}.`);
     }
     case "normalShade": {
       const variants = [
@@ -10366,9 +12302,15 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
         hint: "Use the empirical rule.", hints: ["±1σ ≈ 68%, ±2σ ≈ 95%, ±3σ ≈ 99.7%.", "Use symmetry of the curve."], explanation: v.exp }, v.ans, v.distractors);
     }
     case "stdDevBalancer": {
-      const target = +(rand(1, 5)).toFixed(0);
-      return sliderEng(m, difficulty, `Tune σ until the spread matches σ=${target}.`, { min: 0, max: 8, step: 1, initial: 1, target }, `σ target ${target}`,
-        "Increase σ widens the curve.", ["Slide to labeled value.", "Stop on the integer."], `σ target was ${target}.`);
+      const variants = [
+        { prompt: (t: number) => `Tune σ until the spread matches σ=${t}.`, label: (t: number) => `σ ${t}`, hint: "Increase σ widens the curve.", hints: ["Slide to labeled value.", "Stop on the integer."], max: 8, target: rand(1, 5) },
+        { prompt: (t: number) => `Tune variance to ${t} (variance = σ²).`, label: (t: number) => `σ² = ${t}`, hint: "Variance grows quadratically.", hints: ["σ² = average squared deviation.", "Stop on the integer."], max: 10, target: rand(1, 9) },
+        { prompt: (t: number) => `Tune the mean μ to match ${t}.`, label: (t: number) => `μ = ${t}`, hint: "Mean centers the distribution.", hints: ["Shifts curve horizontally.", "Stop on labeled mean."], max: 8, target: rand(1, 6) },
+        { prompt: (t: number) => `Tune the range (max − min) to ${t}.`, label: (t: number) => `Range ${t}`, hint: "Range = max − min.", hints: ["Range bounds the data.", "Stop on labeled range."], max: 12, target: rand(3, 9) },
+      ];
+      const v = pick(variants);
+      return sliderEng(m, difficulty, v.prompt(v.target), { min: 0, max: v.max, step: 1, initial: 1, target: v.target }, v.label(v.target),
+        v.hint, v.hints, `Target was ${v.target}.`);
     }
     case "correlationMatch": {
       const banks: [string, string][][] = [
@@ -10416,6 +12358,22 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hints: ["Selection bias is about who is in the sample.", "Response bias is about how they answer."],
           explanation: "Different biases enter at different stages of the data process.",
         },
+        {
+          prompt: "Sort each sampling method into probability vs non-probability.",
+          categories: ["Probability sample", "Non-probability sample"],
+          items: [
+            { label: "Simple random sample", category: "Probability sample" },
+            { label: "Stratified random", category: "Probability sample" },
+            { label: "Cluster sample", category: "Probability sample" },
+            { label: "Systematic (every k-th)", category: "Probability sample" },
+            { label: "Convenience sample", category: "Non-probability sample" },
+            { label: "Quota sample", category: "Non-probability sample" },
+            { label: "Snowball sample", category: "Non-probability sample" },
+            { label: "Judgment sample", category: "Non-probability sample" },
+          ],
+          hint: "Probability samples randomize; non-probability use judgment.",
+          explanation: "Only probability samples support classical inference.",
+        },
       ]);
     }
     case "hypothesisTest": {
@@ -10429,9 +12387,15 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
         hint: "Compare p to α.", hints: ["If p < α, reject H₀.", "If p ≥ α, fail to reject."], explanation: `p ${p < alpha ? "<" : "≥"} α → ${decide}.` }, decide, distractors);
     }
     case "confidenceInterval": {
-      const target = +(rand(1, 5)).toFixed(0);
-      return sliderEng(m, difficulty, `Widen the CI margin to ${target}.`, { min: 0, max: 8, step: 1, initial: 0, target }, `Margin ${target}`,
-        "Wider margin = wider interval.", ["Increase σ or decrease n widens it.", "Stop on integer target."], `Margin target was ${target}.`);
+      const variants = [
+        { prompt: (t: number) => `Widen the CI margin to ${t}.`, label: (t: number) => `Margin ${t}`, hint: "Wider margin = wider interval.", hints: ["Increase σ or decrease n widens it.", "Stop on integer target."], max: 8, target: rand(1, 5) },
+        { prompt: (t: number) => `Tune confidence level percentage to ${t}0% (90%, 95%, 99%).`, label: (t: number) => `${t}0% CI`, hint: "Higher confidence = wider interval.", hints: ["Common levels: 90/95/99.", "Stop on the labeled level."], max: 10, target: rand(7, 10) },
+        { prompt: (t: number) => `Tune sample size index to ${t} (narrower CI as n grows).`, label: (t: number) => `n index ${t}`, hint: "Larger n = narrower CI.", hints: ["Margin ∝ 1/√n.", "Stop on labeled index."], max: 10, target: rand(2, 8) },
+        { prompt: (t: number) => `Tune z* critical value index to ${t}.`, label: (t: number) => `z* index ${t}`, hint: "Larger z* widens CI.", hints: ["z* depends on confidence level.", "Stop on labeled index."], max: 6, target: rand(1, 4) },
+      ];
+      const v = pick(variants);
+      return sliderEng(m, difficulty, v.prompt(v.target), { min: 0, max: v.max, step: 1, initial: 0, target: v.target }, v.label(v.target),
+        v.hint, v.hints, `Target was ${v.target}.`);
     }
     case "scatterPlot": {
       const variants = [
@@ -10572,9 +12536,15 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
       );
     }
     case "ecosystemBalance": {
-      const target = +(rand(3, 7)).toFixed(0);
-      return sliderEng(m, difficulty, `Balance predator population to target ${target}.`, { min: 0, max: 10, step: 1, initial: 1, target }, `Predator ${target}`,
-        "Adjust predators to match prey.", ["Too few → prey explodes.", "Too many → prey crashes."], `Balanced predator count: ${target}.`);
+      const variants = [
+        { prompt: (t: number) => `Balance predator population to target ${t}.`, label: (t: number) => `Predator ${t}`, hint: "Adjust predators to match prey.", hints: ["Too few → prey explodes.", "Too many → prey crashes."], target: rand(3, 7) },
+        { prompt: (t: number) => `Balance prey population to ${t} for stable ecosystem.`, label: (t: number) => `Prey ${t}`, hint: "Prey support carnivores.", hints: ["Too few → predators starve.", "Too many → overgraze."], target: rand(4, 8) },
+        { prompt: (t: number) => `Tune producer biomass index to ${t}.`, label: (t: number) => `Producer ${t}`, hint: "Producers form the base.", hints: ["Sunlight + nutrients drive production.", "Stop on the labeled level."], target: rand(3, 9) },
+        { prompt: (t: number) => `Tune decomposer activity index to ${t}.`, label: (t: number) => `Decomposer ${t}`, hint: "Decomposers recycle matter.", hints: ["Faster cycling = healthier system.", "Stop on labeled index."], target: rand(2, 7) },
+      ];
+      const v = pick(variants);
+      return sliderEng(m, difficulty, v.prompt(v.target), { min: 0, max: 10, step: 1, initial: 1, target: v.target }, v.label(v.target),
+        v.hint, v.hints, `Target was ${v.target}.`);
     }
     case "evolutionMatch": {
       const banks: [string, string][][] = [
@@ -10761,9 +12731,15 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
     }
     case "stoichRecipe": {
       const k = pick([2, 3, 4]);
-      const ans = k * 2;
-      return numpadEng(m, difficulty, `For 2H₂ + O₂ → 2H₂O, ${k * 2} mol H₂ produces how many mol H₂O?`, { kind: "icon", icon: m.emoji, title: `${k * 2} mol H₂`, subtitle: "Stoichiometry" },
-        ans, "1:1 H₂ → H₂O.", ["Same coefficient.", `${k * 2} mol H₂ → ${k * 2} mol H₂O.`], `${k * 2} mol H₂ produces ${ans} mol H₂O.`);
+      const variants = [
+        { prompt: `For 2H₂ + O₂ → 2H₂O, ${k * 2} mol H₂ produces how many mol H₂O?`, title: `${k * 2} mol H₂`, ans: k * 2, hint: "1:1 H₂ → H₂O.", hints: ["Same coefficient.", `${k * 2} mol H₂ → ${k * 2} mol H₂O.`], explanation: `${k * 2} mol H₂ produces ${k * 2} mol H₂O.` },
+        { prompt: `For 2H₂ + O₂ → 2H₂O, ${k} mol O₂ produces how many mol H₂O?`, title: `${k} mol O₂`, ans: k * 2, hint: "1 O₂ → 2 H₂O.", hints: ["O₂ coefficient = 1; H₂O = 2.", `${k} × 2 = ${k * 2}.`], explanation: `${k} mol O₂ produces ${k * 2} mol H₂O.` },
+        { prompt: `For N₂ + 3H₂ → 2NH₃, ${k * 3} mol H₂ produces how many mol NH₃?`, title: `${k * 3} mol H₂`, ans: k * 2, hint: "3 H₂ : 2 NH₃.", hints: ["Mole ratio 3:2.", `${k * 3} × (2/3) = ${k * 2}.`], explanation: `${k * 3} mol H₂ → ${k * 2} mol NH₃.` },
+        { prompt: `For CH₄ + 2O₂ → CO₂ + 2H₂O, ${k} mol CH₄ produces how many mol H₂O?`, title: `${k} mol CH₄`, ans: k * 2, hint: "1 CH₄ → 2 H₂O.", hints: ["1:2 ratio.", `${k} × 2 = ${k * 2}.`], explanation: `${k} mol CH₄ → ${k * 2} mol H₂O.` },
+      ];
+      const v = pick(variants);
+      return numpadEng(m, difficulty, v.prompt, { kind: "icon", icon: m.emoji, title: v.title, subtitle: "Stoichiometry" },
+        v.ans, v.hint, v.hints, v.explanation);
     }
     case "motionGraph": {
       const banks: [string, string][][] = [
@@ -10818,14 +12794,26 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
         v.target, v.hint, ["Each part has a single job.", "Match the symbol to its function."], v.exp);
     }
     case "gravityDrop": {
-      const target = +(rand(1, 9)).toFixed(0);
-      return sliderEng(m, difficulty, `Drop time should reach ${target}s. Tune the height.`, { min: 0, max: 12, step: 1, initial: 0, target }, `t ≈ ${target}s`,
-        "h = ½g·t². Slide until t matches.", ["Use g ≈ 10 m/s².", "Stop on integer t."], `Target drop time: ${target}s.`);
+      const variants = [
+        { prompt: (t: number) => `Drop time should reach ${t}s. Tune the height.`, label: (t: number) => `t ≈ ${t}s`, hint: "h = ½g·t². Slide until t matches.", hints: ["Use g ≈ 10 m/s².", "Stop on integer t."], target: rand(1, 9) },
+        { prompt: (t: number) => `Tune impact velocity to ${t} m/s for a falling object.`, label: (t: number) => `v ≈ ${t} m/s`, hint: "v = g·t.", hints: ["g ≈ 10 m/s².", "Stop on integer velocity."], target: rand(2, 10) },
+        { prompt: (t: number) => `Tune the drop height to ${t} m.`, label: (t: number) => `h = ${t} m`, hint: "Higher h = longer fall.", hints: ["h relates to t² via gravity.", "Stop on labeled height."], target: rand(2, 10) },
+        { prompt: (t: number) => `Tune gravitational acceleration g to ${t} m/s² (planetary).`, label: (t: number) => `g = ${t} m/s²`, hint: "Different planets, different g.", hints: ["Earth = 10; Moon ≈ 2.", "Stop on the labeled value."], target: rand(2, 11) },
+      ];
+      const v = pick(variants);
+      return sliderEng(m, difficulty, v.prompt(v.target), { min: 0, max: 12, step: 1, initial: 0, target: v.target }, v.label(v.target),
+        v.hint, v.hints, `Target was ${v.target}.`);
     }
     case "waveFrequency": {
-      const target = +(rand(1, 10)).toFixed(0);
-      return sliderEng(m, difficulty, `Tune frequency to ${target} Hz.`, { min: 0, max: 12, step: 1, initial: 1, target }, `${target} Hz`,
-        "Slide to the labeled frequency.", ["Each step = 1 Hz.", "Match exactly."], `Frequency target was ${target} Hz.`);
+      const variants = [
+        { prompt: (t: number) => `Tune frequency to ${t} Hz.`, label: (t: number) => `${t} Hz`, hint: "Slide to the labeled frequency.", hints: ["Each step = 1 Hz.", "Match exactly."], target: rand(1, 10) },
+        { prompt: (t: number) => `Tune the wavelength to ${t} m.`, label: (t: number) => `λ = ${t} m`, hint: "λ = v / f.", hints: ["Longer λ = lower frequency.", "Stop on integer."], target: rand(1, 10) },
+        { prompt: (t: number) => `Tune wave speed to ${t} m/s.`, label: (t: number) => `v = ${t} m/s`, hint: "v = λ × f.", hints: ["Speed depends on medium.", "Stop on labeled speed."], target: rand(2, 10) },
+        { prompt: (t: number) => `Tune the period T to ${t} seconds (T = 1/f).`, label: (t: number) => `T = ${t} s`, hint: "Period is the inverse of frequency.", hints: ["T = 1 / f.", "Stop on the integer."], target: rand(1, 8) },
+      ];
+      const v = pick(variants);
+      return sliderEng(m, difficulty, v.prompt(v.target), { min: 0, max: 12, step: 1, initial: 1, target: v.target }, v.label(v.target),
+        v.hint, v.hints, `Target was ${v.target}.`);
     }
     case "opticsReflect": {
       const variants = [
@@ -10890,6 +12878,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Identify the colliding crust types.",
           hints: ["Two continents → mountain belts.", "Two oceans → island arcs."],
           explanation: "Crust pairing controls the resulting feature.",
+        },
+        {
+          prompt: "Sort each volcanic feature by type.",
+          categories: ["Shield volcano", "Stratovolcano", "Cinder cone", "Caldera"],
+          items: [
+            { label: "Mauna Loa", category: "Shield volcano" }, { label: "Kilauea", category: "Shield volcano" },
+            { label: "Mount St. Helens", category: "Stratovolcano" }, { label: "Mount Fuji", category: "Stratovolcano" },
+            { label: "Paricutín", category: "Cinder cone" }, { label: "Sunset Crater", category: "Cinder cone" },
+            { label: "Yellowstone caldera", category: "Caldera" }, { label: "Santorini", category: "Caldera" },
+          ],
+          hint: "Volcano shape reflects eruption style.",
+          explanation: "Each volcano type forms from specific lava chemistry and eruption patterns.",
         },
       ]);
     }
@@ -11025,6 +13025,18 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hints: ["Plates and rocks → geosphere.", "Water → hydrosphere.", "Living things → biosphere."],
           explanation: "Each disaster has a dominant Earth-system trigger.",
         },
+        {
+          prompt: "Sort each disaster preparedness step by phase.",
+          categories: ["Mitigation", "Preparedness", "Response", "Recovery"],
+          items: [
+            { label: "Building seismic codes", category: "Mitigation" }, { label: "Flood-resistant infrastructure", category: "Mitigation" },
+            { label: "Stock emergency kits", category: "Preparedness" }, { label: "Run evacuation drills", category: "Preparedness" },
+            { label: "Activate emergency operations center", category: "Response" }, { label: "Search & rescue", category: "Response" },
+            { label: "Rebuild homes", category: "Recovery" }, { label: "Mental health support", category: "Recovery" },
+          ],
+          hint: "FEMA's disaster cycle has four phases.",
+          explanation: "Disaster management spans before, during, and after events.",
+        },
       ]);
     }
     case "fossilTimeline": {
@@ -11109,6 +13121,30 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Each PPE has a specific hazard target.",
           hints: ["Eyes need shielding from splash.", "Lungs need fume control."],
           explanation: "PPE is task-specific.",
+        },
+        {
+          prompt: "Sort each emergency response by hazard type.",
+          categories: ["Chemical spill", "Fire", "Cut/wound", "Eye exposure"],
+          items: [
+            { label: "Notify supervisor + spill kit", category: "Chemical spill" }, { label: "Evacuate fume area", category: "Chemical spill" },
+            { label: "Stop, drop, and roll", category: "Fire" }, { label: "Use fire extinguisher (PASS)", category: "Fire" },
+            { label: "Apply pressure to wound", category: "Cut/wound" }, { label: "Wash with soap and water", category: "Cut/wound" },
+            { label: "Eye-wash station 15 min", category: "Eye exposure" }, { label: "Seek medical attention", category: "Eye exposure" },
+          ],
+          hint: "Each accident has a specific response protocol.",
+          explanation: "Emergency response depends on hazard category.",
+        },
+        {
+          prompt: "Sort each hazard pictogram by what it warns against.",
+          categories: ["Toxic", "Flammable", "Corrosive", "Oxidizer"],
+          items: [
+            { label: "Skull and crossbones", category: "Toxic" }, { label: "Health hazard", category: "Toxic" },
+            { label: "Flame symbol", category: "Flammable" }, { label: "Gas cylinder + flame", category: "Flammable" },
+            { label: "Test tube on hand", category: "Corrosive" }, { label: "Acid drop on surface", category: "Corrosive" },
+            { label: "Flame over circle", category: "Oxidizer" }, { label: "O₂ symbol", category: "Oxidizer" },
+          ],
+          hint: "GHS pictograms have distinct meanings.",
+          explanation: "Globally Harmonized System pictograms communicate chemical hazards.",
         },
       ]);
     }
@@ -11207,6 +13243,29 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
           hint: "Numbers = quantitative; descriptions = qualitative.",
           hints: ["Quantitative has units.", "Qualitative uses words only."],
           explanation: "Each observation is either descriptive or measured.",
+        },
+        {
+          prompt: "Sort each finding as fact or opinion.",
+          categories: ["Fact", "Opinion"],
+          items: [
+            { label: "Water boils at 100°C at sea level", category: "Fact" }, { label: "The Earth orbits the Sun", category: "Fact" },
+            { label: "The sample has a mass of 12 g", category: "Fact" }, { label: "DNA is a double helix", category: "Fact" },
+            { label: "Chocolate is the best flavor", category: "Opinion" }, { label: "This is the most interesting experiment", category: "Opinion" },
+            { label: "Blue is a calming color", category: "Opinion" }, { label: "The lab is too cold", category: "Opinion" },
+          ],
+          hint: "Facts can be verified; opinions are subjective.",
+          explanation: "Facts are objectively verifiable; opinions reflect personal judgment.",
+        },
+        {
+          prompt: "Sort each example by scientific inquiry skill.",
+          categories: ["Observing", "Inferring", "Predicting"],
+          items: [
+            { label: "The bird has red feathers", category: "Observing" }, { label: "I count 7 ants", category: "Observing" },
+            { label: "The puddle suggests it rained", category: "Inferring" }, { label: "The ice melted, so it warmed", category: "Inferring" },
+            { label: "Tomorrow will be sunny", category: "Predicting" }, { label: "The plant will grow taller next week", category: "Predicting" },
+          ],
+          hint: "Observe = direct; infer = explain past; predict = forecast future.",
+          explanation: "These three inquiry skills work together but differ in time/direction.",
         },
       ]);
     }
@@ -11727,14 +13786,26 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
       ]);
     }
     case "bridgeStrength": {
-      const target = +(rand(2, 8)).toFixed(0);
-      return sliderEng(m, difficulty, `Tune truss member count to ${target} for safe bridge.`, { min: 0, max: 10, step: 1, initial: 0, target }, `${target} members`,
-        "More members = stiffer.", ["Triangles are stable.", "Stop on the labeled count."], `Target member count: ${target}.`);
+      const variants = [
+        { prompt: (t: number) => `Tune truss member count to ${t} for safe bridge.`, label: (t: number) => `${t} members`, hint: "More members = stiffer.", hints: ["Triangles are stable.", "Stop on the labeled count."], min: 0, max: 10, target: rand(2, 8) },
+        { prompt: (t: number) => `Tune the load factor to ${t} (safety factor).`, label: (t: number) => `Load × ${t}`, hint: "Higher safety = bigger margin.", hints: ["Typical safety factor 1.5 to 3.", "Stop on labeled value."], min: 1, max: 5, target: rand(2, 4) },
+        { prompt: (t: number) => `Tune the deck thickness to ${t} (units).`, label: (t: number) => `t = ${t}`, hint: "Thicker deck = stronger.", hints: ["Thickness governs bending.", "Stop on the labeled value."], min: 0, max: 8, target: rand(2, 6) },
+        { prompt: (t: number) => `Tune the column count to ${t}.`, label: (t: number) => `${t} columns`, hint: "More columns = shorter spans.", hints: ["Spans transfer load.", "Stop on the labeled count."], min: 1, max: 8, target: rand(2, 6) },
+      ];
+      const v = pick(variants);
+      return sliderEng(m, difficulty, v.prompt(v.target), { min: v.min, max: v.max, step: 1, initial: v.min, target: v.target }, v.label(v.target),
+        v.hint, v.hints, `Target was ${v.target}.`);
     }
     case "pulleyForce": {
-      const target = +(rand(1, 4)).toFixed(0);
-      return sliderEng(m, difficulty, `Add pulleys until effort = load / ${target}.`, { min: 1, max: 5, step: 1, initial: 1, target }, `MA = ${target}`,
-        "Each additional pulley adds advantage.", ["MA equals supporting strands.", "Stop on the labeled MA."], `Mechanical advantage target was ${target}.`);
+      const variants = [
+        { prompt: (t: number) => `Add pulleys until effort = load / ${t}.`, label: (t: number) => `MA = ${t}`, hint: "Each additional pulley adds advantage.", hints: ["MA equals supporting strands.", "Stop on the labeled MA."], min: 1, max: 5, target: rand(1, 4) },
+        { prompt: (t: number) => `Tune the number of supporting rope strands to ${t}.`, label: (t: number) => `${t} strands`, hint: "Strands lift the load.", hints: ["Each strand shares the load.", "Stop on the labeled count."], min: 1, max: 6, target: rand(2, 5) },
+        { prompt: (t: number) => `Set lifting distance ratio to ${t} (rope/load distance).`, label: (t: number) => `Ratio ${t}`, hint: "Trade-off: shorter pull = less force.", hints: ["Distance ratio = MA.", "Stop on labeled ratio."], min: 1, max: 6, target: rand(2, 5) },
+        { prompt: (t: number) => `Tune the pulley diameter index to ${t}.`, label: (t: number) => `Diameter ${t}`, hint: "Larger pulley turns easier.", hints: ["Reduces friction.", "Stop on labeled index."], min: 1, max: 5, target: rand(1, 4) },
+      ];
+      const v = pick(variants);
+      return sliderEng(m, difficulty, v.prompt(v.target), { min: v.min, max: v.max, step: 1, initial: 1, target: v.target }, v.label(v.target),
+        v.hint, v.hints, `Target was ${v.target}.`);
     }
     case "structuralLoad": {
       const variants = [
@@ -11761,9 +13832,15 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
       return pathEng(m, difficulty, "Trace water through this system in order.", stops, "Follow the flow path.", ["Pumps add pressure.", "Filters/treatments clean water."], `${stops[0]} → ... → ${stops[stops.length - 1]}.`);
     }
     case "rocketLaunch": {
-      const target = +(rand(3, 9)).toFixed(0);
-      return sliderEng(m, difficulty, `Tune fuel ratio to target ${target}.`, { min: 0, max: 12, step: 1, initial: 0, target }, `Fuel ratio ${target}`,
-        "Higher Δv needs more fuel.", ["Stop on the labeled ratio.", "Use Tsiolkovsky intuition."], `Fuel ratio target: ${target}.`);
+      const variants = [
+        { prompt: (t: number) => `Tune fuel ratio to target ${t}.`, label: (t: number) => `Fuel ratio ${t}`, hint: "Higher Δv needs more fuel.", hints: ["Stop on the labeled ratio.", "Use Tsiolkovsky intuition."], target: rand(3, 9) },
+        { prompt: (t: number) => `Tune burn time to ${t} seconds.`, label: (t: number) => `Burn ${t}s`, hint: "Longer burn = more Δv.", hints: ["Δv = Isp · g · ln(m₀/m).", "Stop on labeled time."], target: rand(2, 9) },
+        { prompt: (t: number) => `Tune specific impulse Isp index to ${t}.`, label: (t: number) => `Isp index ${t}`, hint: "Higher Isp = more efficient.", hints: ["Chemical engines: Isp 200-450.", "Stop on labeled index."], target: rand(2, 9) },
+        { prompt: (t: number) => `Tune the staging count to ${t}.`, label: (t: number) => `${t} stages`, hint: "Multi-stage rockets reach higher Δv.", hints: ["Drop empty tanks.", "Stop on labeled count."], target: rand(1, 4) },
+      ];
+      const v = pick(variants);
+      return sliderEng(m, difficulty, v.prompt(v.target), { min: 0, max: 12, step: 1, initial: 0, target: v.target }, v.label(v.target),
+        v.hint, v.hints, `Target was ${v.target}.`);
     }
     case "robotArmAngle": {
       const target = pick([60, 90, 120, 150, 180, 270] as const);
@@ -12418,23 +14495,55 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
       ]);
     }
     case "pedigreeRead": {
-      const opts = [
-        "Autosomal recessive",
-        "Autosomal dominant",
-        "X-linked recessive",
-        "Mitochondrial",
+      const variants = [
+        {
+          prompt: "Two unaffected parents have an affected son and an unaffected daughter. Most likely mode of inheritance?",
+          subtitle: "Parents unaffected, son affected",
+          ans: "X-linked recessive",
+          distractors: ["Autosomal recessive", "Autosomal dominant", "Mitochondrial"],
+          hint: "Skipping a generation and male bias hints at X-linked recessive.",
+          hints: ["Carrier mother passes affected X to son.", "Daughters get the unaffected paternal X."],
+          explanation: "X-linked recessive fits: unaffected carriers, affected males.",
+        },
+        {
+          prompt: "Trait appears in every generation, affecting both males and females equally. Most likely mode?",
+          subtitle: "Every generation, both sexes",
+          ans: "Autosomal dominant",
+          distractors: ["Autosomal recessive", "X-linked recessive", "Mitochondrial"],
+          hint: "No skipping; affected parent has affected children.",
+          hints: ["Dominant alleles always express.", "Affected child usually has affected parent."],
+          explanation: "Autosomal dominant: 50% of offspring affected each generation.",
+        },
+        {
+          prompt: "Affected children appear from unaffected parents in multiple generations. Both sexes equally affected. Most likely mode?",
+          subtitle: "Skips generations, both sexes",
+          ans: "Autosomal recessive",
+          distractors: ["Autosomal dominant", "X-linked dominant", "Mitochondrial"],
+          hint: "Carriers don't show the trait.",
+          hints: ["Both parents must be carriers.", "1/4 chance per pregnancy."],
+          explanation: "Autosomal recessive: both parents are heterozygous carriers.",
+        },
+        {
+          prompt: "Affected mother passes trait to all children; affected father passes to none. Most likely mode?",
+          subtitle: "Maternal-line only",
+          ans: "Mitochondrial",
+          distractors: ["X-linked recessive", "Autosomal dominant", "Y-linked"],
+          hint: "Mitochondria are inherited from mother only.",
+          hints: ["Egg cells carry mitochondria.", "Sperm contributes no mtDNA."],
+          explanation: "Mitochondrial inheritance is strictly maternal.",
+        },
       ];
-      const ans = pick(opts);
+      const v = pick(variants);
       return choiceEng(
         m,
         difficulty,
-        `Two unaffected parents have an affected son and an unaffected daughter. Most likely mode of inheritance?`,
-        { kind: "icon", icon: "🌳", title: "Pedigree clue", subtitle: "Parents unaffected, son affected" },
-        ans === "X-linked recessive" ? "X-linked recessive" : "X-linked recessive",
-        opts.filter((o) => o !== "X-linked recessive"),
-        "Skipping a generation and male bias hints at X-linked recessive.",
-        ["Carrier mother passes affected X to son.", "Daughters get the unaffected paternal X."],
-        "X-linked recessive fits: unaffected carriers, affected males.",
+        v.prompt,
+        { kind: "icon", icon: "🌳", title: "Pedigree clue", subtitle: v.subtitle },
+        v.ans,
+        v.distractors,
+        v.hint,
+        v.hints,
+        v.explanation,
       );
     }
     case "chromosomeCount": {
