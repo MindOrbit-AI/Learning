@@ -4,6 +4,8 @@ import { cn } from "@mindorbit/ui";
 import { AnimatePresence, motion } from "framer-motion";
 import { Fragment, useCallback, useEffect, useMemo, useState, type DragEvent, type ReactNode, type TouchEvent } from "react";
 
+import { AICreativeLab } from "./ai-creative-lab";
+
 type Difficulty = "easy" | "medium" | "hard";
 type DifficultyFilter = Difficulty | "All";
 type Result = "idle" | "correct" | "wrong";
@@ -70,6 +72,7 @@ type Domain = "Math" | "Science" | "Technology" | "Engineering";
 type DomainFilter = Domain | "All";
 type LockFilter = "All" | "Unlocked" | "Locked";
 type CatalogView = "grid" | "tree";
+type PlatformTab = "arcade" | "aiLab";
 
 type InteractionTypeKey =
   | "Multiple choice"
@@ -18311,6 +18314,7 @@ export default function MathPuzzlesPage() {
   const [domainFilter, setDomainFilter] = useState<DomainFilter>("All");
   const [lockFilter, setLockFilter] = useState<LockFilter>("All");
   const [catalogView, setCatalogView] = useState<CatalogView>("grid");
+  const [platformTab, setPlatformTab] = useState<PlatformTab>("arcade");
   const [catalogPage, setCatalogPage] = useState(1);
   const [lockedToast, setLockedToast] = useState<{ title: string; message: string } | null>(null);
   const [energy, setEnergy] = useState(MAX_ENERGY);
@@ -18656,8 +18660,15 @@ export default function MathPuzzlesPage() {
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border-2 border-[#84d8ff] dark:border-sky-600 bg-[#ddf4ff] dark:bg-sky-950/50 text-xl">🧠</span>
               )}
               <div className="min-w-0 flex-1">
-                <h1 className="truncate text-lg font-black tracking-tight text-neutral-900 dark:text-zinc-50 sm:text-xl">{activeMeta?.title ?? "MindOrbit Arcade"}</h1>
-                <p className="mt-0.5 line-clamp-2 text-xs text-neutral-500 dark:text-zinc-400 sm:truncate sm:line-clamp-none">{activeMeta?.short ?? `${METAS.length} puzzles · Math · Science · Tech · Engineering`}</p>
+                <h1 className="truncate text-lg font-black tracking-tight text-neutral-900 dark:text-zinc-50 sm:text-xl">
+                  {activeMeta?.title ?? (platformTab === "aiLab" ? "AI Creative Lab" : "MindOrbit Arcade")}
+                </h1>
+                <p className="mt-0.5 line-clamp-2 text-xs text-neutral-500 dark:text-zinc-400 sm:truncate sm:line-clamp-none">
+                  {activeMeta?.short ??
+                    (platformTab === "aiLab"
+                      ? "Build, train, x-ray, and debug toy AI systems — visual-first."
+                      : `${METAS.length} puzzles · Math · Science · Tech · Engineering`)}
+                </p>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2 sm:shrink-0 sm:justify-end sm:gap-2.5">
@@ -18699,12 +18710,42 @@ export default function MathPuzzlesPage() {
           <div className="mt-4 border-t-2 border-neutral-100 pt-4 dark:border-zinc-800">
             <ProgressBar xp={xp} />
           </div>
+          {!active ? (
+            <div className="mt-4 flex max-w-xl gap-2 rounded-2xl border-2 border-neutral-200 bg-neutral-100 p-1 dark:border-zinc-600 dark:bg-zinc-800/80">
+              <button
+                type="button"
+                onClick={() => setPlatformTab("arcade")}
+                className={`flex-1 rounded-xl px-4 py-2.5 text-center text-xs font-black uppercase tracking-wider transition sm:text-sm ${
+                  platformTab === "arcade"
+                    ? "bg-white text-neutral-900 shadow-sm dark:bg-zinc-900 dark:text-zinc-50"
+                    : "text-neutral-600 dark:text-zinc-400"
+                }`}
+              >
+                🧩 STEM Arcade
+              </button>
+              <button
+                type="button"
+                onClick={() => setPlatformTab("aiLab")}
+                className={`flex-1 rounded-xl px-4 py-2.5 text-center text-xs font-black uppercase tracking-wider transition sm:text-sm ${
+                  platformTab === "aiLab"
+                    ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-sm"
+                    : "text-neutral-600 dark:text-zinc-400"
+                }`}
+              >
+                ✨ AI Creative Lab
+              </button>
+            </div>
+          ) : null}
         </div>
       </header>
 
       <main className="relative z-10 mx-auto w-full max-w-7xl flex-1 px-4 pb-36 pt-6 sm:px-6 lg:px-8">
         <AnimatePresence mode="wait">
-          {!active ? (
+          {!active && platformTab === "aiLab" ? (
+            <motion.section key="ai-lab" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} className="space-y-8 sm:space-y-10">
+              <AICreativeLab />
+            </motion.section>
+          ) : !active ? (
             <motion.section key="selector" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} className="space-y-8 sm:space-y-10">
               <section className="overflow-hidden rounded-[2rem] border-2 border-neutral-200 dark:border-zinc-600 border-b-4 border-b-neutral-300 dark:border-b-zinc-600 bg-white dark:bg-zinc-900 shadow-[0_6px_0_0_#e5e5e5] dark:shadow-[0_6px_0_0_#27272a]">
                 <div className="relative grid gap-8 p-6 sm:p-7 lg:grid-cols-[1.25fr_0.75fr] lg:gap-10 lg:p-10">
