@@ -17,7 +17,8 @@ type Mode =
   | "reorder"
   | "swipe"
   | "numpad"
-  | "sort";
+  | "sort"
+  | "coloring";
 type Grade = "K-8" | "9" | "10" | "11" | "12";
 type GradeFilter = Grade | "All";
 type Subject =
@@ -92,7 +93,8 @@ type InteractionTypeKey =
   | "Code Trace"
   | "Circuit Builder"
   | "Design Challenge"
-  | "Simulation";
+  | "Simulation"
+  | "Coloring puzzle";
 
 type InteractionFilter = InteractionTypeKey | "All";
 
@@ -617,7 +619,24 @@ type PuzzleId =
   | "htmlTagSort"
   | "cssBoxModel"
   | "domEventOrder"
-  | "hexBinaryConvert";
+  | "hexBinaryConvert"
+  | "colorFractionPizza"
+  | "colorInequalityRegion"
+  | "colorMatchingAngles"
+  | "colorCellOrganelles"
+  | "colorPhScale"
+  | "colorCircuitFlow"
+  | "colorBridgeStress"
+  | "colorCodeBlocks"
+  | "colorPlanetsByType"
+  | "colorRockCycleStages"
+  | "colorQuadrantSigns"
+  | "colorVennRegions"
+  | "colorFoodChainLevels"
+  | "colorStatesOfMatter"
+  | "colorCompassRose"
+  | "colorPrimeCompositeStrip"
+  | "colorSpinnerZones";
 
 type VisualKind =
   | "scale"
@@ -705,6 +724,19 @@ interface Visual {
   truthTable?: { gate: string; rows: { a: number; b?: number; out: number }[] };
 }
 
+type ColoringRegionShape = "circle" | "square" | "polygon" | "path" | "cell" | "graphRegion" | "ellipse";
+
+interface ColoringRegion {
+  id: string;
+  label: string;
+  shape: ColoringRegionShape;
+  correctColorId: string;
+  explanation: string;
+  /** Normalized layout 0–100 inside the diagram frame */
+  box: { x: number; y: number; w: number; h: number };
+  clipPath?: string;
+}
+
 interface Puzzle {
   id: string;
   type: PuzzleId;
@@ -736,8 +768,21 @@ interface Puzzle {
   numpadAllowMinus?: boolean;
   sortItems?: { label: string; category: string }[];
   sortCategories?: string[];
+  /** Region-fill coloring mode (UI label: Coloring puzzle). */
+  colorPalette?: { id: string; label: string; color: string; meaning: string }[];
+  regions?: ColoringRegion[];
   xpReward?: number;
 }
+
+/**
+ * STEM puzzle solved by assigning palette colors to regions (external schema may use mode: "Coloring Puzzle").
+ * In this arcade `Puzzle.mode` is `"coloring"`.
+ */
+type ColoringPuzzle = Omit<Puzzle, "mode" | "colorPalette" | "regions"> & {
+  mode: "coloring";
+  colorPalette: NonNullable<Puzzle["colorPalette"]>;
+  regions: NonNullable<Puzzle["regions"]>;
+};
 
 interface PlayState {
   choice: string | null;
@@ -753,6 +798,10 @@ interface PlayState {
   numpad: string;
   sort: Record<string, string>;
   pendingItem: string | null;
+  coloringTool: string | null;
+  coloringFill: Record<string, string>;
+  coloringUndo: { regionId: string; prev: string | undefined }[];
+  coloringFeedback: Record<string, "correct" | "wrong"> | null;
 }
 
 const STORAGE_KEY = "mindorbit.stem-puzzles.arcade.v3";
@@ -1302,6 +1351,23 @@ const METAS: PuzzleMeta[] = [
   s("htmlTagSort", "HTML Tag Sort", "Structure vs content", "📄", "from-orange-400 to-rose-700", "9", "WebDev", "Classify HTML tags", 3, "sort", { displayInteraction: "Sort categories", xpRequired: 0 }),
   s("cssBoxModel", "CSS Box Model", "Outer width math", "📦", "from-cyan-400 to-blue-700", "10", "WebDev", "Compute box-model width", 4, "numpad", { displayInteraction: "Fill in number", xpRequired: 500 }),
   s("domEventOrder", "DOM Event Order", "Capture → bubble", "🖱️", "from-violet-400 to-fuchsia-700", "10", "WebDev", "Sequence DOM event flow", 4, "reorder", { displayInteraction: "Sequence processes", xpRequired: 500 }),
+  m("colorFractionPizza", "Color-by Fraction Pizza", "Color the correct share", "🍕", "from-rose-400 to-red-500", "K-8", "Arithmetic", "Visualize fractions by coloring", 3, "coloring", "Coloring puzzle"),
+  m("colorInequalityRegion", "Inequality Region Color", "Shade the solution band", "📊", "from-sky-400 to-blue-700", "9", "Algebra", "Graph simple inequalities", 3, "coloring", "Coloring puzzle"),
+  m("colorMatchingAngles", "Matching Angles Color", "Mark equal angles", "📐", "from-fuchsia-400 to-violet-700", "9", "Geometry", "Recognize congruent angles", 3, "coloring", "Coloring puzzle"),
+  m("colorCellOrganelles", "Organelle Color Map", "Paint the cell parts", "🧫", "from-emerald-400 to-teal-700", "9", "Biology", "Locate organelles visually", 3, "coloring", "Coloring puzzle"),
+  m("colorPhScale", "pH Strip Color", "Acid · neutral · base", "🧪", "from-fuchsia-400 to-purple-700", "9", "Chemistry", "Classify by pH visually", 3, "coloring", "Coloring puzzle"),
+  m("colorCircuitFlow", "Circuit Flow Color", "Trace current path", "🔋", "from-yellow-400 to-amber-700", "9", "Physics", "Follow energy in a loop", 3, "coloring", "Coloring puzzle"),
+  m("colorBridgeStress", "Bridge Stress Color", "Hot spots on a span", "🌉", "from-cyan-400 to-blue-700", "10", "StructuralDesign", "See load concentration", 4, "coloring", "Coloring puzzle"),
+  m("colorCodeBlocks", "Code Block Role Color", "Color by purpose", "💻", "from-violet-400 to-indigo-700", "9", "CodingLogic", "Sort control-flow visually", 3, "coloring", "Coloring puzzle"),
+  m("colorPlanetsByType", "Planet Type Color", "Terrestrial vs giant", "🪐", "from-indigo-400 to-violet-700", "9", "Astronomy", "Classify worlds visually", 3, "coloring", "Coloring puzzle"),
+  m("colorRockCycleStages", "Rock Cycle Color", "Stages of rock change", "🪨", "from-stone-400 to-zinc-700", "9", "EarthScience", "Trace the rock cycle", 3, "coloring", "Coloring puzzle"),
+  m("colorQuadrantSigns", "Quadrant Sign Color", "Same vs opposite signs", "📐", "from-indigo-400 to-violet-700", "9", "Algebra", "Classify quadrants by coordinate signs", 3, "coloring", "Coloring puzzle"),
+  m("colorVennRegions", "Venn Region Color", "A only · both · B only", "⭕", "from-sky-400 to-blue-700", "9", "Logic", "Shade disjoint vs overlap regions", 3, "coloring", "Coloring puzzle"),
+  m("colorFoodChainLevels", "Food Chain Color", "Producer to apex", "🌿", "from-lime-400 to-emerald-700", "9", "Ecology", "Paint trophic levels", 3, "coloring", "Coloring puzzle"),
+  m("colorStatesOfMatter", "States of Matter Color", "Solid · liquid · gas", "💧", "from-cyan-400 to-blue-700", "K-8", "Chemistry", "Classify phases visually", 3, "coloring", "Coloring puzzle"),
+  m("colorCompassRose", "Compass Rose Color", "N · E · S · W", "🧭", "from-amber-400 to-orange-700", "K-8", "EarthScience", "Map cardinal directions", 3, "coloring", "Coloring puzzle"),
+  m("colorPrimeCompositeStrip", "Prime vs Composite Color", "Paint by factor count", "🔢", "from-violet-400 to-fuchsia-700", "K-8", "NumberTheory", "Spot primes visually", 3, "coloring", "Coloring puzzle"),
+  m("colorSpinnerZones", "Spinner Zone Color", "Win vs lose slices", "🎯", "from-rose-400 to-pink-700", "K-8", "Probability", "Relate area to chance", 3, "coloring", "Coloring puzzle"),
   s("hexBinaryConvert", "Hex ↔ Binary", "Convert the byte", "🔢", "from-amber-400 to-orange-700", "10", "DigitalSystems", "Convert between hex and binary", 4, "numpad", { displayInteraction: "Fill in number", xpRequired: 500 }),
 ];
 
@@ -1540,6 +1606,7 @@ function variedPrompt(prompt: string, mode: Mode) {
     swipe: ["Swipe to finish the challenge.", "Use the target swipe.", "Unlock this version."],
     numpad: ["Enter the exact value.", "Solve this numeric version.", "Type the missing number."],
     sort: ["Sort the cards shown.", "Classify this shuffled set.", "Place each card in a bucket."],
+    coloring: ["Pick a color, then tap each region.", "Fill the diagram like color-by-number.", "Use the palette, then check your work."],
   };
   return `${prompt} ${pick(frames[mode])}`;
 }
@@ -1888,6 +1955,27 @@ interface ChoiceVariant {
 function bankChoice(meta: PuzzleMeta, difficulty: Difficulty, variants: ChoiceVariant[]): Puzzle {
   const v = pick(variants);
   return choiceEng(meta, difficulty, v.prompt, v.visual, v.answer, v.distractors, v.hint, v.hints ?? [v.hint], v.explanation);
+}
+
+function coloringPuzzle(
+  meta: PuzzleMeta,
+  difficulty: Difficulty,
+  prompt: string,
+  visual: Visual,
+  palette: { id: string; label: string; color: string; meaning: string }[],
+  regions: ColoringRegion[],
+  hint: string,
+  hints: string[],
+  explanation: string,
+): ColoringPuzzle {
+  return {
+    ...base(meta, difficulty, "coloring", variedPrompt(prompt, "coloring"), visual),
+    hint,
+    hints,
+    explanation,
+    colorPalette: palette,
+    regions,
+  } as ColoringPuzzle;
 }
 
 function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
@@ -15550,6 +15638,460 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
         },
       ]);
     }
+
+    case "colorFractionPizza": {
+      const slices = pick([4, 6, 8]);
+      const num = rand(1, slices - 1);
+      const sliceW = 100 / slices;
+      const regions: ColoringRegion[] = Array.from({ length: slices }, (_, i) => ({
+        id: `slice-${i}`,
+        label: `Slice ${i + 1}`,
+        shape: "cell",
+        correctColorId: i < num ? "on" : "off",
+        explanation: i < num ? "This slice belongs in the colored fraction." : "These slices stay the dough color.",
+        box: { x: i * sliceW + 0.5, y: 30, w: sliceW - 1, h: 40 },
+      }));
+      return coloringPuzzle(
+        m,
+        difficulty,
+        `Color exactly ${num} of ${slices} pizza slices (the fraction ${frac(num, slices)}).`,
+        { kind: "pizza", slices, filled: num },
+        [
+          { id: "on", label: "Colored slice", color: "#f59e0b", meaning: "Counts in the numerator" },
+          { id: "off", label: "Dough", color: "#78350f", meaning: "Not in the fraction" },
+        ],
+        regions,
+        "Use the orange tool on the first slices that match the fraction.",
+        [`Numerator is ${num}; denominator is ${slices}.`, "Every slice must be painted before you check."],
+        `The fraction ${frac(num, slices)} means ${num} glowing slices and ${slices - num} crust-colored slices.`,
+      );
+    }
+
+    case "colorInequalityRegion": {
+      const boundary = pick([-1, 0, 1, 2, 3]);
+      const regions: ColoringRegion[] = [
+        {
+          id: "left",
+          label: `x ≤ ${boundary}`,
+          shape: "graphRegion",
+          correctColorId: "out",
+          explanation: "Numbers at or left of the boundary are not in x > boundary.",
+          box: { x: 4, y: 38, w: 42, h: 36 },
+        },
+        {
+          id: "right",
+          label: `x > ${boundary}`,
+          shape: "graphRegion",
+          correctColorId: "in",
+          explanation: "Open ray to the right is the solution set.",
+          box: { x: 52, y: 38, w: 44, h: 36 },
+        },
+      ];
+      return coloringPuzzle(
+        m,
+        difficulty,
+        `On the number line, color the region where x > ${boundary}.`,
+        { kind: "icon", icon: "📊", title: "Number line", subtitle: `Mark x > ${boundary}` },
+        [
+          { id: "in", label: "Solution set", color: "#22c55e", meaning: "Values that satisfy the inequality" },
+          { id: "out", label: "Not in solution", color: "#64748b", meaning: "Outside the open ray" },
+        ],
+        regions,
+        "Strict inequality excludes the boundary point itself.",
+        ["Open circle at the boundary if you sketch it on paper.", "Shade the side that grows toward +∞."],
+        `For x > ${boundary}, every value to the right is true; the left side is false.`,
+      );
+    }
+
+    case "colorMatchingAngles": {
+      const regions: ColoringRegion[] = [
+        { id: "a-left", label: "Base angle (left)", shape: "polygon", correctColorId: "base", explanation: "Base angles of an isosceles triangle match.", box: { x: 12, y: 52, w: 28, h: 32 }, clipPath: "polygon(0% 100%, 100% 100%, 50% 0%)" },
+        { id: "a-right", label: "Base angle (right)", shape: "polygon", correctColorId: "base", explanation: "Congruent to the other base angle.", box: { x: 60, y: 52, w: 28, h: 32 }, clipPath: "polygon(0% 100%, 100% 100%, 50% 0%)" },
+        { id: "apex", label: "Vertex angle", shape: "polygon", correctColorId: "apex", explanation: "The apex angle is different when the triangle is isosceles.", box: { x: 38, y: 10, w: 24, h: 36 }, clipPath: "polygon(50% 100%, 0% 0%, 100% 0%)" },
+      ];
+      return coloringPuzzle(
+        m,
+        difficulty,
+        "Color the two equal base angles the same, and the vertex angle differently.",
+        { kind: "icon", icon: "📐", title: "Isosceles △", subtitle: "Two congruent base angles" },
+        [
+          { id: "base", label: "Matching bases", color: "#38bdf8", meaning: "Congruent base angles" },
+          { id: "apex", label: "Apex", color: "#f472b6", meaning: "Angle between the equal sides" },
+        ],
+        regions,
+        "Look for symmetry across the altitude from the apex.",
+        ["Equal sides face equal angles.", "Only two angles should share the base color."],
+        "In an isosceles triangle, the base angles are congruent; the vertex angle is generally different.",
+      );
+    }
+
+    case "colorCellOrganelles": {
+      const regions: ColoringRegion[] = [
+        { id: "membrane", label: "Membrane shell", shape: "square", correctColorId: "mem", explanation: "Boundary that controls what enters and exits.", box: { x: 6, y: 10, w: 88, h: 78 } },
+        { id: "nucleus", label: "Nucleus", shape: "circle", correctColorId: "nuc", explanation: "Holds DNA and controls the cell.", box: { x: 38, y: 28, w: 24, h: 24 } },
+        { id: "mito", label: "Mitochondria", shape: "ellipse", correctColorId: "mito", explanation: "Powerhouse: ATP production.", box: { x: 12, y: 58, w: 22, h: 14 } },
+      ];
+      return coloringPuzzle(
+        m,
+        difficulty,
+        "Color the nucleus, mitochondria, and outer membrane with their legend colors.",
+        { kind: "cell", organelles: [{ name: "Nucleus", emoji: "🟣" }, { name: "Mitochondria", emoji: "🟠" }, { name: "Membrane", emoji: "🟢" }], title: "Animal cell" },
+        [
+          { id: "nuc", label: "Nucleus", color: "#a855f7", meaning: "DNA control center" },
+          { id: "mito", label: "Mitochondria", color: "#fb923c", meaning: "Energy organelle" },
+          { id: "mem", label: "Membrane", color: "#4ade80", meaning: "Selective boundary" },
+        ],
+        regions,
+        "The membrane wraps everything; nucleus is largest round body.",
+        ["Mitochondria are often drawn as squiggly beans.", "Pick one tool per organelle type."],
+        "Nucleus stores genetic info; mitochondria make ATP; the plasma membrane encloses the cytoplasm.",
+      );
+    }
+
+    case "colorPhScale": {
+      const regions: ColoringRegion[] = [
+        { id: "lemon", label: "Lemon juice (~pH 2)", shape: "cell", correctColorId: "acid", explanation: "Strongly acidic.", box: { x: 6, y: 40, w: 26, h: 36 } },
+        { id: "water", label: "Pure water (pH 7)", shape: "cell", correctColorId: "neutral", explanation: "Neutral on the scale.", box: { x: 37, y: 40, w: 26, h: 36 } },
+        { id: "soap", label: "Soapy water (~pH 10)", shape: "cell", correctColorId: "base", explanation: "Basic / alkaline.", box: { x: 68, y: 40, w: 26, h: 36 } },
+      ];
+      return coloringPuzzle(
+        m,
+        difficulty,
+        "Color each sample by acid / neutral / base on the pH scale.",
+        { kind: "molecule", atoms: [{ symbol: "H", count: 1, color: "#f472b6" }, { symbol: "OH", count: 1, color: "#38bdf8" }], title: "pH ladder", subtitle: "Low → high" },
+        [
+          { id: "acid", label: "Acidic", color: "#fbbf24", meaning: "pH below 7" },
+          { id: "neutral", label: "Neutral", color: "#94a3b8", meaning: "Near pH 7" },
+          { id: "base", label: "Basic", color: "#60a5fa", meaning: "pH above 7" },
+        ],
+        regions,
+        "Match each bottle to how many H⁺ ions dominate.",
+        ["Acids donate H⁺; bases accept them.", "Water sits in the middle."],
+        "Lemon is acidic, distilled water is neutral, soap solutions are basic.",
+      );
+    }
+
+    case "colorCircuitFlow": {
+      const regions: ColoringRegion[] = [
+        { id: "cell", label: "Battery (+ to −)", shape: "path", correctColorId: "flow", explanation: "Source pushes conventional current outward.", box: { x: 6, y: 40, w: 16, h: 28 } },
+        { id: "wireTop", label: "Wire to bulb", shape: "path", correctColorId: "flow", explanation: "Current travels through the conductor.", box: { x: 22, y: 34, w: 44, h: 12 } },
+        { id: "bulb", label: "Bulb", shape: "circle", correctColorId: "flow", explanation: "Load where electrical energy becomes light.", box: { x: 68, y: 36, w: 18, h: 22 } },
+        { id: "wireReturn", label: "Return path", shape: "path", correctColorId: "return", explanation: "Completes the loop at lower potential.", box: { x: 22, y: 62, w: 60, h: 10 } },
+      ];
+      return coloringPuzzle(
+        m,
+        difficulty,
+        "Color the forward current path one color, and the return path another.",
+        { kind: "circuit", circuit: { nodes: ["+", "−", "💡"], closed: true }, title: "Simple loop" },
+        [
+          { id: "flow", label: "Energetic path", color: "#facc15", meaning: "Source → load (conventional current)" },
+          { id: "return", label: "Return wire", color: "#64748b", meaning: "Back to the source" },
+        ],
+        regions,
+        "Follow + out of the battery, through the bulb, then back.",
+        ["Conventional current leaves +.", "The bottom wire usually completes the loop in textbook diagrams."],
+        "Current leaves the positive terminal, does work in the bulb, and returns on the lower conductor.",
+      );
+    }
+
+    case "colorBridgeStress": {
+      const regions: ColoringRegion[] = [
+        { id: "mid", label: "Midspan deck", shape: "graphRegion", correctColorId: "high", explanation: "Bending moment is largest near midspan.", box: { x: 32, y: 48, w: 36, h: 22 } },
+        { id: "towerL", label: "Left tower", shape: "square", correctColorId: "low", explanation: "Supports convert load mostly into compression.", box: { x: 8, y: 38, w: 16, h: 40 } },
+        { id: "towerR", label: "Right tower", shape: "square", correctColorId: "low", explanation: "Abutments carry vertical reactions.", box: { x: 76, y: 38, w: 16, h: 40 } },
+      ];
+      return coloringPuzzle(
+        m,
+        difficulty,
+        "Color high bending-stress zones hot, and support zones cooler.",
+        { kind: "icon", icon: "🌉", title: "Simple span", subtitle: "Stress intuition" },
+        [
+          { id: "high", label: "High stress", color: "#fb7185", meaning: "Large bending demand" },
+          { id: "low", label: "Lower stress", color: "#34d399", meaning: "Near reactions / supports" },
+        ],
+        regions,
+        "Think about where the deck wants to sag the most.",
+        ["Towers push back with upward reactions.", "Midspan feels the biggest curvature in a uniform load model."],
+        "Maximum bending on a simply supported span is typically at midspan; supports carry reaction forces with less flexural demand.",
+      );
+    }
+
+    case "colorCodeBlocks": {
+      const regions: ColoringRegion[] = [
+        { id: "loop", label: "for-loop header", shape: "cell", correctColorId: "loop", explanation: "Iteration control structure.", box: { x: 8, y: 18, w: 84, h: 22 } },
+        { id: "branch", label: "if branch", shape: "cell", correctColorId: "branch", explanation: "Conditional decision point.", box: { x: 8, y: 44, w: 84, h: 22 } },
+        { id: "call", label: "function call", shape: "cell", correctColorId: "call", explanation: "Invokes another routine.", box: { x: 8, y: 70, w: 84, h: 22 } },
+      ];
+      return coloringPuzzle(
+        m,
+        difficulty,
+        "Color each code line by role: loop, branch, or plain call.",
+        { kind: "code", code: { lines: ["for (const x of data) {", "  if (x.ok) {", "    save(x);"], highlight: 0 }, title: "Snippet" },
+        [
+          { id: "loop", label: "Loop", color: "#818cf8", meaning: "Repeats work" },
+          { id: "branch", label: "Branch", color: "#fbbf24", meaning: "Chooses a path" },
+          { id: "call", label: "Call / action", color: "#2dd4bf", meaning: "Runs a named operation" },
+        ],
+        regions,
+        "Read keywords: for, if, plain identifier calls.",
+        ["Loops repeat; branches decide.", "save(x) is an action, not control flow."],
+        "for introduces iteration; if introduces a conditional; save(x) is a simple call inside the branch.",
+      );
+    }
+
+    case "colorPlanetsByType": {
+      const regions: ColoringRegion[] = [
+        { id: "mercury", label: "Mercury", shape: "circle", correctColorId: "rock", explanation: "Small rocky world.", box: { x: 6, y: 38, w: 18, h: 18 } },
+        { id: "earth", label: "Earth", shape: "circle", correctColorId: "rock", explanation: "Terrestrial planet.", box: { x: 30, y: 36, w: 20, h: 20 } },
+        { id: "mars", label: "Mars", shape: "circle", correctColorId: "rock", explanation: "Rocky outer planet (before giants).", box: { x: 54, y: 38, w: 18, h: 18 } },
+        { id: "jupiter", label: "Jupiter", shape: "circle", correctColorId: "gas", explanation: "Gas giant — mostly hydrogen/helium.", box: { x: 76, y: 32, w: 18, h: 26 } },
+      ];
+      return coloringPuzzle(
+        m,
+        difficulty,
+        "Color rocky planets one way and gas giants another.",
+        { kind: "icon", icon: "🪐", title: "Solar system", subtitle: "Inner vs outer" },
+        [
+          { id: "rock", label: "Terrestrial", color: "#fdba74", meaning: "Rocky / metal-rich" },
+          { id: "gas", label: "Gas giant", color: "#93c5fd", meaning: "Thick H/He envelope" },
+        ],
+        regions,
+        "The four inner planets are terrestrial; Jupiter and beyond are giant planets.",
+        ["Gas giants are much more massive.", "Color Mercury, Earth, Mars alike; Jupiter differently."],
+        "Mercury, Venus, Earth, and Mars are terrestrial; Jupiter is a gas giant with no solid surface like Earth's.",
+      );
+    }
+
+    case "colorRockCycleStages": {
+      const regions: ColoringRegion[] = [
+        { id: "magma", label: "Magma chamber", shape: "circle", correctColorId: "magma", explanation: "Molten rock below surface.", box: { x: 40, y: 10, w: 20, h: 18 } },
+        { id: "igneous", label: "Igneous body", shape: "square", correctColorId: "igneous", explanation: "Forms as melt cools and crystallizes.", box: { x: 10, y: 32, w: 22, h: 22 } },
+        { id: "sed", label: "Sedimentary layer", shape: "square", correctColorId: "sed", explanation: "Deposits cemented in layers.", box: { x: 62, y: 54, w: 28, h: 20 } },
+        { id: "meta", label: "Metamorphic band", shape: "square", correctColorId: "meta", explanation: "Heat/pressure transforms existing rock.", box: { x: 28, y: 62, w: 28, h: 18 } },
+      ];
+      return coloringPuzzle(
+        m,
+        difficulty,
+        "Color magma, igneous rock, sedimentary rock, and metamorphic rock with distinct legend colors.",
+        { kind: "rockCycle", stages: ["Magma", "Igneous", "Sedimentary", "Metamorphic"] },
+        [
+          { id: "magma", label: "Magma", color: "#f97316", meaning: "Molten" },
+          { id: "igneous", label: "Igneous", color: "#a78bfa", meaning: "From cooled melt" },
+          { id: "sed", label: "Sedimentary", color: "#facc15", meaning: "From compacted sediment" },
+          { id: "meta", label: "Metamorphic", color: "#94a3b8", meaning: "Transformed by heat/pressure" },
+        ],
+        regions,
+        "Each box is one stage; colors should not repeat across different processes.",
+        ["Sedimentary forms at/near surface.", "Metamorphic needs burial and heat."],
+        "Magma crystallizes into igneous rock; weathering and burial make sedimentary; deeper heat yields metamorphic, which can melt again.",
+      );
+    }
+
+    case "colorQuadrantSigns": {
+      const regions: ColoringRegion[] = [
+        {
+          id: "q2",
+          label: "Quadrant II (−, +)",
+          shape: "graphRegion",
+          correctColorId: "diff",
+          explanation: "x and y have opposite signs.",
+          box: { x: 6, y: 12, w: 44, h: 38 },
+        },
+        {
+          id: "q1",
+          label: "Quadrant I (+, +)",
+          shape: "graphRegion",
+          correctColorId: "same",
+          explanation: "Both coordinates are positive.",
+          box: { x: 52, y: 12, w: 42, h: 38 },
+        },
+        {
+          id: "q3",
+          label: "Quadrant III (−, −)",
+          shape: "graphRegion",
+          correctColorId: "same",
+          explanation: "Both coordinates are negative.",
+          box: { x: 6, y: 54, w: 44, h: 38 },
+        },
+        {
+          id: "q4",
+          label: "Quadrant IV (+, −)",
+          shape: "graphRegion",
+          correctColorId: "diff",
+          explanation: "x and y have opposite signs.",
+          box: { x: 52, y: 54, w: 42, h: 38 },
+        },
+      ];
+      return coloringPuzzle(
+        m,
+        difficulty,
+        "Color quadrants where x and y share the same sign one way, and opposite signs another.",
+        { kind: "coordinate", targetX: 0, targetY: 0, title: "Axes cross at origin", subtitle: "II · I · III · IV" },
+        [
+          { id: "same", label: "Same sign", color: "#34d399", meaning: "I or III (+,+ or −,−)" },
+          { id: "diff", label: "Opposite signs", color: "#f472b6", meaning: "II or IV" },
+        ],
+        regions,
+        "Quadrants I and III agree in sign; II and IV disagree.",
+        ["Count negatives in each pair.", "I: ++, II: −+, III: −−, IV: +−."],
+        "Sign pattern (+,+), (−,−) matches twice; (−,+), (+,−) flips one coordinate.",
+      );
+    }
+
+    case "colorVennRegions": {
+      const regions: ColoringRegion[] = [
+        { id: "aOnly", label: "In A only", shape: "cell", correctColorId: "a", explanation: "Elements in A but not in B.", box: { x: 8, y: 34, w: 26, h: 40 } },
+        { id: "both", label: "A ∩ B", shape: "cell", correctColorId: "inter", explanation: "Overlap of both sets.", box: { x: 37, y: 34, w: 26, h: 40 } },
+        { id: "bOnly", label: "In B only", shape: "cell", correctColorId: "b", explanation: "Elements in B but not in A.", box: { x: 66, y: 34, w: 26, h: 40 } },
+      ];
+      return coloringPuzzle(
+        m,
+        difficulty,
+        "Color the three disjoint pieces of two overlapping sets: A-only, both, and B-only.",
+        { kind: "icon", icon: "⭕", title: "Sets A and B", subtitle: "Only · overlap · only" },
+        [
+          { id: "a", label: "A only", color: "#fb7185", meaning: "A − B" },
+          { id: "inter", label: "Intersection", color: "#a78bfa", meaning: "A ∩ B" },
+          { id: "b", label: "B only", color: "#38bdf8", meaning: "B − A" },
+        ],
+        regions,
+        "Middle column is shared membership; outer columns are exclusive.",
+        ["Intersection belongs to both definitions.", "Do not reuse the same color for different regions."],
+        "A Venn diagram splits the plane into A-only, intersection, and B-only when comparing two sets.",
+      );
+    }
+
+    case "colorFoodChainLevels": {
+      const regions: ColoringRegion[] = [
+        { id: "prod", label: "Producer (plants)", shape: "cell", correctColorId: "producer", explanation: "Autotrophs capture energy for the chain.", box: { x: 8, y: 18, w: 84, h: 24 } },
+        { id: "primary", label: "Primary consumer", shape: "cell", correctColorId: "primary", explanation: "Herbivore that eats producers.", box: { x: 8, y: 46, w: 84, h: 24 } },
+        { id: "secondary", label: "Secondary consumer", shape: "cell", correctColorId: "secondary", explanation: "Carnivore or omnivore above herbivores.", box: { x: 8, y: 74, w: 84, h: 22 } },
+      ];
+      return coloringPuzzle(
+        m,
+        difficulty,
+        "Color producer, primary consumer, and secondary consumer with distinct legend colors.",
+        { kind: "icon", icon: "🌿", title: "Linear food chain", subtitle: "Energy up the levels" },
+        [
+          { id: "producer", label: "Producer", color: "#4ade80", meaning: "Plants / base energy" },
+          { id: "primary", label: "Primary", color: "#fbbf24", meaning: "Herbivore" },
+          { id: "secondary", label: "Secondary", color: "#f97316", meaning: "Carnivore on herbivores" },
+        ],
+        regions,
+        "Energy enters at producers; each higher level feeds on the level below.",
+        ["Green tier is always plants or algae.", "Fox-like predators sit above rabbits."],
+        "Trophic pyramids stack producers, then primary consumers, then secondary consumers.",
+      );
+    }
+
+    case "colorStatesOfMatter": {
+      const regions: ColoringRegion[] = [
+        { id: "ice", label: "Ice crystal lattice", shape: "cell", correctColorId: "solid", explanation: "Fixed arrangement, vibrates in place.", box: { x: 8, y: 34, w: 26, h: 40 } },
+        { id: "water", label: "Liquid water", shape: "cell", correctColorId: "liquid", explanation: "Molecules flow but stay close.", box: { x: 37, y: 34, w: 26, h: 40 } },
+        { id: "vapor", label: "Water vapor", shape: "cell", correctColorId: "gas", explanation: "Molecules spread out and fill space.", box: { x: 66, y: 34, w: 26, h: 40 } },
+      ];
+      return coloringPuzzle(
+        m,
+        difficulty,
+        "Color solid, liquid, and gas snapshots of H₂O with matching legend colors.",
+        { kind: "molecule", atoms: [{ symbol: "H", count: 2, color: "#38bdf8" }, { symbol: "O", count: 1, color: "#f472b6" }], title: "H₂O phases", subtitle: "Same compound, different motion" },
+        [
+          { id: "solid", label: "Solid", color: "#94a3b8", meaning: "Tight lattice" },
+          { id: "liquid", label: "Liquid", color: "#3b82f6", meaning: "Sliding clusters" },
+          { id: "gas", label: "Gas", color: "#bae6fd", meaning: "Far apart, fast" },
+        ],
+        regions,
+        "Think about how tightly packed and how freely molecules move.",
+        ["Ice keeps shape.", "Steam expands to fill a room."],
+        "Solid water has ordered vibration; liquid flows; gas molecules occupy much more volume at the same temperature.",
+      );
+    }
+
+    case "colorCompassRose": {
+      const regions: ColoringRegion[] = [
+        { id: "n", label: "North", shape: "polygon", correctColorId: "n", explanation: "Toward the geographic pole.", box: { x: 40, y: 8, w: 20, h: 28 }, clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)" },
+        { id: "e", label: "East", shape: "polygon", correctColorId: "e", explanation: "90° clockwise from north.", box: { x: 62, y: 36, w: 30, h: 28 }, clipPath: "polygon(0% 0%, 100% 50%, 0% 100%)" },
+        { id: "s", label: "South", shape: "polygon", correctColorId: "s", explanation: "Opposite north on the horizon.", box: { x: 40, y: 64, w: 20, h: 28 }, clipPath: "polygon(50% 100%, 0% 0%, 100% 0%)" },
+        { id: "w", label: "West", shape: "polygon", correctColorId: "w", explanation: "90° counterclockwise from north.", box: { x: 8, y: 36, w: 30, h: 28 }, clipPath: "polygon(100% 0%, 0% 50%, 100% 100%)" },
+      ];
+      return coloringPuzzle(
+        m,
+        difficulty,
+        "Color each cardinal direction wedge with its own legend color.",
+        { kind: "icon", icon: "🧭", title: "Compass rose", subtitle: "N · E · S · W" },
+        [
+          { id: "n", label: "North", color: "#fb7185", meaning: "Top of most maps" },
+          { id: "e", label: "East", color: "#fbbf24", meaning: "Sunrise direction" },
+          { id: "s", label: "South", color: "#38bdf8", meaning: "Toward Antarctic pole" },
+          { id: "w", label: "West", color: "#a78bfa", meaning: "Sunset direction" },
+        ],
+        regions,
+        "N-E-S-W read clockwise around the rose.",
+        ["North is often drawn up.", "West is opposite east."],
+        "Cardinal directions partition the horizon; maps align north upward for consistency.",
+      );
+    }
+
+    case "colorPrimeCompositeStrip": {
+      const regions: ColoringRegion[] = [
+        { id: "d2", label: "2", shape: "cell", correctColorId: "prime", explanation: "Only factors are 1 and itself.", box: { x: 6, y: 40, w: 13, h: 36 } },
+        { id: "d3", label: "3", shape: "cell", correctColorId: "prime", explanation: "Prime.", box: { x: 21, y: 40, w: 13, h: 36 } },
+        { id: "d4", label: "4", shape: "cell", correctColorId: "composite", explanation: "2 × 2.", box: { x: 36, y: 40, w: 13, h: 36 } },
+        { id: "d5", label: "5", shape: "cell", correctColorId: "prime", explanation: "Prime.", box: { x: 51, y: 40, w: 13, h: 36 } },
+        { id: "d6", label: "6", shape: "cell", correctColorId: "composite", explanation: "2 × 3.", box: { x: 66, y: 40, w: 13, h: 36 } },
+        { id: "d8", label: "8", shape: "cell", correctColorId: "composite", explanation: "2 × 4.", box: { x: 81, y: 40, w: 13, h: 36 } },
+      ];
+      return coloringPuzzle(
+        m,
+        difficulty,
+        "Color each digit cell prime or composite according to its factor structure.",
+        { kind: "icon", icon: "🔢", title: "2 · 3 · 4 · 5 · 6 · 8", subtitle: "Factor count intuition" },
+        [
+          { id: "prime", label: "Prime", color: "#818cf8", meaning: "Exactly two distinct positive divisors" },
+          { id: "composite", label: "Composite", color: "#f97316", meaning: "More than two positive divisors" },
+        ],
+        regions,
+        "Try small divisors: if anything besides 1 and n works, the number is composite.",
+        ["4, 6, and 8 all factor further.", "2, 3, and 5 do not."],
+        "Primes have no nontrivial factors; composites split into smaller integer factors.",
+      );
+    }
+
+    case "colorSpinnerZones": {
+      const regions: ColoringRegion[] = [
+        {
+          id: "win",
+          label: "Winning wedge (⅓)",
+          shape: "graphRegion",
+          correctColorId: "win",
+          explanation: "Favorable outcomes occupy one equal slice.",
+          box: { x: 8, y: 28, w: 30, h: 52 },
+        },
+        {
+          id: "lose",
+          label: "Other outcomes (⅔)",
+          shape: "graphRegion",
+          correctColorId: "lose",
+          explanation: "Remaining probability mass.",
+          box: { x: 42, y: 28, w: 50, h: 52 },
+        },
+      ];
+      return coloringPuzzle(
+        m,
+        difficulty,
+        "A fair spinner has three equal sectors; one is “win.” Color the win zone and the lose zone.",
+        { kind: "icon", icon: "🎯", title: "1 in 3 chance", subtitle: "Equal areas → equal probabilities" },
+        [
+          { id: "win", label: "Win region", color: "#4ade80", meaning: "P = ⅓" },
+          { id: "lose", label: "Lose region", color: "#cbd5e1", meaning: "P = ⅔" },
+        ],
+        regions,
+        "When sectors match in size, probability is favorable count over total.",
+        ["One winning sector out of three.", "Larger combined area means larger probability."],
+        "Geometric probability: each third of the disk has probability 1/3; win + lose partition the whole spinner.",
+      );
+    }
+
     case "hexBinaryConvert": {
       const value = rand(0, 255);
       const isToBinary = Math.random() < 0.5;
@@ -16177,6 +16719,24 @@ function placeholderPuzzle(meta: PuzzleMeta, difficulty: Difficulty): Puzzle {
       return placeholderPath(meta, difficulty);
     case "swipe":
       return placeholderSwipe(meta, difficulty);
+    case "coloring":
+      return coloringPuzzle(
+        meta,
+        difficulty,
+        `${meta.title}: pick colors for each region.`,
+        { kind: "icon", icon: meta.emoji, title: meta.title, subtitle: "Palette practice" },
+        [
+          { id: "warm", label: "Warm", color: "#f97316", meaning: "Energy / source" },
+          { id: "cool", label: "Cool", color: "#38bdf8", meaning: "Sink / return" },
+        ],
+        [
+          { id: "left", label: "Left region", shape: "square", correctColorId: "warm", explanation: "Use the warm legend color.", box: { x: 8, y: 28, w: 40, h: 50 } },
+          { id: "right", label: "Right region", shape: "square", correctColorId: "cool", explanation: "Use the cool legend color.", box: { x: 52, y: 28, w: 40, h: 50 } },
+        ],
+        "Warm on the left, cool on the right.",
+        ["Read each color's meaning.", "Fill both regions before checking."],
+        "The placeholder pairs opposing ideas: warm vs cool across the two regions.",
+      );
     default:
       return subjectChoicePreview(meta, difficulty);
   }
@@ -16197,6 +16757,10 @@ function initialState(puzzle: Puzzle | null): PlayState {
     numpad: "",
     sort: {},
     pendingItem: null,
+    coloringTool: puzzle?.colorPalette?.[0]?.id ?? null,
+    coloringFill: {},
+    coloringUndo: [],
+    coloringFeedback: null,
   };
 }
 
@@ -16213,6 +16777,10 @@ function isSolved(puzzle: Puzzle, state: PlayState) {
     const items = puzzle.sortItems ?? [];
     return items.length > 0 && items.every((item) => state.sort[item.label] === item.category);
   }
+  if (puzzle.mode === "coloring") {
+    const regs = puzzle.regions ?? [];
+    return regs.length > 0 && regs.every((r) => state.coloringFill[r.id] === r.correctColorId);
+  }
   return state.swipe === puzzle.swipeTarget;
 }
 
@@ -16225,6 +16793,13 @@ function canCheck(puzzle: Puzzle | null, state: PlayState) {
   if (puzzle.mode === "swipe") return state.swipe !== null;
   if (puzzle.mode === "numpad") return state.numpad.trim().length > 0;
   if (puzzle.mode === "sort") return Object.keys(state.sort).length === (puzzle.sortItems ?? []).length;
+  if (puzzle.mode === "coloring") {
+    const regs = puzzle.regions ?? [];
+    return regs.length > 0 && regs.every((r) => {
+      const v = state.coloringFill[r.id];
+      return typeof v === "string" && v.length > 0;
+    });
+  }
   return true;
 }
 
@@ -16236,7 +16811,167 @@ function Shape({ kind }: { kind: number }) {
   return <span className={`${base} rotate-45 rounded-lg bg-gradient-to-br from-emerald-300 to-green-600`} />;
 }
 
-function VisualCard({ visual, rotation }: { visual: Visual; rotation: number }) {
+function ColoringDiagram({
+  puzzle,
+  state,
+  setState,
+  locked,
+  result,
+}: {
+  puzzle: Puzzle;
+  state: PlayState;
+  setState: (u: Partial<PlayState>) => void;
+  locked: boolean;
+  result: Result;
+}) {
+  const [hover, setHover] = useState<string | null>(null);
+  const palette = puzzle.colorPalette ?? [];
+  const regions = puzzle.regions ?? [];
+  const byId = useMemo(() => Object.fromEntries(palette.map((p) => [p.id, p])), [palette]);
+  const activeSwatch = state.coloringTool ? byId[state.coloringTool] : undefined;
+
+  const paint = (regionId: string) => {
+    if (locked || !state.coloringTool) return;
+    const prev = state.coloringFill[regionId];
+    if (prev === state.coloringTool) return;
+    setState({
+      coloringUndo: [...state.coloringUndo, { regionId, prev }],
+      coloringFill: { ...state.coloringFill, [regionId]: state.coloringTool },
+      coloringFeedback: null,
+    });
+  };
+
+  const subtitle = puzzle.visual.subtitle ? String(puzzle.visual.subtitle) : null;
+  const title = puzzle.visual.title ? String(puzzle.visual.title) : null;
+
+  return (
+    <div className="w-full space-y-3">
+      {(title || subtitle) && (
+        <div className="flex flex-col gap-0.5 text-center sm:text-left">
+          {title ? <p className="text-[10px] font-black uppercase tracking-[0.22em] text-violet-600 dark:text-violet-300">{title}</p> : null}
+          {subtitle ? <p className="text-xs font-bold text-neutral-600 dark:text-zinc-400">{subtitle}</p> : null}
+        </div>
+      )}
+      <motion.div
+        className="w-full"
+        animate={result === "correct" ? { scale: [1, 1.025, 1] } : { scale: 1 }}
+        transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <div
+          className={cn(
+            "relative mx-auto aspect-[5/4] w-full max-w-lg overflow-hidden rounded-[1.75rem] border-2 border-neutral-200/90 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.6)] dark:border-zinc-600 dark:shadow-[0_12px_40px_-16px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.04)]",
+            "bg-zinc-100 dark:bg-zinc-900",
+            "bg-[radial-gradient(circle_at_1px_1px,rgba(0,0,0,0.06)_1px,transparent_0)] [background-size:18px_18px] dark:bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.05)_1px,transparent_0)]",
+          )}
+        >
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/50 to-transparent dark:from-white/[0.04] dark:to-transparent" />
+          {regions.map((region) => {
+            const assigned = state.coloringFill[region.id];
+            const entry = assigned ? byId[assigned] : undefined;
+            const isEmpty = !assigned;
+            const fill = entry?.color ?? undefined;
+            const fb = state.coloringFeedback?.[region.id];
+            const showCorrectGlow = fb === "correct" || (result === "correct" && assigned === region.correctColorId);
+            const showWrong = fb === "wrong";
+            const radius =
+              region.shape === "circle" || region.shape === "ellipse"
+                ? "9999px"
+                : region.shape === "polygon"
+                  ? "6px"
+                  : "14px";
+
+            return (
+              <motion.div
+                key={region.id}
+                className="absolute"
+                style={{ left: `${region.box.x}%`, top: `${region.box.y}%`, width: `${region.box.w}%`, height: `${region.box.h}%` }}
+                animate={showWrong ? { x: [0, -6, 6, -5, 5, 0] } : { x: 0 }}
+                transition={{ duration: 0.48, ease: "easeInOut" }}
+                whileHover={locked ? undefined : { scale: 1.02 }}
+                whileTap={locked ? undefined : { scale: 0.98 }}
+              >
+                <button
+                  type="button"
+                  disabled={locked}
+                  aria-label={`Paint ${region.label}`}
+                  onClick={() => paint(region.id)}
+                  onMouseEnter={() => setHover(region.id)}
+                  onMouseLeave={() => setHover(null)}
+                  className={cn(
+                    "relative flex h-full w-full items-center justify-center overflow-hidden text-center shadow-sm transition-[box-shadow,transform,border-color] duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-violet-500 focus-visible:ring-offset-zinc-100 disabled:cursor-not-allowed dark:focus-visible:ring-offset-zinc-900",
+                    isEmpty && "border-2 border-dashed border-zinc-400/70 bg-zinc-200/35 dark:border-zinc-500/80 dark:bg-zinc-800/50",
+                    !isEmpty && "border-2 border-solid",
+                    hover === region.id && !locked && !isEmpty && "ring-2 ring-white/80 ring-offset-2 ring-offset-transparent dark:ring-sky-300/50",
+                    hover === region.id && !locked && isEmpty && "border-violet-400/90 bg-violet-100/30 dark:border-violet-400 dark:bg-violet-950/25",
+                    showWrong && "border-rose-500 shadow-[0_0_0_3px_rgba(244,63,94,0.35)] dark:border-rose-400",
+                    !showWrong && !isEmpty && "border-zinc-800/25 dark:border-zinc-950/40",
+                    showCorrectGlow &&
+                      "z-10 border-emerald-400 shadow-[0_0_0_4px_rgba(52,211,153,0.45),0_12px_28px_-8px_rgba(16,185,129,0.55)] dark:border-emerald-300",
+                  )}
+                  style={{
+                    backgroundColor: fill,
+                    borderRadius: radius,
+                    clipPath: region.clipPath,
+                  }}
+                >
+                  <span
+                    className={cn(
+                      "pointer-events-none max-w-[95%] rounded-lg px-2 py-1 text-[10px] font-black leading-tight shadow-sm backdrop-blur-[2px] sm:text-[11px]",
+                      isEmpty
+                        ? "bg-white/80 text-zinc-700 dark:bg-zinc-950/55 dark:text-zinc-200"
+                        : "bg-black/35 text-white dark:bg-black/45",
+                    )}
+                  >
+                    {region.label}
+                  </span>
+                </button>
+              </motion.div>
+            );
+          })}
+        </div>
+      </motion.div>
+      {!locked && (
+        <div className="flex items-center justify-center gap-2 rounded-2xl border border-neutral-200/80 bg-white/70 px-3 py-2 text-center dark:border-zinc-600/80 dark:bg-zinc-900/60">
+          <span className="text-lg" aria-hidden>
+            {activeSwatch ? "🖌️" : "👆"}
+          </span>
+          <p className="text-[11px] font-bold leading-snug text-neutral-600 dark:text-zinc-300">
+            {activeSwatch ? (
+              <>
+                Painting with <span className="font-black text-neutral-900 dark:text-white">{activeSwatch.label}</span>
+                <span className="mx-1.5 inline-block h-3 w-3 align-middle rounded-full ring-2 ring-black/10 dark:ring-white/25" style={{ backgroundColor: activeSwatch.color }} />
+                — tap any region.
+              </>
+            ) : (
+              "Pick a color from the palette first."
+            )}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function VisualCard({
+  visual,
+  rotation,
+  puzzle,
+  playState,
+  setPlayState,
+  locked,
+  result,
+}: {
+  visual: Visual;
+  rotation: number;
+  puzzle?: Puzzle | null;
+  playState?: PlayState;
+  setPlayState?: (u: Partial<PlayState>) => void;
+  locked?: boolean;
+  result?: Result;
+}) {
+  if (puzzle?.mode === "coloring" && playState && setPlayState) {
+    return <ColoringDiagram puzzle={puzzle} state={playState} setState={setPlayState} locked={!!locked} result={result ?? "idle"} />;
+  }
   if (visual.kind === "pizza") return <Pizza slices={visual.slices ?? 6} filled={visual.filled ?? 1} />;
   if (visual.kind === "machine") {
     return (
@@ -16771,6 +17506,123 @@ function Interaction({ puzzle, state, setState, locked }: { puzzle: Puzzle; stat
     return <SortCategories puzzle={puzzle} state={state} setState={setState} locked={locked} />;
   }
 
+  if (puzzle.mode === "coloring") {
+    const palette = puzzle.colorPalette ?? [];
+    const regions = puzzle.regions ?? [];
+    const total = regions.length;
+    const colored = regions.filter((r) => state.coloringFill[r.id]).length;
+    const pct = total > 0 ? Math.round((colored / total) * 100) : 0;
+    const undo = () => {
+      if (locked) return;
+      const stack = state.coloringUndo;
+      if (stack.length === 0) return;
+      const last = stack[stack.length - 1]!;
+      const nextStack = stack.slice(0, -1);
+      const nextFill = { ...state.coloringFill };
+      if (last.prev === undefined) delete nextFill[last.regionId];
+      else nextFill[last.regionId] = last.prev;
+      setState({ coloringUndo: nextStack, coloringFill: nextFill, coloringFeedback: null });
+    };
+    const reset = () => {
+      if (locked) return;
+      setState({ coloringFill: {}, coloringUndo: [], coloringFeedback: null });
+    };
+    return (
+      <div className="space-y-4 rounded-3xl border-2 border-neutral-200 bg-gradient-to-b from-neutral-50 to-neutral-100/90 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] dark:border-zinc-600 dark:from-zinc-900/90 dark:to-zinc-950/90 dark:shadow-none">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-[10px] font-black uppercase tracking-[0.22em] text-violet-600 dark:text-violet-300">Progress</span>
+            <span className="tabular-nums text-xs font-black text-neutral-800 dark:text-zinc-100">
+              {colored}
+              <span className="font-bold text-neutral-400 dark:text-zinc-500"> / </span>
+              {total}
+            </span>
+          </div>
+          <div className="h-2.5 overflow-hidden rounded-full bg-neutral-200/90 ring-1 ring-black/[0.04] dark:bg-zinc-800 dark:ring-white/5">
+            <motion.div
+              className="h-full rounded-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-sky-500"
+              initial={false}
+              animate={{ width: `${pct}%` }}
+              transition={{ type: "spring", stiffness: 400, damping: 35 }}
+            />
+          </div>
+          <p className="text-[11px] font-semibold leading-snug text-neutral-600 dark:text-zinc-400">
+            Choose a brush, then tap regions on the big diagram. Undo reverts one stroke; Reset clears the canvas.
+          </p>
+        </div>
+        <div>
+          <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 dark:text-zinc-400">Palette</p>
+          <div className={cn("grid gap-2", palette.length <= 2 ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2")}>
+            {palette.map((sw) => {
+              const selected = state.coloringTool === sw.id;
+              return (
+                <button
+                  key={sw.id}
+                  type="button"
+                  disabled={locked}
+                  aria-pressed={selected}
+                  onClick={() => setState({ coloringTool: sw.id })}
+                  className={cn(
+                    "group relative flex min-h-[3.25rem] flex-col justify-center gap-0.5 rounded-2xl border-2 px-3 py-2.5 text-left transition",
+                    selected
+                      ? "border-violet-500 bg-gradient-to-br from-violet-50 to-fuchsia-50 shadow-[0_3px_0_0_#7c3aed] dark:border-violet-400 dark:from-violet-950/60 dark:to-fuchsia-950/40 dark:shadow-[0_3px_0_0_#6d28d9]"
+                      : "border-neutral-200 border-b-4 border-b-neutral-300 bg-white hover:border-violet-300/80 hover:bg-violet-50/40 active:border-b-2 active:translate-y-0.5 dark:border-zinc-600 dark:border-b-zinc-700 dark:bg-zinc-900 dark:hover:border-violet-500/50 dark:hover:bg-violet-950/20",
+                  )}
+                >
+                  {selected ? (
+                    <span
+                      className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-violet-600 text-[11px] font-black text-white shadow-md dark:bg-violet-500"
+                      aria-hidden
+                    >
+                      ✓
+                    </span>
+                  ) : null}
+                  <span className={cn("flex items-center gap-2.5", selected && "pr-7")}>
+                    <span
+                      className={cn(
+                        "h-9 w-9 shrink-0 rounded-xl shadow-inner ring-2 transition",
+                        selected ? "ring-violet-400/80 dark:ring-violet-400" : "ring-black/[0.06] dark:ring-white/15",
+                      )}
+                      style={{ backgroundColor: sw.color }}
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-black text-neutral-900 dark:text-zinc-50">{sw.label}</span>
+                      <span className="mt-0.5 block text-[11px] font-medium leading-snug text-neutral-600 dark:text-zinc-400">{sw.meaning}</span>
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            disabled={locked || state.coloringUndo.length === 0}
+            onClick={undo}
+            className="flex items-center justify-center gap-2 rounded-2xl border-2 border-neutral-200 border-b-4 border-b-neutral-300 bg-white py-3 text-sm font-black text-neutral-800 transition active:border-b-2 active:translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40 dark:border-zinc-600 dark:border-b-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+          >
+            <span className="text-base" aria-hidden>
+              ↩
+            </span>
+            Undo
+          </button>
+          <button
+            type="button"
+            disabled={locked}
+            onClick={reset}
+            className="flex items-center justify-center gap-2 rounded-2xl border-2 border-rose-200 border-b-4 border-b-rose-300 bg-gradient-to-b from-rose-50 to-rose-100/90 py-3 text-sm font-black text-rose-900 transition active:border-b-2 active:translate-y-0.5 disabled:opacity-40 dark:border-rose-800 dark:border-b-rose-900 dark:from-rose-950/50 dark:to-rose-950/30 dark:text-rose-100"
+          >
+            <span className="text-base" aria-hidden>
+              ↻
+            </span>
+            Reset
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return <Swipe labels={puzzle.swipeLabels ?? []} state={state} setState={setState} locked={locked} />;
 }
 
@@ -17001,6 +17853,7 @@ function interactionLabel(mode: Mode) {
     swipe: "Swipe",
     numpad: "Numpad",
     sort: "Sort",
+    coloring: "Color",
   };
   return labels[mode];
 }
@@ -17018,6 +17871,7 @@ function metaInteractionDisplay(meta: PuzzleMeta): InteractionTypeKey {
     swipe: "Unlock",
     numpad: "Fill in number",
     sort: "Sort categories",
+    coloring: "Coloring puzzle",
   };
   return map[meta.interactionHint];
 }
@@ -17359,6 +18213,7 @@ const INTERACTION_OPTIONS: readonly InteractionFilter[] = [
   "Circuit Builder",
   "Design Challenge",
   "Simulation",
+  "Coloring puzzle",
 ];
 
 const GRADE_OPTIONS: readonly GradeFilter[] = ["All", "9", "10", "11", "12", "K-8"];
@@ -17707,6 +18562,16 @@ export default function MathPuzzlesPage() {
     }
     const correct = isSolved(puzzle, state);
     setResult(correct ? "correct" : "wrong");
+    if (puzzle.mode === "coloring") {
+      const regs = puzzle.regions ?? [];
+      if (regs.length > 0) {
+        setState({
+          coloringFeedback: Object.fromEntries(
+            regs.map((r) => [r.id, state.coloringFill[r.id] === r.correctColorId ? ("correct" as const) : ("wrong" as const)]),
+          ),
+        });
+      }
+    }
     if (correct) {
       const reward = puzzle.xpReward ?? xpRewardFor(puzzle.difficulty);
       setXp((value) => value + reward);
@@ -18151,8 +19016,22 @@ export default function MathPuzzlesPage() {
                     <p className="text-xs font-black uppercase tracking-[0.22em] text-[#1899d6] dark:text-sky-400">Current Challenge</p>
                     <h2 className="mt-2 text-3xl font-black leading-tight tracking-tight text-neutral-900 dark:text-zinc-50 sm:text-5xl">{puzzle.prompt}</h2>
                   </div>
-                  <div className="rounded-[1.25rem] border-2 border-neutral-200 dark:border-zinc-600 bg-neutral-100 dark:bg-zinc-800/80 p-4 text-neutral-900 dark:text-zinc-100 sm:p-5">
-                    <VisualCard visual={puzzle.visual} rotation={state.rotation} />
+                  <div
+                    className={cn(
+                      "rounded-[1.25rem] border-2 border-neutral-200 dark:border-zinc-600 bg-neutral-100 dark:bg-zinc-800/80 p-4 text-neutral-900 dark:text-zinc-100 sm:p-5",
+                      puzzle.mode === "coloring" &&
+                        "border-violet-200/90 bg-gradient-to-b from-violet-50/90 via-neutral-50 to-neutral-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] dark:border-violet-800/45 dark:from-violet-950/35 dark:via-zinc-900 dark:to-zinc-950 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]",
+                    )}
+                  >
+                    <VisualCard
+                      visual={puzzle.visual}
+                      rotation={state.rotation}
+                      puzzle={puzzle}
+                      playState={state}
+                      setPlayState={setState}
+                      locked={result === "correct"}
+                      result={result}
+                    />
                   </div>
                 </div>
               </section>
