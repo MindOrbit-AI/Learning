@@ -215,15 +215,17 @@ type LabPersist = {
   achievements: string[];
 };
 
+const DEFAULT_LAB_PERSIST: LabPersist = { xp: 0, streak: 0, lastDay: "", completed: [], achievements: [] };
+
 function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
 function loadLab(): LabPersist {
-  if (typeof window === "undefined") return { xp: 0, streak: 0, lastDay: "", completed: [], achievements: [] };
+  if (typeof window === "undefined") return DEFAULT_LAB_PERSIST;
   try {
     const raw = window.localStorage.getItem(LAB_STORAGE_KEY);
-    if (!raw) return { xp: 0, streak: 0, lastDay: "", completed: [], achievements: [] };
+    if (!raw) return DEFAULT_LAB_PERSIST;
     const p = JSON.parse(raw) as Partial<LabPersist>;
     return {
       xp: typeof p.xp === "number" ? p.xp : 0,
@@ -233,11 +235,12 @@ function loadLab(): LabPersist {
       achievements: Array.isArray(p.achievements) ? p.achievements : [],
     };
   } catch {
-    return { xp: 0, streak: 0, lastDay: "", completed: [], achievements: [] };
+    return DEFAULT_LAB_PERSIST;
   }
 }
 
 function saveLab(p: LabPersist) {
+  if (typeof window === "undefined") return;
   window.localStorage.setItem(LAB_STORAGE_KEY, JSON.stringify(p));
 }
 
@@ -817,16 +820,27 @@ function ModeFreePlay({ mode }: { mode: AIMode }) {
   );
 }
 
-export function AICreativeLab() {
-  const [persist, setPersist] = useState<LabPersist>(() => loadLab());
+export default function AICreativeLab() {
+  const [persist, setPersist] = useState<LabPersist>(() => DEFAULT_LAB_PERSIST);
+  const [labStorageHydrated, setLabStorageHydrated] = useState(false);
   const [mode, setMode] = useState<AIMode>("Sandbox");
   const [challengeId, setChallengeId] = useState<string | null>(LAB_CHALLENGES[0]!.id);
   const [toast, setToast] = useState<string | null>(null);
   const [solvedFlash, setSolvedFlash] = useState(false);
 
+  const prevCompletedRef = useRef<string[] | null>(null);
+
   useEffect(() => {
+    const loaded = loadLab();
+    prevCompletedRef.current = loaded.completed;
+    setPersist(loaded);
+    setLabStorageHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!labStorageHydrated) return;
     saveLab(persist);
-  }, [persist]);
+  }, [persist, labStorageHydrated]);
 
   const challenge = useMemo(() => LAB_CHALLENGES.find((c) => c.id === challengeId) ?? LAB_CHALLENGES[0]!, [challengeId]);
   const challengesForMode = useMemo(
@@ -840,9 +854,8 @@ export function AICreativeLab() {
     if (!challengeId || !list.some((c) => c.id === challengeId)) setChallengeId(list[0]!.id);
   }, [mode, persist.xp, challengeId]);
 
-  const prevCompletedRef = useRef<string[] | null>(null);
-
   useEffect(() => {
+    if (!labStorageHydrated) return;
     if (prevCompletedRef.current === null) {
       prevCompletedRef.current = persist.completed;
       return;
@@ -858,7 +871,7 @@ export function AICreativeLab() {
     window.setTimeout(() => setToast(null), 2000);
     setSolvedFlash(true);
     window.setTimeout(() => setSolvedFlash(false), 900);
-  }, [persist.completed]);
+  }, [persist.completed, labStorageHydrated]);
 
   const completeChallenge = useCallback((id: string, xpReward: number) => {
     setPersist((prev) => {
