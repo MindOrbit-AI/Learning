@@ -156,6 +156,140 @@ type PuzzleId =
   | "percentChangeBasics"
   | "meanMedianMode"
   | "elapsedTimeClock"
+  | "gcfFinder"
+  | "longMultiplicationCol"
+  | "systemSubstitution"
+  | "circleCircumferenceCalc"
+  | "sohcahtoaPick"
+  | "polynomialRationalZero"
+  | "productRuleBasic"
+  | "standardDeviationStep"
+  | "validInvalidArg"
+  | "binomialTwoTrial"
+  | "moduloRemainder"
+  | "simpleInterestCalc"
+  | "respirationVsPhoto"
+  | "oxidationStateBasic"
+  | "kinematicsV"
+  | "mineralHardnessRank"
+  | "siUnitMatcher"
+  | "moonPhaseOrder"
+  | "dnaReplicationSteps"
+  | "nitrogenCycleSort"
+  | "boneSystemMatch"
+  | "recycleStreamSort"
+  | "loopOutputTrace"
+  | "complexityMatch"
+  | "mlTermMatch"
+  | "attackVectorMatch"
+  | "joinTypeMatch"
+  | "controllerMatch"
+  | "httpResponseMatch"
+  | "restVerbMatch"
+  | "tcpHandshakeOrder"
+  | "flipFlopMatch"
+  | "gearTrainSpeed"
+  | "parallelResistance"
+  | "loadTypeSort"
+  | "flightForcesMatch"
+  | "actuatorTypeMatch"
+  | "bridgeTypeMatch"
+  | "materialPropertySort"
+  | "seriesParallelCalc"
+  | "vModelPhase"
+  | "designPhaseOrder"
+  | "divisibilityRules"
+  | "longDivisionRemainder"
+  | "inequalitySolve"
+  | "triangleAreaCalc"
+  | "pythagoreanIdentity"
+  | "domainOfFunction"
+  | "riemannSumBasic"
+  | "correlationDirection"
+  | "deMorganApply"
+  | "conditionalProbBasic"
+  | "primeFactorBuilder"
+  | "loanMonthlyBasic"
+  | "enzymeFitMatch"
+  | "stateChangeOrder"
+  | "momentumCalc"
+  | "layersOfEarth"
+  | "scientificMethodOrder"
+  | "starLifecycleOrder"
+  | "geneticTermMatch"
+  | "biomeMatchClimate"
+  | "organSystemFunction"
+  | "renewableNonrenewableSort"
+  | "truthyFalsyChoice"
+  | "recursionBaseCase"
+  | "trainTestSplitChoice"
+  | "encryptionTypeMatch"
+  | "normalFormOrder"
+  | "robotSensorFusion"
+  | "domEventMatch"
+  | "apiPayloadFormatMatch"
+  | "ipClassMatch"
+  | "numberSystemConvert"
+  | "leverMechAdvantage"
+  | "kirchhoffCurrentChoice"
+  | "concreteStrengthMatch"
+  | "propulsionTypeMatch"
+  | "dofCalc"
+  | "bendingMomentMatch"
+  | "corrosionTypeMatch"
+  | "capacitorEnergy"
+  | "lifecyclePhaseOrder"
+  | "prototypeFidelityMatch"
+  | "placeValueRound"
+  | "additionCarryChain"
+  | "factoringQuadratic"
+  | "volumeRectPrism"
+  | "lawOfSinesChoice"
+  | "transformShiftMatch"
+  | "quotientRuleBasic"
+  | "quartileCalc"
+  | "quantifierMatch"
+  | "geometricProbBasic"
+  | "eulerTotientBasic"
+  | "taxBracketBasic"
+  | "cellOrganelleSort"
+  | "acidBaseClassify"
+  | "forceDiagram"
+  | "weatherFrontMatch"
+  | "labSafetySort"
+  | "galaxyTypeMatch"
+  | "bloodTypeChoice"
+  | "symbiosisMatch"
+  | "muscleTypeMatch"
+  | "pollutantSourceMatch"
+  | "bitwiseOpChoice"
+  | "dynamicProgrammingMatch"
+  | "activationFunctionMatch"
+  | "authFactorSort"
+  | "indexUseMatch"
+  | "kinematicsForwardChoice"
+  | "cssBoxModelChoice"
+  | "authSchemeMatch"
+  | "apiPaginationCalc"
+  | "rateLimitReset"
+  | "idempotencyKeyMatch"
+  | "corsHeaderMatch"
+  | "webhookSignatureOrder"
+  | "graphqlOperationMatch"
+  | "apiVersioningChoice"
+  | "errorResponseDesign"
+  | "subnetMaskMatch"
+  | "kMapSimplify"
+  | "pulleyAdvantage"
+  | "electricPowerCalc"
+  | "soilTypeMatch"
+  | "orbitTypeMatch"
+  | "pathPlanningMatch"
+  | "framingTypeMatch"
+  | "compositeLayerOrder"
+  | "rcTimeConstant"
+  | "requirementTypeMatch"
+  | "userResearchMatch"
   | "escapeRoom"
   | "linearBalance"
   | "slopeRunner"
@@ -704,6 +838,140 @@ const METAS: PuzzleMeta[] = [
   m("percentChangeBasics", "Percent Change", "Increase or decrease", "📈", "from-green-400 to-emerald-700", "9", "MathFoundations", "Compute percent increase / decrease", 3, "numpad", "Fill in number"),
   m("meanMedianMode", "Mean & Median Lab", "Compute the center", "📍", "from-blue-400 to-violet-700", "K-8", "MathFoundations", "Find mean and median of a list", 3, "numpad", "Fill in number"),
   m("elapsedTimeClock", "Elapsed Time Clock", "How long passed?", "🕒", "from-indigo-300 to-purple-700", "K-8", "MathFoundations", "Compute elapsed clock time", 3, "choice"),
+  m("gcfFinder", "Greatest Common Factor", "Find the biggest shared factor", "🧮", "from-lime-300 to-emerald-700", "K-8", "MathFoundations", "Find GCF of two numbers", 2, "choice"),
+  m("longMultiplicationCol", "Column Multiplication", "Carry the tens", "✏️", "from-orange-300 to-rose-700", "K-8", "Arithmetic", "Multi-digit multiplication", 3, "numpad", "Fill in number"),
+  s("systemSubstitution", "System by Substitution", "Solve for x and y", "🧩", "from-emerald-300 to-sky-700", "10", "Algebra", "Solve 2-variable systems", 5, "choice", { displayInteraction: "Multiple choice", xpRequired: 500 }),
+  s("circleCircumferenceCalc", "Circle Circumference", "2πr around the loop", "⭕", "from-indigo-300 to-purple-700", "9", "Geometry", "Compute circumference", 3, "numpad", { displayInteraction: "Fill in number", xpRequired: 0 }),
+  s("sohcahtoaPick", "SOH-CAH-TOA Picker", "Pick the trig ratio", "📐", "from-pink-300 to-rose-700", "10", "Trigonometry", "Choose sin/cos/tan for a side", 3, "choice", { displayInteraction: "Multiple choice", xpRequired: 500 }),
+  s("polynomialRationalZero", "Rational Zeros", "Test possible roots", "🌱", "from-purple-300 to-fuchsia-700", "11", "Precalculus", "Use the rational root theorem", 5, "choice", { displayInteraction: "Multiple choice", xpRequired: 1200 }),
+  s("productRuleBasic", "Product Rule Lab", "(fg)' = f'g + fg'", "🧪", "from-violet-400 to-indigo-700", "12", "Calculus", "Apply the product rule", 5, "choice", { displayInteraction: "Multiple choice", xpRequired: 2500 }),
+  s("standardDeviationStep", "Standard Deviation Step", "Spread around the mean", "📊", "from-amber-300 to-orange-700", "11", "Statistics", "Compute std deviation of a small list", 5, "numpad", { displayInteraction: "Fill in number", xpRequired: 1200 }),
+  s("validInvalidArg", "Valid or Invalid?", "Spot the bad inference", "🔍", "from-slate-300 to-zinc-700", "10", "Logic", "Evaluate argument validity", 4, "choice", { displayInteraction: "Multiple choice", xpRequired: 500 }),
+  s("binomialTwoTrial", "Binomial Trial", "Exactly k successes", "🎲", "from-amber-300 to-pink-700", "11", "Probability", "Compute binomial probability", 4, "numpad", { displayInteraction: "Fill in number", xpRequired: 1200 }),
+  s("moduloRemainder", "Modulo Remainder", "Find a mod n", "🔁", "from-cyan-300 to-blue-700", "10", "NumberTheory", "Compute modulo", 3, "numpad", { displayInteraction: "Fill in number", xpRequired: 500 }),
+  s("simpleInterestCalc", "Simple Interest", "I = P·r·t", "💵", "from-green-300 to-emerald-700", "9", "FinancialMath", "Compute simple interest", 3, "numpad", { displayInteraction: "Fill in number", xpRequired: 0 }),
+  s("respirationVsPhoto", "Respiration vs Photosynthesis", "Sort each process", "🌱", "from-emerald-300 to-green-700", "10", "Biology", "Compare cellular processes", 4, "sort", { displayInteraction: "Sort categories", xpRequired: 500 }),
+  s("oxidationStateBasic", "Oxidation State Picker", "Assign the charge", "⚛️", "from-fuchsia-300 to-purple-700", "11", "Chemistry", "Determine oxidation states", 4, "choice", { displayInteraction: "Multiple choice", xpRequired: 1200 }),
+  s("kinematicsV", "Kinematics v = u + at", "Solve for final velocity", "🚀", "from-sky-300 to-indigo-700", "10", "Physics", "Apply kinematic equations", 4, "numpad", { displayInteraction: "Fill in number", xpRequired: 500 }),
+  s("mineralHardnessRank", "Mineral Hardness Rank", "Softest to hardest", "💎", "from-stone-300 to-zinc-700", "9", "EarthScience", "Order Mohs scale minerals", 4, "reorder", { displayInteraction: "Order steps", xpRequired: 0 }),
+  s("siUnitMatcher", "SI Unit Matcher", "Quantity → unit", "📏", "from-blue-300 to-cyan-700", "9", "GeneralScience", "Match quantities to SI units", 3, "match", { displayInteraction: "Matching cards", xpRequired: 0 }),
+  s("moonPhaseOrder", "Moon Phase Order", "New → full → new", "🌙", "from-slate-300 to-indigo-700", "9", "Astronomy", "Order lunar phases", 3, "reorder", { displayInteraction: "Order steps", xpRequired: 0 }),
+  s("dnaReplicationSteps", "DNA Replication Steps", "Unwind → synthesize", "🧬", "from-rose-300 to-fuchsia-700", "11", "Genetics", "Order replication steps", 5, "reorder", { displayInteraction: "Order steps", xpRequired: 1200 }),
+  s("nitrogenCycleSort", "Nitrogen Cycle Sort", "Sort each process", "🌾", "from-emerald-400 to-teal-700", "10", "Ecology", "Sort nitrogen-cycle processes", 4, "sort", { displayInteraction: "Sort categories", xpRequired: 500 }),
+  s("boneSystemMatch", "Bone System Matcher", "Bone → body region", "🦴", "from-zinc-300 to-stone-700", "10", "Anatomy", "Match bones to body region", 3, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
+  s("recycleStreamSort", "Recycle Stream Sort", "Sort each item", "♻️", "from-green-300 to-emerald-700", "9", "EnvironmentalScience", "Sort recyclables by stream", 3, "sort", { displayInteraction: "Sort categories", xpRequired: 0 }),
+  s("loopOutputTrace", "Loop Output Trace", "What does the loop print?", "🔁", "from-cyan-300 to-blue-700", "10", "CodingLogic", "Trace simple loops", 4, "choice", { displayInteraction: "Code Trace", xpRequired: 500 }),
+  s("complexityMatch", "Big-O Match", "Algorithm → complexity", "📈", "from-violet-300 to-purple-700", "11", "Algorithms", "Match algorithms to Big-O", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("mlTermMatch", "ML Term Match", "Term → meaning", "🤖", "from-fuchsia-300 to-pink-700", "11", "AIML", "Match ML terms to definitions", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("attackVectorMatch", "Attack Vector Match", "Attack → defense", "🕷️", "from-rose-400 to-red-700", "10", "Cybersecurity", "Match attacks to defenses", 4, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
+  s("joinTypeMatch", "SQL Join Matcher", "Join type → result", "🧷", "from-orange-300 to-amber-700", "11", "Databases", "Match SQL join types", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("controllerMatch", "Controller Match", "Control loop → use", "🎛️", "from-zinc-300 to-stone-700", "10", "RoboticsProgramming", "Match controllers to scenarios", 4, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
+  s("httpResponseMatch", "HTTP Response Match", "Status → meaning", "🌐", "from-sky-300 to-blue-700", "10", "WebDev", "Match HTTP status codes", 3, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
+  s("restVerbMatch", "REST Verb Match", "Verb → action", "🛰️", "from-indigo-300 to-violet-700", "10", "APIs", "Match REST verbs to actions", 3, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
+  s("tcpHandshakeOrder", "TCP Handshake Order", "SYN · SYN-ACK · ACK", "🤝", "from-cyan-300 to-blue-700", "11", "Networks", "Order TCP handshake steps", 3, "reorder", { displayInteraction: "Order steps", xpRequired: 1200 }),
+  s("flipFlopMatch", "Flip-Flop Matcher", "Flip-flop → behavior", "⚡", "from-amber-300 to-orange-700", "11", "DigitalSystems", "Match flip-flop types", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("gearTrainSpeed", "Gear Train Speed", "Output rev/min", "⚙️", "from-zinc-300 to-stone-700", "10", "MechanicalEng", "Compute gear-train speed", 4, "numpad", { displayInteraction: "Fill in number", xpRequired: 500 }),
+  s("parallelResistance", "Parallel Resistance", "Combine resistors", "🔌", "from-yellow-300 to-amber-700", "10", "ElectricalEng", "Compute parallel resistance", 4, "numpad", { displayInteraction: "Fill in number", xpRequired: 500 }),
+  s("loadTypeSort", "Load Type Sort", "Dead · Live · Wind · Snow", "🏗️", "from-stone-300 to-zinc-700", "10", "CivilEng", "Sort structural loads", 4, "sort", { displayInteraction: "Sort categories", xpRequired: 500 }),
+  s("flightForcesMatch", "Four Forces of Flight", "Force → cause", "✈️", "from-sky-300 to-indigo-700", "10", "AerospaceEng", "Match flight forces", 3, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
+  s("actuatorTypeMatch", "Actuator Type Match", "Actuator → task", "🦾", "from-zinc-300 to-stone-700", "10", "Robotics", "Match actuator types", 4, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
+  s("bridgeTypeMatch", "Bridge Type Match", "Bridge → load path", "🌉", "from-cyan-400 to-blue-700", "10", "StructuralDesign", "Match bridge styles", 4, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
+  s("materialPropertySort", "Material Property Sort", "Sort each metal/polymer", "🧱", "from-amber-300 to-orange-700", "10", "MaterialsScience", "Sort materials by property", 4, "sort", { displayInteraction: "Sort categories", xpRequired: 500 }),
+  s("seriesParallelCalc", "Series/Parallel Calc", "Combine resistors", "🔋", "from-yellow-300 to-orange-700", "10", "Circuits", "Compute equivalent resistance", 4, "numpad", { displayInteraction: "Fill in number", xpRequired: 500 }),
+  s("vModelPhase", "V-Model Phase Match", "Design → verification", "🔁", "from-violet-300 to-purple-700", "11", "SystemsEng", "Match V-model phases", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("designPhaseOrder", "Design Thinking Phases", "Empathize → test", "💡", "from-fuchsia-300 to-pink-700", "9", "DesignThinking", "Order the 5 design phases", 3, "reorder", { displayInteraction: "Order steps", xpRequired: 0 }),
+  m("divisibilityRules", "Divisibility Rules", "Pick the right rule", "📐", "from-emerald-300 to-teal-700", "K-8", "MathFoundations", "Apply divisibility rules", 2, "choice"),
+  m("longDivisionRemainder", "Long Division Remainder", "Divide with remainder", "➗", "from-amber-300 to-orange-700", "K-8", "Arithmetic", "Multi-digit long division", 4, "numpad", "Fill in number"),
+  s("inequalitySolve", "Inequality Solver", "Pick the solution set", "📊", "from-sky-300 to-blue-700", "9", "Algebra", "Solve linear inequalities", 3, "choice", { displayInteraction: "Multiple choice", xpRequired: 0 }),
+  s("triangleAreaCalc", "Triangle Area", "½ · b · h", "🔺", "from-rose-300 to-pink-700", "9", "Geometry", "Compute triangle area", 3, "numpad", { displayInteraction: "Fill in number", xpRequired: 0 }),
+  s("pythagoreanIdentity", "Pythagorean Identity", "sin² + cos² = 1", "📐", "from-fuchsia-300 to-rose-700", "11", "Trigonometry", "Apply Pythagorean identity", 4, "choice", { displayInteraction: "Multiple choice", xpRequired: 1200 }),
+  s("domainOfFunction", "Domain Detective", "Pick the domain", "🔎", "from-indigo-300 to-violet-700", "11", "Precalculus", "Find function domains", 4, "choice", { displayInteraction: "Multiple choice", xpRequired: 1200 }),
+  s("riemannSumBasic", "Riemann Sum Box", "Estimate the area", "📦", "from-violet-300 to-fuchsia-700", "12", "Calculus", "Estimate integrals with rectangles", 5, "numpad", { displayInteraction: "Fill in number", xpRequired: 2500 }),
+  s("correlationDirection", "Correlation Direction", "Positive, negative, none", "📈", "from-amber-300 to-orange-700", "10", "Statistics", "Read correlation sign", 3, "choice", { displayInteraction: "Multiple choice", xpRequired: 500 }),
+  s("deMorganApply", "De Morgan's Twist", "Negate AND/OR", "🔁", "from-slate-300 to-zinc-700", "10", "Logic", "Apply De Morgan's laws", 4, "choice", { displayInteraction: "Multiple choice", xpRequired: 500 }),
+  s("conditionalProbBasic", "Conditional Probability", "P(A | B)", "🎯", "from-rose-300 to-pink-700", "11", "Probability", "Compute conditional probability", 4, "numpad", { displayInteraction: "Fill in number", xpRequired: 1200 }),
+  s("primeFactorBuilder", "Prime / Composite Sort", "Sort each number", "🔢", "from-cyan-300 to-blue-700", "K-8", "NumberTheory", "Classify primes vs composites", 3, "sort", { displayInteraction: "Sort categories", xpRequired: 0 }),
+  s("loanMonthlyBasic", "Loan Monthly Estimate", "Principal ÷ months", "🏦", "from-green-300 to-emerald-700", "9", "FinancialMath", "Estimate monthly loan payment", 3, "numpad", { displayInteraction: "Fill in number", xpRequired: 0 }),
+  s("enzymeFitMatch", "Enzyme Fit Match", "Enzyme → substrate", "🧬", "from-emerald-300 to-teal-700", "11", "Biology", "Match enzymes to substrates", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("stateChangeOrder", "State Change Ladder", "Solid → liquid → gas → plasma", "🌡️", "from-cyan-300 to-blue-700", "9", "Chemistry", "Order phase transitions", 3, "reorder", { displayInteraction: "Order steps", xpRequired: 0 }),
+  s("momentumCalc", "Momentum p = mv", "Solve for momentum", "🎱", "from-sky-300 to-indigo-700", "9", "Physics", "Compute linear momentum", 3, "numpad", { displayInteraction: "Fill in number", xpRequired: 0 }),
+  s("layersOfEarth", "Earth's Layers", "Crust → core", "🌍", "from-orange-300 to-red-700", "9", "EarthScience", "Order Earth's layers", 3, "reorder", { displayInteraction: "Order steps", xpRequired: 0 }),
+  s("scientificMethodOrder", "Scientific Method Order", "Observation → conclusion", "🔬", "from-blue-300 to-cyan-700", "9", "GeneralScience", "Order scientific method steps", 3, "reorder", { displayInteraction: "Order steps", xpRequired: 0 }),
+  s("starLifecycleOrder", "Star Lifecycle", "Nebula → remnant", "🌟", "from-indigo-300 to-violet-700", "10", "Astronomy", "Order star lifecycle stages", 4, "reorder", { displayInteraction: "Order steps", xpRequired: 500 }),
+  s("geneticTermMatch", "Genetics Vocab Match", "Term → meaning", "🧬", "from-rose-300 to-fuchsia-700", "11", "Genetics", "Match genetics vocabulary", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("biomeMatchClimate", "Biome Climate Match", "Biome → climate", "🌳", "from-emerald-300 to-green-700", "10", "Ecology", "Match biomes to climates", 4, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
+  s("organSystemFunction", "Organ System Function", "System → function", "🫀", "from-rose-400 to-red-700", "10", "Anatomy", "Match organ systems to functions", 4, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
+  s("renewableNonrenewableSort", "Renewable Sort", "Renewable vs not", "♻️", "from-green-300 to-teal-700", "9", "EnvironmentalScience", "Sort energy sources", 3, "sort", { displayInteraction: "Sort categories", xpRequired: 0 }),
+  s("truthyFalsyChoice", "Truthy or Falsy", "Pick the falsy value", "💡", "from-violet-300 to-purple-700", "10", "CodingLogic", "Classify truthy/falsy values", 3, "choice", { displayInteraction: "Code Trace", xpRequired: 500 }),
+  s("recursionBaseCase", "Base Case Picker", "Choose the stop", "🔚", "from-cyan-300 to-blue-700", "11", "Algorithms", "Choose proper base case", 4, "choice", { displayInteraction: "Code Trace", xpRequired: 1200 }),
+  s("trainTestSplitChoice", "Train/Test Split", "Pick the best strategy", "📚", "from-fuchsia-300 to-pink-700", "11", "AIML", "Choose validation strategies", 4, "choice", { displayInteraction: "Multiple choice", xpRequired: 1200 }),
+  s("encryptionTypeMatch", "Encryption Type Match", "Symmetric · asymmetric · hash", "🔐", "from-rose-400 to-red-700", "11", "Cybersecurity", "Match crypto primitives", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("normalFormOrder", "Database Normal Forms", "1NF → 3NF", "📑", "from-orange-300 to-amber-700", "11", "Databases", "Order normal forms", 4, "reorder", { displayInteraction: "Order steps", xpRequired: 1200 }),
+  s("robotSensorFusion", "Sensor Fusion Match", "Sensor → fusion role", "🧠", "from-zinc-300 to-stone-700", "11", "RoboticsProgramming", "Match sensor → fusion role", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("domEventMatch", "DOM Event Match", "Event → trigger", "🖱️", "from-sky-300 to-blue-700", "10", "WebDev", "Match DOM events", 3, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
+  s("apiPayloadFormatMatch", "API Payload Match", "Format → use", "📦", "from-indigo-300 to-violet-700", "10", "APIs", "Match payload formats", 3, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
+  s("ipClassMatch", "IP Class Match", "Class → range", "🛰️", "from-cyan-300 to-blue-700", "10", "Networks", "Match IPv4 classes to ranges", 3, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
+  s("numberSystemConvert", "Number System Convert", "Binary ↔ decimal", "🔢", "from-amber-300 to-orange-700", "10", "DigitalSystems", "Convert binary to decimal", 3, "numpad", { displayInteraction: "Fill in number", xpRequired: 500 }),
+  s("leverMechAdvantage", "Lever MA", "MA = effort arm / load arm", "🦯", "from-zinc-300 to-stone-700", "10", "MechanicalEng", "Compute lever mechanical advantage", 3, "numpad", { displayInteraction: "Fill in number", xpRequired: 500 }),
+  s("kirchhoffCurrentChoice", "Kirchhoff's Current Law", "Sum currents at node", "🔌", "from-yellow-300 to-amber-700", "10", "ElectricalEng", "Apply KCL at a node", 4, "choice", { displayInteraction: "Multiple choice", xpRequired: 500 }),
+  s("concreteStrengthMatch", "Concrete Mix Match", "Mix → use case", "🧱", "from-stone-300 to-zinc-700", "10", "CivilEng", "Match concrete mixes to uses", 4, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
+  s("propulsionTypeMatch", "Propulsion Match", "Engine type → mission", "🚀", "from-sky-300 to-indigo-700", "10", "AerospaceEng", "Match propulsion to mission", 4, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
+  s("dofCalc", "Degrees of Freedom", "Count joint DOFs", "🦾", "from-zinc-300 to-stone-700", "10", "Robotics", "Compute robot DOFs", 4, "numpad", { displayInteraction: "Fill in number", xpRequired: 500 }),
+  s("bendingMomentMatch", "Bending Moment Match", "Loading → diagram", "🌉", "from-cyan-400 to-blue-700", "11", "StructuralDesign", "Match loads to bending diagrams", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("corrosionTypeMatch", "Corrosion Type Match", "Form → cause", "🪙", "from-amber-300 to-orange-700", "11", "MaterialsScience", "Match corrosion forms to causes", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("capacitorEnergy", "Capacitor Energy", "E = ½ C V²", "🔋", "from-yellow-300 to-orange-700", "11", "Circuits", "Compute capacitor energy", 4, "numpad", { displayInteraction: "Fill in number", xpRequired: 1200 }),
+  s("lifecyclePhaseOrder", "System Lifecycle Order", "Concept → retire", "🗺️", "from-violet-300 to-purple-700", "11", "SystemsEng", "Order system lifecycle phases", 4, "reorder", { displayInteraction: "Order steps", xpRequired: 1200 }),
+  s("prototypeFidelityMatch", "Prototype Fidelity", "Fidelity → purpose", "🖼️", "from-fuchsia-300 to-pink-700", "9", "DesignThinking", "Match prototype fidelities to use", 3, "match", { displayInteraction: "Matching cards", xpRequired: 0 }),
+  m("placeValueRound", "Place Value Round", "Round to a place", "📏", "from-cyan-300 to-blue-700", "K-8", "MathFoundations", "Round to nearest ten/hundred", 2, "choice"),
+  m("additionCarryChain", "Add with Carry", "Stack and carry", "➕", "from-yellow-300 to-orange-700", "K-8", "Arithmetic", "Multi-digit addition with carries", 3, "numpad", "Fill in number"),
+  s("factoringQuadratic", "Factor a Quadratic", "Pick the factored form", "🧩", "from-emerald-300 to-teal-700", "10", "Algebra", "Factor x² + bx + c", 4, "choice", { displayInteraction: "Multiple choice", xpRequired: 500 }),
+  s("volumeRectPrism", "Volume of a Prism", "V = l · w · h", "📦", "from-indigo-300 to-purple-700", "9", "Geometry", "Compute volume of a rectangular prism", 3, "numpad", { displayInteraction: "Fill in number", xpRequired: 0 }),
+  s("lawOfSinesChoice", "Law of Sines Picker", "Pick the right setup", "📐", "from-pink-300 to-rose-700", "11", "Trigonometry", "Apply the law of sines", 4, "choice", { displayInteraction: "Multiple choice", xpRequired: 1200 }),
+  s("transformShiftMatch", "Function Transform Match", "Shift, stretch, reflect", "🔀", "from-violet-300 to-fuchsia-700", "11", "Precalculus", "Match transformations to f(x)", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("quotientRuleBasic", "Quotient Rule Lab", "(f/g)' = (f'g − fg')/g²", "✂️", "from-violet-400 to-indigo-700", "12", "Calculus", "Apply the quotient rule", 5, "choice", { displayInteraction: "Multiple choice", xpRequired: 2500 }),
+  s("quartileCalc", "Quartile Box", "Find Q1, Q2, Q3", "📦", "from-amber-300 to-orange-700", "11", "Statistics", "Compute quartiles of a list", 4, "numpad", { displayInteraction: "Fill in number", xpRequired: 1200 }),
+  s("quantifierMatch", "Quantifier Match", "∀ / ∃ statements", "🌐", "from-slate-300 to-zinc-700", "10", "Logic", "Match logical quantifier statements", 4, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
+  s("geometricProbBasic", "First Success Probability", "Geometric distribution", "🎯", "from-rose-300 to-pink-700", "11", "Probability", "Compute geometric probability", 4, "numpad", { displayInteraction: "Fill in number", xpRequired: 1200 }),
+  s("eulerTotientBasic", "Euler's Totient φ(n)", "Count coprime integers", "🔢", "from-cyan-300 to-blue-700", "11", "NumberTheory", "Compute Euler's totient", 4, "numpad", { displayInteraction: "Fill in number", xpRequired: 1200 }),
+  s("taxBracketBasic", "Tax Bracket Estimate", "Progressive tax slabs", "🧾", "from-green-300 to-emerald-700", "10", "FinancialMath", "Apply progressive tax brackets", 4, "numpad", { displayInteraction: "Fill in number", xpRequired: 500 }),
+  s("cellOrganelleSort", "Cell Organelle Sort", "Plant · Animal · Both", "🧫", "from-emerald-300 to-green-700", "10", "Biology", "Sort organelles by cell type", 4, "sort", { displayInteraction: "Sort categories", xpRequired: 500 }),
+  s("acidBaseClassify", "Acid · Base · Neutral", "Sort by pH", "🧪", "from-fuchsia-300 to-purple-700", "9", "Chemistry", "Classify by pH category", 3, "sort", { displayInteraction: "Sort categories", xpRequired: 0 }),
+  s("forceDiagram", "Free-Body Forces", "Find the net force", "🎯", "from-sky-300 to-indigo-700", "10", "Physics", "Resolve a free-body diagram", 4, "choice", { displayInteraction: "Multiple choice", xpRequired: 500 }),
+  s("weatherFrontMatch", "Weather Front Match", "Front → behavior", "🌦️", "from-cyan-300 to-blue-700", "9", "EarthScience", "Match weather fronts", 3, "match", { displayInteraction: "Matching cards", xpRequired: 0 }),
+  s("labSafetySort", "Lab Safety Sort", "Safe vs unsafe", "🥽", "from-yellow-300 to-amber-700", "9", "GeneralScience", "Sort lab practices safely", 3, "sort", { displayInteraction: "Sort categories", xpRequired: 0 }),
+  s("galaxyTypeMatch", "Galaxy Type Match", "Spiral · elliptical · irregular", "🌌", "from-indigo-300 to-violet-700", "11", "Astronomy", "Match galaxy types", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("bloodTypeChoice", "Blood Type Inheritance", "Predict from parents", "🩸", "from-rose-400 to-red-700", "11", "Genetics", "Predict ABO blood type", 4, "choice", { displayInteraction: "Multiple choice", xpRequired: 1200 }),
+  s("symbiosisMatch", "Symbiosis Match", "Mutualism · commensalism · parasitism", "🤝", "from-emerald-300 to-teal-700", "10", "Ecology", "Match symbiotic relationships", 4, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
+  s("muscleTypeMatch", "Muscle Type Match", "Skeletal · smooth · cardiac", "💪", "from-rose-300 to-pink-700", "10", "Anatomy", "Match muscle types to function", 4, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
+  s("pollutantSourceMatch", "Pollutant Source Match", "Pollutant → source", "🏭", "from-stone-300 to-zinc-700", "10", "EnvironmentalScience", "Match pollutants to sources", 4, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
+  s("bitwiseOpChoice", "Bitwise Op Output", "AND · OR · XOR", "🔢", "from-violet-300 to-purple-700", "10", "CodingLogic", "Evaluate bitwise expressions", 3, "choice", { displayInteraction: "Multiple choice", xpRequired: 500 }),
+  s("dynamicProgrammingMatch", "DP Problem Match", "Problem → DP pattern", "🧠", "from-cyan-300 to-blue-700", "12", "Algorithms", "Match DP problems to patterns", 5, "match", { displayInteraction: "Matching cards", xpRequired: 2500 }),
+  s("activationFunctionMatch", "Activation Match", "Function → property", "⚡", "from-fuchsia-300 to-pink-700", "11", "AIML", "Match neural activations", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("authFactorSort", "Auth Factor Sort", "Know · have · are", "🔑", "from-rose-400 to-red-700", "10", "Cybersecurity", "Sort auth factor types", 3, "sort", { displayInteraction: "Sort categories", xpRequired: 500 }),
+  s("indexUseMatch", "DB Index Match", "Index type → use", "📑", "from-orange-300 to-amber-700", "11", "Databases", "Match index types to use cases", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("kinematicsForwardChoice", "Forward vs Inverse Kinematics", "Pick the right method", "🤖", "from-zinc-300 to-stone-700", "11", "RoboticsProgramming", "Choose FK vs IK", 4, "choice", { displayInteraction: "Multiple choice", xpRequired: 1200 }),
+  s("cssBoxModelChoice", "CSS Box Model", "Add up the box", "📦", "from-sky-300 to-blue-700", "10", "WebDev", "Compute element width with padding/border", 3, "choice", { displayInteraction: "Multiple choice", xpRequired: 500 }),
+  s("authSchemeMatch", "Auth Scheme Match", "Scheme → use", "🪪", "from-indigo-300 to-violet-700", "10", "APIs", "Match HTTP auth schemes", 3, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
+  s("apiPaginationCalc", "API Pagination Calc", "offset · limit · pages", "📄", "from-sky-300 to-indigo-700", "10", "APIs", "Compute pagination offsets and page counts", 4, "numpad", { displayInteraction: "Fill in number", xpRequired: 500 }),
+  s("rateLimitReset", "Rate Limit Reset", "Requests left over time", "⏱️", "from-amber-300 to-orange-700", "10", "APIs", "Reason about API rate limits", 4, "choice", { displayInteraction: "Multiple choice", xpRequired: 500 }),
+  s("idempotencyKeyMatch", "Idempotency Key Match", "Retry without duplication", "🔁", "from-emerald-300 to-teal-700", "11", "APIs", "Match idempotency concepts", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("corsHeaderMatch", "CORS Header Match", "Origin · methods · credentials", "🛂", "from-violet-300 to-purple-700", "10", "APIs", "Match CORS headers to behavior", 4, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
+  s("webhookSignatureOrder", "Webhook Signature Flow", "Verify before processing", "🪝", "from-rose-300 to-pink-700", "11", "APIs", "Order secure webhook handling steps", 4, "reorder", { displayInteraction: "Order steps", xpRequired: 1200 }),
+  s("graphqlOperationMatch", "GraphQL Operation Match", "Query · mutation · subscription", "🕸️", "from-fuchsia-300 to-pink-700", "11", "APIs", "Match GraphQL operations to use cases", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("apiVersioningChoice", "API Versioning Choice", "Pick the safer change", "🏷️", "from-cyan-300 to-blue-700", "11", "APIs", "Choose API versioning strategies", 4, "choice", { displayInteraction: "Multiple choice", xpRequired: 1200 }),
+  s("errorResponseDesign", "Error Response Design", "Status + problem details", "🚨", "from-red-300 to-orange-700", "10", "APIs", "Match API errors to responses", 4, "choice", { displayInteraction: "Multiple choice", xpRequired: 500 }),
+  s("subnetMaskMatch", "CIDR Subnet Match", "CIDR → host count", "🛰️", "from-cyan-300 to-blue-700", "11", "Networks", "Match CIDR to subnet details", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("kMapSimplify", "K-Map Simplify", "Group adjacent 1s", "⚡", "from-amber-300 to-orange-700", "11", "DigitalSystems", "Simplify with Karnaugh maps", 4, "choice", { displayInteraction: "Multiple choice", xpRequired: 1200 }),
+  s("pulleyAdvantage", "Pulley Advantage", "Count supporting ropes", "⚙️", "from-zinc-300 to-stone-700", "10", "MechanicalEng", "Count pulley MA", 3, "numpad", { displayInteraction: "Fill in number", xpRequired: 500 }),
+  s("electricPowerCalc", "Electric Power", "P = V · I", "🔌", "from-yellow-300 to-amber-700", "10", "ElectricalEng", "Compute electrical power", 3, "numpad", { displayInteraction: "Fill in number", xpRequired: 500 }),
+  s("soilTypeMatch", "Soil Type Match", "Soil → property", "🪨", "from-stone-300 to-zinc-700", "10", "CivilEng", "Match soil types", 4, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
+  s("orbitTypeMatch", "Orbit Match", "LEO · MEO · GEO", "🛰️", "from-sky-300 to-indigo-700", "11", "AerospaceEng", "Match orbits to missions", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("pathPlanningMatch", "Path Planning Match", "Algorithm → use", "🧭", "from-zinc-300 to-stone-700", "11", "Robotics", "Match path planning algorithms", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("framingTypeMatch", "Framing System Match", "Frame → use", "🏗️", "from-cyan-400 to-blue-700", "11", "StructuralDesign", "Match structural framing systems", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("compositeLayerOrder", "Composite Layup", "Order the plies", "🎨", "from-amber-300 to-orange-700", "11", "MaterialsScience", "Order composite lay-up plies", 4, "reorder", { displayInteraction: "Order steps", xpRequired: 1200 }),
+  s("rcTimeConstant", "RC Time Constant", "τ = R · C", "🔋", "from-yellow-300 to-orange-700", "11", "Circuits", "Compute RC time constant", 4, "numpad", { displayInteraction: "Fill in number", xpRequired: 1200 }),
+  s("requirementTypeMatch", "Requirement Type Match", "Functional · non-functional · constraint", "📋", "from-violet-300 to-purple-700", "11", "SystemsEng", "Match requirement types", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("userResearchMatch", "User Research Match", "Method → goal", "🎙️", "from-fuchsia-300 to-pink-700", "9", "DesignThinking", "Match user research methods", 3, "match", { displayInteraction: "Matching cards", xpRequired: 0 }),
   m("escapeRoom", "Math Escape Room", "Unlock every door", "🚪", "from-zinc-300 to-violet-700", "K-8", "Algebra", "Chain operations", 3, "swipe"),
   m("absValueDistance", "Absolute Value Distance", "Measure the distance", "📏", "from-cyan-400 to-blue-700", "9", "Algebra", "Compute |a − b|", 3, "numpad", "Fill in number"),
   m("absoluteValueEquation", "Absolute Value Equation", "Solve |x + b| = c", "🪞", "from-fuchsia-400 to-pink-600", "9", "Algebra", "Split into two cases", 3, "choice"),
@@ -2872,6 +3140,3552 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
         answer,
         distractors,
       );
+    }
+    case "gcfFinder": {
+      const a = rand(8, 36);
+      const b = rand(8, 36);
+      const ans = gcd(a, b);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Find the greatest common factor of ${a} and ${b}.`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: `gcf(${a}, ${b})`,
+            subtitle: "Greatest common factor",
+          }),
+          hint: "List factors of each number and pick the largest shared one.",
+          hints: ["Use prime factorization.", "Take the lowest power of each shared prime."],
+          explanation: `gcf(${a}, ${b}) = ${ans}.`,
+        },
+        String(ans),
+        numberChoices(ans),
+      );
+    }
+    case "longMultiplicationCol": {
+      const a = rand(12, 99);
+      const b = rand(3, 9);
+      return numpadEng(
+        m,
+        difficulty,
+        `Compute ${a} × ${b}.`,
+        { kind: "icon", icon: m.emoji, title: `${a} × ${b}`, subtitle: "Column multiplication" },
+        a * b,
+        "Multiply ones first, then tens, carrying as needed.",
+        [`${a % 10} × ${b} = ${(a % 10) * b}.`, `Don't forget to carry to the tens column.`],
+        `${a} × ${b} = ${a * b}.`,
+      );
+    }
+    case "systemSubstitution": {
+      const x = rand(1, 9);
+      const y = rand(1, 9);
+      const s = x + y;
+      const d = x - y;
+      const ans = `x=${x}, y=${y}`;
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Solve: x + y = ${s} and x − y = ${d}.`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: `x+y=${s} | x−y=${d}`,
+            subtitle: "Find x and y",
+          }),
+          hint: "Add the two equations to eliminate y.",
+          hints: [`Adding: 2x = ${s + d}, so x = ${x}.`, `Then y = ${s} − ${x} = ${y}.`],
+          explanation: `Substitution / elimination gives x = ${x}, y = ${y}.`,
+        },
+        ans,
+        [`x=${y}, y=${x}`, `x=${x + 1}, y=${y - 1}`, `x=${x - 1}, y=${y + 1}`].filter((c) => c !== ans),
+      );
+    }
+    case "circleCircumferenceCalc": {
+      const r = rand(2, 12);
+      const ans = +(2 * Math.PI * r).toFixed(2);
+      return numpadEng(
+        m,
+        difficulty,
+        `A circle has radius ${r}. Find the circumference (to 2 decimal places).`,
+        { kind: "icon", icon: m.emoji, title: `r = ${r}`, subtitle: "C = 2πr" },
+        String(ans),
+        "Use C = 2πr.",
+        [`2 × π × ${r} ≈ ${ans}.`, "π ≈ 3.14159."],
+        `C = 2π × ${r} ≈ ${ans}.`,
+      );
+    }
+    case "sohcahtoaPick": {
+      const variants = [
+        { sides: ["opposite", "hypotenuse"] as const, trig: "sin" },
+        { sides: ["adjacent", "hypotenuse"] as const, trig: "cos" },
+        { sides: ["opposite", "adjacent"] as const, trig: "tan" },
+      ];
+      const v = pick(variants);
+      const [s1, s2] = v.sides;
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Which trig ratio uses ${s1} and ${s2}?`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: `${s1} / ${s2}`,
+            subtitle: "SOH-CAH-TOA",
+          }),
+          hint: "SOH = sin opp/hyp; CAH = cos adj/hyp; TOA = tan opp/adj.",
+          hints: ["Sine pairs opposite with hypotenuse.", "Tangent uses the two legs."],
+          explanation: `${v.trig}(θ) = ${s1} / ${s2}.`,
+        },
+        v.trig,
+        ["sin", "cos", "tan"].filter((t) => t !== v.trig),
+      );
+    }
+    case "polynomialRationalZero": {
+      const r = rand(1, 5);
+      let s = rand(2, 6);
+      if (s === r) s = r + 1;
+      const root = pick([r, s] as const);
+      const bAbs = r + s;
+      const c = r * s;
+      const polynomial = `x² − ${bAbs}x + ${c}`;
+      const ans = String(root);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Which value is a root of ${polynomial}?`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: polynomial,
+            subtitle: "Pick a zero",
+          }),
+          hint: "Substitute each candidate; a root makes the polynomial 0.",
+          hints: [`Try factors of ${c}.`, `Roots are ${r} and ${s}.`],
+          explanation: `(x − ${r})(x − ${s}) = ${polynomial}; root: ${root}.`,
+        },
+        ans,
+        [String(-root), String(root + 1), String(c)].filter((opt) => opt !== ans),
+      );
+    }
+    case "productRuleBasic": {
+      const variants = [
+        {
+          expr: "d/dx[x² · sin(x)]",
+          answer: "2x·sin(x) + x²·cos(x)",
+          distractors: ["2x·cos(x)", "x²·cos(x)", "2x·sin(x)"],
+          explanation: "(fg)' = f'g + fg' with f = x², g = sin(x).",
+        },
+        {
+          expr: "d/dx[x · e^x]",
+          answer: "e^x + x·e^x",
+          distractors: ["x·e^x", "e^x", "x·e^(x−1)"],
+          explanation: "f = x → f' = 1; g = e^x → g' = e^x.",
+        },
+        {
+          expr: "d/dx[x³ · ln(x)]",
+          answer: "3x²·ln(x) + x²",
+          distractors: ["3x²·ln(x)", "x²", "3x·ln(x)"],
+          explanation: "f = x³ → f' = 3x²; g = ln(x) → g' = 1/x; combine.",
+        },
+        {
+          expr: "d/dx[(2x+1)·x²]",
+          answer: "2·x² + (2x+1)·2x",
+          distractors: ["2·x²", "(2x+1)·2x", "2·(2x+1)"],
+          explanation: "Differentiate each factor and apply product rule.",
+        },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Apply the product rule: ${v.expr}.`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: v.expr,
+            subtitle: "(fg)' = f'g + fg'",
+          }),
+          hint: "Differentiate each factor and combine.",
+          hints: ["First factor's derivative times second.", "Plus first times second's derivative."],
+          explanation: v.explanation,
+        },
+        v.answer,
+        v.distractors,
+      );
+    }
+    case "standardDeviationStep": {
+      const variants: { list: number[]; sd: string; mean: number }[] = [
+        { list: [1, 1, 5, 5], sd: "2", mean: 3 },
+        { list: [0, 2, 4, 6, 8], sd: "2.83", mean: 4 },
+        { list: [3, 3, 7, 7], sd: "2", mean: 5 },
+        { list: [10, 20, 30, 40], sd: "11.18", mean: 25 },
+        { list: [2, 2, 8, 8], sd: "3", mean: 5 },
+      ];
+      const v = pick(variants);
+      return numpadEng(
+        m,
+        difficulty,
+        `Find the population standard deviation of ${v.list.join(", ")} (≈ to 2 dp).`,
+        { kind: "icon", icon: m.emoji, title: v.list.join(", "), subtitle: "Population σ" },
+        v.sd,
+        "σ = √(mean of squared deviations from the mean).",
+        [`Mean is ${v.mean}.`, `Sum the (x − mean)² values, divide by N, then √.`],
+        `σ ≈ ${v.sd}.`,
+      );
+    }
+    case "validInvalidArg": {
+      const variants = [
+        {
+          argument: "All squares are rectangles. ABCD is a square. Therefore ABCD is a rectangle.",
+          verdict: "Valid",
+          reason: "Modus ponens applied to a universal premise.",
+        },
+        {
+          argument: "If it rains, the ground is wet. The ground is wet. Therefore it rained.",
+          verdict: "Invalid",
+          reason: "Affirming the consequent — wet ground may come from other causes.",
+        },
+        {
+          argument: "All birds can fly. Penguins are birds. So penguins can fly.",
+          verdict: "Invalid",
+          reason: "The major premise is false (penguins cannot fly).",
+        },
+        {
+          argument: "Some primes are odd. 2 is prime. Therefore 2 is odd.",
+          verdict: "Invalid",
+          reason: "‘Some’ does not justify a claim about every prime.",
+        },
+        {
+          argument: "If x > 5 then x > 0. We are told x > 5. Therefore x > 0.",
+          verdict: "Valid",
+          reason: "Modus ponens.",
+        },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `${v.argument}\n\nIs the argument valid?`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: "Logic check",
+            subtitle: "Pick valid or invalid",
+          }),
+          hint: "Does the conclusion necessarily follow from the premises?",
+          hints: ["Watch for affirming the consequent.", "Universal premises support modus ponens."],
+          explanation: v.reason,
+        },
+        v.verdict,
+        ["Valid", "Invalid", "Possibly valid", "Vacuously true"].filter((o) => o !== v.verdict),
+      );
+    }
+    case "binomialTwoTrial": {
+      const variants = [
+        { n: 2, k: 1, answer: "0.5" },
+        { n: 3, k: 2, answer: "0.375" },
+        { n: 3, k: 3, answer: "0.125" },
+        { n: 4, k: 2, answer: "0.375" },
+        { n: 3, k: 1, answer: "0.375" },
+        { n: 4, k: 1, answer: "0.25" },
+      ];
+      const v = pick(variants);
+      return numpadEng(
+        m,
+        difficulty,
+        `${v.n} fair coins are flipped. P(exactly ${v.k} heads)?`,
+        { kind: "icon", icon: m.emoji, title: `n=${v.n}, k=${v.k}`, subtitle: "Binomial probability" },
+        v.answer,
+        "P(k) = C(n,k) · p^k · (1−p)^(n−k).",
+        [`Count favorable arrangements: C(${v.n}, ${v.k}).`, `Each outcome has probability 0.5^${v.n}.`],
+        `P = C(${v.n}, ${v.k}) · 0.5^${v.n} = ${v.answer}.`,
+      );
+    }
+    case "moduloRemainder": {
+      const n = rand(3, 12);
+      const a = rand(20, 199);
+      const ans = a % n;
+      return numpadEng(
+        m,
+        difficulty,
+        `Compute ${a} mod ${n}.`,
+        { kind: "icon", icon: m.emoji, title: `${a} mod ${n}`, subtitle: "Remainder after division" },
+        ans,
+        "Find the remainder when dividing.",
+        [`${a} ÷ ${n} = ${Math.floor(a / n)} remainder ${ans}.`, "Modulo returns the remainder."],
+        `${a} mod ${n} = ${ans}.`,
+      );
+    }
+    case "simpleInterestCalc": {
+      const principal = pick([100, 200, 500, 1000, 2000] as const);
+      const rate = pick([0.03, 0.04, 0.05, 0.06, 0.08, 0.1] as const);
+      const time = pick([1, 2, 3, 4, 5] as const);
+      const ans = +(principal * rate * time).toFixed(2);
+      const ratePct = Math.round(rate * 100);
+      return numpadEng(
+        m,
+        difficulty,
+        `Compute simple interest: P=$${principal}, r=${ratePct}%, t=${time} yr.`,
+        { kind: "icon", icon: m.emoji, title: `$${principal} @ ${ratePct}% × ${time}y`, subtitle: "I = P · r · t" },
+        String(ans),
+        "Multiply principal, rate (as decimal), and time.",
+        [`${principal} × ${rate} = ${+(principal * rate).toFixed(2)}.`, `Then × ${time} = ${ans}.`],
+        `I = ${principal} × ${rate} × ${time} = ${ans}.`,
+      );
+    }
+    case "respirationVsPhoto": {
+      return bankSort(m, difficulty, [
+        {
+          prompt: "Sort each process into respiration or photosynthesis.",
+          categories: ["Cellular Respiration", "Photosynthesis"],
+          items: [
+            { label: "Releases CO₂", category: "Cellular Respiration" },
+            { label: "Produces ATP from glucose", category: "Cellular Respiration" },
+            { label: "Occurs in mitochondria", category: "Cellular Respiration" },
+            { label: "Consumes O₂", category: "Cellular Respiration" },
+            { label: "Absorbs CO₂", category: "Photosynthesis" },
+            { label: "Makes glucose from sunlight", category: "Photosynthesis" },
+            { label: "Occurs in chloroplasts", category: "Photosynthesis" },
+            { label: "Releases O₂", category: "Photosynthesis" },
+          ],
+          hint: "One uses O₂; the other releases it.",
+          hints: ["Mitochondria vs chloroplasts.", "ATP vs glucose."],
+          explanation: "Respiration breaks down glucose for ATP; photosynthesis builds glucose from CO₂ + light.",
+        },
+      ]);
+    }
+    case "oxidationStateBasic": {
+      const variants = [
+        { compound: "Na in NaCl", answer: "+1", distractors: ["−1", "0", "+2"], reason: "Group 1 metals are +1 in compounds." },
+        { compound: "Cl in NaCl", answer: "−1", distractors: ["+1", "0", "−2"], reason: "Halogens are typically −1 with metals." },
+        { compound: "O in H₂O", answer: "−2", distractors: ["−1", "+2", "0"], reason: "Oxygen is usually −2 in compounds." },
+        { compound: "H in H₂O", answer: "+1", distractors: ["−1", "0", "+2"], reason: "Hydrogen is +1 when bonded to nonmetals." },
+        { compound: "S in SO₂", answer: "+4", distractors: ["+2", "+6", "−2"], reason: "Each O contributes −2 (total −4); S must be +4 for neutrality." },
+        { compound: "Fe in Fe₂O₃", answer: "+3", distractors: ["+2", "+6", "−3"], reason: "3 O at −2 = −6; 2 Fe must total +6 → Fe = +3." },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `What is the oxidation state of ${v.compound}?`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: v.compound,
+            subtitle: "Oxidation number",
+          }),
+          hint: "Use the rules: O = −2, H = +1, totals match net charge.",
+          hints: ["Group 1 metals = +1.", "Halogens = −1 with metals."],
+          explanation: v.reason,
+        },
+        v.answer,
+        v.distractors,
+      );
+    }
+    case "kinematicsV": {
+      const u = rand(0, 20);
+      const a = pick([2, 3, 5, -2, -3] as const);
+      const t = rand(2, 8);
+      const v = u + a * t;
+      return numpadEng(
+        m,
+        difficulty,
+        `An object starts at ${u} m/s with acceleration ${a} m/s². Find v after ${t} s.`,
+        { kind: "icon", icon: m.emoji, title: `u=${u}, a=${a}, t=${t}`, subtitle: "v = u + at" },
+        String(v),
+        "Apply v = u + at.",
+        [`a × t = ${a * t}.`, `Add to initial velocity: ${u} + ${a * t}.`],
+        `v = ${u} + (${a})(${t}) = ${v} m/s.`,
+        true,
+      );
+    }
+    case "mineralHardnessRank": {
+      return bankReorder(m, difficulty, [
+        {
+          prompt: "Order these minerals from softest to hardest (Mohs scale).",
+          order: ["Talc", "Gypsum", "Calcite", "Fluorite", "Apatite", "Orthoclase", "Quartz", "Topaz", "Corundum", "Diamond"],
+          hint: "Mohs scale runs 1 → 10.",
+          hints: ["Talc is 1.", "Diamond is 10."],
+          explanation: "The Mohs scale ranks minerals from softest (talc) to hardest (diamond).",
+        },
+      ]);
+    }
+    case "siUnitMatcher": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each base quantity with its SI unit.",
+          pairs: [
+            ["Length", "meter"],
+            ["Mass", "kilogram"],
+            ["Time", "second"],
+            ["Current", "ampere"],
+            ["Temperature", "kelvin"],
+          ],
+          hint: "These are SI base units.",
+          explanation: "Each base quantity has exactly one SI base unit.",
+        },
+        {
+          prompt: "Pair each derived quantity with its SI unit.",
+          pairs: [
+            ["Force", "newton"],
+            ["Energy", "joule"],
+            ["Power", "watt"],
+            ["Pressure", "pascal"],
+            ["Frequency", "hertz"],
+          ],
+          hint: "These are named derived SI units.",
+          explanation: "Each derived quantity has a special name in SI.",
+        },
+      ]);
+    }
+    case "moonPhaseOrder": {
+      return bankReorder(m, difficulty, [
+        {
+          prompt: "Order the moon phases through one lunar cycle.",
+          order: [
+            "New Moon",
+            "Waxing Crescent",
+            "First Quarter",
+            "Waxing Gibbous",
+            "Full Moon",
+            "Waning Gibbous",
+            "Last Quarter",
+            "Waning Crescent",
+          ],
+          hint: "Waxing = growing, waning = shrinking.",
+          hints: ["New is dark; full is bright.", "First quarter follows waxing crescent."],
+          explanation: "Lunar cycle ~29.5 days from new to full and back.",
+        },
+      ]);
+    }
+    case "dnaReplicationSteps": {
+      return bankReorder(m, difficulty, [
+        {
+          prompt: "Order the steps of DNA replication.",
+          order: [
+            "Helicase unzips DNA",
+            "Primase lays an RNA primer",
+            "DNA polymerase adds bases",
+            "Lagging strand forms Okazaki fragments",
+            "Ligase joins the fragments",
+            "Replication complete",
+          ],
+          hint: "Helicase first, ligase last.",
+          hints: ["Primers seed the new strand.", "Lagging strand is built in pieces."],
+          explanation: "Replication proceeds 5'→3' on leading and lagging strands.",
+        },
+      ]);
+    }
+    case "nitrogenCycleSort": {
+      return bankSort(m, difficulty, [
+        {
+          prompt: "Sort each process by its role in the nitrogen cycle.",
+          categories: ["Fixation", "Nitrification", "Denitrification"],
+          items: [
+            { label: "Bacteria turn N₂ into ammonia", category: "Fixation" },
+            { label: "Legume root nodules host bacteria", category: "Fixation" },
+            { label: "Lightning binds N₂ to oxygen", category: "Fixation" },
+            { label: "Ammonia → nitrite", category: "Nitrification" },
+            { label: "Nitrite → nitrate", category: "Nitrification" },
+            { label: "Nitrate → N₂ gas", category: "Denitrification" },
+          ],
+          hint: "Fixation pulls N from air; denitrification returns it.",
+          hints: ["Nitrification builds nitrate in stages.", "Denitrification releases N₂."],
+          explanation: "Bacteria drive every step of the nitrogen cycle.",
+        },
+      ]);
+    }
+    case "boneSystemMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each bone with its body region.",
+          pairs: [
+            ["Femur", "Upper leg"],
+            ["Humerus", "Upper arm"],
+            ["Tibia", "Lower leg"],
+            ["Radius", "Lower arm"],
+            ["Scapula", "Shoulder"],
+          ],
+          hint: "Each bone has a specific location.",
+          explanation: "Major appendicular bones of the skeleton.",
+        },
+        {
+          prompt: "Pair each cranial bone with its location.",
+          pairs: [
+            ["Frontal", "Forehead"],
+            ["Parietal", "Top of skull"],
+            ["Occipital", "Back of skull"],
+            ["Temporal", "Sides of skull"],
+            ["Mandible", "Lower jaw"],
+          ],
+          hint: "Cranial bones map to head regions.",
+          explanation: "These bones form the skull and jaw.",
+        },
+      ]);
+    }
+    case "recycleStreamSort": {
+      return bankSort(m, difficulty, [
+        {
+          prompt: "Sort each item into the correct recycle stream.",
+          categories: ["Paper", "Plastic", "Metal", "Glass", "Compost"],
+          items: [
+            { label: "Cardboard box", category: "Paper" },
+            { label: "Newspaper", category: "Paper" },
+            { label: "Water bottle", category: "Plastic" },
+            { label: "Yogurt cup", category: "Plastic" },
+            { label: "Soda can", category: "Metal" },
+            { label: "Aluminum foil", category: "Metal" },
+            { label: "Glass jar", category: "Glass" },
+            { label: "Wine bottle", category: "Glass" },
+            { label: "Banana peel", category: "Compost" },
+            { label: "Coffee grounds", category: "Compost" },
+          ],
+          hint: "Cleaner streams make recycling work.",
+          hints: ["Plastics carry a triangle code.", "Compost should be organic only."],
+          explanation: "Curbside recycling typically splits by major material category.",
+        },
+      ]);
+    }
+    case "loopOutputTrace": {
+      const variants = [
+        {
+          lines: ["let s = 0;", "for (let i = 1; i <= 4; i++) s += i;", "console.log(s);"],
+          answer: "10",
+          distractors: ["6", "8", "11"],
+          reason: "1 + 2 + 3 + 4 = 10.",
+        },
+        {
+          lines: ["let p = 1;", "for (let i = 1; i <= 4; i++) p *= i;", "console.log(p);"],
+          answer: "24",
+          distractors: ["10", "16", "12"],
+          reason: "4! = 24.",
+        },
+        {
+          lines: ["let c = 0;", "for (let i = 0; i < 10; i += 2) c++;", "console.log(c);"],
+          answer: "5",
+          distractors: ["4", "6", "10"],
+          reason: "Iterates over 0,2,4,6,8 → 5 increments.",
+        },
+        {
+          lines: ["let n = 5;", "while (n > 1) n--;", "console.log(n);"],
+          answer: "1",
+          distractors: ["0", "5", "2"],
+          reason: "Loop stops when n = 1.",
+        },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", "What does this loop print?", {
+            kind: "code",
+            icon: m.emoji,
+            title: "Trace the loop",
+            subtitle: "Print the final value",
+            code: { lines: v.lines },
+          }),
+          hint: "Run the loop step by step.",
+          hints: ["Track the accumulator.", "Watch the exit condition."],
+          explanation: v.reason,
+        },
+        v.answer,
+        v.distractors,
+      );
+    }
+    case "complexityMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each algorithm with its average time complexity.",
+          pairs: [
+            ["Binary search", "O(log n)"],
+            ["Linear search", "O(n)"],
+            ["Merge sort", "O(n log n)"],
+            ["Bubble sort", "O(n²)"],
+            ["Hash lookup", "O(1)"],
+          ],
+          hint: "Sorted lookups are fast; sorts are pricey.",
+          explanation: "Standard average-case complexities for common algorithms.",
+        },
+        {
+          prompt: "Pair each data-structure operation with its complexity.",
+          pairs: [
+            ["Array index", "O(1)"],
+            ["Linked list search", "O(n)"],
+            ["Balanced BST search", "O(log n)"],
+            ["Heap insert", "O(log n)"],
+            ["Stack push", "O(1)"],
+          ],
+          hint: "Indexing is constant; searches depend on structure.",
+          explanation: "Standard textbook costs.",
+        },
+      ]);
+    }
+    case "mlTermMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each ML term with its definition.",
+          pairs: [
+            ["Supervised", "Trains with labeled data"],
+            ["Unsupervised", "Finds structure in unlabeled data"],
+            ["Reinforcement", "Learns by reward signal"],
+            ["Overfitting", "Memorizes the training set"],
+            ["Regularization", "Penalizes large weights"],
+          ],
+          hint: "Each term has a specific role.",
+          explanation: "Foundational ML vocabulary.",
+        },
+        {
+          prompt: "Pair each loss with its task.",
+          pairs: [
+            ["Cross-entropy", "Multi-class classification"],
+            ["MSE", "Regression"],
+            ["Hinge loss", "Margin-based classification"],
+            ["KL divergence", "Distribution matching"],
+            ["Binary cross-entropy", "Two-class classification"],
+          ],
+          hint: "Pick loss based on prediction type.",
+          explanation: "Loss families align with prediction type.",
+        },
+      ]);
+    }
+    case "attackVectorMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each attack with its primary defense.",
+          pairs: [
+            ["Phishing", "User training"],
+            ["SQL injection", "Parameterized queries"],
+            ["XSS", "Output escaping"],
+            ["Brute force", "Rate limiting"],
+            ["MITM", "TLS/HTTPS"],
+          ],
+          hint: "Defenses target the attack mechanism.",
+          explanation: "Each attack has a canonical mitigation.",
+        },
+        {
+          prompt: "Pair each attack with its category.",
+          pairs: [
+            ["Ransomware", "Malware"],
+            ["DNS spoofing", "Network attack"],
+            ["Credential stuffing", "Account takeover"],
+            ["Zero-day", "Unknown vulnerability"],
+            ["Social engineering", "Human exploit"],
+          ],
+          hint: "Group by attack mechanism.",
+          explanation: "Standard cybersecurity taxonomy.",
+        },
+      ]);
+    }
+    case "joinTypeMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each SQL join with what it returns.",
+          pairs: [
+            ["INNER JOIN", "Rows matching in both tables"],
+            ["LEFT JOIN", "All rows from left; matched right"],
+            ["RIGHT JOIN", "All rows from right; matched left"],
+            ["FULL OUTER JOIN", "All rows from both sides"],
+            ["CROSS JOIN", "Cartesian product"],
+          ],
+          hint: "Think rows kept from each table.",
+          explanation: "Standard relational JOIN semantics.",
+        },
+        {
+          prompt: "Pair each SQL clause with its purpose.",
+          pairs: [
+            ["WHERE", "Filter rows"],
+            ["GROUP BY", "Aggregate by key"],
+            ["HAVING", "Filter aggregates"],
+            ["ORDER BY", "Sort results"],
+            ["LIMIT", "Cap row count"],
+          ],
+          hint: "Clauses run in a fixed logical order.",
+          explanation: "Logical execution order: FROM → WHERE → GROUP → HAVING → SELECT → ORDER → LIMIT.",
+        },
+      ]);
+    }
+    case "controllerMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each robot controller with its use.",
+          pairs: [
+            ["PID", "Closed-loop set-point tracking"],
+            ["Bang-bang", "On/off thermostat-style control"],
+            ["State machine", "Discrete behavior sequencing"],
+            ["Model-predictive", "Plan over a future horizon"],
+            ["Open-loop", "No sensor feedback"],
+          ],
+          hint: "Match controller style to task.",
+          explanation: "Each controller fits a class of problems.",
+        },
+        {
+          prompt: "Pair each sensor with its measurement.",
+          pairs: [
+            ["IMU", "Acceleration & rotation"],
+            ["LIDAR", "Distance to obstacles"],
+            ["Encoder", "Wheel rotation"],
+            ["Camera", "Visual scene"],
+            ["GPS", "Global position"],
+          ],
+          hint: "Each sensor reports a physical quantity.",
+          explanation: "Common robotics sensor lineup.",
+        },
+      ]);
+    }
+    case "httpResponseMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each HTTP status code with its meaning.",
+          pairs: [
+            ["200", "OK"],
+            ["301", "Moved Permanently"],
+            ["404", "Not Found"],
+            ["500", "Server Error"],
+            ["401", "Unauthorized"],
+          ],
+          hint: "2xx success, 3xx redirect, 4xx client, 5xx server.",
+          explanation: "Standard HTTP status families.",
+        },
+        {
+          prompt: "Pair each status code with its category.",
+          pairs: [
+            ["201", "Success (Created)"],
+            ["304", "Cache (Not Modified)"],
+            ["403", "Client error (Forbidden)"],
+            ["429", "Client error (Too Many Requests)"],
+            ["502", "Server error (Bad Gateway)"],
+          ],
+          hint: "First digit signals the family.",
+          explanation: "HTTP groups statuses by first digit.",
+        },
+      ]);
+    }
+    case "restVerbMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each REST verb with its action.",
+          pairs: [
+            ["GET", "Read a resource"],
+            ["POST", "Create a resource"],
+            ["PUT", "Replace a resource"],
+            ["PATCH", "Partially update"],
+            ["DELETE", "Remove a resource"],
+          ],
+          hint: "Each verb maps to CRUD.",
+          explanation: "Standard REST → CRUD mapping.",
+        },
+        {
+          prompt: "Pair each verb with its idempotency.",
+          pairs: [
+            ["GET", "Idempotent + safe"],
+            ["PUT", "Idempotent"],
+            ["DELETE", "Idempotent"],
+            ["POST", "Not idempotent"],
+            ["PATCH", "Not always idempotent"],
+          ],
+          hint: "Idempotent = same result on retry.",
+          explanation: "REST verb semantics around retries.",
+        },
+      ]);
+    }
+    case "tcpHandshakeOrder": {
+      return bankReorder(m, difficulty, [
+        {
+          prompt: "Order the steps of a TCP 3-way handshake.",
+          order: ["Client sends SYN", "Server responds SYN-ACK", "Client sends ACK", "Connection established"],
+          hint: "Three packets establish a session.",
+          hints: ["SYN starts it.", "ACK acknowledges the server."],
+          explanation: "SYN → SYN-ACK → ACK opens a TCP connection.",
+        },
+        {
+          prompt: "Order the steps of a TCP connection teardown.",
+          order: ["Client sends FIN", "Server ACKs FIN", "Server sends FIN", "Client ACKs FIN", "Connection closed"],
+          hint: "Each side closes its own half.",
+          hints: ["FIN signals half-close.", "Both sides FIN and ACK."],
+          explanation: "Four-way teardown — each side independently closes.",
+        },
+      ]);
+    }
+    case "flipFlopMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each flip-flop with its behavior.",
+          pairs: [
+            ["SR", "Set/Reset latch"],
+            ["D", "Captures input on clock edge"],
+            ["JK", "Toggles when both inputs high"],
+            ["T", "Toggles every clock when T = 1"],
+            ["Latch", "Level-sensitive, no clock edge"],
+          ],
+          hint: "Each flip-flop responds differently to inputs.",
+          explanation: "Foundational sequential logic elements.",
+        },
+        {
+          prompt: "Pair each register type with its use.",
+          pairs: [
+            ["Shift register", "Serial ↔ parallel conversion"],
+            ["Counter", "Counts clock pulses"],
+            ["Buffer register", "Temporarily stores data"],
+            ["Accumulator", "Holds ALU results"],
+            ["Status register", "Carries CPU flags"],
+          ],
+          hint: "Match register style to function.",
+          explanation: "Each register category serves a digital-system role.",
+        },
+      ]);
+    }
+    case "gearTrainSpeed": {
+      const inputRpm = pick([60, 90, 120, 180, 240, 300] as const);
+      const teethIn = pick([10, 12, 15, 20] as const);
+      const teethOut = pick([20, 24, 30, 36, 40, 60] as const);
+      const ans = (inputRpm * teethIn) / teethOut;
+      return numpadEng(
+        m,
+        difficulty,
+        `Input gear (${teethIn} teeth) at ${inputRpm} rpm drives output gear (${teethOut} teeth). Find output rpm.`,
+        { kind: "icon", icon: m.emoji, title: `${teethIn}T → ${teethOut}T`, subtitle: "Gear ratio · ω₁N₁ = ω₂N₂" },
+        String(ans),
+        "Conservation of teeth-rpm: ω₁·N₁ = ω₂·N₂.",
+        [`ratio = ${teethIn}/${teethOut}.`, `output = ${inputRpm} × ${teethIn} / ${teethOut}.`],
+        `Output rpm = ${inputRpm} × ${teethIn} / ${teethOut} = ${ans}.`,
+      );
+    }
+    case "parallelResistance": {
+      const variants = [
+        { r1: 6, r2: 3, answer: "2" },
+        { r1: 10, r2: 10, answer: "5" },
+        { r1: 12, r2: 4, answer: "3" },
+        { r1: 8, r2: 8, answer: "4" },
+        { r1: 20, r2: 5, answer: "4" },
+        { r1: 6, r2: 12, answer: "4" },
+      ];
+      const v = pick(variants);
+      return numpadEng(
+        m,
+        difficulty,
+        `Two resistors in parallel: R₁ = ${v.r1} Ω, R₂ = ${v.r2} Ω. Find R_eq.`,
+        { kind: "icon", icon: m.emoji, title: `${v.r1} Ω ∥ ${v.r2} Ω`, subtitle: "1/R = 1/R₁ + 1/R₂" },
+        v.answer,
+        "Use 1/R_eq = 1/R₁ + 1/R₂.",
+        [`Sum reciprocals: 1/${v.r1} + 1/${v.r2}.`, `Invert to get R_eq.`],
+        `R_eq = (${v.r1} · ${v.r2}) / (${v.r1} + ${v.r2}) = ${v.answer} Ω.`,
+      );
+    }
+    case "loadTypeSort": {
+      return bankSort(m, difficulty, [
+        {
+          prompt: "Sort each load by its structural type.",
+          categories: ["Dead", "Live", "Wind", "Snow"],
+          items: [
+            { label: "Self-weight of the beam", category: "Dead" },
+            { label: "Fixed equipment", category: "Dead" },
+            { label: "People walking", category: "Live" },
+            { label: "Furniture & storage", category: "Live" },
+            { label: "Lateral gust on facade", category: "Wind" },
+            { label: "Uplift on roof", category: "Wind" },
+            { label: "Snowpack on flat roof", category: "Snow" },
+            { label: "Drifted snow at parapet", category: "Snow" },
+          ],
+          hint: "Permanent vs occupant vs climate.",
+          hints: ["Live loads can change.", "Wind acts laterally and uplift."],
+          explanation: "Structural codes classify loads by source and duration.",
+        },
+      ]);
+    }
+    case "flightForcesMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each flight force with its cause.",
+          pairs: [
+            ["Lift", "Wing pressure difference"],
+            ["Weight", "Gravity"],
+            ["Thrust", "Engine output"],
+            ["Drag", "Air resistance"],
+          ],
+          hint: "Four classic forces balance in level flight.",
+          explanation: "In steady flight: lift = weight; thrust = drag.",
+        },
+        {
+          prompt: "Pair each axis of motion with its control surface.",
+          pairs: [
+            ["Pitch", "Elevator"],
+            ["Roll", "Ailerons"],
+            ["Yaw", "Rudder"],
+            ["Flap setting", "Flaps"],
+          ],
+          hint: "Each axis has a primary surface.",
+          explanation: "Aircraft control is split across three principal axes.",
+        },
+      ]);
+    }
+    case "actuatorTypeMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each actuator with its drive medium.",
+          pairs: [
+            ["DC motor", "Electricity"],
+            ["Hydraulic cylinder", "Pressurized fluid"],
+            ["Pneumatic cylinder", "Compressed air"],
+            ["Servo", "Electric + feedback"],
+            ["Piezo actuator", "Voltage-induced strain"],
+          ],
+          hint: "Match actuator to its energy source.",
+          explanation: "Each actuator class converts a different energy source to motion.",
+        },
+        {
+          prompt: "Pair each actuator with its typical task.",
+          pairs: [
+            ["Stepper motor", "Precise positioning"],
+            ["Solenoid", "Quick latch / release"],
+            ["Linear actuator", "Push/pull motion"],
+            ["Gripper", "Object pickup"],
+            ["Brushless motor", "High-speed drive"],
+          ],
+          hint: "Match the right tool to the task.",
+          explanation: "Common end-effector and drive options in robotics.",
+        },
+      ]);
+    }
+    case "bridgeTypeMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each bridge type with its primary load path.",
+          pairs: [
+            ["Beam", "Bending in the deck"],
+            ["Truss", "Tension and compression in members"],
+            ["Arch", "Compression along the arch"],
+            ["Suspension", "Tension in cables"],
+            ["Cable-stayed", "Tension in cables to a tower"],
+          ],
+          hint: "Each form routes load differently.",
+          explanation: "Bridge form follows the path of force flow.",
+        },
+        {
+          prompt: "Pair each bridge type with a famous example.",
+          pairs: [
+            ["Suspension", "Golden Gate Bridge"],
+            ["Cable-stayed", "Millau Viaduct"],
+            ["Arch", "Sydney Harbour Bridge"],
+            ["Truss", "Forth Rail Bridge"],
+            ["Beam", "Many highway overpasses"],
+          ],
+          hint: "Famous bridges illustrate each style.",
+          explanation: "Iconic bridges showcase each structural family.",
+        },
+      ]);
+    }
+    case "materialPropertySort": {
+      return bankSort(m, difficulty, [
+        {
+          prompt: "Sort each material by its dominant property.",
+          categories: ["Ductile", "Brittle", "Elastic", "Insulator"],
+          items: [
+            { label: "Copper wire", category: "Ductile" },
+            { label: "Mild steel", category: "Ductile" },
+            { label: "Cast iron", category: "Brittle" },
+            { label: "Ceramic tile", category: "Brittle" },
+            { label: "Natural rubber", category: "Elastic" },
+            { label: "Spring steel", category: "Elastic" },
+            { label: "Glass fiber", category: "Insulator" },
+            { label: "Polyethylene", category: "Insulator" },
+          ],
+          hint: "Each material maps to one dominant trait.",
+          hints: ["Ductile yields before failure.", "Brittle fails suddenly."],
+          explanation: "Material families are characterized by their mechanical behavior.",
+        },
+      ]);
+    }
+    case "seriesParallelCalc": {
+      const variants = [
+        { type: "series", r1: 4, r2: 6, answer: "10" },
+        { type: "series", r1: 7, r2: 8, answer: "15" },
+        { type: "parallel", r1: 6, r2: 3, answer: "2" },
+        { type: "parallel", r1: 12, r2: 4, answer: "3" },
+        { type: "parallel", r1: 10, r2: 10, answer: "5" },
+        { type: "series", r1: 5, r2: 5, answer: "10" },
+      ] as const;
+      const v = pick(variants);
+      const expression = v.type === "series" ? `${v.r1} + ${v.r2}` : `${v.r1} ∥ ${v.r2}`;
+      return numpadEng(
+        m,
+        difficulty,
+        `R₁ = ${v.r1} Ω, R₂ = ${v.r2} Ω in ${v.type}. Find R_eq.`,
+        { kind: "icon", icon: m.emoji, title: expression, subtitle: v.type === "series" ? "R_eq = R₁ + R₂" : "1/R_eq = 1/R₁ + 1/R₂" },
+        v.answer,
+        v.type === "series" ? "Series: add resistances." : "Parallel: add reciprocals, then invert.",
+        v.type === "series" ? [`${v.r1} + ${v.r2}.`] : [`Sum reciprocals.`, `Invert the sum.`],
+        v.type === "series"
+          ? `R_eq = ${v.r1} + ${v.r2} = ${v.answer} Ω.`
+          : `R_eq = (${v.r1} · ${v.r2}) / (${v.r1} + ${v.r2}) = ${v.answer} Ω.`,
+      );
+    }
+    case "vModelPhase": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each V-model phase with its verification step.",
+          pairs: [
+            ["Requirements", "Acceptance testing"],
+            ["System design", "System testing"],
+            ["Architectural design", "Integration testing"],
+            ["Module design", "Unit testing"],
+            ["Coding", "Code review"],
+          ],
+          hint: "Left side designs; right side verifies the same level.",
+          explanation: "V-model pairs each design level with its test level.",
+        },
+        {
+          prompt: "Pair each lifecycle artifact with its phase.",
+          pairs: [
+            ["URS document", "Requirements"],
+            ["SRS document", "System design"],
+            ["HLD document", "Architectural design"],
+            ["LLD document", "Module design"],
+            ["Test plan", "Verification planning"],
+          ],
+          hint: "Each phase produces signature artifacts.",
+          explanation: "V-model is artifact-driven.",
+        },
+      ]);
+    }
+    case "designPhaseOrder": {
+      return bankReorder(m, difficulty, [
+        {
+          prompt: "Order the 5 design-thinking phases.",
+          order: ["Empathize", "Define", "Ideate", "Prototype", "Test"],
+          hint: "Empathy first, testing last.",
+          hints: ["Define the problem before brainstorming.", "Prototype before testing."],
+          explanation: "Stanford d.school's classic design-thinking sequence.",
+        },
+        {
+          prompt: "Order the steps of an iterative product cycle.",
+          order: ["Discover users", "Frame the problem", "Sketch concepts", "Build a prototype", "Run tests", "Iterate"],
+          hint: "Discovery feeds framing; testing feeds iteration.",
+          hints: ["Sketching precedes building.", "Iterate on what tests reveal."],
+          explanation: "Iterative loops feed insight back into discovery.",
+        },
+      ]);
+    }
+    case "divisibilityRules": {
+      const divisors = [2, 3, 4, 5, 9, 10] as const;
+      const d = pick(divisors);
+      const multiplier = rand(12, 60);
+      const correct = d * multiplier;
+      const nonMultiples: number[] = [];
+      while (nonMultiples.length < 3) {
+        const candidate = rand(20, 999);
+        if (candidate % d !== 0 && !nonMultiples.includes(candidate) && candidate !== correct) {
+          nonMultiples.push(candidate);
+        }
+      }
+      const rules: Record<number, string> = {
+        2: "Last digit is even.",
+        3: "Digit sum is divisible by 3.",
+        4: "Last two digits divisible by 4.",
+        5: "Last digit is 0 or 5.",
+        9: "Digit sum is divisible by 9.",
+        10: "Last digit is 0.",
+      };
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Which number is divisible by ${d}?`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: `÷ ${d}`,
+            subtitle: "Apply the divisibility rule",
+          }),
+          hint: rules[d]!,
+          hints: [rules[d]!, `Test ${d} × 1, ${d} × 2, ...`],
+          explanation: `${correct} = ${d} × ${multiplier}; rule: ${rules[d]}`,
+        },
+        String(correct),
+        nonMultiples.map((n) => String(n)),
+      );
+    }
+    case "longDivisionRemainder": {
+      const divisor = rand(3, 9);
+      const quotient = rand(20, 99);
+      const remainder = rand(1, divisor - 1);
+      const dividend = quotient * divisor + remainder;
+      return numpadEng(
+        m,
+        difficulty,
+        `Compute ${dividend} ÷ ${divisor}. What is the remainder?`,
+        { kind: "icon", icon: m.emoji, title: `${dividend} ÷ ${divisor}`, subtitle: "Remainder" },
+        remainder,
+        "Divide step by step; the leftover is the remainder.",
+        [`${dividend} ÷ ${divisor} ≈ ${quotient} with leftover.`, `Check: ${quotient} × ${divisor} = ${quotient * divisor}.`],
+        `${dividend} = ${divisor} × ${quotient} + ${remainder}; remainder = ${remainder}.`,
+      );
+    }
+    case "inequalitySolve": {
+      const variants = [
+        { prompt: "Solve: 2x + 3 < 11.", answer: "x < 4", distractors: ["x > 4", "x ≤ 4", "x ≥ 4"], reason: "Subtract 3, divide by 2." },
+        { prompt: "Solve: 3x − 5 ≥ 7.", answer: "x ≥ 4", distractors: ["x > 4", "x ≤ 4", "x < 4"], reason: "Add 5, divide by 3." },
+        { prompt: "Solve: −2x > 8.", answer: "x < −4", distractors: ["x > −4", "x < 4", "x > 4"], reason: "Dividing by negative flips the sign." },
+        { prompt: "Solve: 5 − x ≤ 1.", answer: "x ≥ 4", distractors: ["x ≤ 4", "x > 4", "x < 4"], reason: "Subtract 5, multiply by −1 (flips sign)." },
+        { prompt: "Solve: x/4 > 2.", answer: "x > 8", distractors: ["x ≥ 8", "x < 8", "x ≤ 8"], reason: "Multiply both sides by 4." },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", v.prompt, {
+            kind: "icon",
+            icon: m.emoji,
+            title: v.prompt.replace(/^Solve:\s*/, ""),
+            subtitle: "Linear inequality",
+          }),
+          hint: "Isolate x; flipping signs flips the inequality.",
+          hints: ["Treat like an equation.", "Flip the sign when multiplying/dividing by a negative."],
+          explanation: v.reason,
+        },
+        v.answer,
+        v.distractors,
+      );
+    }
+    case "triangleAreaCalc": {
+      const baseLen = pick([4, 5, 6, 8, 10, 12] as const);
+      const heightLen = pick([3, 4, 5, 6, 7, 9] as const);
+      const ans = (baseLen * heightLen) / 2;
+      return numpadEng(
+        m,
+        difficulty,
+        `Triangle with base ${baseLen} and height ${heightLen}. Find the area.`,
+        { kind: "icon", icon: m.emoji, title: `b = ${baseLen}, h = ${heightLen}`, subtitle: "A = ½ · b · h" },
+        String(ans),
+        "Multiply base × height, divide by 2.",
+        [`${baseLen} × ${heightLen} = ${baseLen * heightLen}.`, `Then ÷ 2 = ${ans}.`],
+        `A = ½ × ${baseLen} × ${heightLen} = ${ans}.`,
+      );
+    }
+    case "pythagoreanIdentity": {
+      const variants = [
+        { prompt: "If sin(θ) = 3/5 and θ is acute, find cos(θ).", answer: "4/5", distractors: ["3/5", "5/4", "5/3"], reason: "sin² + cos² = 1; cos² = 1 − 9/25 = 16/25." },
+        { prompt: "If cos(θ) = 5/13 (acute), find sin(θ).", answer: "12/13", distractors: ["5/13", "13/5", "13/12"], reason: "1 − 25/169 = 144/169." },
+        { prompt: "Simplify 1 − sin²(θ).", answer: "cos²(θ)", distractors: ["sin²(θ)", "1 − cos²(θ)", "2 cos(θ)"], reason: "From sin² + cos² = 1." },
+        { prompt: "Simplify sin²(θ) + cos²(θ).", answer: "1", distractors: ["0", "2", "sin(2θ)"], reason: "Fundamental identity." },
+        { prompt: "Simplify sec²(θ) − tan²(θ).", answer: "1", distractors: ["sin²", "cos²", "0"], reason: "Derived identity." },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", v.prompt, {
+            kind: "icon",
+            icon: m.emoji,
+            title: "sin² + cos² = 1",
+            subtitle: "Pythagorean identity",
+          }),
+          hint: "Use sin² + cos² = 1 (or derived versions).",
+          hints: ["Square the known ratio.", "Subtract from 1, then take √."],
+          explanation: v.reason,
+        },
+        v.answer,
+        v.distractors,
+      );
+    }
+    case "domainOfFunction": {
+      const variants = [
+        { prompt: "Find the domain of f(x) = √(x − 3).", answer: "x ≥ 3", distractors: ["x > 3", "x ≤ 3", "all real x"], reason: "Radicand must be ≥ 0." },
+        { prompt: "Find the domain of f(x) = 1 / (x − 2).", answer: "x ≠ 2", distractors: ["x > 2", "x < 2", "all real x"], reason: "Denominator cannot be 0." },
+        { prompt: "Find the domain of f(x) = ln(x).", answer: "x > 0", distractors: ["x ≥ 0", "x ≠ 0", "all real x"], reason: "Logs require strictly positive input." },
+        { prompt: "Find the domain of f(x) = √(4 − x²).", answer: "−2 ≤ x ≤ 2", distractors: ["x ≥ 2", "x ≤ −2", "all real x"], reason: "4 − x² ≥ 0 → |x| ≤ 2." },
+        { prompt: "Find the domain of f(x) = 1 / √(x + 1).", answer: "x > −1", distractors: ["x ≥ −1", "x < −1", "all real x"], reason: "Need x + 1 > 0 (strict, due to denominator)." },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", v.prompt, {
+            kind: "icon",
+            icon: m.emoji,
+            title: "Domain",
+            subtitle: "Pick the allowed inputs",
+          }),
+          hint: "Watch for square roots, divisions, and logs.",
+          hints: ["√: radicand ≥ 0.", "1/x: x ≠ 0.", "ln: x > 0."],
+          explanation: v.reason,
+        },
+        v.answer,
+        v.distractors,
+      );
+    }
+    case "riemannSumBasic": {
+      const variants = [
+        { fn: "f(x) = x", a: 0, b: 4, n: 4, type: "right", values: [1, 2, 3, 4], width: 1, expected: 10 },
+        { fn: "f(x) = x²", a: 0, b: 3, n: 3, type: "right", values: [1, 4, 9], width: 1, expected: 14 },
+        { fn: "f(x) = x + 1", a: 0, b: 4, n: 4, type: "right", values: [2, 3, 4, 5], width: 1, expected: 14 },
+        { fn: "f(x) = 2x", a: 0, b: 5, n: 5, type: "right", values: [2, 4, 6, 8, 10], width: 1, expected: 30 },
+      ];
+      const v = pick(variants);
+      return numpadEng(
+        m,
+        difficulty,
+        `Estimate ∫ from ${v.a} to ${v.b} of ${v.fn} using ${v.n} right rectangles of width ${v.width}.`,
+        { kind: "icon", icon: m.emoji, title: v.fn, subtitle: `${v.n} right rectangles, Δx = ${v.width}` },
+        v.expected,
+        "Sum f(x_i) · Δx for each rectangle.",
+        [`Heights: ${v.values.join(", ")}.`, `Sum × Δx = ${v.values.reduce((s, x) => s + x, 0) * v.width}.`],
+        `Right Riemann sum ≈ ${v.expected}.`,
+      );
+    }
+    case "correlationDirection": {
+      const variants = [
+        { describe: "More study hours, higher test score.", answer: "Positive", reason: "Both rise together." },
+        { describe: "More TV time, lower grades.", answer: "Negative", reason: "One increases as the other decreases." },
+        { describe: "Shoe size vs IQ.", answer: "None", reason: "No meaningful relationship." },
+        { describe: "Outdoor temperature vs ice-cream sales.", answer: "Positive", reason: "Both increase together." },
+        { describe: "Car age vs resale value.", answer: "Negative", reason: "Older usually means cheaper." },
+        { describe: "Birthday month vs height.", answer: "None", reason: "Unrelated variables." },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `${v.describe} What is the direction of correlation?`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: "Correlation",
+            subtitle: "Positive · Negative · None",
+          }),
+          hint: "Do both variables move together, opposite, or are they unrelated?",
+          hints: ["Positive: both up.", "Negative: one up, the other down."],
+          explanation: v.reason,
+        },
+        v.answer,
+        ["Positive", "Negative", "None"].filter((o) => o !== v.answer),
+      );
+    }
+    case "deMorganApply": {
+      const variants = [
+        { prompt: "¬(A ∧ B) equals?", answer: "¬A ∨ ¬B", distractors: ["¬A ∧ ¬B", "A ∨ B", "A ∧ B"], reason: "De Morgan: not-and = or-not." },
+        { prompt: "¬(A ∨ B) equals?", answer: "¬A ∧ ¬B", distractors: ["¬A ∨ ¬B", "A ∨ B", "A ∧ B"], reason: "De Morgan: not-or = and-not." },
+        { prompt: "¬(A ∧ ¬B) equals?", answer: "¬A ∨ B", distractors: ["A ∨ B", "¬A ∧ B", "A ∧ ¬B"], reason: "Apply De Morgan, then double-negate." },
+        { prompt: "Negate: \"All swans are white\".", answer: "Some swan is not white", distractors: ["No swans are white", "Some swan is white", "All swans are not white"], reason: "¬(∀x P) = ∃x ¬P." },
+        { prompt: "Negate: \"Some student passed\".", answer: "No student passed", distractors: ["Every student passed", "Some student failed", "Every student failed"], reason: "¬(∃x P) = ∀x ¬P." },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", v.prompt, {
+            kind: "icon",
+            icon: m.emoji,
+            title: "De Morgan",
+            subtitle: "Negate AND / OR / quantifiers",
+          }),
+          hint: "Negation flips ∧ ↔ ∨ and ∀ ↔ ∃.",
+          hints: ["¬(A ∧ B) = ¬A ∨ ¬B.", "¬(A ∨ B) = ¬A ∧ ¬B."],
+          explanation: v.reason,
+        },
+        v.answer,
+        v.distractors,
+      );
+    }
+    case "conditionalProbBasic": {
+      const variants = [
+        { prompt: "P(A and B) = 0.2, P(B) = 0.5. Find P(A|B).", answer: "0.4", reason: "P(A|B) = P(A∩B)/P(B) = 0.2/0.5." },
+        { prompt: "P(A and B) = 0.1, P(B) = 0.25. Find P(A|B).", answer: "0.4", reason: "0.1 / 0.25 = 0.4." },
+        { prompt: "P(A and B) = 0.3, P(B) = 0.6. Find P(A|B).", answer: "0.5", reason: "0.3 / 0.6 = 0.5." },
+        { prompt: "P(A and B) = 0.15, P(B) = 0.3. Find P(A|B).", answer: "0.5", reason: "0.15 / 0.3 = 0.5." },
+        { prompt: "P(A and B) = 0.18, P(B) = 0.6. Find P(A|B).", answer: "0.3", reason: "0.18 / 0.6 = 0.3." },
+      ];
+      const v = pick(variants);
+      return numpadEng(
+        m,
+        difficulty,
+        v.prompt,
+        { kind: "icon", icon: m.emoji, title: "P(A | B)", subtitle: "Conditional probability" },
+        v.answer,
+        "P(A|B) = P(A ∩ B) / P(B).",
+        ["Divide joint probability by P(B).", "Make sure P(B) > 0."],
+        v.reason,
+      );
+    }
+    case "primeFactorBuilder": {
+      return bankSort(m, difficulty, [
+        {
+          prompt: "Sort each number as prime or composite.",
+          categories: ["Prime", "Composite"],
+          items: [
+            { label: "7", category: "Prime" },
+            { label: "11", category: "Prime" },
+            { label: "13", category: "Prime" },
+            { label: "17", category: "Prime" },
+            { label: "9", category: "Composite" },
+            { label: "12", category: "Composite" },
+            { label: "15", category: "Composite" },
+            { label: "21", category: "Composite" },
+            { label: "25", category: "Composite" },
+          ],
+          hint: "Primes have only 1 and themselves as factors.",
+          hints: ["Composites have more than two divisors.", "1 is neither prime nor composite."],
+          explanation: "Definition: a prime has exactly two distinct positive divisors.",
+        },
+        {
+          prompt: "Sort each number into prime or composite.",
+          categories: ["Prime", "Composite"],
+          items: [
+            { label: "19", category: "Prime" },
+            { label: "23", category: "Prime" },
+            { label: "29", category: "Prime" },
+            { label: "31", category: "Prime" },
+            { label: "27", category: "Composite" },
+            { label: "33", category: "Composite" },
+            { label: "35", category: "Composite" },
+            { label: "39", category: "Composite" },
+            { label: "49", category: "Composite" },
+          ],
+          hint: "Check small prime divisors (2, 3, 5, 7).",
+          hints: ["Many in the 30s have small factors.", "49 = 7 × 7."],
+          explanation: "Trial divide by small primes up to √n.",
+        },
+      ]);
+    }
+    case "loanMonthlyBasic": {
+      const principal = pick([1200, 2400, 3600, 6000, 12000] as const);
+      const months = pick([6, 12, 24, 36] as const);
+      const ans = +(principal / months).toFixed(2);
+      return numpadEng(
+        m,
+        difficulty,
+        `Estimate the monthly payment for a $${principal} 0% loan over ${months} months.`,
+        { kind: "icon", icon: m.emoji, title: `$${principal} ÷ ${months}`, subtitle: "Monthly = total ÷ months" },
+        String(ans),
+        "Divide total by number of months.",
+        [`${principal} ÷ ${months} ≈ ${ans}.`, "Interest is ignored for this estimate."],
+        `Monthly ≈ $${principal} / ${months} = $${ans}.`,
+      );
+    }
+    case "enzymeFitMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each enzyme with its substrate.",
+          pairs: [
+            ["Amylase", "Starch"],
+            ["Lipase", "Lipids"],
+            ["Protease", "Proteins"],
+            ["Lactase", "Lactose"],
+            ["DNA polymerase", "DNA bases"],
+          ],
+          hint: "Enzymes are named after what they act on.",
+          explanation: "Each enzyme catalyzes a specific reaction with its substrate.",
+        },
+        {
+          prompt: "Pair each digestive enzyme with where it acts.",
+          pairs: [
+            ["Salivary amylase", "Mouth"],
+            ["Pepsin", "Stomach"],
+            ["Trypsin", "Small intestine"],
+            ["Maltase", "Small intestine brush border"],
+            ["Bile (not enzyme)", "Emulsifies fats in small intestine"],
+          ],
+          hint: "Digestion is staged across organs.",
+          explanation: "Enzymes are released at specific points in digestion.",
+        },
+      ]);
+    }
+    case "stateChangeOrder": {
+      return bankReorder(m, difficulty, [
+        {
+          prompt: "Order phase changes from coldest to hottest.",
+          order: ["Solid", "Liquid", "Gas", "Plasma"],
+          hint: "Add energy → particles move more.",
+          hints: ["Solids vibrate in place.", "Plasma is ionized gas."],
+          explanation: "Adding energy transitions matter through these four states.",
+        },
+        {
+          prompt: "Order the heating curve transitions of water.",
+          order: ["Melting", "Warming liquid", "Boiling", "Heating vapor"],
+          hint: "Heat first changes phase, then temperature.",
+          hints: ["Phase change is constant temperature.", "Heating between changes raises temperature."],
+          explanation: "Heating curve plateaus at melting and boiling points.",
+        },
+      ]);
+    }
+    case "momentumCalc": {
+      const mass = pick([2, 3, 5, 8, 10, 12, 15] as const);
+      const velocity = pick([2, 3, 4, 6, 8, 10, 12] as const);
+      const ans = mass * velocity;
+      return numpadEng(
+        m,
+        difficulty,
+        `An object has mass ${mass} kg and velocity ${velocity} m/s. Find its momentum.`,
+        { kind: "icon", icon: m.emoji, title: `m=${mass}, v=${velocity}`, subtitle: "p = m · v" },
+        String(ans),
+        "Momentum p = m · v.",
+        [`${mass} × ${velocity} = ${ans}.`, "Units: kg·m/s."],
+        `p = ${mass} × ${velocity} = ${ans} kg·m/s.`,
+      );
+    }
+    case "layersOfEarth": {
+      return bankReorder(m, difficulty, [
+        {
+          prompt: "Order Earth's layers from outermost to innermost.",
+          order: ["Crust", "Upper Mantle", "Lower Mantle", "Outer Core", "Inner Core"],
+          hint: "Outside to deep.",
+          hints: ["Crust is thin.", "Inner core is solid iron."],
+          explanation: "Compositional and mechanical layering of Earth.",
+        },
+      ]);
+    }
+    case "scientificMethodOrder": {
+      return bankReorder(m, difficulty, [
+        {
+          prompt: "Order the steps of the scientific method.",
+          order: ["Observe", "Question", "Hypothesize", "Experiment", "Analyze", "Conclude"],
+          hint: "Curiosity precedes the test.",
+          hints: ["Hypothesis comes before experiment.", "Conclusions come after analysis."],
+          explanation: "Iterative scientific inquiry.",
+        },
+        {
+          prompt: "Order the steps from inquiry to communication.",
+          order: ["Identify a problem", "Background research", "Form hypothesis", "Test the hypothesis", "Record data", "Share findings"],
+          hint: "Research before designing the test.",
+          hints: ["Hypothesis is testable.", "Findings are peer-reviewed."],
+          explanation: "Sharing findings closes the loop.",
+        },
+      ]);
+    }
+    case "starLifecycleOrder": {
+      return bankReorder(m, difficulty, [
+        {
+          prompt: "Order the life stages of a Sun-like star.",
+          order: ["Nebula", "Protostar", "Main Sequence", "Red Giant", "Planetary Nebula", "White Dwarf"],
+          hint: "Dust → fusion → exhaustion.",
+          hints: ["Main sequence burns hydrogen.", "Sun-like stars end as white dwarfs."],
+          explanation: "Lifecycle of a low-to-medium-mass star.",
+        },
+        {
+          prompt: "Order the life stages of a massive star.",
+          order: ["Nebula", "Protostar", "Main Sequence", "Red Supergiant", "Supernova", "Neutron Star or Black Hole"],
+          hint: "Massive stars die explosively.",
+          hints: ["Supergiants are huge.", "Remnant depends on remaining mass."],
+          explanation: "High-mass stars end as supernova remnants.",
+        },
+      ]);
+    }
+    case "geneticTermMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each genetics term with its meaning.",
+          pairs: [
+            ["Allele", "Version of a gene"],
+            ["Locus", "Gene's chromosome location"],
+            ["Genotype", "Genetic makeup"],
+            ["Phenotype", "Observed trait"],
+            ["Heterozygous", "Two different alleles"],
+          ],
+          hint: "Vocabulary of inheritance.",
+          explanation: "Core Mendelian genetics vocabulary.",
+        },
+        {
+          prompt: "Pair each term with its definition.",
+          pairs: [
+            ["Dominant", "Masks the other allele"],
+            ["Recessive", "Hidden unless homozygous"],
+            ["Homozygous", "Same alleles"],
+            ["Carrier", "Heterozygous for recessive disease"],
+            ["Pedigree", "Family inheritance diagram"],
+          ],
+          hint: "Inheritance patterns.",
+          explanation: "Heredity vocabulary across alleles and tools.",
+        },
+      ]);
+    }
+    case "biomeMatchClimate": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each biome with its climate.",
+          pairs: [
+            ["Tundra", "Cold, dry"],
+            ["Desert", "Hot, arid"],
+            ["Tropical Rainforest", "Hot, wet year-round"],
+            ["Taiga", "Cold, conifer forest"],
+            ["Savanna", "Tropical grassland"],
+          ],
+          hint: "Match temperature and precipitation.",
+          explanation: "Climate drives biome distribution.",
+        },
+        {
+          prompt: "Pair each biome with a defining species.",
+          pairs: [
+            ["Tundra", "Caribou"],
+            ["Desert", "Cactus"],
+            ["Rainforest", "Toucan"],
+            ["Taiga", "Pine tree"],
+            ["Coral reef", "Clownfish"],
+          ],
+          hint: "Iconic species per biome.",
+          explanation: "Biomes share distinctive species.",
+        },
+      ]);
+    }
+    case "organSystemFunction": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each organ system with its primary function.",
+          pairs: [
+            ["Circulatory", "Transports blood"],
+            ["Respiratory", "Gas exchange"],
+            ["Digestive", "Breaks down food"],
+            ["Nervous", "Sends signals"],
+            ["Endocrine", "Releases hormones"],
+          ],
+          hint: "Each system has a unique job.",
+          explanation: "Core human body systems and their roles.",
+        },
+        {
+          prompt: "Pair each system with an example organ.",
+          pairs: [
+            ["Circulatory", "Heart"],
+            ["Respiratory", "Lungs"],
+            ["Digestive", "Stomach"],
+            ["Nervous", "Brain"],
+            ["Excretory", "Kidney"],
+          ],
+          hint: "Each system features one signature organ.",
+          explanation: "Organs centralize each body system's work.",
+        },
+      ]);
+    }
+    case "renewableNonrenewableSort": {
+      return bankSort(m, difficulty, [
+        {
+          prompt: "Sort each energy source.",
+          categories: ["Renewable", "Nonrenewable"],
+          items: [
+            { label: "Solar", category: "Renewable" },
+            { label: "Wind", category: "Renewable" },
+            { label: "Hydro", category: "Renewable" },
+            { label: "Geothermal", category: "Renewable" },
+            { label: "Biomass", category: "Renewable" },
+            { label: "Coal", category: "Nonrenewable" },
+            { label: "Natural Gas", category: "Nonrenewable" },
+            { label: "Oil", category: "Nonrenewable" },
+            { label: "Nuclear (uranium)", category: "Nonrenewable" },
+          ],
+          hint: "Renewable replenishes on human time scales.",
+          hints: ["Fossil fuels take millions of years.", "Sunlight and wind are abundant."],
+          explanation: "Renewables replenish quickly; fossil/nuclear fuels do not.",
+        },
+      ]);
+    }
+    case "truthyFalsyChoice": {
+      const variants = [
+        { prompt: "Which value is falsy in JavaScript?", answer: "0", distractors: ["'0'", "'false'", "[]"], reason: "0 is one of the seven falsy values; the rest are truthy." },
+        { prompt: "Which value is falsy in JavaScript?", answer: "''", distractors: ["' '", "[]", "{}"], reason: "Empty string is falsy; ' ' has a space and is truthy." },
+        { prompt: "Which value is falsy in JavaScript?", answer: "null", distractors: ["'null'", "{}", "[0]"], reason: "null is falsy; quoted 'null' is truthy." },
+        { prompt: "Which value is falsy in JavaScript?", answer: "NaN", distractors: ["Infinity", "-1", "'NaN'"], reason: "NaN is falsy; -1 and Infinity are truthy." },
+        { prompt: "Which value is falsy in JavaScript?", answer: "undefined", distractors: ["'undefined'", "0.1", "[]"], reason: "undefined is falsy; the string is truthy." },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", v.prompt, {
+            kind: "icon",
+            icon: m.emoji,
+            title: "Truthy / Falsy",
+            subtitle: "JavaScript coercion",
+          }),
+          hint: "Falsy: false, 0, '', null, undefined, NaN, 0n.",
+          hints: ["Empty array is truthy.", "Quoted strings of any non-empty length are truthy."],
+          explanation: v.reason,
+        },
+        v.answer,
+        v.distractors,
+      );
+    }
+    case "recursionBaseCase": {
+      const variants = [
+        {
+          lines: [
+            "def fact(n):",
+            "    return n * fact(n - 1)",
+          ],
+          answer: "Add: if n <= 1: return 1",
+          distractors: ["Remove the return", "Pass n directly", "Use n + 1"],
+          reason: "Without a base case the recursion never terminates.",
+        },
+        {
+          lines: [
+            "def sumTo(n):",
+            "    return n + sumTo(n - 1)",
+          ],
+          answer: "Add: if n <= 0: return 0",
+          distractors: ["Add: if n: return", "Increase n", "Print and return"],
+          reason: "Recursion needs a base case to halt.",
+        },
+        {
+          lines: [
+            "def fib(n):",
+            "    return fib(n-1) + fib(n-2)",
+          ],
+          answer: "Add: if n < 2: return n",
+          distractors: ["Add: if n == 100: return", "Multiply instead of add", "Cache results only"],
+          reason: "fib must terminate at n = 0 and n = 1.",
+        },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", "Which line is the correct base case?", {
+            kind: "code",
+            icon: m.emoji,
+            title: "Pick the base case",
+            subtitle: "Recursion needs a stop",
+            code: { lines: v.lines },
+          }),
+          hint: "A base case is a condition that returns without recursing.",
+          hints: ["The smallest input should not recurse.", "Without a base case you get infinite recursion."],
+          explanation: v.reason,
+        },
+        v.answer,
+        v.distractors,
+      );
+    }
+    case "trainTestSplitChoice": {
+      const variants = [
+        {
+          prompt: "You have a tabular dataset of 10,000 customers. Which is the most robust validation strategy?",
+          answer: "K-fold cross-validation",
+          distractors: ["Use all data for training", "70/30 single random split", "Use the test set during training"],
+          reason: "K-fold gives more stable performance estimates than a single split.",
+        },
+        {
+          prompt: "You're predicting next month's sales. Which validation is correct?",
+          answer: "Time-based split (train on past, test on future)",
+          distractors: ["Random split", "K-fold cross-validation", "Train on all data"],
+          reason: "Time series must respect temporal ordering to avoid leakage.",
+        },
+        {
+          prompt: "Your dataset has 95% class A and 5% class B. Which is correct?",
+          answer: "Stratified split",
+          distractors: ["Random unstratified split", "Drop minority class", "Use only class A for training"],
+          reason: "Stratification keeps class proportions balanced across splits.",
+        },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", v.prompt, {
+            kind: "icon",
+            icon: m.emoji,
+            title: "Validation",
+            subtitle: "Pick the right split",
+          }),
+          hint: "Honor the data's structure when splitting.",
+          hints: ["Avoid leakage.", "Preserve class balance and time order."],
+          explanation: v.reason,
+        },
+        v.answer,
+        v.distractors,
+      );
+    }
+    case "encryptionTypeMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each algorithm with its crypto class.",
+          pairs: [
+            ["AES", "Symmetric"],
+            ["RSA", "Asymmetric"],
+            ["SHA-256", "Hash"],
+            ["ECDSA", "Asymmetric (signing)"],
+            ["HMAC", "Keyed hash (MAC)"],
+          ],
+          hint: "Categorize by key model.",
+          explanation: "Crypto primitives split into symmetric, asymmetric, and hash families.",
+        },
+        {
+          prompt: "Pair each primitive with its primary use.",
+          pairs: [
+            ["AES", "Bulk encryption"],
+            ["RSA", "Key exchange / signatures"],
+            ["SHA-256", "Integrity checks"],
+            ["bcrypt", "Password hashing"],
+            ["TLS", "Secure transport"],
+          ],
+          hint: "Each primitive has a primary use case.",
+          explanation: "Choose the primitive to match the security goal.",
+        },
+      ]);
+    }
+    case "normalFormOrder": {
+      return bankReorder(m, difficulty, [
+        {
+          prompt: "Order the normalization forms from weakest to strongest.",
+          order: ["1NF", "2NF", "3NF", "BCNF", "4NF"],
+          hint: "Each form removes a specific anomaly.",
+          hints: ["1NF removes repeating groups.", "BCNF refines 3NF for every functional dependency."],
+          explanation: "Database normalization tightens dependency rules at each step.",
+        },
+        {
+          prompt: "Order the design steps for a normalized schema.",
+          order: ["Identify entities", "Remove repeating groups (1NF)", "Remove partial dependencies (2NF)", "Remove transitive dependencies (3NF)", "Validate with sample queries"],
+          hint: "Modeling precedes normalization.",
+          hints: ["Then test with queries.", "Each step refines the schema."],
+          explanation: "Standard normalization workflow.",
+        },
+      ]);
+    }
+    case "robotSensorFusion": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each sensor with its fusion role.",
+          pairs: [
+            ["IMU", "Short-term orientation"],
+            ["GPS", "Long-term absolute position"],
+            ["Wheel encoder", "Local odometry"],
+            ["LIDAR", "Obstacle mapping"],
+            ["Camera", "Semantic recognition"],
+          ],
+          hint: "Each sensor contributes different information.",
+          explanation: "Robust localization combines sensors that complement each other.",
+        },
+        {
+          prompt: "Pair each filter with its purpose.",
+          pairs: [
+            ["Kalman filter", "Linear Gaussian estimation"],
+            ["Extended Kalman", "Nonlinear motion models"],
+            ["Particle filter", "Non-Gaussian belief"],
+            ["Complementary filter", "IMU sensor fusion"],
+            ["Mahony / Madgwick", "Orientation from IMU"],
+          ],
+          hint: "Pick the filter that fits the model.",
+          explanation: "Sensor fusion filters trade complexity for assumptions.",
+        },
+      ]);
+    }
+    case "domEventMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each DOM event with its trigger.",
+          pairs: [
+            ["click", "Mouse button pressed and released"],
+            ["input", "Value of an input changes"],
+            ["submit", "Form submission"],
+            ["keydown", "Key pressed down"],
+            ["load", "Page or resource finished loading"],
+          ],
+          hint: "Each event maps to a user or browser action.",
+          explanation: "Standard DOM event vocabulary.",
+        },
+        {
+          prompt: "Pair each event with where it bubbles from.",
+          pairs: [
+            ["mouseenter", "Doesn't bubble"],
+            ["mouseover", "Bubbles"],
+            ["focus", "Doesn't bubble"],
+            ["focusin", "Bubbles"],
+            ["change", "Bubbles"],
+          ],
+          hint: "Some events are non-bubbling.",
+          explanation: "Bubbling controls how event handlers propagate.",
+        },
+      ]);
+    }
+    case "apiPayloadFormatMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each payload format with its typical use.",
+          pairs: [
+            ["JSON", "Modern REST APIs"],
+            ["XML", "Legacy / enterprise (SOAP)"],
+            ["form-urlencoded", "Classic HTML forms"],
+            ["multipart/form-data", "File uploads"],
+            ["protobuf", "Compact binary RPC"],
+          ],
+          hint: "Each format trades off readability and size.",
+          explanation: "Payload format choice depends on the use case.",
+        },
+        {
+          prompt: "Pair each Content-Type with its parser.",
+          pairs: [
+            ["application/json", "JSON.parse"],
+            ["application/xml", "XML parser"],
+            ["text/csv", "CSV parser"],
+            ["multipart/form-data", "Multipart parser"],
+            ["application/x-www-form-urlencoded", "Form parser"],
+          ],
+          hint: "Servers parse by Content-Type.",
+          explanation: "Each parser handles a specific encoding.",
+        },
+      ]);
+    }
+    case "ipClassMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each IPv4 class with its range.",
+          pairs: [
+            ["A", "1.0.0.0 – 126.255.255.255"],
+            ["B", "128.0.0.0 – 191.255.255.255"],
+            ["C", "192.0.0.0 – 223.255.255.255"],
+            ["D (multicast)", "224.0.0.0 – 239.255.255.255"],
+            ["E (reserved)", "240.0.0.0 – 255.255.255.254"],
+          ],
+          hint: "Look at the first octet.",
+          explanation: "Classful IPv4 ranges are defined by the leading octet.",
+        },
+        {
+          prompt: "Pair each reserved range with its purpose.",
+          pairs: [
+            ["10.0.0.0/8", "Private (large)"],
+            ["172.16.0.0/12", "Private (medium)"],
+            ["192.168.0.0/16", "Private (small)"],
+            ["127.0.0.0/8", "Loopback"],
+            ["169.254.0.0/16", "Link-local"],
+          ],
+          hint: "Some ranges never route on the public Internet.",
+          explanation: "Reserved IPv4 ranges for specific roles.",
+        },
+      ]);
+    }
+    case "numberSystemConvert": {
+      const decimal = rand(5, 63);
+      const binary = decimal.toString(2);
+      return numpadEng(
+        m,
+        difficulty,
+        `Convert binary ${binary} to decimal.`,
+        { kind: "binary", icon: m.emoji, title: binary, subtitle: "Binary → decimal", bits: binary.split("").map((b) => Number(b)) },
+        decimal,
+        "Each bit is a power of two.",
+        [`Rightmost bit is 2⁰ = 1.`, `Add the place values for each 1 bit.`],
+        `${binary}₂ = ${decimal}.`,
+      );
+    }
+    case "leverMechAdvantage": {
+      const effortArm = pick([6, 8, 10, 12, 15, 20] as const);
+      const loadArm = pick([2, 3, 4, 5] as const);
+      const ans = +(effortArm / loadArm).toFixed(2);
+      return numpadEng(
+        m,
+        difficulty,
+        `Effort arm = ${effortArm} cm, load arm = ${loadArm} cm. Find the mechanical advantage.`,
+        { kind: "icon", icon: m.emoji, title: `effort=${effortArm} | load=${loadArm}`, subtitle: "MA = effort arm / load arm" },
+        String(ans),
+        "MA = effort arm length ÷ load arm length.",
+        [`${effortArm} ÷ ${loadArm} = ${ans}.`, "MA > 1 means the lever amplifies effort."],
+        `MA = ${effortArm}/${loadArm} = ${ans}.`,
+      );
+    }
+    case "kirchhoffCurrentChoice": {
+      const variants = [
+        {
+          prompt: "Currents flowing into a node: 3 A, 2 A. Currents out: ? + 1 A. Find the missing current.",
+          answer: "4 A",
+          distractors: ["1 A", "6 A", "5 A"],
+          reason: "Σ in = Σ out → 3 + 2 = 1 + I → I = 4 A.",
+        },
+        {
+          prompt: "Currents in: 5 A. Currents out: 2 A, ?. Missing?",
+          answer: "3 A",
+          distractors: ["5 A", "7 A", "1 A"],
+          reason: "5 = 2 + I → I = 3 A.",
+        },
+        {
+          prompt: "Currents in: 4 A, 1 A. Out: 2 A, ?. Missing?",
+          answer: "3 A",
+          distractors: ["5 A", "1 A", "7 A"],
+          reason: "5 = 2 + I → I = 3 A.",
+        },
+        {
+          prompt: "Currents in: 2 A, 2 A, 1 A. Out: ? Missing?",
+          answer: "5 A",
+          distractors: ["3 A", "4 A", "6 A"],
+          reason: "Σ in = Σ out → 5 = I.",
+        },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", v.prompt, {
+            kind: "icon",
+            icon: m.emoji,
+            title: "KCL at a node",
+            subtitle: "Σ I in = Σ I out",
+          }),
+          hint: "Currents entering a node must equal currents leaving.",
+          hints: ["Sum the inflows.", "Sum the outflows; balance them."],
+          explanation: v.reason,
+        },
+        v.answer,
+        v.distractors,
+      );
+    }
+    case "concreteStrengthMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each concrete strength class with a use.",
+          pairs: [
+            ["C15", "Foundations / mass fill"],
+            ["C25", "General building slabs"],
+            ["C30", "Bridges & heavy floors"],
+            ["C40", "High-strength columns"],
+            ["C50+", "Prestressed elements"],
+          ],
+          hint: "Higher strength → more demanding use.",
+          explanation: "Concrete strength class (MPa at 28 days) determines suitable applications.",
+        },
+        {
+          prompt: "Pair each admixture with its effect.",
+          pairs: [
+            ["Plasticizer", "Reduces water demand"],
+            ["Retarder", "Slows setting"],
+            ["Accelerator", "Speeds setting"],
+            ["Air-entrainer", "Freeze-thaw resistance"],
+            ["Fiber", "Crack control"],
+          ],
+          hint: "Admixtures tune concrete behavior.",
+          explanation: "Each admixture changes a specific property of the mix.",
+        },
+      ]);
+    }
+    case "propulsionTypeMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each propulsion type with a typical mission.",
+          pairs: [
+            ["Turbofan", "Commercial airliner"],
+            ["Turbojet", "High-speed military jet"],
+            ["Ramjet", "Hypersonic vehicle"],
+            ["Chemical rocket", "Launch to orbit"],
+            ["Ion thruster", "Deep-space station-keeping"],
+          ],
+          hint: "Each engine wins at a specific regime.",
+          explanation: "Mission and atmosphere drive engine choice.",
+        },
+        {
+          prompt: "Pair each engine with its energy source.",
+          pairs: [
+            ["Solid rocket", "Solid propellant"],
+            ["Liquid rocket", "Liquid propellants + oxidizer"],
+            ["Hybrid rocket", "Solid fuel + liquid oxidizer"],
+            ["Electric propulsion", "Electricity → plasma"],
+            ["Nuclear thermal", "Reactor heats propellant"],
+          ],
+          hint: "Each engine extracts energy differently.",
+          explanation: "Energy source dictates thrust and specific impulse.",
+        },
+      ]);
+    }
+    case "dofCalc": {
+      const variants = [
+        { prompt: "A planar robot arm with 3 revolute joints. How many DOFs?", answer: 3, reason: "Each revolute joint adds 1 DOF." },
+        { prompt: "A 6-axis industrial robot. How many DOFs?", answer: 6, reason: "Each axis is one joint = one DOF." },
+        { prompt: "A SCARA robot has 3 revolute + 1 prismatic joint. DOFs?", answer: 4, reason: "Joints add directly: 3 + 1." },
+        { prompt: "A Cartesian (XYZ) robot. DOFs?", answer: 3, reason: "One prismatic joint per axis = 3 DOFs." },
+        { prompt: "A 4-bar linkage on the plane. DOFs?", answer: 1, reason: "Grübler: F = 3(n−1) − 2j₁ = 3(3) − 2(4) = 1." },
+      ];
+      const v = pick(variants);
+      return numpadEng(
+        m,
+        difficulty,
+        v.prompt,
+        { kind: "icon", icon: m.emoji, title: "DOF count", subtitle: "Degrees of freedom" },
+        v.answer,
+        "Count independent motions; or apply Grübler for linkages.",
+        ["Each joint adds DOFs.", "Grübler's formula handles closed-loop linkages."],
+        v.reason,
+      );
+    }
+    case "bendingMomentMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each beam loading with its bending moment shape.",
+          pairs: [
+            ["Simply supported, point load mid-span", "Triangular peak at center"],
+            ["Simply supported, uniform load", "Parabolic peak at center"],
+            ["Cantilever, end point load", "Linear, max at fixed end"],
+            ["Cantilever, uniform load", "Parabolic, max at fixed end"],
+            ["Overhanging beam", "Negative moment over support"],
+          ],
+          hint: "Geometry and supports drive moment shape.",
+          explanation: "Moment diagrams reflect load + support geometry.",
+        },
+        {
+          prompt: "Pair each diagram point with what it indicates.",
+          pairs: [
+            ["Max moment", "Critical bending stress"],
+            ["Zero shear point", "Often coincides with max moment"],
+            ["Inflection point", "Curvature changes sign"],
+            ["Reaction at support", "Equilibrium force"],
+            ["Point of contraflexure", "Moment crosses zero"],
+          ],
+          hint: "Each feature has a structural meaning.",
+          explanation: "Shear and moment diagrams are core to beam design.",
+        },
+      ]);
+    }
+    case "corrosionTypeMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each corrosion form with its cause.",
+          pairs: [
+            ["Uniform", "General oxidation across surface"],
+            ["Galvanic", "Dissimilar metals in electrolyte"],
+            ["Pitting", "Localized chloride breakdown"],
+            ["Crevice", "Stagnant electrolyte in tight gap"],
+            ["Stress corrosion cracking", "Tensile stress + corrosive env"],
+          ],
+          hint: "Each form has a distinct mechanism.",
+          explanation: "Choosing materials means knowing the corrosion threat.",
+        },
+        {
+          prompt: "Pair each protection method with its mechanism.",
+          pairs: [
+            ["Galvanizing", "Sacrificial zinc layer"],
+            ["Cathodic protection", "Reverse the corrosion current"],
+            ["Coatings", "Barrier to environment"],
+            ["Inhibitors", "Slow the corrosion reaction"],
+            ["Alloying", "Built-in resistance (e.g., stainless)"],
+          ],
+          hint: "Match protection to mechanism.",
+          explanation: "Common corrosion-control strategies.",
+        },
+      ]);
+    }
+    case "capacitorEnergy": {
+      const variants = [
+        { c: 2, v: 4, e: 16 },
+        { c: 5, v: 2, e: 10 },
+        { c: 4, v: 5, e: 50 },
+        { c: 10, v: 3, e: 45 },
+        { c: 1, v: 10, e: 50 },
+        { c: 8, v: 5, e: 100 },
+      ];
+      const v = pick(variants);
+      return numpadEng(
+        m,
+        difficulty,
+        `A ${v.c} F capacitor is charged to ${v.v} V. Find the stored energy (J).`,
+        { kind: "icon", icon: m.emoji, title: `C=${v.c} F, V=${v.v} V`, subtitle: "E = ½ C V²" },
+        v.e,
+        "Use E = ½ · C · V².",
+        [`V² = ${v.v ** 2}.`, `½ · ${v.c} · ${v.v ** 2} = ${v.e} J.`],
+        `E = 0.5 × ${v.c} × ${v.v}² = ${v.e} J.`,
+      );
+    }
+    case "lifecyclePhaseOrder": {
+      return bankReorder(m, difficulty, [
+        {
+          prompt: "Order the phases of a system development lifecycle.",
+          order: ["Concept", "Requirements", "Design", "Implementation", "Verification", "Operation", "Retirement"],
+          hint: "Concept first, retirement last.",
+          hints: ["Design follows requirements.", "Operation precedes retirement."],
+          explanation: "Standard system engineering lifecycle.",
+        },
+        {
+          prompt: "Order the phases of a project's product lifecycle.",
+          order: ["Idea", "Feasibility", "Development", "Launch", "Growth", "Maturity", "Decline"],
+          hint: "Ideas grow into products that eventually fade.",
+          hints: ["Feasibility precedes development.", "Maturity precedes decline."],
+          explanation: "Classic product lifecycle stages.",
+        },
+      ]);
+    }
+    case "prototypeFidelityMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each prototype fidelity with its purpose.",
+          pairs: [
+            ["Sketch / paper", "Explore quick concepts"],
+            ["Wireframe", "Plan layout & flow"],
+            ["Mockup", "Validate visual design"],
+            ["Interactive prototype", "Test user flow"],
+            ["High-fidelity coded", "Validate engineering feasibility"],
+          ],
+          hint: "Higher fidelity asks better-defined questions.",
+          explanation: "Fidelity should match the question you're trying to answer.",
+        },
+        {
+          prompt: "Pair each prototype tool with its strength.",
+          pairs: [
+            ["Pen & paper", "Throwaway iteration"],
+            ["Figma", "Collaborative UI design"],
+            ["Storybook", "Reusable component library"],
+            ["Cardboard model", "Physical ergonomics"],
+            ["Working code prototype", "End-to-end validation"],
+          ],
+          hint: "Each tool fits a different stage.",
+          explanation: "Choose the lightest tool that answers your question.",
+        },
+      ]);
+    }
+    case "placeValueRound": {
+      const places = [
+        { name: "ten", divisor: 10 },
+        { name: "hundred", divisor: 100 },
+        { name: "thousand", divisor: 1000 },
+      ];
+      const p = pick(places);
+      const n = rand(p.divisor + 10, p.divisor * 20);
+      const rounded = Math.round(n / p.divisor) * p.divisor;
+      const distractors = [
+        Math.floor(n / p.divisor) * p.divisor,
+        Math.ceil(n / p.divisor) * p.divisor + p.divisor,
+        Math.round(n / (p.divisor * 10)) * (p.divisor * 10),
+      ];
+      const seen = new Set([rounded]);
+      const validDistractors = distractors.filter((d) => {
+        if (seen.has(d) || d === rounded) return false;
+        seen.add(d);
+        return true;
+      });
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Round ${n} to the nearest ${p.name}.`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: String(n),
+            subtitle: `Round to nearest ${p.name}`,
+          }),
+          hint: "Look at the digit just below the place you're rounding to.",
+          hints: ["≥ 5 rounds up; < 5 rounds down.", "Replace lower digits with zeros."],
+          explanation: `${n} rounded to the nearest ${p.name} is ${rounded}.`,
+        },
+        String(rounded),
+        validDistractors.map(String),
+      );
+    }
+    case "additionCarryChain": {
+      const a = rand(120, 899);
+      const b = rand(120, 899);
+      return numpadEng(
+        m,
+        difficulty,
+        `Compute ${a} + ${b}.`,
+        { kind: "icon", icon: m.emoji, title: `${a} + ${b}`, subtitle: "Stack and add with carry" },
+        a + b,
+        "Add column by column, carrying tens.",
+        [`Ones: ${a % 10} + ${b % 10} = ${(a % 10) + (b % 10)}.`, "Then add tens, hundreds, with carries."],
+        `${a} + ${b} = ${a + b}.`,
+      );
+    }
+    case "factoringQuadratic": {
+      const r = rand(1, 6);
+      const s = rand(1, 6);
+      const b = r + s;
+      const c = r * s;
+      const ans = `(x − ${r})(x − ${s})`;
+      const distractors = [
+        `(x + ${r})(x + ${s})`,
+        `(x − ${r + 1})(x − ${s})`,
+        `(x − ${r})(x + ${s})`,
+      ].filter((d) => d !== ans);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Factor x² − ${b}x + ${c}.`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: `x² − ${b}x + ${c}`,
+            subtitle: "Sum-product factoring",
+          }),
+          hint: "Find two numbers that multiply to c and add to b.",
+          hints: [`Multiply to ${c}.`, `Add to ${b}.`],
+          explanation: `${r} + ${s} = ${b}; ${r} · ${s} = ${c}; factors are (x − ${r})(x − ${s}).`,
+        },
+        ans,
+        distractors,
+      );
+    }
+    case "volumeRectPrism": {
+      const l = pick([3, 4, 5, 6, 8, 10] as const);
+      const w = pick([2, 3, 4, 5, 6] as const);
+      const h = pick([2, 3, 4, 5] as const);
+      const ans = l * w * h;
+      return numpadEng(
+        m,
+        difficulty,
+        `A rectangular prism is ${l} × ${w} × ${h}. Find its volume.`,
+        { kind: "icon", icon: m.emoji, title: `${l} × ${w} × ${h}`, subtitle: "V = l · w · h" },
+        ans,
+        "Multiply length × width × height.",
+        [`${l} × ${w} = ${l * w}.`, `Then × ${h} = ${ans}.`],
+        `V = ${l} × ${w} × ${h} = ${ans}.`,
+      );
+    }
+    case "lawOfSinesChoice": {
+      const variants = [
+        {
+          prompt: "Triangle has angles A=30°, B=60° and side a=5 (opposite A). To find side b, use:",
+          answer: "Law of sines: b / sin B = a / sin A",
+          distractors: [
+            "Pythagorean theorem",
+            "Law of cosines: b² = a² + c² − 2ac cos B",
+            "SOH-CAH-TOA",
+          ],
+          reason: "Law of sines fits when you know an angle + opposite side and another angle.",
+        },
+        {
+          prompt: "You know side a, side b, and angle B (not between them). Solve for angle A using:",
+          answer: "Law of sines: sin A / a = sin B / b",
+          distractors: [
+            "Law of cosines",
+            "Pythagorean theorem",
+            "SOH-CAH-TOA",
+          ],
+          reason: "Two sides + a non-included angle → law of sines.",
+        },
+        {
+          prompt: "Right triangle with hypotenuse 10, opposite leg 6. Find sin θ. Use:",
+          answer: "SOH-CAH-TOA",
+          distractors: ["Law of sines", "Law of cosines", "Heron's formula"],
+          reason: "Right triangles use basic ratios.",
+        },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", v.prompt, {
+            kind: "icon",
+            icon: m.emoji,
+            title: "Pick the technique",
+            subtitle: "Trig solver",
+          }),
+          hint: "Match known quantities (sides/angles) to the right tool.",
+          hints: ["Two sides + included angle: law of cosines.", "Two angles + side opposite one: law of sines."],
+          explanation: v.reason,
+        },
+        v.answer,
+        v.distractors,
+      );
+    }
+    case "transformShiftMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each transformation with its effect on f(x).",
+          pairs: [
+            ["f(x) + 3", "Shift up 3"],
+            ["f(x − 2)", "Shift right 2"],
+            ["−f(x)", "Reflect over x-axis"],
+            ["f(−x)", "Reflect over y-axis"],
+            ["2 · f(x)", "Vertical stretch by 2"],
+          ],
+          hint: "Outside changes vertical; inside changes horizontal.",
+          explanation: "Standard rigid + scaling transformations.",
+        },
+        {
+          prompt: "Pair each transformed graph with its formula.",
+          pairs: [
+            ["Shifted left 4", "f(x + 4)"],
+            ["Compressed horizontally by ½", "f(2x)"],
+            ["Stretched horizontally by 3", "f(x/3)"],
+            ["Shifted down 5", "f(x) − 5"],
+            ["Reflected and shifted up 1", "−f(x) + 1"],
+          ],
+          hint: "Watch inside-vs-outside carefully.",
+          explanation: "Horizontal vs vertical transforms differ in placement.",
+        },
+      ]);
+    }
+    case "quotientRuleBasic": {
+      const variants = [
+        {
+          expr: "d/dx[x / (x² + 1)]",
+          answer: "(1 · (x²+1) − x · 2x) / (x²+1)²",
+          distractors: [
+            "(1 · (x²+1) + x · 2x) / (x²+1)²",
+            "(x · (x²+1) − 1 · 2x) / (x²+1)²",
+            "1 / (x²+1)²",
+          ],
+          reason: "(f/g)' = (f'g − fg') / g² with f=x, g=x²+1.",
+        },
+        {
+          expr: "d/dx[sin(x) / x]",
+          answer: "(x·cos(x) − sin(x)) / x²",
+          distractors: [
+            "(cos(x) + sin(x)) / x²",
+            "(x·cos(x) + sin(x)) / x²",
+            "cos(x) / x",
+          ],
+          reason: "f=sin(x), g=x; numerator = f'g − fg' = x·cos(x) − sin(x).",
+        },
+        {
+          expr: "d/dx[(2x+1) / x]",
+          answer: "(2·x − (2x+1)) / x²",
+          distractors: [
+            "(2x + 1) / x²",
+            "2 / x²",
+            "(2·x + (2x+1)) / x²",
+          ],
+          reason: "f=2x+1, g=x; (2·x − (2x+1)) / x² simplifies to −1/x².",
+        },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", `Apply the quotient rule: ${v.expr}.`, {
+            kind: "icon",
+            icon: m.emoji,
+            title: v.expr,
+            subtitle: "(f/g)' = (f'g − fg') / g²",
+          }),
+          hint: "Apply the quotient rule carefully — order of f and g matters.",
+          hints: ["Numerator: f'g − fg'.", "Denominator: g²."],
+          explanation: v.reason,
+        },
+        v.answer,
+        v.distractors,
+      );
+    }
+    case "quartileCalc": {
+      const variants = [
+        { list: [1, 3, 5, 7, 9, 11, 13], stat: "Q1", answer: 3 },
+        { list: [1, 3, 5, 7, 9, 11, 13], stat: "Q3", answer: 11 },
+        { list: [2, 4, 6, 8, 10, 12, 14], stat: "Q2 (median)", answer: 8 },
+        { list: [4, 6, 8, 10, 12], stat: "Q1", answer: 5 },
+        { list: [4, 6, 8, 10, 12], stat: "Q3", answer: 11 },
+        { list: [1, 2, 3, 4, 5, 6, 7, 8, 9], stat: "Q1", answer: 2.5 },
+        { list: [1, 2, 3, 4, 5, 6, 7, 8, 9], stat: "Q3", answer: 7.5 },
+      ];
+      const v = pick(variants);
+      return numpadEng(
+        m,
+        difficulty,
+        `Find ${v.stat} of ${v.list.join(", ")}.`,
+        { kind: "icon", icon: m.emoji, title: v.list.join(", "), subtitle: v.stat },
+        v.answer,
+        "Sort the list, then locate the position.",
+        ["Median splits the data in half.", "Q1 is the median of the lower half; Q3 of the upper half."],
+        `${v.stat} = ${v.answer}.`,
+      );
+    }
+    case "quantifierMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each quantifier statement with its meaning.",
+          pairs: [
+            ["∀x P(x)", "For every x, P(x) holds"],
+            ["∃x P(x)", "There exists an x with P(x)"],
+            ["¬∀x P(x)", "P fails for some x"],
+            ["¬∃x P(x)", "P fails for every x"],
+            ["∀x∃y Q(x,y)", "Every x has a partner y"],
+          ],
+          hint: "∀ universal, ∃ existential, ¬ negate.",
+          explanation: "Quantifier logic foundations.",
+        },
+        {
+          prompt: "Pair each English sentence with its symbolic form.",
+          pairs: [
+            ["Every dog barks", "∀d (dog(d) → barks(d))"],
+            ["Some cat purrs", "∃c (cat(c) ∧ purrs(c))"],
+            ["No bird swims", "¬∃b (bird(b) ∧ swims(b))"],
+            ["All students passed", "∀s (student(s) → passed(s))"],
+            ["At least one student failed", "∃s (student(s) ∧ ¬passed(s))"],
+          ],
+          hint: "Translate each clause carefully.",
+          explanation: "Translation between English and predicate logic.",
+        },
+      ]);
+    }
+    case "geometricProbBasic": {
+      const variants = [
+        { prompt: "Probability of success p = 0.5. Find P(first success on trial 3).", answer: "0.125", reason: "P = (1-p)² · p = 0.5² · 0.5 = 0.125." },
+        { prompt: "Probability of success p = 0.2. Find P(first success on trial 1).", answer: "0.2", reason: "P = p." },
+        { prompt: "Probability of success p = 0.5. Find P(first success on trial 2).", answer: "0.25", reason: "(1-p)·p = 0.5·0.5." },
+        { prompt: "Probability of success p = 0.25. Find P(first success on trial 2).", answer: "0.1875", reason: "(1-p)·p = 0.75·0.25." },
+        { prompt: "Probability of success p = 0.1. Find P(first success on trial 3).", answer: "0.081", reason: "(0.9)² · 0.1 = 0.081." },
+      ];
+      const v = pick(variants);
+      return numpadEng(
+        m,
+        difficulty,
+        v.prompt,
+        { kind: "icon", icon: m.emoji, title: "Geometric P", subtitle: "(1-p)^(k-1) · p" },
+        v.answer,
+        "Geometric: P(first success on trial k) = (1-p)^(k-1) · p.",
+        ["Track failures before first success.", "Multiply (1-p) for each failure."],
+        v.reason,
+      );
+    }
+    case "eulerTotientBasic": {
+      const variants = [
+        { n: 7, answer: 6, reason: "Prime ⇒ φ(p) = p − 1." },
+        { n: 9, answer: 6, reason: "9 = 3²; φ = 9 − 3 = 6." },
+        { n: 10, answer: 4, reason: "Coprime to 10: 1, 3, 7, 9." },
+        { n: 12, answer: 4, reason: "Coprime to 12: 1, 5, 7, 11." },
+        { n: 15, answer: 8, reason: "φ(3·5) = (3-1)(5-1) = 8." },
+        { n: 16, answer: 8, reason: "φ(2^k) = 2^(k-1) → 8." },
+      ];
+      const v = pick(variants);
+      return numpadEng(
+        m,
+        difficulty,
+        `Compute φ(${v.n}) (Euler's totient).`,
+        { kind: "icon", icon: m.emoji, title: `φ(${v.n})`, subtitle: "Count coprimes ≤ n" },
+        v.answer,
+        "Count integers in [1, n] coprime to n.",
+        ["For primes: φ(p) = p − 1.", "For products of coprime factors: multiplicative."],
+        v.reason,
+      );
+    }
+    case "taxBracketBasic": {
+      const variants = [
+        { income: 30000, tax: 3000, reason: "10% on 30,000 = 3,000 (single bracket)." },
+        { income: 50000, tax: 7000, reason: "10% on 30k = 3,000; 20% on remaining 20k = 4,000. Total 7,000." },
+        { income: 80000, tax: 13000, reason: "10% on 30k = 3,000; 20% on 50k = 10,000. Total 13,000." },
+        { income: 100000, tax: 19000, reason: "10% on 30k + 20% on 50k + 30% on 20k = 3+10+6 = 19,000." },
+        { income: 150000, tax: 34000, reason: "10% on 30k + 20% on 50k + 30% on 70k = 3+10+21 = 34,000." },
+      ];
+      const v = pick(variants);
+      return numpadEng(
+        m,
+        difficulty,
+        `Using a simple progressive table — 10% to $30k, 20% to $80k, 30% above — what is the tax on $${v.income.toLocaleString()}?`,
+        { kind: "icon", icon: m.emoji, title: `$${v.income.toLocaleString()}`, subtitle: "Progressive tax" },
+        v.tax,
+        "Apply each bracket only to income within that bracket.",
+        ["First $30k at 10%.", "Next $50k at 20%.", "Above $80k at 30%."],
+        v.reason,
+      );
+    }
+    case "cellOrganelleSort": {
+      return bankSort(m, difficulty, [
+        {
+          prompt: "Sort each organelle by where it appears.",
+          categories: ["Plant only", "Animal only", "Both"],
+          items: [
+            { label: "Chloroplast", category: "Plant only" },
+            { label: "Cell wall", category: "Plant only" },
+            { label: "Large central vacuole", category: "Plant only" },
+            { label: "Centriole", category: "Animal only" },
+            { label: "Lysosome (prominent)", category: "Animal only" },
+            { label: "Nucleus", category: "Both" },
+            { label: "Mitochondria", category: "Both" },
+            { label: "Endoplasmic reticulum", category: "Both" },
+            { label: "Golgi apparatus", category: "Both" },
+            { label: "Ribosome", category: "Both" },
+          ],
+          hint: "Photosynthesis structures are plant-only.",
+          hints: ["Centrioles drive animal cell division.", "Both share ATP-producing organelles."],
+          explanation: "Plants and animals share most organelles; a few differ.",
+        },
+      ]);
+    }
+    case "acidBaseClassify": {
+      return bankSort(m, difficulty, [
+        {
+          prompt: "Sort each substance by pH category.",
+          categories: ["Acid", "Neutral", "Base"],
+          items: [
+            { label: "Lemon juice", category: "Acid" },
+            { label: "Vinegar", category: "Acid" },
+            { label: "Stomach acid (HCl)", category: "Acid" },
+            { label: "Pure water", category: "Neutral" },
+            { label: "Blood plasma (~7.4)", category: "Base" },
+            { label: "Sea water (~8.1)", category: "Base" },
+            { label: "Soap", category: "Base" },
+            { label: "Baking soda", category: "Base" },
+            { label: "Coffee (~5)", category: "Acid" },
+          ],
+          hint: "pH < 7 acid; pH > 7 base.",
+          hints: ["Pure water is exactly 7.", "Bleach and soap are strongly basic."],
+          explanation: "pH scale: 0 (acid) → 7 (neutral) → 14 (base).",
+        },
+      ]);
+    }
+    case "forceDiagram": {
+      const variants = [
+        {
+          prompt: "An object has 5 N right and 3 N left. Net force?",
+          answer: "2 N right",
+          distractors: ["8 N right", "2 N left", "0 N"],
+          reason: "Net = 5 − 3 = 2 N right.",
+        },
+        {
+          prompt: "Forces: 4 N up, 4 N down. Net force?",
+          answer: "0 N",
+          distractors: ["4 N up", "4 N down", "8 N"],
+          reason: "Equal and opposite forces cancel.",
+        },
+        {
+          prompt: "Forces: 6 N right, 8 N right, 5 N left. Net?",
+          answer: "9 N right",
+          distractors: ["19 N right", "1 N right", "5 N left"],
+          reason: "(6 + 8) − 5 = 9 N right.",
+        },
+        {
+          prompt: "A 5 kg block on a flat surface; friction = 10 N, push = 15 N. Net force?",
+          answer: "5 N forward",
+          distractors: ["15 N forward", "10 N forward", "0 N"],
+          reason: "Net = push − friction = 5 N.",
+        },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", v.prompt, {
+            kind: "vectors",
+            icon: m.emoji,
+            title: "Free-body diagram",
+            subtitle: "Sum the vectors",
+          }),
+          hint: "Add forces in the same direction; subtract opposite.",
+          hints: ["Choose a positive direction.", "Sum components with signs."],
+          explanation: v.reason,
+        },
+        v.answer,
+        v.distractors,
+      );
+    }
+    case "weatherFrontMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each weather front with its behavior.",
+          pairs: [
+            ["Cold front", "Heavy showers, then clearing"],
+            ["Warm front", "Steady rain over a wide area"],
+            ["Stationary front", "Long, steady rainy weather"],
+            ["Occluded front", "Mixed precipitation"],
+            ["Dry line", "Sharp humidity boundary"],
+          ],
+          hint: "Each front has a typical weather signature.",
+          explanation: "Air-mass boundaries create characteristic weather.",
+        },
+        {
+          prompt: "Pair each cloud type with its altitude.",
+          pairs: [
+            ["Cirrus", "High (>6 km)"],
+            ["Altostratus", "Mid (2–6 km)"],
+            ["Stratus", "Low (<2 km)"],
+            ["Cumulonimbus", "Vertical, towering"],
+            ["Fog", "Surface level"],
+          ],
+          hint: "Cloud names hint at height.",
+          explanation: "Cloud classification by height and shape.",
+        },
+      ]);
+    }
+    case "labSafetySort": {
+      return bankSort(m, difficulty, [
+        {
+          prompt: "Sort each behavior in the lab.",
+          categories: ["Safe", "Unsafe"],
+          items: [
+            { label: "Wear safety goggles", category: "Safe" },
+            { label: "Tie back long hair", category: "Safe" },
+            { label: "Read labels before mixing", category: "Safe" },
+            { label: "Wash hands after experiments", category: "Safe" },
+            { label: "Know the emergency exits", category: "Safe" },
+            { label: "Eat or drink in the lab", category: "Unsafe" },
+            { label: "Smell chemicals directly", category: "Unsafe" },
+            { label: "Run with hot glassware", category: "Unsafe" },
+            { label: "Wear open-toed shoes", category: "Unsafe" },
+            { label: "Mix unknown chemicals", category: "Unsafe" },
+          ],
+          hint: "Safety first.",
+          hints: ["PPE protects you.", "Waft, don't sniff."],
+          explanation: "Standard lab safety practices.",
+        },
+      ]);
+    }
+    case "galaxyTypeMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each galaxy type with its key feature.",
+          pairs: [
+            ["Spiral", "Rotating arms with young stars"],
+            ["Elliptical", "Old stars in a smooth bulge"],
+            ["Irregular", "No clear shape, often young"],
+            ["Lenticular", "Disk without spiral arms"],
+            ["Dwarf", "Small, low-mass companions"],
+          ],
+          hint: "Shape reflects history and dynamics.",
+          explanation: "Hubble's classification of galaxies.",
+        },
+        {
+          prompt: "Pair each galactic feature with its description.",
+          pairs: [
+            ["Halo", "Diffuse old stars + globular clusters"],
+            ["Disk", "Flat rotating layer of gas and stars"],
+            ["Bulge", "Central dense star concentration"],
+            ["Nucleus", "Often hosts a supermassive black hole"],
+            ["Spiral arms", "Star-forming regions"],
+          ],
+          hint: "Each galactic region has a structural role.",
+          explanation: "Galactic structure parts.",
+        },
+      ]);
+    }
+    case "bloodTypeChoice": {
+      const variants = [
+        {
+          prompt: "Father AO × Mother BO. Which blood type is possible?",
+          answer: "AB",
+          distractors: ["AA", "BB", "Rh-only"],
+          reason: "AO can give A or O; BO can give B or O — child can be AB, A, B, or O.",
+        },
+        {
+          prompt: "Father AA × Mother OO. Most likely child blood type?",
+          answer: "A (AO)",
+          distractors: ["O", "B", "AB"],
+          reason: "Father donates A; mother donates O — child is AO (expresses A).",
+        },
+        {
+          prompt: "Father AB × Mother OO. Which is impossible?",
+          answer: "AB",
+          distractors: ["A (AO)", "B (BO)", "O"],
+          reason: "Mother only donates O; child can be AO or BO, never AB or OO from this cross (no OO inherited).",
+        },
+        {
+          prompt: "Father BO × Mother BO. Which is most likely?",
+          answer: "B (BB or BO)",
+          distractors: ["A only", "AB", "Always O"],
+          reason: "75% chance child carries at least one B allele → B blood type.",
+        },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", v.prompt, {
+            kind: "icon",
+            icon: m.emoji,
+            title: "Blood type cross",
+            subtitle: "ABO genetics",
+          }),
+          hint: "A and B are codominant; O is recessive.",
+          hints: ["Each parent passes one allele.", "AB heterozygote is impossible from OO mother."],
+          explanation: v.reason,
+        },
+        v.answer,
+        v.distractors,
+      );
+    }
+    case "symbiosisMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each interaction with its type.",
+          pairs: [
+            ["Mutualism", "Both species benefit"],
+            ["Commensalism", "One benefits, other unaffected"],
+            ["Parasitism", "One benefits, other harmed"],
+            ["Competition", "Both species hurt"],
+            ["Predation", "Predator kills prey"],
+          ],
+          hint: "Each name describes a pairwise outcome.",
+          explanation: "Symbiosis taxonomy.",
+        },
+        {
+          prompt: "Pair each example with its symbiosis type.",
+          pairs: [
+            ["Bee + flower", "Mutualism"],
+            ["Barnacle on whale", "Commensalism"],
+            ["Tick on dog", "Parasitism"],
+            ["Lion hunts gazelle", "Predation"],
+            ["Two birds in same niche", "Competition"],
+          ],
+          hint: "Classify real-world examples.",
+          explanation: "Symbiotic relationships in nature.",
+        },
+      ]);
+    }
+    case "muscleTypeMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each muscle type with its location.",
+          pairs: [
+            ["Skeletal", "Attached to bones"],
+            ["Smooth", "Walls of internal organs"],
+            ["Cardiac", "Heart"],
+          ],
+          hint: "Three muscle types.",
+          explanation: "Skeletal moves bones; smooth lines organs; cardiac pumps blood.",
+        },
+        {
+          prompt: "Pair each muscle type with a property.",
+          pairs: [
+            ["Skeletal", "Voluntary, striated"],
+            ["Smooth", "Involuntary, non-striated"],
+            ["Cardiac", "Involuntary, striated, intercalated discs"],
+            ["Fast-twitch", "Powerful, fatigues quickly"],
+            ["Slow-twitch", "Endurance, fatigue-resistant"],
+          ],
+          hint: "Match properties to muscle category.",
+          explanation: "Muscle classification by control and structure.",
+        },
+      ]);
+    }
+    case "pollutantSourceMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each pollutant with its primary source.",
+          pairs: [
+            ["CO₂", "Fossil-fuel combustion"],
+            ["SO₂", "Coal-burning power plants"],
+            ["NOₓ", "Vehicle exhaust"],
+            ["Mercury", "Coal plants, mining"],
+            ["Microplastics", "Plastic-product wear"],
+          ],
+          hint: "Sources reveal mitigation strategies.",
+          explanation: "Each pollutant has a dominant emission source.",
+        },
+        {
+          prompt: "Pair each environmental issue with a leading cause.",
+          pairs: [
+            ["Acid rain", "SO₂ and NOₓ emissions"],
+            ["Ozone hole", "CFC refrigerants (legacy)"],
+            ["Eutrophication", "Fertilizer runoff"],
+            ["Smog", "Vehicle + industrial emissions"],
+            ["Ocean acidification", "Excess CO₂ dissolving"],
+          ],
+          hint: "Each problem traces to a specific pollutant.",
+          explanation: "Linking environmental issues to causes.",
+        },
+      ]);
+    }
+    case "bitwiseOpChoice": {
+      const variants = [
+        { prompt: "What is 0b1100 AND 0b1010?", answer: "0b1000", distractors: ["0b1110", "0b0110", "0b0010"], reason: "AND keeps only bits set in both operands." },
+        { prompt: "What is 0b1100 OR 0b1010?", answer: "0b1110", distractors: ["0b1000", "0b0110", "0b0010"], reason: "OR sets a bit if it appears in either operand." },
+        { prompt: "What is 0b1100 XOR 0b1010?", answer: "0b0110", distractors: ["0b1000", "0b1110", "0b1111"], reason: "XOR flips bits that differ." },
+        { prompt: "What is 0b0011 << 2?", answer: "0b1100", distractors: ["0b0110", "0b1111", "0b0001"], reason: "Left shift by 2 multiplies by 4." },
+        { prompt: "What is ~0b00001111 (8-bit)?", answer: "0b11110000", distractors: ["0b00001111", "0b11111111", "0b01010101"], reason: "Bitwise NOT flips every bit (with 8-bit width)." },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", v.prompt, {
+            kind: "icon",
+            icon: m.emoji,
+            title: "Bitwise operation",
+            subtitle: "AND / OR / XOR / shift",
+          }),
+          hint: "Compare bit by bit.",
+          hints: ["AND: both 1.", "OR: either 1.", "XOR: exactly one 1."],
+          explanation: v.reason,
+        },
+        v.answer,
+        v.distractors,
+      );
+    }
+    case "dynamicProgrammingMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each DP problem with its pattern.",
+          pairs: [
+            ["Fibonacci", "1-D memoization"],
+            ["0/1 Knapsack", "2-D table over items × capacity"],
+            ["Longest Common Subsequence", "2-D over two sequences"],
+            ["Edit distance", "2-D Levenshtein DP"],
+            ["Coin change (min coins)", "1-D over amount"],
+          ],
+          hint: "Match problem to its standard DP shape.",
+          explanation: "Classic DP problem patterns.",
+        },
+        {
+          prompt: "Pair each DP optimization with its purpose.",
+          pairs: [
+            ["Tabulation", "Iterative bottom-up"],
+            ["Memoization", "Top-down with caching"],
+            ["Rolling array", "Reduce 2-D table to 1-D"],
+            ["State compression", "Encode state in bits"],
+            ["Divide-and-conquer optimization", "Quadrangle inequality DPs"],
+          ],
+          hint: "Performance vs memory trade-offs.",
+          explanation: "DP refinements reduce time or space.",
+        },
+      ]);
+    }
+    case "activationFunctionMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each activation function with its property.",
+          pairs: [
+            ["ReLU", "Zero for negatives, linear for positives"],
+            ["Sigmoid", "Squashes to (0, 1)"],
+            ["Tanh", "Squashes to (−1, 1)"],
+            ["Softmax", "Outputs probability vector"],
+            ["Leaky ReLU", "Small slope for negatives"],
+          ],
+          hint: "Each activation shapes the output differently.",
+          explanation: "Common neural activations.",
+        },
+        {
+          prompt: "Pair each activation with its issue.",
+          pairs: [
+            ["Sigmoid", "Vanishing gradients at extremes"],
+            ["Tanh", "Vanishing gradients at extremes"],
+            ["ReLU", "Dying neurons (zero gradient)"],
+            ["Softmax", "Sensitive to large logits"],
+            ["Linear", "No nonlinearity"],
+          ],
+          hint: "Common pitfalls of each activation.",
+          explanation: "Each activation has trade-offs.",
+        },
+      ]);
+    }
+    case "authFactorSort": {
+      return bankSort(m, difficulty, [
+        {
+          prompt: "Sort each factor by its authentication category.",
+          categories: ["Knowledge", "Possession", "Inherence"],
+          items: [
+            { label: "Password", category: "Knowledge" },
+            { label: "PIN", category: "Knowledge" },
+            { label: "Security question", category: "Knowledge" },
+            { label: "Hardware token", category: "Possession" },
+            { label: "Smartphone OTP", category: "Possession" },
+            { label: "Smart card", category: "Possession" },
+            { label: "Fingerprint", category: "Inherence" },
+            { label: "Face scan", category: "Inherence" },
+            { label: "Voice signature", category: "Inherence" },
+          ],
+          hint: "Know · have · are.",
+          hints: ["MFA combines categories.", "Biometrics are inherence."],
+          explanation: "Authentication factors fall into three categories.",
+        },
+      ]);
+    }
+    case "indexUseMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each index type with its use.",
+          pairs: [
+            ["B-tree", "Equality + range queries"],
+            ["Hash", "Fast equality lookup"],
+            ["Bitmap", "Low-cardinality columns"],
+            ["Full-text", "Text search"],
+            ["GIN / inverted", "Array / document search"],
+          ],
+          hint: "Each index has a workload.",
+          explanation: "Index choice depends on query patterns.",
+        },
+        {
+          prompt: "Pair each index strategy with its trade-off.",
+          pairs: [
+            ["Add index", "Faster reads, slower writes"],
+            ["Composite index", "Speeds multi-column filters"],
+            ["Covering index", "Avoids table lookup"],
+            ["Partial index", "Indexes subset of rows"],
+            ["Drop unused index", "Cuts write cost"],
+          ],
+          hint: "Indexes are not free.",
+          explanation: "Indexes trade write cost for read speed.",
+        },
+      ]);
+    }
+    case "kinematicsForwardChoice": {
+      const variants = [
+        {
+          prompt: "Given joint angles θ₁, θ₂ of a 2-link arm, find the end-effector position. Which approach?",
+          answer: "Forward kinematics",
+          distractors: ["Inverse kinematics", "Path planning", "PID control"],
+          reason: "FK maps joint angles to end-effector pose.",
+        },
+        {
+          prompt: "You want the end-effector at (x, y). Find the joint angles. Which approach?",
+          answer: "Inverse kinematics",
+          distractors: ["Forward kinematics", "Trajectory planning", "Vision"],
+          reason: "IK solves for joint configurations from a desired pose.",
+        },
+        {
+          prompt: "Compute Jacobian for instantaneous velocity mapping. This is part of:",
+          answer: "Forward kinematics (Jacobian)",
+          distractors: ["Path smoothing", "Sensor calibration", "Inverse dynamics"],
+          reason: "FK Jacobian relates joint velocities to Cartesian velocity.",
+        },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", v.prompt, {
+            kind: "icon",
+            icon: m.emoji,
+            title: "FK vs IK",
+            subtitle: "Pick the right kinematics",
+          }),
+          hint: "FK: joints → pose. IK: pose → joints.",
+          hints: ["FK is straightforward.", "IK may have multiple solutions."],
+          explanation: v.reason,
+        },
+        v.answer,
+        v.distractors,
+      );
+    }
+    case "cssBoxModelChoice": {
+      const variants = [
+        {
+          prompt: "Width 200 px, padding 10 px, border 2 px. What is the total rendered width (default box-sizing)?",
+          answer: "224 px",
+          distractors: ["200 px", "212 px", "220 px"],
+          reason: "Default content-box: width + 2×padding + 2×border = 200 + 20 + 4.",
+        },
+        {
+          prompt: "With box-sizing: border-box, width 200 px includes padding and border. Rendered total width?",
+          answer: "200 px",
+          distractors: ["220 px", "224 px", "212 px"],
+          reason: "border-box bakes padding and border into width.",
+        },
+        {
+          prompt: "Width 100 px, margin 10 px, padding 5 px, border 1 px. Total horizontal space taken?",
+          answer: "132 px",
+          distractors: ["116 px", "122 px", "112 px"],
+          reason: "100 + 2×5 + 2×1 + 2×10 = 132.",
+        },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", v.prompt, {
+            kind: "icon",
+            icon: m.emoji,
+            title: "Box model",
+            subtitle: "Content + padding + border + margin",
+          }),
+          hint: "Box model layers: content → padding → border → margin.",
+          hints: ["Default box-sizing is content-box.", "Margin is outside the border."],
+          explanation: v.reason,
+        },
+        v.answer,
+        v.distractors,
+      );
+    }
+    case "authSchemeMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each HTTP auth scheme with its use.",
+          pairs: [
+            ["Basic", "Username:password (Base64)"],
+            ["Bearer", "Token in Authorization header"],
+            ["OAuth 2.0", "Delegated access"],
+            ["API key", "Identify a calling client"],
+            ["mTLS", "Mutual TLS certificate auth"],
+          ],
+          hint: "Each scheme fits a specific scenario.",
+          explanation: "Common auth schemes for HTTP APIs.",
+        },
+        {
+          prompt: "Pair each token type with its purpose.",
+          pairs: [
+            ["Access token", "Short-lived API call"],
+            ["Refresh token", "Renew access token"],
+            ["ID token", "OIDC user identity"],
+            ["Session cookie", "Browser-based session"],
+            ["JWT", "Signed claims"],
+          ],
+          hint: "Match token to its job.",
+          explanation: "Token types in modern auth.",
+        },
+      ]);
+    }
+    case "apiPaginationCalc": {
+      const variants = [
+        () => {
+          const page = rand(2, 12);
+          const limit = pick([10, 20, 25, 50] as const);
+          const offset = (page - 1) * limit;
+          return {
+            prompt: `An endpoint uses offset pagination with page=${page} and limit=${limit}. What offset should the client send?`,
+            title: `page=${page}, limit=${limit}`,
+            answer: offset,
+            hint: "offset = (page - 1) × limit.",
+            explanation: `offset = (${page} - 1) × ${limit} = ${offset}.`,
+          };
+        },
+        () => {
+          const total = pick([96, 125, 247, 501, 999] as const);
+          const limit = pick([10, 25, 50, 100] as const);
+          const pages = Math.ceil(total / limit);
+          return {
+            prompt: `An API returns ${total} total items with limit=${limit}. How many pages are needed?`,
+            title: `${total} items / ${limit}`,
+            answer: pages,
+            hint: "pages = ceil(total / limit).",
+            explanation: `ceil(${total} / ${limit}) = ${pages}.`,
+          };
+        },
+        () => {
+          const offset = pick([20, 40, 75, 100, 150] as const);
+          const limit = pick([10, 20, 25, 50] as const);
+          const page = Math.floor(offset / limit) + 1;
+          return {
+            prompt: `An API request uses offset=${offset} and limit=${limit}. What 1-based page number is this?`,
+            title: `offset=${offset}, limit=${limit}`,
+            answer: page,
+            hint: "page = floor(offset / limit) + 1.",
+            explanation: `floor(${offset} / ${limit}) + 1 = ${page}.`,
+          };
+        },
+      ];
+      const v = pick(variants)();
+      return numpadEng(
+        m,
+        difficulty,
+        v.prompt,
+        { kind: "icon", icon: m.emoji, title: v.title, subtitle: "Pagination math" },
+        v.answer,
+        v.hint,
+        [v.hint, "Watch whether the page number is 0-based or 1-based."],
+        v.explanation,
+      );
+    }
+    case "rateLimitReset": {
+      const variants = [
+        {
+          prompt: "Header says X-RateLimit-Limit: 100, X-RateLimit-Remaining: 0, Retry-After: 30. What should the client do?",
+          answer: "Wait 30 seconds, then retry",
+          distractors: ["Retry immediately", "Open 100 parallel retries", "Switch POST to GET"],
+          reason: "Retry-After tells the client how long to back off after exhausting the quota.",
+        },
+        {
+          prompt: "A client has 8 remaining requests and needs to fetch 10 pages. What is the safest behavior?",
+          answer: "Fetch 8 now, pause until reset, then continue",
+          distractors: ["Ignore the limit", "Send all 10 because they are reads", "Use a random API key"],
+          reason: "Respect the remaining quota and resume after the reset window.",
+        },
+        {
+          prompt: "HTTP 429 with Retry-After: 120 means:",
+          answer: "Too many requests; wait 120 seconds",
+          distractors: ["Resource moved permanently", "Authentication failed", "Server accepted the request"],
+          reason: "429 is the standard rate-limit response; Retry-After gives the wait time.",
+        },
+        {
+          prompt: "A rate limit is 60 requests/minute. A worker should run at about:",
+          answer: "1 request per second",
+          distractors: ["60 requests per second", "1 request per minute", "Unlimited while authenticated"],
+          reason: "60 per minute equals roughly one request per second.",
+        },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", v.prompt, {
+            kind: "icon",
+            icon: m.emoji,
+            title: "Rate limits",
+            subtitle: "429 · Retry-After · quota windows",
+          }),
+          hint: "Respect 429 responses and Retry-After headers.",
+          hints: ["Throttle before you hit zero remaining.", "Use exponential backoff for bursty failures."],
+          explanation: v.reason,
+        },
+        v.answer,
+        v.distractors,
+      );
+    }
+    case "idempotencyKeyMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each idempotency concept with its meaning.",
+          pairs: [
+            ["Idempotency key", "Client-generated retry token"],
+            ["Duplicate POST", "Same key returns original result"],
+            ["Safe retry", "Network timeout can be retried"],
+            ["Server store", "Persists key + response briefly"],
+            ["Payment create", "Classic idempotency use case"],
+          ],
+          hint: "Idempotency keeps retries from creating duplicates.",
+          explanation: "Idempotency keys let servers recognize a retried mutation and return the first result.",
+        },
+        {
+          prompt: "Pair each API method with typical idempotency behavior.",
+          pairs: [
+            ["GET", "Safe and idempotent"],
+            ["PUT", "Idempotent replacement"],
+            ["DELETE", "Idempotent deletion"],
+            ["POST without key", "Usually not idempotent"],
+            ["POST with idempotency key", "Retryable mutation"],
+          ],
+          hint: "POST needs extra help to be safely retryable.",
+          explanation: "HTTP semantics make GET/PUT/DELETE idempotent; POST often needs a key.",
+        },
+      ]);
+    }
+    case "corsHeaderMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each CORS header with what it controls.",
+          pairs: [
+            ["Access-Control-Allow-Origin", "Which origins may read response"],
+            ["Access-Control-Allow-Methods", "Allowed HTTP methods"],
+            ["Access-Control-Allow-Headers", "Allowed request headers"],
+            ["Access-Control-Allow-Credentials", "Whether cookies/auth may be sent"],
+            ["Access-Control-Max-Age", "How long preflight can be cached"],
+          ],
+          hint: "CORS is browser-enforced cross-origin access control.",
+          explanation: "CORS headers tell browsers which cross-origin calls are allowed.",
+        },
+        {
+          prompt: "Pair each CORS scenario with the needed response.",
+          pairs: [
+            ["Simple GET from allowed site", "Allow-Origin for that site"],
+            ["Custom Authorization header", "Preflight + Allow-Headers"],
+            ["DELETE request", "Preflight + Allow-Methods"],
+            ["Cookie-based request", "Allow-Credentials: true"],
+            ["Unknown origin", "No allow-origin header"],
+          ],
+          hint: "Non-simple requests trigger a preflight.",
+          explanation: "Browsers preflight methods and headers that need explicit permission.",
+        },
+      ]);
+    }
+    case "webhookSignatureOrder": {
+      return bankReorder(m, difficulty, [
+        {
+          prompt: "Order secure webhook handling steps.",
+          order: [
+            "Receive webhook request",
+            "Read raw request body",
+            "Compute HMAC with shared secret",
+            "Compare with signature header",
+            "Reject if signature is invalid",
+            "Process event idempotently",
+            "Return 2xx quickly",
+          ],
+          hint: "Verify before trusting the payload.",
+          hints: ["Use the raw body, not parsed JSON.", "Process idempotently because providers retry."],
+          explanation: "Webhook security starts with signature verification before processing.",
+        },
+        {
+          prompt: "Order a robust webhook retry flow.",
+          order: [
+            "Provider emits event",
+            "Provider signs payload",
+            "Consumer verifies signature",
+            "Consumer checks event id",
+            "Consumer skips duplicate events",
+            "Consumer stores processing result",
+            "Consumer returns 200 OK",
+          ],
+          hint: "Deduplicate before side effects.",
+          hints: ["Event ids prevent duplicate work.", "The provider may deliver the same event more than once."],
+          explanation: "Webhook consumers should verify, dedupe, process, and acknowledge quickly.",
+        },
+      ]);
+    }
+    case "graphqlOperationMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each GraphQL operation with its use.",
+          pairs: [
+            ["query", "Read data"],
+            ["mutation", "Change server state"],
+            ["subscription", "Stream live updates"],
+            ["fragment", "Reuse field selections"],
+            ["resolver", "Fetch data for a field"],
+          ],
+          hint: "GraphQL separates reads, writes, and live updates.",
+          explanation: "GraphQL operations describe data shape and intent.",
+        },
+        {
+          prompt: "Pair each GraphQL concern with its mitigation.",
+          pairs: [
+            ["Over-fetching", "Client asks only needed fields"],
+            ["N+1 resolver calls", "Batch with DataLoader"],
+            ["Huge nested query", "Depth / complexity limit"],
+            ["Breaking schema change", "Deprecate old field first"],
+            ["Auth per field", "Check in resolver or directive"],
+          ],
+          hint: "GraphQL flexibility needs guardrails.",
+          explanation: "Production GraphQL APIs need batching, limits, and careful schema evolution.",
+        },
+      ]);
+    }
+    case "apiVersioningChoice": {
+      const variants = [
+        {
+          prompt: "You need to rename a response field used by mobile clients. What is the safest approach?",
+          answer: "Add the new field, keep old field deprecated, remove later in a major version",
+          distractors: ["Rename it in place today", "Return both randomly", "Move it to a request header only"],
+          reason: "Stable public APIs preserve existing fields while clients migrate.",
+        },
+        {
+          prompt: "A new optional response field is added. What versioning impact is typical?",
+          answer: "Usually non-breaking; no new major version needed",
+          distractors: ["Always create /v2", "Delete old clients", "Change all status codes"],
+          reason: "Adding optional response fields is normally backwards compatible.",
+        },
+        {
+          prompt: "A required request field is added to an existing endpoint. What kind of change is it?",
+          answer: "Breaking change",
+          distractors: ["Purely additive", "Safe patch release", "Only documentation"],
+          reason: "Existing clients would start failing unless they send the new field.",
+        },
+        {
+          prompt: "Which path best communicates a major REST API version?",
+          answer: "/v2/orders",
+          distractors: ["/orders?debug=true", "/orders/latest-only", "/orders#v2"],
+          reason: "Path-based versioning is common and visible to clients.",
+        },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", v.prompt, {
+            kind: "icon",
+            icon: m.emoji,
+            title: "API versioning",
+            subtitle: "Backwards compatibility",
+          }),
+          hint: "Ask whether old clients still work without code changes.",
+          hints: ["Additive optional fields are usually safe.", "Changing required inputs or removing fields is breaking."],
+          explanation: v.reason,
+        },
+        v.answer,
+        v.distractors,
+      );
+    }
+    case "errorResponseDesign": {
+      const variants = [
+        {
+          prompt: "A request body is missing a required email field. Which response is best?",
+          answer: "400 with a validation error body",
+          distractors: ["200 with empty data", "500 internal server error", "301 redirect"],
+          reason: "The client sent invalid input, so 400 plus structured details is appropriate.",
+        },
+        {
+          prompt: "A valid token is present, but the user lacks admin permission. Which response is best?",
+          answer: "403 Forbidden",
+          distractors: ["401 Unauthorized", "404 for every case", "500 Internal Server Error"],
+          reason: "403 means the server understood the authenticated user but denies access.",
+        },
+        {
+          prompt: "A request has no bearer token for a protected endpoint. Which response is best?",
+          answer: "401 Unauthorized with WWW-Authenticate",
+          distractors: ["403 Forbidden", "422 Unprocessable Entity", "204 No Content"],
+          reason: "401 asks the client to authenticate.",
+        },
+        {
+          prompt: "A POST creates a new resource successfully. Which response is best?",
+          answer: "201 Created with Location header",
+          distractors: ["404 Not Found", "409 Conflict", "429 Too Many Requests"],
+          reason: "201 signals successful creation; Location points at the new resource.",
+        },
+        {
+          prompt: "A create request conflicts with an existing unique username. Which response is best?",
+          answer: "409 Conflict",
+          distractors: ["201 Created", "401 Unauthorized", "503 Service Unavailable"],
+          reason: "409 indicates the request conflicts with current resource state.",
+        },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", v.prompt, {
+            kind: "icon",
+            icon: m.emoji,
+            title: "API errors",
+            subtitle: "Status + structured body",
+          }),
+          hint: "Match the status code to who can fix the problem.",
+          hints: ["4xx usually means the client can change the request.", "5xx means the server failed unexpectedly."],
+          explanation: v.reason,
+        },
+        v.answer,
+        v.distractors,
+      );
+    }
+    case "subnetMaskMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each CIDR prefix with its usable host count.",
+          pairs: [
+            ["/30", "2"],
+            ["/29", "6"],
+            ["/28", "14"],
+            ["/24", "254"],
+            ["/16", "65,534"],
+          ],
+          hint: "Usable hosts = 2^(32 − prefix) − 2.",
+          explanation: "CIDR prefix length controls host count.",
+        },
+        {
+          prompt: "Pair each CIDR with its subnet mask.",
+          pairs: [
+            ["/24", "255.255.255.0"],
+            ["/16", "255.255.0.0"],
+            ["/30", "255.255.255.252"],
+            ["/27", "255.255.255.224"],
+            ["/25", "255.255.255.128"],
+          ],
+          hint: "Convert prefix into dotted decimal.",
+          explanation: "CIDR ↔ subnet mask mapping.",
+        },
+      ]);
+    }
+    case "kMapSimplify": {
+      const variants = [
+        {
+          prompt: "Karnaugh map with 1s only where A=1. Simplest expression?",
+          answer: "A",
+          distractors: ["A·B", "A + B", "Ā"],
+          reason: "All 1s align with A=1 column.",
+        },
+        {
+          prompt: "K-map 1s when A=B (both 0 or both 1). Simplest?",
+          answer: "A ⊙ B (XNOR)",
+          distractors: ["A ⊕ B", "A·B", "A + B"],
+          reason: "1s where A equals B is XNOR.",
+        },
+        {
+          prompt: "K-map 1s when exactly one of A, B is true. Simplest?",
+          answer: "A ⊕ B (XOR)",
+          distractors: ["A ⊙ B", "A + B", "A·B"],
+          reason: "Exactly-one true = XOR.",
+        },
+        {
+          prompt: "K-map all 1s. Simplest?",
+          answer: "1",
+          distractors: ["A", "A + B", "A·B"],
+          reason: "Function is always true.",
+        },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", v.prompt, {
+            kind: "icon",
+            icon: m.emoji,
+            title: "K-map simplify",
+            subtitle: "Pick the minimal expression",
+          }),
+          hint: "Group adjacent 1s in powers of two.",
+          hints: ["Variables that stay the same in a group survive.", "Largest valid group simplifies most."],
+          explanation: v.reason,
+        },
+        v.answer,
+        v.distractors,
+      );
+    }
+    case "pulleyAdvantage": {
+      const variants = [
+        { ropes: 2, name: "single movable pulley" },
+        { ropes: 3, name: "compound block-and-tackle" },
+        { ropes: 4, name: "double-block tackle" },
+        { ropes: 5, name: "5-rope block" },
+        { ropes: 6, name: "6-rope block" },
+      ];
+      const v = pick(variants);
+      return numpadEng(
+        m,
+        difficulty,
+        `Count the supporting ropes in the ${v.name}. What is the ideal mechanical advantage?`,
+        { kind: "icon", icon: m.emoji, title: `${v.ropes} supporting ropes`, subtitle: "MA = # supporting ropes" },
+        v.ropes,
+        "MA equals the number of rope segments supporting the load.",
+        ["Don't count the rope you pull.", "Each supporting segment shares the weight."],
+        `Ideal MA = ${v.ropes}.`,
+      );
+    }
+    case "electricPowerCalc": {
+      const v = pick([6, 12, 24, 48, 120, 240] as const);
+      const i = pick([0.5, 1, 2, 3, 5] as const);
+      const ans = +(v * i).toFixed(2);
+      return numpadEng(
+        m,
+        difficulty,
+        `A device draws ${i} A at ${v} V. Find the power in watts.`,
+        { kind: "icon", icon: m.emoji, title: `V=${v}, I=${i}`, subtitle: "P = V · I" },
+        String(ans),
+        "Use P = V × I.",
+        [`${v} × ${i} = ${ans}.`, "Units: V·A = W."],
+        `P = ${v} × ${i} = ${ans} W.`,
+      );
+    }
+    case "soilTypeMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each soil with its property.",
+          pairs: [
+            ["Sand", "Large grains, high drainage"],
+            ["Silt", "Smooth, holds moisture"],
+            ["Clay", "Tiny grains, low drainage"],
+            ["Loam", "Balanced, ideal for plants"],
+            ["Peat", "Organic, acidic"],
+          ],
+          hint: "Grain size and organic content matter.",
+          explanation: "Soil texture controls drainage and fertility.",
+        },
+        {
+          prompt: "Pair each soil with a typical engineering concern.",
+          pairs: [
+            ["Expansive clay", "Heaves with moisture"],
+            ["Loose sand", "Liquefaction in earthquakes"],
+            ["Organic peat", "Settles under load"],
+            ["Bedrock", "Excellent foundation"],
+            ["Silty soil", "Frost susceptibility"],
+          ],
+          hint: "Soils misbehave in characteristic ways.",
+          explanation: "Geotechnical concerns vary by soil.",
+        },
+      ]);
+    }
+    case "orbitTypeMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each orbit with its altitude band.",
+          pairs: [
+            ["LEO", "Low Earth orbit (160–2000 km)"],
+            ["MEO", "Medium Earth orbit (2k–35k km)"],
+            ["GEO", "Geostationary (≈35,786 km)"],
+            ["HEO", "Highly elliptical orbit"],
+            ["Sun-synchronous", "Polar, syncs to sun"],
+          ],
+          hint: "Altitude defines the orbit family.",
+          explanation: "Each orbital regime suits specific missions.",
+        },
+        {
+          prompt: "Pair each orbit with a representative mission.",
+          pairs: [
+            ["LEO", "ISS, Starlink"],
+            ["MEO", "GPS"],
+            ["GEO", "Weather, communications"],
+            ["Sun-synchronous", "Earth-observation"],
+            ["L2 halo", "James Webb Space Telescope"],
+          ],
+          hint: "Match orbit to its job.",
+          explanation: "Mission requirements drive orbit choice.",
+        },
+      ]);
+    }
+    case "pathPlanningMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each algorithm with its use.",
+          pairs: [
+            ["A*", "Shortest path with heuristic"],
+            ["Dijkstra", "Shortest path, no heuristic"],
+            ["RRT", "Sampling in high-D continuous space"],
+            ["PRM", "Roadmap for static environments"],
+            ["D* Lite", "Replanning with dynamic obstacles"],
+          ],
+          hint: "Discrete vs continuous, static vs dynamic.",
+          explanation: "Each planner fits a different problem geometry.",
+        },
+        {
+          prompt: "Pair each motion technique with its niche.",
+          pairs: [
+            ["Potential fields", "Local navigation, reactive"],
+            ["Vector field histogram", "Local obstacle avoidance"],
+            ["Bug algorithms", "Simple obstacle following"],
+            ["MPC", "Constrained dynamic planning"],
+            ["Lattice planner", "Kinodynamic paths"],
+          ],
+          hint: "Each method handles dynamics differently.",
+          explanation: "Local vs global planning techniques.",
+        },
+      ]);
+    }
+    case "framingTypeMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each framing system with its use.",
+          pairs: [
+            ["Stud wall (wood)", "Light residential"],
+            ["Steel moment frame", "High-rise lateral resistance"],
+            ["Concrete shear wall", "Lateral force resistance"],
+            ["Tilt-up panel", "Big-box warehouses"],
+            ["Mass timber (CLT)", "Mid-rise sustainable buildings"],
+          ],
+          hint: "Each system serves a building type.",
+          explanation: "Structural framing depends on scale and use.",
+        },
+        {
+          prompt: "Pair each lateral system with its mechanism.",
+          pairs: [
+            ["Braced frame", "Diagonal members carry shear"],
+            ["Moment frame", "Rigid connections resist bending"],
+            ["Shear wall", "Walls resist in-plane shear"],
+            ["Tube system", "Building acts like cantilever tube"],
+            ["Outrigger", "Couples core to perimeter columns"],
+          ],
+          hint: "Different ways to fight lateral loads.",
+          explanation: "Lateral systems handle wind and seismic.",
+        },
+      ]);
+    }
+    case "compositeLayerOrder": {
+      return bankReorder(m, difficulty, [
+        {
+          prompt: "Order the steps of a fiber composite hand lay-up.",
+          order: [
+            "Prepare and wax the mold",
+            "Apply gel coat",
+            "Lay reinforcing fabric",
+            "Wet out with resin",
+            "Consolidate / debulk",
+            "Cure",
+            "Demold and finish",
+          ],
+          hint: "Surface first, structure next, cure last.",
+          hints: ["Gel coat is the finished surface.", "Curing makes the part rigid."],
+          explanation: "Standard hand lay-up sequence.",
+        },
+        {
+          prompt: "Order the steps of a vacuum-assisted resin transfer (VARTM) cycle.",
+          order: [
+            "Prepare mold surface",
+            "Lay reinforcement plies",
+            "Apply peel ply + flow media",
+            "Seal vacuum bag",
+            "Pull vacuum / leak check",
+            "Infuse resin",
+            "Cure",
+          ],
+          hint: "Build the stack, seal it, then infuse.",
+          hints: ["Leak test before infusion.", "Resin follows the flow media."],
+          explanation: "VARTM gives high fiber volume with controlled resin flow.",
+        },
+      ]);
+    }
+    case "rcTimeConstant": {
+      const variants = [
+        { r: 1000, c: 0.000001, label: "1 kΩ × 1 µF", expected: 0.001 },
+        { r: 10000, c: 0.000001, label: "10 kΩ × 1 µF", expected: 0.01 },
+        { r: 100, c: 0.0001, label: "100 Ω × 100 µF", expected: 0.01 },
+        { r: 470, c: 0.000022, label: "470 Ω × 22 µF", expected: 0.01034 },
+        { r: 4700, c: 0.0000001, label: "4.7 kΩ × 0.1 µF", expected: 0.00047 },
+      ];
+      const v = pick(variants);
+      const display = (s: number) => (s < 0.01 ? `${(s * 1000).toFixed(2)} ms` : `${(s * 1000).toFixed(1)} ms`);
+      return numpadEng(
+        m,
+        difficulty,
+        `Find the RC time constant (in ms) for ${v.label}.`,
+        { kind: "icon", icon: m.emoji, title: v.label, subtitle: "τ = R · C (enter in ms)" },
+        +(v.expected * 1000).toFixed(2),
+        "τ = R × C; convert seconds to milliseconds.",
+        [`τ = ${v.r} × ${v.c} = ${v.expected} s.`, `In ms: ${display(v.expected)}.`],
+        `τ = R·C = ${display(v.expected)}.`,
+      );
+    }
+    case "requirementTypeMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each requirement statement with its type.",
+          pairs: [
+            ["System shall log every login attempt.", "Functional"],
+            ["System shall respond in < 200 ms.", "Non-functional (performance)"],
+            ["System shall run on iOS 17+.", "Constraint"],
+            ["System shall be accessible to screen readers.", "Non-functional (accessibility)"],
+            ["System shall encrypt PII at rest.", "Non-functional (security)"],
+          ],
+          hint: "Functional = what; non-functional = how well; constraint = limit.",
+          explanation: "Requirements are categorized to guide design and testing.",
+        },
+        {
+          prompt: "Pair each requirement with a quality attribute.",
+          pairs: [
+            ["99.9% uptime", "Reliability"],
+            ["Recover within 30 s", "Resilience"],
+            ["Support 10k concurrent users", "Scalability"],
+            ["Switch DBs without rewrites", "Portability"],
+            ["Update in < 10 min", "Maintainability"],
+          ],
+          hint: "Each requirement targets one *-ility.",
+          explanation: "ISO 25010 / classic quality attributes.",
+        },
+      ]);
+    }
+    case "userResearchMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each user-research method with its purpose.",
+          pairs: [
+            ["Interview", "Deep qualitative insight"],
+            ["Survey", "Scaled quantitative trends"],
+            ["Usability test", "Watch users perform tasks"],
+            ["Diary study", "Behavior over time"],
+            ["Field observation", "Contextual behavior"],
+          ],
+          hint: "Match each method to what it best reveals.",
+          explanation: "Research methods trade depth vs breadth.",
+        },
+        {
+          prompt: "Pair each artifact with its goal.",
+          pairs: [
+            ["Persona", "Capture target users"],
+            ["Empathy map", "Externalize user thoughts/feelings"],
+            ["Journey map", "Trace experience over time"],
+            ["Affinity diagram", "Cluster qualitative insights"],
+            ["Storyboard", "Illustrate scenarios"],
+          ],
+          hint: "Each artifact frames a different aspect.",
+          explanation: "Design-research artifacts surface different insights.",
+        },
+      ]);
     }
     case "escapeRoom":
       return {
