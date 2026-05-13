@@ -11185,28 +11185,13 @@ function Badge({ tone, children }: { tone: "violet" | "sky" | "amber" | "emerald
   );
 }
 
-function CategoryCard({
-  meta,
-  xp,
-  onClick,
-  unlocked,
-  required,
-  currentXp,
-}: {
-  meta: PuzzleMeta;
-  xp: number;
-  onClick: () => void;
-  unlocked: boolean;
-  required: number;
-  currentXp: number;
-}) {
-  const progress = required === 0 ? 1 : Math.min(1, currentXp / required);
+function CategoryCard({ meta, onClick, unlocked }: { meta: PuzzleMeta; onClick: () => void; unlocked: boolean }) {
   return (
     <motion.button
       type="button"
       onClick={onClick}
       whileTap={{ scale: 0.97 }}
-      className={`group relative flex h-full flex-col overflow-hidden rounded-[2rem] border-2 border-b-4 p-5 text-left transition active:translate-y-0.5 ${
+      className={`group relative flex h-full min-h-[15.5rem] w-full flex-col overflow-hidden rounded-[2rem] border-2 border-b-4 p-5 text-left transition active:translate-y-0.5 sm:min-h-[16.5rem] ${
         unlocked
           ? "border-neutral-200 dark:border-zinc-600 border-b-neutral-300 dark:border-b-zinc-600 bg-white dark:bg-zinc-900 shadow-[0_4px_0_0_#e5e5e5] dark:shadow-[0_4px_0_0_#27272a] hover:bg-neutral-50 dark:hover:bg-zinc-800/90"
           : "border-neutral-200 dark:border-zinc-600 border-b-neutral-300 dark:border-b-zinc-600 bg-neutral-100 dark:bg-zinc-800/80 hover:border-amber-300"
@@ -11234,27 +11219,14 @@ function CategoryCard({
           <div className="mt-2.5 flex flex-wrap gap-1.5">
             <Badge tone="violet">{gradeLabel(meta.grade)}</Badge>
             <Badge tone="sky">{subjectLabel(meta.subject)}</Badge>
-            {unlocked ? (
-              <Badge tone="amber">+{xp} XP</Badge>
-            ) : (
-              <Badge tone="amber">🔒 {required} XP</Badge>
-            )}
             {meta.isBoss ? <Badge tone="amber">BOSS</Badge> : null}
             {meta.isMasteryTest ? <Badge tone="violet">Mastery</Badge> : null}
           </div>
         </div>
       </div>
-      <p className={`mt-4 line-clamp-2 text-xs leading-relaxed ${unlocked ? "text-neutral-600 dark:text-zinc-400" : "text-neutral-500 dark:text-zinc-400"}`}>{meta.skill}</p>
-      {!unlocked ? (
-        <div className="mt-3 space-y-1">
-          <div className="h-2 rounded-full bg-neutral-200 dark:bg-zinc-700">
-            <div className="h-2 rounded-full bg-[#ffc800]" style={{ width: `${progress * 100}%` }} />
-          </div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-amber-800">
-            {currentXp}/{required} XP to unlock
-          </p>
-        </div>
-      ) : null}
+      <div className="mt-4 min-h-0 flex-1">
+        <p className={`line-clamp-2 text-xs leading-relaxed ${unlocked ? "text-neutral-600 dark:text-zinc-400" : "text-neutral-500 dark:text-zinc-400"}`}>{meta.skill}</p>
+      </div>
       <div className="mt-auto flex items-center justify-between gap-2 pt-4 text-[11px] text-neutral-500 dark:text-zinc-400">
         <span className="inline-flex max-w-[65%] items-center gap-1 truncate rounded-full border border-neutral-200 dark:border-zinc-600 bg-neutral-100 dark:bg-zinc-800/80 px-2 py-0.5 font-bold uppercase tracking-wider text-neutral-700 dark:text-zinc-300">
           {metaInteractionDisplay(meta)}
@@ -11268,13 +11240,11 @@ function CategoryCard({
 function SkillTree({
   metas,
   xp,
-  currentDifficulty,
   onPick,
   completions,
 }: {
   metas: PuzzleMeta[];
   xp: number;
-  currentDifficulty: Difficulty;
   onPick: (id: PuzzleId) => void;
   completions: Record<string, number>;
 }) {
@@ -11310,17 +11280,15 @@ function SkillTree({
                 <div className="h-2 rounded-full bg-[#58cc02]" style={{ width: `${(unlockedInTier / inTier.length) * 100}%` }} />
               </div>
             </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 xl:grid-cols-3">
+            <div className="grid auto-rows-[minmax(0,1fr)] grid-cols-1 items-stretch gap-4 md:grid-cols-2 md:gap-5 xl:grid-cols-3">
               {inTier.map((meta) => (
-                <CategoryCard
-                  key={meta.id}
-                  meta={meta}
-                  xp={xpRewardFor(currentDifficulty)}
-                  onClick={() => onPick(meta.id)}
-                  unlocked={isUnlocked(meta, xp, completions)}
-                  required={xpRequiredFor(meta)}
-                  currentXp={xp}
-                />
+                <div key={meta.id} className="flex h-full min-h-0 w-full">
+                  <CategoryCard
+                    meta={meta}
+                    onClick={() => onPick(meta.id)}
+                    unlocked={isUnlocked(meta, xp, completions)}
+                  />
+                </div>
               ))}
             </div>
           </div>
@@ -12140,21 +12108,19 @@ export default function MathPuzzlesPage() {
                     </div>
                   ) : catalogView === "grid" ? (
                     <>
-                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 xl:grid-cols-3">
+                      <div className="grid auto-rows-[minmax(0,1fr)] grid-cols-1 items-stretch gap-4 md:grid-cols-2 md:gap-5 xl:grid-cols-3">
                         {pagedGridMetas.map((meta, i) => (
                           <motion.div
                             key={meta.id}
+                            className="flex h-full min-h-0 w-full"
                             initial={{ opacity: 0, y: 12 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: Math.min(i * 0.008, 0.25) }}
                           >
                             <CategoryCard
                               meta={meta}
-                              xp={xpRewardFor(effectiveDifficulty)}
                               onClick={() => start(meta.id)}
                               unlocked={isUnlocked(meta, xp, categoryCompletions)}
-                              required={xpRequiredFor(meta)}
-                              currentXp={xp}
                             />
                           </motion.div>
                         ))}
@@ -12196,7 +12162,6 @@ export default function MathPuzzlesPage() {
                     <SkillTree
                       metas={visibleMetas}
                       xp={xp}
-                      currentDifficulty={effectiveDifficulty}
                       onPick={(id) => start(id)}
                       completions={categoryCompletions}
                     />
