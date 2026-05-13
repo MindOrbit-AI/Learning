@@ -11528,6 +11528,8 @@ const ENGINEERING_SUBJECT_OPTIONS: readonly SubjectFilter[] = [
 const DIFFICULTY_OPTIONS: readonly DifficultyFilter[] = ["All", "easy", "medium", "hard"];
 const DOMAIN_OPTIONS: readonly DomainFilter[] = ["All", "Math", "Science", "Technology", "Engineering"];
 const LOCK_OPTIONS: readonly LockFilter[] = ["All", "Unlocked", "Locked"];
+/** Grid catalog: puzzles per page (3 columns × 4 rows at xl). */
+const CATALOG_PAGE_SIZE = 12;
 
 function ProgressBar({ xp }: { xp: number }) {
   const level = Math.floor(xp / LEVEL_XP) + 1;
@@ -11563,6 +11565,7 @@ export default function MathPuzzlesPage() {
   const [domainFilter, setDomainFilter] = useState<DomainFilter>("All");
   const [lockFilter, setLockFilter] = useState<LockFilter>("All");
   const [catalogView, setCatalogView] = useState<CatalogView>("grid");
+  const [catalogPage, setCatalogPage] = useState(1);
   const [lockedToast, setLockedToast] = useState<{ title: string; message: string } | null>(null);
   const [energy, setEnergy] = useState(MAX_ENERGY);
   const [lastEnergyAt, setLastEnergyAt] = useState<number>(() => Date.now());
@@ -11602,6 +11605,17 @@ export default function MathPuzzlesPage() {
       }),
     [gradeFilter, subjectFilter, interactionFilter, search, domainFilter, lockFilter, xp, categoryCompletions],
   );
+
+  const catalogTotalPages = Math.max(1, Math.ceil(visibleMetas.length / CATALOG_PAGE_SIZE));
+  const pagedGridMetas = useMemo(() => {
+    const start = (catalogPage - 1) * CATALOG_PAGE_SIZE;
+    return visibleMetas.slice(start, start + CATALOG_PAGE_SIZE);
+  }, [visibleMetas, catalogPage]);
+
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(visibleMetas.length / CATALOG_PAGE_SIZE));
+    setCatalogPage((p) => Math.min(p, maxPage));
+  }, [visibleMetas]);
 
   const subjectOptions = useMemo<readonly SubjectFilter[]>(() => {
     if (domainFilter === "Science") return SCIENCE_SUBJECT_OPTIONS;
@@ -12125,25 +12139,59 @@ export default function MathPuzzlesPage() {
                       No puzzles match these filters yet. Try widening the grade, subject, or interaction.
                     </div>
                   ) : catalogView === "grid" ? (
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 xl:grid-cols-3">
-                      {visibleMetas.map((meta, i) => (
-                        <motion.div
-                          key={meta.id}
-                          initial={{ opacity: 0, y: 12 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: Math.min(i * 0.008, 0.25) }}
-                        >
-                          <CategoryCard
-                            meta={meta}
-                            xp={xpRewardFor(effectiveDifficulty)}
-                            onClick={() => start(meta.id)}
-                            unlocked={isUnlocked(meta, xp, categoryCompletions)}
-                            required={xpRequiredFor(meta)}
-                            currentXp={xp}
-                          />
-                        </motion.div>
-                      ))}
-                    </div>
+                    <>
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 xl:grid-cols-3">
+                        {pagedGridMetas.map((meta, i) => (
+                          <motion.div
+                            key={meta.id}
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: Math.min(i * 0.008, 0.25) }}
+                          >
+                            <CategoryCard
+                              meta={meta}
+                              xp={xpRewardFor(effectiveDifficulty)}
+                              onClick={() => start(meta.id)}
+                              unlocked={isUnlocked(meta, xp, categoryCompletions)}
+                              required={xpRequiredFor(meta)}
+                              currentXp={xp}
+                            />
+                          </motion.div>
+                        ))}
+                      </div>
+                      {catalogTotalPages > 1 ? (
+                        <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border-2 border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-900 px-4 py-4 shadow-[0_4px_0_0_#e5e5e5] dark:shadow-[0_4px_0_0_#27272a] sm:flex-row sm:px-5">
+                          <p className="text-center text-xs font-bold text-neutral-600 dark:text-zinc-400 sm:text-left">
+                            Showing{" "}
+                            <span className="font-black text-neutral-900 dark:text-zinc-100">
+                              {(catalogPage - 1) * CATALOG_PAGE_SIZE + 1}–{Math.min(catalogPage * CATALOG_PAGE_SIZE, visibleMetas.length)}
+                            </span>{" "}
+                            of {visibleMetas.length}
+                          </p>
+                          <div className="flex flex-wrap items-center justify-center gap-2">
+                            <button
+                              type="button"
+                              disabled={catalogPage <= 1}
+                              onClick={() => setCatalogPage((p) => Math.max(1, p - 1))}
+                              className="rounded-xl border-2 border-neutral-200 dark:border-zinc-600 border-b-4 border-b-neutral-300 dark:border-b-zinc-600 bg-white dark:bg-zinc-900 px-4 py-2 text-xs font-black uppercase tracking-wider text-neutral-800 dark:text-zinc-100 shadow-[0_2px_0_0_#e5e5e5] dark:shadow-[0_2px_0_0_#27272a] transition enabled:active:border-b-2 enabled:active:translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                              Previous
+                            </button>
+                            <span className="min-w-[7rem] text-center text-xs font-black text-neutral-700 dark:text-zinc-300">
+                              Page {catalogPage} / {catalogTotalPages}
+                            </span>
+                            <button
+                              type="button"
+                              disabled={catalogPage >= catalogTotalPages}
+                              onClick={() => setCatalogPage((p) => Math.min(catalogTotalPages, p + 1))}
+                              className="rounded-xl border-2 border-neutral-200 dark:border-zinc-600 border-b-4 border-b-neutral-300 dark:border-b-zinc-600 bg-white dark:bg-zinc-900 px-4 py-2 text-xs font-black uppercase tracking-wider text-neutral-800 dark:text-zinc-100 shadow-[0_2px_0_0_#e5e5e5] dark:shadow-[0_2px_0_0_#27272a] transition enabled:active:border-b-2 enabled:active:translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                              Next
+                            </button>
+                          </div>
+                        </div>
+                      ) : null}
+                    </>
                   ) : (
                     <SkillTree
                       metas={visibleMetas}
