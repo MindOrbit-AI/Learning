@@ -605,6 +605,21 @@ type PuzzleId =
   | "precisionRecall"
   | "gradientStep"
   | "normalizeData"
+  | "lossFunctionMatch"
+  | "optimizerMatch"
+  | "regularizationSort"
+  | "mlPipelineOrder"
+  | "transformerStageOrder"
+  | "embeddingMatch"
+  | "vectorSimilarityChoice"
+  | "promptPatternMatch"
+  | "ragPipelineOrder"
+  | "modelEvalScenario"
+  | "softmaxStep"
+  | "f1ScoreCalc"
+  | "biasTypeMLSort"
+  | "samplingMethodChoice"
+  | "convolutionOutput"
   | "caesarCipher"
   | "passwordStrength"
   | "sqlJoinMatch"
@@ -1337,6 +1352,21 @@ const METAS: PuzzleMeta[] = [
   s("precisionRecall", "Precision / Recall", "Score the classifier", "🤖", "from-fuchsia-400 to-violet-700", "11", "AIML", "Compute precision and recall", 5, "numpad", { displayInteraction: "Fill in number", xpRequired: 1200 }),
   s("gradientStep", "Gradient Descent Step", "Which way to go?", "📉", "from-rose-400 to-amber-700", "12", "AIML", "Decide gradient descent direction", 5, "choice", { displayInteraction: "Multiple choice", xpRequired: 2500 }),
   s("normalizeData", "Normalize a Value", "Min-max scale", "🧮", "from-cyan-400 to-emerald-700", "10", "AIML", "Min-max scale a feature", 4, "numpad", { displayInteraction: "Fill in number", xpRequired: 500 }),
+  s("lossFunctionMatch", "Loss Function Match", "Loss → use case", "📉", "from-rose-400 to-pink-700", "11", "AIML", "Match loss functions to tasks", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("optimizerMatch", "Optimizer Match", "Algorithm → behavior", "⚙️", "from-violet-400 to-indigo-700", "11", "AIML", "Match optimizers to characteristics", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("regularizationSort", "Regularization Sort", "Which type?", "🧯", "from-amber-400 to-rose-700", "11", "AIML", "Classify regularization techniques", 4, "sort", { displayInteraction: "Sort categories", xpRequired: 1200 }),
+  s("mlPipelineOrder", "ML Pipeline Order", "Data → deploy", "🚇", "from-sky-400 to-cyan-700", "10", "AIML", "Order ML pipeline stages", 4, "reorder", { displayInteraction: "Order steps", xpRequired: 500 }),
+  s("transformerStageOrder", "Transformer Stages", "Token → output", "🔁", "from-fuchsia-400 to-purple-700", "12", "AIML", "Order transformer stages", 5, "reorder", { displayInteraction: "Order steps", xpRequired: 2500 }),
+  s("embeddingMatch", "Embedding Match", "Technique → property", "🧬", "from-cyan-400 to-violet-700", "11", "AIML", "Match embedding techniques", 4, "match", { displayInteraction: "Matching cards", xpRequired: 1200 }),
+  s("vectorSimilarityChoice", "Vector Similarity", "Pick the metric", "📐", "from-emerald-400 to-cyan-700", "10", "AIML", "Choose similarity metric", 4, "choice", { displayInteraction: "Multiple choice", xpRequired: 500 }),
+  s("promptPatternMatch", "Prompt Pattern Match", "Pattern → use case", "💬", "from-orange-400 to-rose-700", "10", "AIML", "Match prompt engineering patterns", 4, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
+  s("ragPipelineOrder", "RAG Pipeline Order", "Query → answer", "🔎", "from-violet-400 to-fuchsia-700", "11", "AIML", "Order RAG retrieval steps", 5, "reorder", { displayInteraction: "Order steps", xpRequired: 1200 }),
+  s("modelEvalScenario", "Model Eval Scenario", "Pick the right metric", "🧪", "from-rose-400 to-violet-700", "11", "AIML", "Choose the right ML evaluation metric", 5, "choice", { displayInteraction: "Multiple choice", xpRequired: 1200 }),
+  s("softmaxStep", "Softmax Step", "Normalize logits", "🌡️", "from-amber-400 to-orange-700", "11", "AIML", "Compute softmax probabilities", 5, "numpad", { displayInteraction: "Fill in number", xpRequired: 1200 }),
+  s("f1ScoreCalc", "F1 Score", "Harmonic mean of P & R", "🎯", "from-pink-400 to-rose-700", "11", "AIML", "Compute F1 score", 5, "numpad", { displayInteraction: "Fill in number", xpRequired: 1200 }),
+  s("biasTypeMLSort", "ML Bias Type Sort", "Bias source → type", "⚖️", "from-fuchsia-400 to-pink-700", "11", "AIML", "Classify ML bias types", 5, "sort", { displayInteraction: "Sort categories", xpRequired: 1200 }),
+  s("samplingMethodChoice", "LLM Sampling Method", "Greedy / temp / top-k", "🎲", "from-cyan-400 to-blue-700", "11", "AIML", "Pick the LLM sampling strategy", 4, "choice", { displayInteraction: "Multiple choice", xpRequired: 1200 }),
+  s("convolutionOutput", "Convolution Output", "Feature map size", "🧩", "from-indigo-400 to-violet-700", "12", "AIML", "Compute conv output size", 5, "numpad", { displayInteraction: "Fill in number", xpRequired: 2500 }),
   s("caesarCipher", "Caesar Cipher", "Decode the shift", "🔐", "from-amber-400 to-rose-700", "10", "Cybersecurity", "Decrypt a Caesar cipher", 4, "numpad", { displayInteraction: "Fill in number", xpRequired: 500 }),
   s("passwordStrength", "Password Strength Order", "Weakest to strongest", "🛡️", "from-emerald-400 to-cyan-700", "9", "Cybersecurity", "Rank password entropy", 3, "reorder", { displayInteraction: "Order steps", xpRequired: 0 }),
   s("sqlJoinMatch", "SQL Join Match", "Inner, left, right, full", "🗄️", "from-blue-400 to-cyan-700", "10", "Databases", "Match SQL joins to behavior", 4, "match", { displayInteraction: "Matching cards", xpRequired: 500 }),
@@ -1460,6 +1490,14 @@ const GRADE_BASE_XP: Record<Grade, number> = {
   "12": 2500,
 };
 
+const GRADE_SORT_RANK: Record<Grade, number> = {
+  "K-8": 0,
+  "9": 1,
+  "10": 2,
+  "11": 3,
+  "12": 4,
+};
+
 const BOSS_CATEGORY_THRESHOLD = 5;
 const MASTERY_CATEGORY_THRESHOLD = 8;
 
@@ -1469,6 +1507,14 @@ function xpRequiredFor(meta: PuzzleMeta): number {
   if (meta.isBoss) base += 300;
   if (meta.isMasteryTest) base += 500;
   return base;
+}
+
+function compareMetaDifficulty(a: PuzzleMeta, b: PuzzleMeta): number {
+  return (
+    xpRequiredFor(a) - xpRequiredFor(b)
+    || GRADE_SORT_RANK[a.grade] - GRADE_SORT_RANK[b.grade]
+    || a.estMin - b.estMin
+  );
 }
 
 type AiPuzzleMode = "choice" | "match" | "sort" | "reorder" | "numpad";
@@ -15192,6 +15238,852 @@ function makePuzzle(type: PuzzleId, difficulty: Difficulty): Puzzle {
         `(${x}−${min})/(${max}−${min}) = ${ans}.`,
       );
     }
+    case "lossFunctionMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each loss function with the task it's best suited for.",
+          pairs: [
+            ["MSE (Mean Squared Error)", "Regression"],
+            ["Cross-Entropy", "Multi-class classification"],
+            ["Binary Cross-Entropy", "Binary classification"],
+            ["Hinge Loss", "SVM / margin classifier"],
+            ["Huber Loss", "Robust regression"],
+          ],
+          hint: "Loss must match the output type.",
+          hints: ["Probabilities → cross-entropy.", "Continuous output → MSE/Huber."],
+          explanation: "Loss is paired with task and output type.",
+        },
+        {
+          prompt: "Pair each loss with its formula sketch.",
+          pairs: [
+            ["MSE", "(1/n) Σ (y − ŷ)²"],
+            ["MAE", "(1/n) Σ |y − ŷ|"],
+            ["Cross-Entropy", "−Σ y · log(ŷ)"],
+            ["KL Divergence", "Σ p · log(p/q)"],
+            ["Hinge", "max(0, 1 − y·ŷ)"],
+          ],
+          hint: "Each loss has a distinct closed form.",
+          explanation: "Memorize the canonical formulas.",
+        },
+        {
+          prompt: "Pair each loss with a key property.",
+          pairs: [
+            ["MSE", "Penalizes large errors more"],
+            ["MAE", "Robust to outliers"],
+            ["Huber", "Quadratic near 0, linear far"],
+            ["Cross-Entropy", "Convex with softmax/sigmoid"],
+            ["Triplet Loss", "Used for embedding learning"],
+          ],
+          hint: "Properties drive choice of loss.",
+          explanation: "Trade-offs depend on data and goal.",
+        },
+        {
+          prompt: "Pair each task with its standard loss.",
+          pairs: [
+            ["House price prediction", "MSE"],
+            ["Email spam classifier", "Binary Cross-Entropy"],
+            ["10-class image classifier", "Cross-Entropy"],
+            ["Object detection (bbox regression)", "Smooth L1 / Huber"],
+            ["Face recognition embeddings", "Triplet / Contrastive Loss"],
+          ],
+          hint: "Map task to canonical loss.",
+          explanation: "Each task has a default loss family.",
+        },
+      ]);
+    }
+    case "optimizerMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each optimizer with its defining behavior.",
+          pairs: [
+            ["SGD", "Plain gradient with fixed learning rate"],
+            ["Momentum", "Accumulates a velocity vector"],
+            ["RMSProp", "Adapts learning rate per parameter (squared-grad EMA)"],
+            ["Adam", "Adaptive moments: combines momentum + RMSProp"],
+            ["AdaGrad", "Per-parameter rate based on cumulative squared grad"],
+          ],
+          hint: "Each optimizer adds something on top of SGD.",
+          hints: ["Adam ≈ Momentum + RMSProp.", "AdaGrad sums grads; never resets."],
+          explanation: "Optimizers vary in how they scale and smooth gradients.",
+        },
+        {
+          prompt: "Pair each optimizer with the hyperparameter it most directly controls.",
+          pairs: [
+            ["SGD", "learning rate η"],
+            ["Momentum", "momentum coefficient β (e.g., 0.9)"],
+            ["Adam", "β₁, β₂ for moment estimates"],
+            ["RMSProp", "decay rate ρ for squared-grad EMA"],
+            ["LR Scheduler", "How η changes over time"],
+          ],
+          hint: "Each tunable changes a specific term.",
+          explanation: "Hyperparameters expose the optimizer's knobs.",
+        },
+        {
+          prompt: "Pair each optimizer with a typical strength.",
+          pairs: [
+            ["SGD + Momentum", "Generalizes well on vision tasks"],
+            ["Adam", "Fast convergence on noisy gradients"],
+            ["AdamW", "Adam with decoupled weight decay"],
+            ["LBFGS", "Quasi-Newton for small batches"],
+            ["NAG (Nesterov)", "Look-ahead momentum update"],
+          ],
+          hint: "Strength comes from update rule structure.",
+          explanation: "Pick optimizer by problem shape.",
+        },
+        {
+          prompt: "Pair each optimizer with a typical weakness or pitfall.",
+          pairs: [
+            ["SGD", "Sensitive to learning-rate choice"],
+            ["AdaGrad", "Learning rate decays to 0"],
+            ["Adam", "Can generalize worse than SGD on CV"],
+            ["Momentum", "Can overshoot minima"],
+            ["LBFGS", "Memory-heavy on large nets"],
+          ],
+          hint: "Every optimizer has a failure mode.",
+          explanation: "Trade-offs guide selection.",
+        },
+      ]);
+    }
+    case "regularizationSort": {
+      return bankSort(m, difficulty, [
+        {
+          prompt: "Sort each technique by what it primarily targets.",
+          categories: ["Weight magnitude", "Network capacity", "Training dynamics"],
+          items: [
+            { label: "L1 regularization", category: "Weight magnitude" },
+            { label: "L2 regularization", category: "Weight magnitude" },
+            { label: "Weight decay (AdamW)", category: "Weight magnitude" },
+            { label: "Dropout", category: "Network capacity" },
+            { label: "DropConnect", category: "Network capacity" },
+            { label: "Early stopping", category: "Training dynamics" },
+            { label: "Learning-rate decay", category: "Training dynamics" },
+            { label: "Data augmentation", category: "Training dynamics" },
+          ],
+          hint: "What does the method change directly?",
+          hints: ["L-norms penalize weight size.", "Dropout randomly removes capacity."],
+          explanation: "Each regularizer attacks overfitting from a different angle.",
+        },
+        {
+          prompt: "Sort each regularizer into parametric vs structural vs data-based.",
+          categories: ["Parametric", "Structural", "Data-based"],
+          items: [
+            { label: "L2 weight decay", category: "Parametric" },
+            { label: "L1 weight decay", category: "Parametric" },
+            { label: "Elastic Net (L1+L2)", category: "Parametric" },
+            { label: "Dropout", category: "Structural" },
+            { label: "Stochastic depth", category: "Structural" },
+            { label: "Batch normalization", category: "Structural" },
+            { label: "Data augmentation", category: "Data-based" },
+            { label: "Mixup / CutMix", category: "Data-based" },
+            { label: "Label smoothing", category: "Data-based" },
+          ],
+          hint: "Where does the regularization act?",
+          explanation: "Same goal (reduce overfit), different mechanism.",
+        },
+        {
+          prompt: "Classify each by whether it's active during training vs inference.",
+          categories: ["Train only", "Train & inference", "Inference only"],
+          items: [
+            { label: "Dropout", category: "Train only" },
+            { label: "BatchNorm (training stats)", category: "Train only" },
+            { label: "Data augmentation", category: "Train only" },
+            { label: "Weight decay", category: "Train & inference" },
+            { label: "BatchNorm (running stats)", category: "Train & inference" },
+            { label: "Layer normalization", category: "Train & inference" },
+            { label: "Test-time augmentation", category: "Inference only" },
+            { label: "Calibration (Platt/Temperature)", category: "Inference only" },
+          ],
+          hint: "Some techniques behave differently at test time.",
+          explanation: "Mode-switching is a common source of bugs.",
+        },
+        {
+          prompt: "Sort each technique by whether it reduces overfit, underfit, or neither.",
+          categories: ["Reduces overfit", "Reduces underfit", "Neither (other)"],
+          items: [
+            { label: "More training data", category: "Reduces overfit" },
+            { label: "Dropout", category: "Reduces overfit" },
+            { label: "Weight decay", category: "Reduces overfit" },
+            { label: "Bigger model", category: "Reduces underfit" },
+            { label: "Lower regularization", category: "Reduces underfit" },
+            { label: "Add features / complexity", category: "Reduces underfit" },
+            { label: "Change random seed", category: "Neither (other)" },
+            { label: "Switch optimizer", category: "Neither (other)" },
+          ],
+          hint: "Diagnose bias vs variance first.",
+          explanation: "Pick the fix that matches the failure mode.",
+        },
+      ]);
+    }
+    case "mlPipelineOrder": {
+      return bankReorder(m, difficulty, [
+        {
+          prompt: "Order the stages of a typical supervised ML pipeline.",
+          order: ["Define problem", "Collect data", "Clean & preprocess", "Train model", "Evaluate", "Deploy"],
+          hint: "Define before deploy.",
+          hints: ["Data work happens before training.", "Evaluate before deploy."],
+          explanation: "Standard end-to-end ML workflow.",
+        },
+        {
+          prompt: "Order the data-preparation steps.",
+          order: ["Ingest raw data", "Handle missing values", "Encode categoricals", "Scale features", "Split train/val/test"],
+          hint: "Encode before scaling.",
+          hints: ["Impute missing first.", "Always split last to avoid leakage."],
+          explanation: "Preprocessing flows from raw to model-ready.",
+        },
+        {
+          prompt: "Order the model-development loop.",
+          order: ["Pick baseline", "Train", "Validate", "Inspect errors", "Tune hyperparameters", "Retrain"],
+          hint: "Establish baseline first.",
+          hints: ["Inspect errors to guide tuning.", "Iterate validate → tune → retrain."],
+          explanation: "Iterative loop converges on the right model.",
+        },
+        {
+          prompt: "Order the deployment & MLOps steps.",
+          order: ["Freeze model", "Package artifact", "Deploy to staging", "Run A/B test", "Promote to prod", "Monitor drift"],
+          hint: "Stage before production.",
+          hints: ["Monitor never stops.", "A/B test before promote."],
+          explanation: "MLOps wraps model release in a release pipeline.",
+        },
+      ]);
+    }
+    case "transformerStageOrder": {
+      return bankReorder(m, difficulty, [
+        {
+          prompt: "Order the inference stages of a transformer LLM (one token).",
+          order: ["Tokenize input", "Embed tokens", "Add position info", "Self-attention", "Feed-forward", "Output logits", "Sample next token"],
+          hint: "Text → tokens → embeddings → attention → logits.",
+          hints: ["Position is added to embeddings.", "Attention runs before FFN."],
+          explanation: "Standard transformer forward path per token.",
+        },
+        {
+          prompt: "Order the components inside one transformer block.",
+          order: ["LayerNorm (or pre-norm)", "Multi-head self-attention", "Residual add", "LayerNorm", "Feed-forward (MLP)", "Residual add"],
+          hint: "Pre-norm or post-norm; both follow this pattern.",
+          hints: ["Residuals wrap each sublayer.", "Norm before attention is common."],
+          explanation: "Each block is a chain of norm → sublayer → residual.",
+        },
+        {
+          prompt: "Order the steps of the attention computation.",
+          order: ["Project to Q, K, V", "Compute QKᵀ scores", "Scale by √d_k", "Softmax to weights", "Weighted sum of V"],
+          hint: "Scaled dot-product attention.",
+          hints: ["Divide by √d_k for stability.", "Softmax over keys for each query."],
+          explanation: "Attention(Q,K,V) = softmax(QKᵀ/√d_k) V.",
+        },
+        {
+          prompt: "Order LLM training stages.",
+          order: ["Pre-train on raw text", "Supervised fine-tune (SFT)", "Reward model training", "RLHF (PPO)", "Alignment evaluation"],
+          hint: "Self-supervised first, alignment last.",
+          hints: ["SFT happens before RLHF.", "Reward model trained from preferences."],
+          explanation: "Modern instruct-LLM training pipeline.",
+        },
+      ]);
+    }
+    case "embeddingMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each embedding technique with its core idea.",
+          pairs: [
+            ["Word2Vec (Skip-gram)", "Predict context from a center word"],
+            ["Word2Vec (CBOW)", "Predict center from context"],
+            ["GloVe", "Factorize co-occurrence matrix"],
+            ["FastText", "Subword n-gram embeddings"],
+            ["BERT embeddings", "Contextual via transformer"],
+          ],
+          hint: "Each method derives vectors differently.",
+          explanation: "Static vs contextual embeddings differ in how they handle polysemy.",
+        },
+        {
+          prompt: "Pair each modality with its standard embedding model.",
+          pairs: [
+            ["Text", "BERT / SBERT / E5"],
+            ["Image", "CLIP image encoder / ResNet"],
+            ["Image+Text joint", "CLIP / SigLIP"],
+            ["Audio", "Wav2Vec / Whisper encoder"],
+            ["Code", "CodeBERT / StarCoder embeddings"],
+          ],
+          hint: "Pick the standard encoder per modality.",
+          explanation: "Encoder choice depends on input type.",
+        },
+        {
+          prompt: "Pair each property with the embedding concept it describes.",
+          pairs: [
+            ["Cosine similarity ≈ semantic closeness", "Property of good embeddings"],
+            ["Dimensionality (e.g. 768, 1536)", "Vector size"],
+            ["Hubness", "Points become near-neighbors of many"],
+            ["Anisotropy", "Vectors clustered in a narrow cone"],
+            ["Linear analogies", "king − man + woman ≈ queen"],
+          ],
+          hint: "Embedding behavior has well-known terms.",
+          explanation: "Geometry of the space matters as much as accuracy.",
+        },
+        {
+          prompt: "Pair each step with its embedding-pipeline role.",
+          pairs: [
+            ["Chunking", "Split long docs into passages"],
+            ["Embedding", "Encode each chunk to a vector"],
+            ["Indexing", "Store in a vector DB (FAISS, pgvector, …)"],
+            ["Query encoding", "Embed the user query"],
+            ["ANN search", "Approximate nearest-neighbor lookup"],
+          ],
+          hint: "Standard retrieval-pipeline glossary.",
+          explanation: "Embedding alone is not enough — you index and search.",
+        },
+      ]);
+    }
+    case "vectorSimilarityChoice": {
+      const variants = [
+        {
+          q: "Two unit-length sentence embeddings have cosine similarity 0.95. They are…",
+          ans: "Very similar in direction",
+          distractors: ["Orthogonal", "Opposite", "Identical in magnitude only"],
+          exp: "Cosine close to 1 → small angle, high semantic similarity.",
+          title: "cos θ ≈ 0.95",
+        },
+        {
+          q: "Cosine similarity of two vectors is 0. The vectors are…",
+          ans: "Orthogonal (perpendicular)",
+          distractors: ["Equal", "Anti-parallel", "Identical up to scale"],
+          exp: "cos 90° = 0; vectors are orthogonal.",
+          title: "cos θ = 0",
+        },
+        {
+          q: "Cosine similarity = −1. The vectors are…",
+          ans: "Pointing in opposite directions",
+          distractors: ["Identical", "Orthogonal", "Random"],
+          exp: "cos 180° = −1; vectors are anti-parallel.",
+          title: "cos θ = −1",
+        },
+        {
+          q: "When vector magnitudes vary a lot but you only care about direction, pick…",
+          ans: "Cosine similarity",
+          distractors: ["Euclidean distance", "Manhattan distance", "Mahalanobis"],
+          exp: "Cosine ignores magnitude, focuses on angle.",
+          title: "Magnitude-invariant",
+        },
+        {
+          q: "When points are normalized to unit length, cosine similarity equals…",
+          ans: "Dot product",
+          distractors: ["Euclidean distance squared", "Manhattan distance", "1 minus correlation"],
+          exp: "For unit vectors, cos θ = a·b.",
+          title: "Unit vectors",
+        },
+        {
+          q: "Euclidean distance ‖a − b‖ between two embedding vectors is small. They are…",
+          ans: "Close in vector space",
+          distractors: ["Orthogonal", "Anti-parallel", "Unrelated"],
+          exp: "Small distance → nearby points.",
+          title: "Small ‖a − b‖",
+        },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", v.q, { kind: "icon", icon: "📐", title: v.title, subtitle: "Similarity metric" }),
+          hint: "Match the geometry to the metric.",
+          hints: ["Cosine: angle.", "Euclidean: distance.", "Dot: similar to cosine for unit vectors."],
+          explanation: v.exp,
+        },
+        v.ans,
+        v.distractors,
+      );
+    }
+    case "promptPatternMatch": {
+      return bankMatch(m, difficulty, [
+        {
+          prompt: "Pair each prompt pattern with its description.",
+          pairs: [
+            ["Zero-shot", "Ask without examples"],
+            ["Few-shot", "Provide a few input/output examples"],
+            ["Chain-of-Thought", "Ask to reason step by step"],
+            ["Role prompt", "Give the model a persona"],
+            ["ReAct", "Interleave reasoning with tool actions"],
+          ],
+          hint: "Each pattern shapes the model's response.",
+          explanation: "Standard prompt-engineering patterns.",
+        },
+        {
+          prompt: "Pair each pattern with a concrete trigger phrase.",
+          pairs: [
+            ["Chain-of-Thought", "Let's think step by step."],
+            ["Self-consistency", "Sample multiple chains, then majority-vote."],
+            ["Few-shot", "Here are some examples: …"],
+            ["Role prompt", "You are an expert ___."],
+            ["JSON output", "Respond as JSON matching this schema."],
+          ],
+          hint: "Trigger phrases activate specific behaviors.",
+          explanation: "Prompt phrasing influences outputs strongly.",
+        },
+        {
+          prompt: "Pair each issue with the mitigation pattern.",
+          pairs: [
+            ["Hallucinated facts", "Retrieval-Augmented Generation (RAG)"],
+            ["Inconsistent answers", "Self-consistency / temperature 0"],
+            ["Unstructured output", "JSON / function-calling schema"],
+            ["Off-topic answers", "Role prompt + constraints"],
+            ["Long-context drift", "Summarize / map-reduce"],
+          ],
+          hint: "Match failure mode to its fix.",
+          explanation: "Each pitfall has a known prompting remedy.",
+        },
+        {
+          prompt: "Pair each agentic pattern with its purpose.",
+          pairs: [
+            ["ReAct", "Reason + act with tools"],
+            ["Reflexion", "Self-critique then retry"],
+            ["Tree-of-Thoughts", "Explore branching reasoning paths"],
+            ["Toolformer / function-calling", "Call external APIs"],
+            ["Planner-Executor", "Separate planning from acting"],
+          ],
+          hint: "Agent patterns extend single-turn prompts.",
+          explanation: "Agentic prompting is a family of multi-step techniques.",
+        },
+      ]);
+    }
+    case "ragPipelineOrder": {
+      return bankReorder(m, difficulty, [
+        {
+          prompt: "Order the stages of a basic Retrieval-Augmented Generation pipeline.",
+          order: ["Embed user query", "Search vector DB", "Re-rank top results", "Build augmented prompt", "Generate answer with LLM"],
+          hint: "Retrieve before generate.",
+          hints: ["Always embed the query first.", "Re-ranking is optional but helpful."],
+          explanation: "RAG = retrieve → augment → generate.",
+        },
+        {
+          prompt: "Order the offline indexing steps for a RAG system.",
+          order: ["Ingest documents", "Chunk into passages", "Embed each chunk", "Write to vector store", "Build metadata index"],
+          hint: "Chunk before embed.",
+          hints: ["Choose chunk size carefully.", "Store metadata alongside vectors."],
+          explanation: "Indexing prepares the corpus once; query time is hot path.",
+        },
+        {
+          prompt: "Order the hybrid-retrieval pipeline (dense + lexical).",
+          order: ["Embed query", "Dense ANN search", "BM25 / keyword search", "Reciprocal rank fusion", "Re-rank with cross-encoder", "Send top-k to LLM"],
+          hint: "Combine dense + sparse, then re-rank.",
+          hints: ["RRF is a popular fusion method.", "Cross-encoders re-rank better than encoders."],
+          explanation: "Hybrid retrieval beats either method alone.",
+        },
+        {
+          prompt: "Order evaluation steps for a RAG system.",
+          order: ["Generate eval set (questions + answers)", "Run retrieval", "Measure retrieval recall / MRR", "Generate answers", "Measure answer faithfulness", "Measure answer relevance"],
+          hint: "Evaluate retrieval and generation separately.",
+          hints: ["Retrieval recall is upstream of answer quality.", "Faithfulness checks for hallucination."],
+          explanation: "RAGAS-style evaluation pipeline.",
+        },
+      ]);
+    }
+    case "modelEvalScenario": {
+      const variants = [
+        {
+          q: "Imbalanced spam dataset (99% ham). Best primary metric?",
+          ans: "F1 (or precision/recall, AUPRC)",
+          distractors: ["Accuracy", "Mean Squared Error", "R²"],
+          exp: "Accuracy is misleading on imbalanced data; F1 / AUPRC are better.",
+          title: "Imbalanced classification",
+        },
+        {
+          q: "Predicting house prices (continuous target). Best primary metric?",
+          ans: "RMSE or MAE",
+          distractors: ["Accuracy", "F1 score", "AUC"],
+          exp: "Regression uses error-based metrics.",
+          title: "Regression task",
+        },
+        {
+          q: "Medical screening — false negatives are catastrophic. Optimize for…",
+          ans: "Recall (sensitivity)",
+          distractors: ["Precision", "Accuracy", "Specificity"],
+          exp: "Recall = TP/(TP+FN); minimize missed positives.",
+          title: "Cost of false negatives",
+        },
+        {
+          q: "Search relevance — false positives are catastrophic. Optimize for…",
+          ans: "Precision",
+          distractors: ["Recall", "Accuracy", "R²"],
+          exp: "Precision = TP/(TP+FP); minimize bad hits.",
+          title: "Cost of false positives",
+        },
+        {
+          q: "Multi-class image classification across 10 balanced classes. Best primary metric?",
+          ans: "Accuracy (or top-k accuracy)",
+          distractors: ["AUC", "RMSE", "BLEU"],
+          exp: "Balanced multi-class → accuracy is fine.",
+          title: "Balanced multi-class",
+        },
+        {
+          q: "Generative summarization quality. Best automatic metric?",
+          ans: "ROUGE / BERTScore",
+          distractors: ["Accuracy", "RMSE", "F1"],
+          exp: "Summarization uses overlap-based metrics + embedding-based metrics.",
+          title: "Text summarization",
+        },
+        {
+          q: "Recommender system, ranked list of items. Best metric?",
+          ans: "NDCG (or MAP / MRR)",
+          distractors: ["RMSE", "Accuracy", "AUC"],
+          exp: "Ranking quality uses position-aware metrics.",
+          title: "Ranked recommendations",
+        },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", v.q, { kind: "icon", icon: "🧪", title: v.title, subtitle: "Pick the right metric" }),
+          hint: "Match the task's failure mode to the metric.",
+          hints: ["Imbalanced → precision/recall, F1, AUPRC.", "Cost-asymmetric → optimize one side."],
+          explanation: v.exp,
+        },
+        v.ans,
+        v.distractors,
+      );
+    }
+    case "softmaxStep": {
+      const variants = [
+        () => {
+          const z = [1, 2, 3];
+          const exps = z.map((x) => Math.exp(x));
+          const sum = exps.reduce((a, b) => a + b, 0);
+          const ans = +(exps[2]! / sum).toFixed(2);
+          return {
+            prompt: `Softmax of logits [${z.join(", ")}]. Probability of the third class (2 decimal places)?`,
+            title: `[${z.join(", ")}]`,
+            ans,
+            hint: "p_i = e^{z_i} / Σ e^{z_j}.",
+            hints: ["Compute each e^{z}.", "Divide by the sum."],
+            explanation: `e³ / (e¹ + e² + e³) ≈ ${ans}.`,
+          };
+        },
+        () => {
+          const z = [2, 0, 1];
+          const exps = z.map((x) => Math.exp(x));
+          const sum = exps.reduce((a, b) => a + b, 0);
+          const ans = +(exps[0]! / sum).toFixed(2);
+          return {
+            prompt: `Softmax of logits [${z.join(", ")}]. Probability of the first class (2 decimal places)?`,
+            title: `[${z.join(", ")}]`,
+            ans,
+            hint: "p_i = e^{z_i} / Σ e^{z_j}.",
+            hints: ["Largest logit → largest probability.", "Subtract max logit first for stability."],
+            explanation: `e² / (e² + e⁰ + e¹) ≈ ${ans}.`,
+          };
+        },
+        () => {
+          const a = rand(1, 4);
+          const ans = +(Math.exp(a) / (Math.exp(a) + Math.exp(0))).toFixed(2);
+          return {
+            prompt: `Sigmoid of x = ${a} (binary softmax). Value (2 decimal places)?`,
+            title: `σ(${a})`,
+            ans,
+            hint: "σ(x) = 1 / (1 + e^{−x}).",
+            hints: ["σ(0) = 0.5.", `σ(${a}) > 0.5.`],
+            explanation: `1/(1 + e^{−${a}}) ≈ ${ans}.`,
+          };
+        },
+        () => {
+          const z = [3, 3, 3];
+          const ans = +(1 / 3).toFixed(2);
+          return {
+            prompt: `Softmax of logits [${z.join(", ")}]. Probability of any class (2 decimal places)?`,
+            title: `[${z.join(", ")}]`,
+            ans,
+            hint: "All logits equal → uniform output.",
+            hints: ["e³/e³/e³ all equal.", "Sum = 3·e³."],
+            explanation: "Equal logits → uniform distribution over classes.",
+          };
+        },
+      ];
+      const v = pick(variants)();
+      return numpadEng(
+        m,
+        difficulty,
+        v.prompt,
+        { kind: "icon", icon: "🌡️", title: v.title, subtitle: "Softmax / sigmoid" },
+        v.ans,
+        v.hint,
+        v.hints,
+        v.explanation,
+      );
+    }
+    case "f1ScoreCalc": {
+      const variants = [
+        () => {
+          const tp = rand(20, 60);
+          const fp = rand(5, 20);
+          const fn = rand(5, 20);
+          const precision = tp / (tp + fp);
+          const recall = tp / (tp + fn);
+          const ans = +(2 * precision * recall / (precision + recall)).toFixed(2);
+          return {
+            prompt: `TP=${tp}, FP=${fp}, FN=${fn}. F1 score (2 decimal places)?`,
+            title: `F1 = 2PR / (P+R)`,
+            subtitle: `TP=${tp}, FP=${fp}, FN=${fn}`,
+            ans,
+            hint: "F1 is the harmonic mean of precision and recall.",
+            hints: [`P = ${tp}/(${tp}+${fp}) = ${precision.toFixed(2)}.`, `R = ${tp}/(${tp}+${fn}) = ${recall.toFixed(2)}.`],
+            explanation: `F1 = 2·${precision.toFixed(2)}·${recall.toFixed(2)}/(${precision.toFixed(2)}+${recall.toFixed(2)}) ≈ ${ans}.`,
+          };
+        },
+        () => {
+          const tp = rand(30, 60);
+          const fp = rand(10, 30);
+          const fn = rand(10, 30);
+          const ans = +(tp / (tp + fp)).toFixed(2);
+          return {
+            prompt: `TP=${tp}, FP=${fp}, FN=${fn}. Precision (2 decimal places)?`,
+            title: `P = TP/(TP+FP)`,
+            subtitle: `TP=${tp}, FP=${fp}`,
+            ans,
+            hint: "Precision is correctness among predicted positives.",
+            hints: [`Divide by ${tp + fp}.`],
+            explanation: `${tp}/(${tp}+${fp}) ≈ ${ans}.`,
+          };
+        },
+        () => {
+          const tp = rand(30, 60);
+          const fp = rand(10, 30);
+          const fn = rand(10, 30);
+          const ans = +(tp / (tp + fn)).toFixed(2);
+          return {
+            prompt: `TP=${tp}, FP=${fp}, FN=${fn}. Recall (2 decimal places)?`,
+            title: `R = TP/(TP+FN)`,
+            subtitle: `TP=${tp}, FN=${fn}`,
+            ans,
+            hint: "Recall is coverage of actual positives.",
+            hints: [`Divide by ${tp + fn}.`],
+            explanation: `${tp}/(${tp}+${fn}) ≈ ${ans}.`,
+          };
+        },
+        () => {
+          const tp = rand(30, 60);
+          const fp = rand(5, 20);
+          const fn = rand(5, 20);
+          const tn = rand(50, 200);
+          const ans = +((tp + tn) / (tp + fp + fn + tn)).toFixed(2);
+          return {
+            prompt: `TP=${tp}, FP=${fp}, FN=${fn}, TN=${tn}. Accuracy (2 decimal places)?`,
+            title: `Acc = (TP+TN)/all`,
+            subtitle: `Total = ${tp + fp + fn + tn}`,
+            ans,
+            hint: "Accuracy counts all correct predictions over total.",
+            hints: [`Correct = TP + TN = ${tp + tn}.`, `Total = ${tp + fp + fn + tn}.`],
+            explanation: `(${tp}+${tn})/${tp + fp + fn + tn} ≈ ${ans}.`,
+          };
+        },
+      ];
+      const v = pick(variants)();
+      return numpadEng(
+        m,
+        difficulty,
+        v.prompt,
+        { kind: "icon", icon: "🎯", title: v.title, subtitle: v.subtitle },
+        v.ans,
+        v.hint,
+        v.hints,
+        v.explanation,
+      );
+    }
+    case "biasTypeMLSort": {
+      return bankSort(m, difficulty, [
+        {
+          prompt: "Sort each example of bias by where it enters the ML pipeline.",
+          categories: ["Data collection", "Labeling", "Model / training", "Deployment / feedback"],
+          items: [
+            { label: "Survey only reaches landline phones", category: "Data collection" },
+            { label: "Camera dataset only sampled in daylight", category: "Data collection" },
+            { label: "Annotators disagree on hate-speech labels", category: "Labeling" },
+            { label: "Crowdworkers under time pressure mislabel", category: "Labeling" },
+            { label: "Class-imbalance not handled in loss", category: "Model / training" },
+            { label: "Test set leaks into training data", category: "Model / training" },
+            { label: "Self-reinforcing recommendation loops", category: "Deployment / feedback" },
+            { label: "Concept drift after launch", category: "Deployment / feedback" },
+          ],
+          hint: "Trace the bias back to the stage that created it.",
+          hints: ["Data, label, model, or loop.", "Each stage has its own fixes."],
+          explanation: "ML bias is multi-stage; mitigation depends on where it arose.",
+        },
+        {
+          prompt: "Sort each effect into a named bias type.",
+          categories: ["Sampling bias", "Measurement bias", "Confirmation/selection bias", "Aggregation bias"],
+          items: [
+            { label: "Training set omits low-income users", category: "Sampling bias" },
+            { label: "Survey only reaches tech-savvy users", category: "Sampling bias" },
+            { label: "Sensor mis-calibrated at low light", category: "Measurement bias" },
+            { label: "Different proxies measure different things", category: "Measurement bias" },
+            { label: "Manually keep only examples that fit hypothesis", category: "Confirmation/selection bias" },
+            { label: "Filter data to confirm prior belief", category: "Confirmation/selection bias" },
+            { label: "Treating all genders as one group hides effect", category: "Aggregation bias" },
+            { label: "Combining subgroups masks per-group performance", category: "Aggregation bias" },
+          ],
+          hint: "Each named bias has a textbook definition.",
+          explanation: "Bias glossary varies by source.",
+        },
+        {
+          prompt: "Sort each fairness/bias mitigation into pre-processing, in-processing, or post-processing.",
+          categories: ["Pre-processing", "In-processing", "Post-processing"],
+          items: [
+            { label: "Reweight training examples", category: "Pre-processing" },
+            { label: "Resample minority class", category: "Pre-processing" },
+            { label: "Drop biased features", category: "Pre-processing" },
+            { label: "Add fairness-aware loss term", category: "In-processing" },
+            { label: "Adversarial debiasing", category: "In-processing" },
+            { label: "Constrain training to a fairness budget", category: "In-processing" },
+            { label: "Calibrate threshold per group", category: "Post-processing" },
+            { label: "Equal-odds post-hoc adjustment", category: "Post-processing" },
+          ],
+          hint: "Mitigation acts on data, model, or output.",
+          explanation: "Different bias-fixes act at different stages.",
+        },
+        {
+          prompt: "Sort each scenario by whether it's a fairness, robustness, privacy, or safety concern.",
+          categories: ["Fairness", "Robustness", "Privacy", "Safety / alignment"],
+          items: [
+            { label: "Model accuracy drops for one ethnic group", category: "Fairness" },
+            { label: "Loan model favors one neighborhood", category: "Fairness" },
+            { label: "Small adversarial pixel perturbation fools model", category: "Robustness" },
+            { label: "Accuracy collapses on out-of-distribution data", category: "Robustness" },
+            { label: "Training data memorized verbatim", category: "Privacy" },
+            { label: "Membership inference reveals if a user is in training set", category: "Privacy" },
+            { label: "Model gives harmful instructions on request", category: "Safety / alignment" },
+            { label: "Model goal-hacks the reward signal", category: "Safety / alignment" },
+          ],
+          hint: "These categories are often confused but distinct.",
+          explanation: "Each concern has a different threat model.",
+        },
+      ]);
+    }
+    case "samplingMethodChoice": {
+      const variants = [
+        {
+          q: "You want the LLM to give the same answer every time. Pick the sampling method.",
+          ans: "Greedy decoding (temperature = 0)",
+          distractors: ["Temperature 1.0", "Top-k = 50", "Nucleus (top-p) = 0.9"],
+          exp: "Greedy / temperature 0 is deterministic given the same prompt.",
+          title: "Deterministic output",
+        },
+        {
+          q: "You want creative, varied output for poetry. Pick the sampling method.",
+          ans: "Temperature ≈ 0.9 with top-p",
+          distractors: ["Greedy decoding", "Temperature 0", "Beam search width 1"],
+          exp: "Higher temperature + nucleus sampling encourages diversity.",
+          title: "Creative writing",
+        },
+        {
+          q: "You want only the top-50 likely tokens at each step, sampled probabilistically. Pick the method.",
+          ans: "Top-k = 50",
+          distractors: ["Greedy", "Temperature 0", "Nucleus only"],
+          exp: "Top-k restricts to the k most-likely tokens before sampling.",
+          title: "Top-k sampling",
+        },
+        {
+          q: "You want to sample only from the smallest set of tokens whose cumulative probability ≥ 0.9. Pick the method.",
+          ans: "Nucleus sampling (top-p = 0.9)",
+          distractors: ["Top-k = 50", "Greedy", "Temperature 1.5"],
+          exp: "Top-p selects a dynamic vocabulary by cumulative probability.",
+          title: "Top-p / nucleus",
+        },
+        {
+          q: "You want the most-likely full sequence of length 30 (not just per-token greedy). Pick the method.",
+          ans: "Beam search (width > 1)",
+          distractors: ["Greedy decoding", "Random sampling", "Temperature 0.7"],
+          exp: "Beam search explores multiple sequences and keeps the highest-scoring full beams.",
+          title: "Best full sequence",
+        },
+        {
+          q: "You want to reduce repetition during generation. Pick the technique.",
+          ans: "Frequency / presence penalty (or repetition penalty)",
+          distractors: ["Lower temperature", "Greedy decoding", "Smaller top-k"],
+          exp: "Penalties downweight tokens that have already appeared.",
+          title: "Reduce repetition",
+        },
+      ];
+      const v = pick(variants);
+      return makeChoice(
+        {
+          ...base(m, difficulty, "choice", v.q, { kind: "icon", icon: "🎲", title: v.title, subtitle: "LLM sampling" }),
+          hint: "Match the goal to the right decoding strategy.",
+          hints: ["Temperature controls randomness.", "Top-k/top-p control vocabulary."],
+          explanation: v.exp,
+        },
+        v.ans,
+        v.distractors,
+      );
+    }
+    case "convolutionOutput": {
+      const variants = [
+        () => {
+          const n = pick([28, 32, 64]);
+          const k = pick([3, 5]);
+          const stride = 1;
+          const padding = 0;
+          const out = Math.floor((n - k + 2 * padding) / stride) + 1;
+          return {
+            prompt: `Input ${n}×${n}, kernel ${k}×${k}, stride ${stride}, padding ${padding}. Output spatial size?`,
+            title: `${n}×${n} → ?`,
+            subtitle: `k=${k}, s=${stride}, p=${padding}`,
+            ans: out,
+            hint: "Out = ⌊(N − K + 2P)/S⌋ + 1.",
+            hints: [`N − K + 2P = ${n - k + 2 * padding}.`, `Divide by S = ${stride}.`],
+            explanation: `⌊(${n} − ${k} + 0)/${stride}⌋ + 1 = ${out}.`,
+          };
+        },
+        () => {
+          const n = pick([32, 64, 128]);
+          const k = 3;
+          const stride = pick([2, 4]);
+          const padding = 1;
+          const out = Math.floor((n - k + 2 * padding) / stride) + 1;
+          return {
+            prompt: `Input ${n}×${n}, kernel ${k}×${k}, stride ${stride}, padding ${padding}. Output spatial size?`,
+            title: `${n}×${n} → ?`,
+            subtitle: `k=${k}, s=${stride}, p=${padding}`,
+            ans: out,
+            hint: "Stride > 1 downsamples.",
+            hints: [`N − K + 2P = ${n - k + 2 * padding}.`, `Divide by S = ${stride}.`],
+            explanation: `⌊(${n} − ${k} + 2)/${stride}⌋ + 1 = ${out}.`,
+          };
+        },
+        () => {
+          const n = pick([24, 32, 48]);
+          const k = pick([2, 3]);
+          const stride = 2;
+          const out = Math.floor((n - k) / stride) + 1;
+          return {
+            prompt: `Max-pool: input ${n}×${n}, window ${k}×${k}, stride ${stride}. Output spatial size?`,
+            title: `pool ${n}×${n} → ?`,
+            subtitle: `k=${k}, s=${stride}`,
+            ans: out,
+            hint: "Pool layer formula is the same as conv with padding 0.",
+            hints: [`(${n} − ${k})/${stride}.`, "Add 1 at the end."],
+            explanation: `⌊(${n} − ${k})/${stride}⌋ + 1 = ${out}.`,
+          };
+        },
+        () => {
+          const n = pick([28, 32, 64]);
+          const k = 3;
+          const stride = 1;
+          const padding = 1;
+          const out = Math.floor((n - k + 2 * padding) / stride) + 1;
+          return {
+            prompt: `Input ${n}×${n}, kernel 3×3, stride 1, "same" padding (p=1). Output spatial size?`,
+            title: `same conv ${n}×${n}`,
+            subtitle: `k=${k}, s=${stride}, p=${padding}`,
+            ans: out,
+            hint: "Same padding keeps spatial size.",
+            hints: ["With k=3, p=1, s=1 → output = input.", `Output = ${out}.`],
+            explanation: `Same padding preserves the spatial size: ${out}.`,
+          };
+        },
+      ];
+      const v = pick(variants)();
+      return numpadEng(
+        m,
+        difficulty,
+        v.prompt,
+        { kind: "icon", icon: "🧩", title: v.title, subtitle: v.subtitle },
+        v.ans,
+        v.hint,
+        v.hints,
+        v.explanation,
+      );
+    }
     case "caesarCipher": {
       const shift = rand(1, 9);
       const orig = pick(["HELLO", "WORLD", "CODE", "CYBER", "ZEBRA", "QUARK", "PIXEL"]);
@@ -18336,19 +19228,22 @@ export default function MathPuzzlesPage() {
 
   const visibleMetas = useMemo(
     () =>
-      METAS.filter((meta) => {
-        if (gradeFilter !== "All" && meta.grade !== gradeFilter) return false;
-        if (subjectFilter !== "All" && meta.subject !== subjectFilter) return false;
-        if (domainFilter !== "All" && domainFor(meta.subject) !== domainFilter) return false;
-        if (interactionFilter !== "All" && metaInteractionDisplay(meta) !== interactionFilter) return false;
-        if (lockFilter === "Unlocked" && !isUnlocked(meta, xp, categoryCompletions)) return false;
-        if (lockFilter === "Locked" && isUnlocked(meta, xp, categoryCompletions)) return false;
-        if (search.trim().length > 0) {
-          const haystack = `${meta.title} ${meta.short} ${meta.skill} ${meta.subject}`.toLowerCase();
-          if (!haystack.includes(search.trim().toLowerCase())) return false;
-        }
-        return true;
-      }),
+      METAS.map((meta, index) => ({ meta, index }))
+        .filter(({ meta }) => {
+          if (gradeFilter !== "All" && meta.grade !== gradeFilter) return false;
+          if (subjectFilter !== "All" && meta.subject !== subjectFilter) return false;
+          if (domainFilter !== "All" && domainFor(meta.subject) !== domainFilter) return false;
+          if (interactionFilter !== "All" && metaInteractionDisplay(meta) !== interactionFilter) return false;
+          if (lockFilter === "Unlocked" && !isUnlocked(meta, xp, categoryCompletions)) return false;
+          if (lockFilter === "Locked" && isUnlocked(meta, xp, categoryCompletions)) return false;
+          if (search.trim().length > 0) {
+            const haystack = `${meta.title} ${meta.short} ${meta.skill} ${meta.subject}`.toLowerCase();
+            if (!haystack.includes(search.trim().toLowerCase())) return false;
+          }
+          return true;
+        })
+        .sort((a, b) => compareMetaDifficulty(a.meta, b.meta) || a.index - b.index)
+        .map(({ meta }) => meta),
     [gradeFilter, subjectFilter, interactionFilter, search, domainFilter, lockFilter, xp, categoryCompletions],
   );
 

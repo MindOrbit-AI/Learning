@@ -1,5 +1,8 @@
 # Adding new puzzles
 
+example prompt:
+`Following the Adding Puzzle guide; add more puzzles on AI & ML subject and include variants on each puzzle`
+
 This guide explains how to add a new puzzle to the STEM arcade at
 `apps/web/src/app/(marketing)/math-puzzles/page.tsx`.
 
