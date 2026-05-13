@@ -18659,27 +18659,52 @@ function SortCategories({ puzzle, state, setState, locked }: { puzzle: Puzzle; s
 function Reorder({ state, setState, locked }: { state: PlayState; setState: (s: Partial<PlayState>) => void; locked: boolean }) {
   const [held, setHeld] = useState<number | null>(null);
   return (
-    <div className="grid grid-cols-4 gap-2">
-      {state.order.map((tile, i) => (
-        <button
-          key={`${tile}-${i}`}
-          type="button"
-          disabled={locked}
-          onClick={() => {
-            if (held === null) {
-              setHeld(i);
-              return;
-            }
-            const next = [...state.order];
-            [next[held], next[i]] = [next[i]!, next[held]!];
-            setHeld(null);
-            setState({ order: next });
-          }}
-          className={`grid h-16 place-items-center rounded-2xl border-2 border-b-4 text-3xl transition active:border-b-2 active:translate-y-0.5 ${held === i ? "border-[#ffc800] bg-amber-100 text-neutral-900 dark:border-amber-500 dark:bg-amber-950/50 dark:text-amber-100" : "border-neutral-200 dark:border-zinc-600 border-b-neutral-300 dark:border-b-zinc-600 bg-white dark:bg-zinc-900 text-neutral-800 dark:text-zinc-100"}`}
-        >
-          {tile}
-        </button>
-      ))}
+    <div className="space-y-2.5">
+      <p className="text-center text-[11px] font-semibold leading-snug text-neutral-500 dark:text-zinc-400">
+        Tap one tile, then another to <span className="text-neutral-700 dark:text-zinc-300">swap</span> them.
+      </p>
+      <div className="flex flex-col gap-2">
+        {state.order.map((tile, i) => (
+          <button
+            key={`${tile}-${i}`}
+            type="button"
+            disabled={locked}
+            onClick={() => {
+              if (held === null) {
+                setHeld(i);
+                return;
+              }
+              const next = [...state.order];
+              [next[held], next[i]] = [next[i]!, next[held]!];
+              setHeld(null);
+              setState({ order: next });
+            }}
+            className={cn(
+              "flex w-full min-h-[3.25rem] items-center gap-3 rounded-2xl border-2 border-b-4 px-3 py-2.5 text-left shadow-sm transition active:border-b-2 active:translate-y-0.5 sm:min-h-[3.5rem] sm:px-4 sm:py-3",
+              held === i
+                ? "border-[#e5a000] border-b-[#e5a000] bg-[#fff4d4] text-neutral-900 shadow-[0_3px_0_0_#e5a000] dark:border-amber-500 dark:border-b-amber-600 dark:bg-amber-950/45 dark:text-amber-50 dark:shadow-[0_3px_0_0_#d97706]"
+                : "border-neutral-200 border-b-neutral-300 bg-white text-neutral-900 dark:border-zinc-600 dark:border-b-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:shadow-none",
+            )}
+          >
+            <span
+              className={cn(
+                "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm font-black tabular-nums",
+                held === i
+                  ? "bg-amber-200/90 text-amber-950 dark:bg-amber-800/80 dark:text-amber-50"
+                  : "bg-neutral-100 text-neutral-500 dark:bg-zinc-800 dark:text-zinc-400",
+              )}
+            >
+              {i + 1}
+            </span>
+            <span className="min-w-0 flex-1 text-pretty text-center text-sm font-bold leading-snug sm:text-[0.95rem]">{tile}</span>
+            <span className="flex w-8 shrink-0 flex-col items-center gap-0.5 text-neutral-300 dark:text-zinc-600" aria-hidden>
+              <span className="h-1 w-4 rounded-full bg-current" />
+              <span className="h-1 w-4 rounded-full bg-current" />
+              <span className="h-1 w-4 rounded-full bg-current" />
+            </span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -19933,13 +19958,18 @@ export default function MathPuzzlesPage() {
 
               <aside className="space-y-5 lg:sticky lg:top-28">
                 <div className="rounded-[2rem] border-2 border-neutral-200 dark:border-zinc-600 border-b-4 border-b-neutral-300 dark:border-b-zinc-600 bg-white dark:bg-zinc-900 p-5 shadow-[0_4px_0_0_#e5e5e5] dark:shadow-[0_4px_0_0_#27272a]">
-                  <div className="mb-4 flex items-center justify-between gap-2">
-                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-neutral-500 dark:text-zinc-400">Your Move</p>
-                    <span className="rounded-full border-2 border-[#46a302] bg-[#d7ffb8] px-2 py-0.5 text-[10px] font-mono font-bold text-[#2b6e0f] dark:border-emerald-600 dark:bg-emerald-950/35 dark:text-emerald-200">
+                  <div className="mb-3 flex items-center justify-between gap-3 border-b border-neutral-200 pb-3 dark:border-zinc-700">
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#1899d6] dark:text-sky-400">Your Move</p>
+                      <p className="mt-0.5 text-[11px] font-semibold leading-snug text-neutral-500 dark:text-zinc-400">Use the panel below to answer.</p>
+                    </div>
+                    <span className="shrink-0 rounded-full border-2 border-[#46a302] bg-[#d7ffb8] px-2.5 py-1 text-[10px] font-mono font-bold text-[#2b6e0f] shadow-[0_2px_0_0_#46a302] dark:border-emerald-600 dark:bg-emerald-950/35 dark:text-emerald-200 dark:shadow-[0_2px_0_0_#059669]">
                       +{puzzle.xpReward ?? XP_PER_WIN} XP
                     </span>
                   </div>
-                  <Interaction puzzle={puzzle} state={state} setState={setState} locked={result === "correct"} />
+                  <div className="rounded-2xl border border-neutral-200/90 bg-neutral-50/90 p-3.5 dark:border-zinc-700 dark:bg-zinc-800/40 sm:p-4">
+                    <Interaction puzzle={puzzle} state={state} setState={setState} locked={result === "correct"} />
+                  </div>
                 </div>
 
                 <div className="flex gap-2">
