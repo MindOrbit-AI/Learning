@@ -19,6 +19,7 @@ import { DuoLandingHeader } from "@/features/marketing/duo-landing-header";
 import { DuoPrimaryLink } from "@/features/marketing/duo-primary-link";
 import { MasteryMapVisual } from "@/features/marketing/mastery-map-visual";
 import { ScrollReveal } from "@/features/marketing/scroll-reveal";
+import { defaultOgImages, defaultTwitterImages } from "@/lib/og-defaults";
 
 export const metadata: Metadata = {
   title: { absolute: "MindOrbit - From hidden gaps to visible progress" },
@@ -29,11 +30,13 @@ export const metadata: Metadata = {
     description:
       "Move from guessing what is wrong to knowing exactly what to fix next, then train it through interactive puzzles.",
     url: "/transformation",
+    images: defaultOgImages,
   },
   twitter: {
     title: "MindOrbit - From hidden gaps to visible progress",
     description:
       "Move from guessing what is wrong to knowing exactly what to fix next, then train it through interactive puzzles.",
+    images: defaultTwitterImages,
   },
 };
 

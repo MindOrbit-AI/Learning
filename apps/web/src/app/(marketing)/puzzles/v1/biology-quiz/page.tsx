@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { BiologyQuizClient } from "@/features/biology-quiz/biology-quiz-client";
+import { defaultOgImages } from "@/lib/og-defaults";
 
 export const metadata: Metadata = {
   title: "Biology Quiz — Junior Biologist",
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
     description:
       "Grow your plant from 🌱 to 🌳 as you master cell structure, photosynthesis, and animal classification.",
     url: "/biology-quiz",
+    images: defaultOgImages,
   },
 };
 
