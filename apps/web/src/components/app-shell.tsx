@@ -22,6 +22,7 @@ import {
   Rocket,
   ChevronDown,
   LogOut,
+  Puzzle,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -38,8 +39,8 @@ import { ClaimGuestDiagnosticEffect } from "@/features/diagnostics/claim-guest-d
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/subjects", label: "Subjects", icon: BookOpen },
-  { href: "/mastery-map", label: "Mastery Map", icon: Map },
   { href: "/missions", label: "Missions", icon: Target },
+  { href: "/puzzles", label: "Puzzles", icon: Puzzle },
   { href: "/community", label: "Community", icon: Users },
   { href: "/review", label: "Review", icon: ClipboardList },
 ];
@@ -229,6 +230,15 @@ export function AppShell({
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="my-1 bg-border" />
+              <DropdownMenuItem
+                asChild
+                className="cursor-pointer rounded-lg px-3 py-2.5 text-sm leading-none text-foreground data-[highlighted]:bg-muted data-[highlighted]:text-foreground"
+              >
+                <Link href="/mastery-map" className="flex items-center gap-3">
+                  <Map className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={2} />
+                  Mastery Map
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem
                 asChild
                 className="cursor-pointer rounded-lg px-3 py-2.5 text-sm leading-none text-foreground data-[highlighted]:bg-muted data-[highlighted]:text-foreground"
