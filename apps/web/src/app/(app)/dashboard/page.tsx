@@ -65,22 +65,24 @@ export default async function DashboardPage() {
   const masteryPct = totalNodes > 0 ? Math.round((masteredCount / totalNodes) * 100) : 0;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div>
-        <h1 className="text-3xl font-extrabold">
+        <h1 className="text-2xl font-extrabold break-words sm:text-3xl">
           Welcome back{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
         </h1>
-        <p className="text-muted-foreground mt-1">Here&apos;s your learning overview</p>
+        <p className="mt-1 text-sm text-muted-foreground sm:text-base">
+          Here&apos;s your learning overview
+        </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
         <Card className="rounded-3xl border-2 border-primary/10 shadow-lg transition-all hover:shadow-xl">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Mastery</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{masteryPct}%</div>
+            <div className="text-xl font-bold sm:text-2xl">{masteryPct}%</div>
             <p className="text-xs text-muted-foreground">
               {masteredCount} nodes mastered
             </p>
@@ -92,7 +94,7 @@ export default async function DashboardPage() {
             <Flame className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{user?.streakCount ?? 0} days</div>
+            <div className="text-xl font-bold sm:text-2xl">{user?.streakCount ?? 0} days</div>
             <p className="text-xs text-muted-foreground">
               UTC days with a mission · best {user?.bestMissionStreak ?? 0}
             </p>
@@ -103,7 +105,7 @@ export default async function DashboardPage() {
             <CardTitle className="text-sm font-medium">XP</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{user?.xp ?? 0}</div>
+            <div className="text-xl font-bold sm:text-2xl">{user?.xp ?? 0}</div>
             <p className="text-xs text-muted-foreground">Total experience</p>
           </CardContent>
         </Card>
@@ -133,10 +135,10 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Today&apos;s Mission</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Today&apos;s Mission</CardTitle>
             <CardDescription>
               {todayMission
                 ? `Continue or start: ${todayMission.node.title}`
@@ -146,17 +148,17 @@ export default async function DashboardPage() {
           <CardContent>
             {todayMission ? (
               <Link href={`/missions/${todayMission.id}`}>
-                <div className="flex items-center justify-between rounded-xl border p-4 transition-colors hover:bg-muted">
-                  <div className="flex items-center gap-3">
-                    <Target className="h-10 w-10 text-primary" />
-                    <div>
+                <div className="flex items-start justify-between gap-3 rounded-xl border p-4 transition-colors hover:bg-muted">
+                  <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center">
+                    <Target className="h-9 w-9 shrink-0 text-primary sm:h-10 sm:w-10" />
+                    <div className="min-w-0">
                       <p className="font-medium">{todayMission.title}</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="break-words text-sm text-muted-foreground">
                         {todayMission.node.title} • ~{todayMission.estimatedMinutes} min
                       </p>
                     </div>
                   </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  <ChevronRight className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
                 </div>
               </Link>
             ) : (
