@@ -45,12 +45,12 @@ export function DuoLandingSubjectsSection() {
         <ul className="mx-auto mt-10 grid max-w-5xl grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
           {SUBJECTS.map((s, i) => {
             const Icon = s.icon;
-            const signup = `/auth/signup?callbackUrl=${encodeURIComponent(`/subjects/${s.slug}`)}`;
+            const diagnosticHref = `/try-diagnostic/${s.slug}`;
             return (
               <li key={s.slug}>
                 <ScrollReveal delay={0.04 * i} className="h-full">
                   <Link
-                    href={signup}
+                    href={diagnosticHref}
                     className="flex h-full flex-col items-center gap-3 rounded-2xl border-2 border-border bg-card px-3 py-5 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md sm:px-4 sm:py-6"
                   >
                     <span
