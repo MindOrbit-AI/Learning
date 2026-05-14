@@ -19582,7 +19582,7 @@ export default function MathPuzzlesPage() {
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border-2 border-[#84d8ff] dark:border-sky-600 bg-[#ddf4ff] dark:bg-sky-950/50 text-xl">🧠</span>
               )}
               <div className="min-w-0 flex-1">
-                <h1 className="truncate text-lg font-black tracking-tight text-neutral-900 dark:text-zinc-50 sm:text-xl">{activeMeta?.title ?? "MindOrbit Arcade"}</h1>
+                <h1 className="truncate text-lg font-black tracking-tight text-neutral-900 dark:text-zinc-50 sm:text-xl">{activeMeta?.title ?? "MindOrbit Puzzles"}</h1>
                 <p className="mt-0.5 line-clamp-2 text-xs text-neutral-500 dark:text-zinc-400 sm:truncate sm:line-clamp-none">{activeMeta?.short ?? `${METAS.length} puzzles · Math · Science · Tech · Engineering`}</p>
               </div>
             </div>
@@ -19636,7 +19636,7 @@ export default function MathPuzzlesPage() {
                 <div className="relative grid gap-8 p-6 sm:p-7 lg:grid-cols-[1.25fr_0.75fr] lg:gap-10 lg:p-10">
                   <div className={`absolute inset-0 bg-gradient-to-br ${featuredMeta.gradient} opacity-[0.08]`} />
                   <div className="relative">
-                    <p className="text-xs font-black uppercase tracking-[0.24em] text-[#1899d6] dark:text-sky-400">Visual Learning Arcade</p>
+                    <p className="text-xs font-black uppercase tracking-[0.24em] text-[#1899d6] dark:text-sky-400">Visual Learning</p>
                     <h2 className="mt-3 max-w-2xl text-4xl font-black leading-[1.02] tracking-tight text-neutral-900 dark:text-zinc-50 sm:text-5xl">
                       Play your way through STEM.
                     </h2>
