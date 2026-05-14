@@ -19598,7 +19598,7 @@ export default function MathPuzzlesPage() {
               </button>
               <span className="hidden rounded-full border-2 border-[#84d8ff] dark:border-sky-600 bg-[#ddf4ff] dark:bg-sky-950/50 px-3 py-1.5 text-sm font-black text-[#1899d6] dark:text-sky-300 sm:inline-flex">Lv {Math.floor(xp / LEVEL_XP) + 1}</span>
               <span className="hidden rounded-full border-2 border-orange-200 bg-orange-100 px-3 py-1.5 text-sm font-black text-orange-800 sm:inline-flex dark:border-orange-900/50 dark:bg-orange-950/40 dark:text-orange-200">🔥 {streak}</span>
-              <button
+              {/* <button
                 type="button"
                 onClick={() => setAiEnabled((value) => !value)}
                 aria-pressed={aiEnabled}
@@ -19611,7 +19611,7 @@ export default function MathPuzzlesPage() {
               >
                 <span>✨</span>
                 <span>AI {aiEnabled ? "ON" : "OFF"}</span>
-              </button>
+              </button> */}
               <span
                 className={`rounded-full border-2 px-3 py-1.5 text-sm font-black ${
                   energy === 0 ? "border-neutral-200 dark:border-zinc-600 bg-neutral-100 dark:bg-zinc-800/80 text-neutral-400 dark:text-zinc-500" : "border-[#84d8ff] dark:border-sky-600 bg-[#ddf4ff] dark:bg-sky-950/50 text-[#1899d6] dark:text-sky-300"
