@@ -838,7 +838,6 @@ function Pizza({ slices, filled }: { slices: number; filled: number }) {
         const d = `M ${r} ${r} L ${r + r * Math.cos(a)} ${r + r * Math.sin(a)} A ${r} ${r} 0 0 1 ${r + r * Math.cos(b)} ${r + r * Math.sin(b)} Z`;
         return <path key={i} d={d} fill={i < filled ? "#f59e0b" : "#78350f"} stroke="#431407" strokeWidth="2" />;
       })}
-      {Array.from({ length: filled }, (_, i) => <circle key={i} cx={r + Math.cos((i / slices) * Math.PI * 2) * 42} cy={r + Math.sin((i / slices) * Math.PI * 2) * 42} r="6" fill="#ef4444" />)}
     </svg>
   );
 }
