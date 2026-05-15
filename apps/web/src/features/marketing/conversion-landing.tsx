@@ -493,6 +493,9 @@ export function ConversionLanding() {
               <Link href="/who-we-are" className="hover:text-foreground">
                 Who we are
               </Link>
+              <Link href="/our-vision" className="hover:text-foreground">
+                Our vision
+              </Link>
               <Link href="/auth/signin" className="hover:text-foreground">
                 Sign in
               </Link>
