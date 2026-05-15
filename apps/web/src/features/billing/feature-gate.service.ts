@@ -98,6 +98,16 @@ export const featureGateService = {
     );
   },
 
+  /** STEM marketing puzzle arcade — effective Pro only (includes bonus Pro). */
+  canPlayStemPuzzles(user: { planTier: PlanTier; bonusProUntil?: Date | null } | null): boolean {
+    if (!user) return false;
+    const tier = effectivePlanTier({
+      planTier: user.planTier,
+      bonusProUntil: user.bonusProUntil,
+    }) as PlanTier;
+    return getFeatureAccess(tier, "stem_puzzles").allowed;
+  },
+
   getMasteryMapAccessLevel(user: { planTier: PlanTier; bonusProUntil?: Date | null } | null): "limited" | "full" {
     if (!user) return "limited";
     return effectivePlanTier({ planTier: user.planTier, bonusProUntil: user.bonusProUntil }) === "PRO"

@@ -9,6 +9,7 @@ describe("plan-config", () => {
     expect(PLAN_LIMITS.FREE.maxClustersVisible).toBe(2);
     expect(PLAN_LIMITS.FREE.masteryMapAccess).toBe("limited");
     expect(PLAN_LIMITS.FREE.advancedInsights).toBe(false);
+    expect(PLAN_LIMITS.FREE.stemPuzzles).toBe(false);
     expect(PLAN_LIMITS.FREE.diagnosticAllowed).toBe(true);
   });
 
@@ -17,6 +18,7 @@ describe("plan-config", () => {
     expect(PLAN_LIMITS.PRO.maxSubjectCreations).toBeNull();
     expect(PLAN_LIMITS.PRO.masteryMapAccess).toBe("full");
     expect(PLAN_LIMITS.PRO.advancedInsights).toBe(true);
+    expect(PLAN_LIMITS.PRO.stemPuzzles).toBe(true);
   });
 
   it("PRO price is 15.99", () => {

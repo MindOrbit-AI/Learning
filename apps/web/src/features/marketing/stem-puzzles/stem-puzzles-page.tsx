@@ -2,6 +2,7 @@
 
 import { cn } from "@mindorbit/ui";
 import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
 import { getSession } from "next-auth/react";
 import {
   Fragment,
@@ -78,7 +79,7 @@ import {
   VisualCard,
 } from "./widgets";
 
-export function StemPuzzlesPage() {
+export function StemPuzzlesPage({ canPlayPuzzles }: { canPlayPuzzles: boolean }) {
   const [xp, setXp] = useState(0);
   const [streak, setStreak] = useState(0);
   const [solved, setSolved] = useState(0);
@@ -99,7 +100,11 @@ export function StemPuzzlesPage() {
   const [lockFilter, setLockFilter] = useState<LockFilter>("All");
   const [catalogView, setCatalogView] = useState<CatalogView>("grid");
   const [catalogPage, setCatalogPage] = useState(1);
-  const [lockedToast, setLockedToast] = useState<{ title: string; message: string } | null>(null);
+  const [lockedToast, setLockedToast] = useState<{
+    title: string;
+    message: string;
+    cta?: { href: string; label: string };
+  } | null>(null);
   const [energy, setEnergy] = useState(MAX_ENERGY);
   const [lastEnergyAt, setLastEnergyAt] = useState<number>(() => Date.now());
   const [categoryCompletions, setCategoryCompletions] = useState<Record<string, number>>({});
@@ -257,6 +262,14 @@ export function StemPuzzlesPage() {
         window.location.assign(`/auth/signin?callbackUrl=${encodeURIComponent(returnTo)}`);
         return;
       }
+      if (!canPlayPuzzles) {
+        setLockedToast({
+          title: "Pro feature",
+          message: "STEM puzzles are included with Pro. Upgrade to play every puzzle.",
+          cta: { href: "/settings/billing", label: "Go to billing" },
+        });
+        return;
+      }
       const meta = metaFor(type);
       if (meta && !isUnlocked(meta, xp, categoryCompletions)) {
         const subjectCount = categoryCompletions[meta.subject] ?? 0;
@@ -321,7 +334,7 @@ export function StemPuzzlesPage() {
       setRawState(initialState(next));
       setResult("idle");
     },
-    [difficultyFilter, solved, xp, categoryCompletions, energy, aiEnabled],
+    [difficultyFilter, solved, xp, categoryCompletions, energy, aiEnabled, canPlayPuzzles],
   );
 
   const nextPuzzle = useCallback(() => {
@@ -427,9 +440,17 @@ export function StemPuzzlesPage() {
           >
             <div className="flex items-start gap-3 rounded-2xl border-2 border-[#e5a000] bg-[#fff4d4] px-4 py-3 text-neutral-900 shadow-[0_4px_0_0_#e5a000] dark:border-amber-600 dark:bg-amber-950/50 dark:text-amber-50 dark:shadow-[0_4px_0_0_#92400e]">
               <span className="text-xl">🔒</span>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-black">{lockedToast.title}</p>
                 <p className="text-[11px] leading-snug text-neutral-700 dark:text-amber-100/90">{lockedToast.message}</p>
+                {lockedToast.cta ? (
+                  <Link
+                    href={lockedToast.cta.href}
+                    className="mt-2 inline-block text-[11px] font-black uppercase tracking-wider text-[#1899d6] underline underline-offset-2 hover:text-[#147aa8] dark:text-sky-300 dark:hover:text-sky-200"
+                  >
+                    {lockedToast.cta.label}
+                  </Link>
+                ) : null}
               </div>
             </div>
           </motion.div>
@@ -945,5 +966,3 @@ export function StemPuzzlesPage() {
     </div>
   );
 }
-
-export default StemPuzzlesPage;

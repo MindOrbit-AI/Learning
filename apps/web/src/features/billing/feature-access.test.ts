@@ -31,11 +31,18 @@ describe("feature-access", () => {
     expect(r.reason).toBe("Pro feature");
   });
 
+  it("FREE user cannot play STEM puzzles", () => {
+    const r = getFeatureAccess("FREE", "stem_puzzles");
+    expect(r.allowed).toBe(false);
+    expect(r.reason).toBe("Pro feature");
+  });
+
   it("PRO user has full access", () => {
     expect(getFeatureAccess("PRO", "diagnostic").allowed).toBe(true);
     expect(getFeatureAccess("PRO", "missions").allowed).toBe(true);
     expect(getFeatureAccess("PRO", "mastery_map").allowed).toBe(true);
     expect(getFeatureAccess("PRO", "subject_creation").allowed).toBe(true);
     expect(getFeatureAccess("PRO", "advanced_insights").allowed).toBe(true);
+    expect(getFeatureAccess("PRO", "stem_puzzles").allowed).toBe(true);
   });
 });

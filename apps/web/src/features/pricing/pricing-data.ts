@@ -15,6 +15,7 @@ export const PRO_FEATURES = [
   "All clusters per subject",
   "Advanced insights",
   "Unlimited subject creation",
+  "STEM puzzle arcade (full access)",
 ];
 
 export const PRICING_COMPARISON_ROWS: {
@@ -28,4 +29,5 @@ export const PRICING_COMPARISON_ROWS: {
   { feature: "Mastery map", free: "Limited", pro: "Full" },
   { feature: "Subject creation", free: "3 total", pro: "Unlimited" },
   { feature: "Advanced insights", free: "—", pro: "✓" },
+  { feature: "STEM puzzle arcade", free: "—", pro: "✓" },
 ];

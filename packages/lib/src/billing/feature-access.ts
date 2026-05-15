@@ -10,7 +10,8 @@ export type FeatureAccessKey =
   | "missions"
   | "mastery_map"
   | "subject_creation"
-  | "advanced_insights";
+  | "advanced_insights"
+  | "stem_puzzles";
 
 export interface FeatureAccessResult {
   allowed: boolean;
@@ -62,6 +63,12 @@ export function getFeatureAccess(
       return {
         allowed: limits.advancedInsights,
         reason: limits.advancedInsights ? undefined : "Pro feature",
+      };
+
+    case "stem_puzzles":
+      return {
+        allowed: limits.stemPuzzles,
+        reason: limits.stemPuzzles ? undefined : "Pro feature",
       };
 
     default:

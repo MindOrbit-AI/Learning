@@ -22,6 +22,8 @@ export interface PlanLimits {
   maxClustersVisible: number | null;
   masteryMapAccess: MasteryMapAccessLevel;
   advancedInsights: boolean;
+  /** Marketing STEM puzzle arcade (/puzzles). */
+  stemPuzzles: boolean;
   diagnosticAllowed: boolean;
   missionsAllowed: boolean;
   subjectCreationAllowed: boolean;
@@ -35,6 +37,7 @@ export const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
     maxClustersVisible: 2,
     masteryMapAccess: MASTERY_MAP_ACCESS.LIMITED,
     advancedInsights: false,
+    stemPuzzles: false,
     diagnosticAllowed: true,
     missionsAllowed: true,
     subjectCreationAllowed: true,
@@ -46,6 +49,7 @@ export const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
     maxClustersVisible: null,
     masteryMapAccess: MASTERY_MAP_ACCESS.FULL,
     advancedInsights: true,
+    stemPuzzles: true,
     diagnosticAllowed: true,
     missionsAllowed: true,
     subjectCreationAllowed: true,
