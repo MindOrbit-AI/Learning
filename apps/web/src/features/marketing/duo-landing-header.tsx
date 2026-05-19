@@ -17,8 +17,14 @@ export function DuoLandingHeader() {
           MindOrbit
         </Link>
         <nav className="hidden items-center gap-8 text-sm font-bold text-muted-foreground md:flex">
-          <a href="/#why" className="transition-colors hover:text-foreground">
-            Why MindOrbit
+          <a href="/#struggling" className="transition-colors hover:text-foreground">
+            Why it&apos;s hard
+          </a>
+          <a href="/#profile" className="transition-colors hover:text-foreground">
+            Profile
+          </a>
+          <a href="/#outcomes" className="transition-colors hover:text-foreground">
+            Outcomes
           </a>
           <a href="/#how" className="transition-colors hover:text-foreground">
             How it works
@@ -35,8 +41,8 @@ export function DuoLandingHeader() {
             I HAVE AN ACCOUNT
           </Link>
           <div className="hidden sm:block">
-            <DuoPrimaryLink href="/auth/signup">
-              Get started
+            <DuoPrimaryLink href="/try-diagnostic">
+              Free diagnostic
               <ArrowRight className="h-4 w-4" />
             </DuoPrimaryLink>
           </div>

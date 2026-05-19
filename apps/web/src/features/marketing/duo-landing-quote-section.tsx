@@ -8,10 +8,10 @@ export function DuoLandingQuoteSection() {
         <ScrollReveal className="mx-auto flex max-w-3xl flex-col items-center gap-4 text-center">
           <Sparkles className="h-10 w-10 text-[hsl(var(--duo-blue))]" strokeWidth={2} />
           <blockquote className="text-balance text-xl font-extrabold leading-snug text-foreground sm:text-2xl">
-            “I finally stopped guessing what to review—the map showed me exactly where I was
-            weak.”
+            “I stopped re-reading the same chapter—the map showed me the one thing I was missing
+            for the unit test.”
           </blockquote>
-          <p className="text-sm font-bold text-muted-foreground">Early learner, beta</p>
+          <p className="text-sm font-bold text-muted-foreground">9th grader, beta</p>
         </ScrollReveal>
       </div>
     </section>

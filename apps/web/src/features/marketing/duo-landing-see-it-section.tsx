@@ -19,7 +19,8 @@ export function DuoLandingSeeItSection() {
             Your mastery map, live in the app.
           </h2>
           <p className="mt-4 text-base font-semibold text-muted-foreground sm:text-lg">
-            Concepts link like a path—so you always know what to tackle next.
+            Every topic connects—so you always know what to study next, not just what&apos;s due
+            tomorrow.
           </p>
         </ScrollReveal>
 
@@ -44,8 +45,8 @@ export function DuoLandingSeeItSection() {
         </ScrollReveal>
 
         <ScrollReveal className="mx-auto mt-10 flex justify-center" delay={0.12}>
-          <DuoPrimaryLink href="/auth/signup">
-            Try it free
+          <DuoPrimaryLink href="/try-diagnostic">
+            Run Free Diagnostic
             <ArrowRight className="h-4 w-4" />
           </DuoPrimaryLink>
         </ScrollReveal>

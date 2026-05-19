@@ -10,7 +10,7 @@ const STEPS = [
   {
     n: "1",
     title: "Diagnose",
-    body: "Pinpoint gaps in minutes so you stop guessing",
+    body: "Find your gaps in minutes—before the test finds them for you",
     Cartoon: CartoonStepDiagnose,
   },
   {
@@ -28,7 +28,7 @@ const STEPS = [
   {
     n: "4",
     title: "Reinforce",
-    body: "Bring it back on schedule so it sticks for exams",
+    body: "Review on a schedule so it sticks for quizzes and finals",
     Cartoon: CartoonStepReinforce,
   },
 ] as const;
@@ -45,7 +45,7 @@ export function DuoLandingHowSection() {
             Your learning loop
           </p>
           <h2 className="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl">
-            Four steps. Zero wheel-spinning.
+            Four steps. No more random studying.
           </h2>
         </ScrollReveal>
         <div className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2">

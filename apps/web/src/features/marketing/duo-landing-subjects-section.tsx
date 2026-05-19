@@ -38,8 +38,11 @@ export function DuoLandingSubjectsSection() {
         <ScrollReveal className="mx-auto max-w-2xl text-center">
           <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary">Subjects</p>
           <h2 className="mt-3 text-2xl font-extrabold tracking-tight text-balance sm:text-3xl">
-            Pick a subject—your mastery map updates with you.
+            Pick your class—your mastery map updates as you go.
           </h2>
+          <p className="mt-3 text-sm font-semibold text-muted-foreground sm:text-base">
+            Algebra, bio, chem, and more—built for grades 6–12.
+          </p>
         </ScrollReveal>
 
         <ul className="mx-auto mt-10 grid max-w-5xl grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
