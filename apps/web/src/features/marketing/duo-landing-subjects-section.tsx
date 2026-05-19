@@ -41,7 +41,7 @@ export function DuoLandingSubjectsSection() {
             Pick your class—your mastery map updates as you go.
           </h2>
           <p className="mt-3 text-sm font-semibold text-muted-foreground sm:text-base">
-            Algebra, bio, chem, and more—built for grades 6–12.
+            Algebra, bio, chem, and more—built for everyone.
           </p>
         </ScrollReveal>
 

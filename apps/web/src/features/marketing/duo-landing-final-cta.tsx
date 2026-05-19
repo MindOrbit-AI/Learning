@@ -13,7 +13,7 @@ export function DuoLandingFinalCta() {
           Find your gaps in 5 minutes.
         </h2>
         <p className="relative mx-auto mt-4 max-w-lg text-base font-semibold text-muted-foreground sm:text-lg">
-          Run the free diagnostic and get a mastery map with the smartest order to study—grades 6–12.
+          Run the free diagnostic and get a mastery map with the smartest order to study.
         </p>
         <div className="relative mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <DuoPrimaryLink href="/try-diagnostic">

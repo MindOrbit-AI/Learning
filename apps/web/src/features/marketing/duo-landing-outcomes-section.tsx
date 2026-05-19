@@ -95,7 +95,7 @@ export function DuoLandingOutcomesSection() {
         <ScrollReveal className="mx-auto mt-10 flex justify-center" delay={0.1}>
           <div className="flex items-center gap-2 text-sm font-extrabold text-muted-foreground">
             <Award className="h-5 w-5 text-[hsl(var(--duo-gold))]" strokeWidth={2.25} />
-            Built for grades 6–12—real progress, not just “study harder.”
+            Built for real progress, not just “study harder.”
           </div>
         </ScrollReveal>
       </div>
