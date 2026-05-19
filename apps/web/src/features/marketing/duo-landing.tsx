@@ -3,11 +3,9 @@ import { DuoLandingFooter } from "./duo-landing-footer";
 import { DuoLandingHeader } from "./duo-landing-header";
 import { DuoLandingHero } from "./duo-landing-hero";
 import { DuoLandingOutcomesSection } from "./duo-landing-outcomes-section";
-import { DuoLandingSubjectsSection } from "./duo-landing-subjects-section";
 import { DuoLandingHowSection } from "./duo-landing-how-section";
 import { DuoLandingPricingSection } from "./duo-landing-pricing-section";
 import { DuoLandingQuoteSection } from "./duo-landing-quote-section";
-import { DuoLandingSeeItSection } from "./duo-landing-see-it-section";
 import { DuoLandingStruggleSection } from "./duo-landing-struggle-section";
 
 export function DuoLanding() {
@@ -25,8 +23,6 @@ export function DuoLanding() {
         <DuoLandingHero />
         <DuoLandingStruggleSection />
         <DuoLandingOutcomesSection />
-        <DuoLandingSubjectsSection />
-        <DuoLandingSeeItSection />
         <DuoLandingHowSection />
         <DuoLandingQuoteSection />
         <DuoLandingPricingSection />
