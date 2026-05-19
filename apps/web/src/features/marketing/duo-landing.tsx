@@ -1,4 +1,3 @@
-import { DuoLandingCognitiveProfileSection } from "./duo-landing-cognitive-profile-section";
 import { DuoLandingFinalCta } from "./duo-landing-final-cta";
 import { DuoLandingFooter } from "./duo-landing-footer";
 import { DuoLandingHeader } from "./duo-landing-header";
@@ -25,7 +24,6 @@ export function DuoLanding() {
       <main>
         <DuoLandingHero />
         <DuoLandingStruggleSection />
-        <DuoLandingCognitiveProfileSection />
         <DuoLandingOutcomesSection />
         <DuoLandingSubjectsSection />
         <DuoLandingSeeItSection />

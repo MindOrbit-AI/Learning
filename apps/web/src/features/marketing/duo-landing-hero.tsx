@@ -15,18 +15,17 @@ export function DuoLandingHero() {
         <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-14">
           <ScrollReveal className="min-w-0">
             <p className="inline-flex items-center rounded-full border-2 border-primary/25 bg-primary/10 px-4 py-1.5 text-xs font-extrabold uppercase tracking-[0.18em] text-primary">
-              Grades 6–12
+              Learning Platform
             </p>
             <h1 className="mt-6 text-4xl font-extrabold leading-[1.08] tracking-tight text-foreground sm:text-5xl md:text-6xl">
-              See how you actually think.
+              Transform Your Learning
             </h1>
             <p className="mt-6 max-w-xl text-lg font-semibold leading-relaxed text-muted-foreground sm:text-xl">
-              A 5-minute diagnostic built for middle and high school—find your gaps, fix weak
-              foundations, and get a clear path to actually mastering the material.
+              Discover gaps, strengthen your foundation, and build real mastery in just 5 minutes.
             </p>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
               <DuoPrimaryLink href="/try-diagnostic">
-                Run Free Diagnostic
+                Run FREE Diagnostic
                 <ArrowRight className="h-4 w-4" />
               </DuoPrimaryLink>
               <a

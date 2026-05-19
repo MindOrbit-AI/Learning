@@ -20,9 +20,6 @@ export function DuoLandingHeader() {
           <a href="/#struggling" className="transition-colors hover:text-foreground">
             Why it&apos;s hard
           </a>
-          <a href="/#profile" className="transition-colors hover:text-foreground">
-            Profile
-          </a>
           <a href="/#outcomes" className="transition-colors hover:text-foreground">
             Outcomes
           </a>
