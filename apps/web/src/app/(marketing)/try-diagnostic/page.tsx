@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@mindorbit/db";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@mindorbit/ui";
 import { ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Try a diagnostic — no account",
+  title: "Run a free diagnostic — no account",
   description:
-    "Run a short skill diagnostic on a MindOrbit subject without signing up. See how it feels in a few minutes.",
+    "Pick a subject and answer about fifteen questions in ~5 minutes. No signup required—your mastery snapshot appears on the next screen.",
 };
 
 export default async function TryDiagnosticIndexPage() {
@@ -19,45 +18,57 @@ export default async function TryDiagnosticIndexPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">
-      <div>
-        <h1 className="text-3xl font-extrabold tracking-tight">Try a diagnostic</h1>
-        <p className="mt-2 text-muted-foreground">
-          Pick a subject and answer about fifteen questions. No account required—your
-          snapshot appears on the next screen.
+      <div className="text-center sm:text-left">
+        <p className="inline-flex items-center rounded-full border-2 border-primary/25 bg-primary/10 px-4 py-1.5 text-xs font-extrabold uppercase tracking-[0.18em] text-primary">
+          Free · No signup
+        </p>
+        <h1 className="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl">
+          Pick your subject
+        </h1>
+        <p className="mt-3 text-base font-semibold text-muted-foreground">
+          About fifteen questions (~5 minutes). Your mastery snapshot appears on the next screen.
         </p>
       </div>
 
       {subjects.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
+        <p className="rounded-2xl border-2 border-border bg-card px-5 py-4 text-center text-sm font-semibold text-muted-foreground">
           No published catalog subjects are available yet. Check back soon.
         </p>
       ) : (
-        <div className="space-y-4">
+        <ul className="space-y-3">
           {subjects.map((s) => (
-            <Link key={s.slug} href={`/try-diagnostic/${s.slug}`} className="block">
-              <Card className="transition-shadow hover:shadow-md">
-                <CardHeader className="flex flex-row items-center gap-3 space-y-0 pb-2">
-                  <span className="text-2xl" aria-hidden>
-                    {s.icon}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <CardTitle className="text-lg">{s.title}</CardTitle>
-                    <CardDescription className="line-clamp-2">{s.description}</CardDescription>
-                  </div>
-                  <ArrowRight className="h-5 w-5 shrink-0 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <span className="text-sm font-semibold text-primary">Start free →</span>
-                </CardContent>
-              </Card>
-            </Link>
+            <li key={s.slug}>
+              <Link
+                href={`/try-diagnostic/${s.slug}`}
+                className="flex items-center gap-4 rounded-2xl border-2 border-border bg-card px-5 py-4 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
+              >
+                <span
+                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-2xl"
+                  aria-hidden
+                >
+                  {s.icon}
+                </span>
+                <span className="min-w-0 flex-1 text-left">
+                  <span className="block text-lg font-extrabold text-foreground">{s.title}</span>
+                  {s.description ? (
+                    <span className="mt-1 line-clamp-2 block text-sm font-semibold text-muted-foreground">
+                      {s.description}
+                    </span>
+                  ) : null}
+                </span>
+                <ArrowRight className="h-5 w-5 shrink-0 text-primary" aria-hidden />
+              </Link>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
 
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-center text-sm font-semibold text-muted-foreground">
         Already learning with us?{" "}
-        <Link href="/auth/signin" className="font-semibold text-primary underline underline-offset-4">
+        <Link
+          href="/auth/signin"
+          className="font-extrabold text-[hsl(var(--duo-blue))] underline decoration-2 underline-offset-4 hover:opacity-90"
+        >
           Sign in
         </Link>
       </p>

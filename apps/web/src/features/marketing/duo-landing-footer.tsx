@@ -59,14 +59,20 @@ export function DuoLandingFooter() {
             MindOrbit
           </div>
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm font-semibold text-muted-foreground">
-            <a href="/#why" className="hover:text-foreground">
-              Why MindOrbit
+            <a href="/#struggling" className="hover:text-foreground">
+              Why it&apos;s hard
             </a>
             <a href="/#how" className="hover:text-foreground">
               How it works
             </a>
+            <a href="/#subjects" className="hover:text-foreground">
+              Subjects
+            </a>
             <a href="/#pricing" className="hover:text-foreground">
               Pricing
+            </a>
+            <a href="/#faq" className="hover:text-foreground">
+              FAQ
             </a>
             <Link href="/who-we-are" className="hover:text-foreground">
               Who we are

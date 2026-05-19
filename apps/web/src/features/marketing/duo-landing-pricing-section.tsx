@@ -16,7 +16,9 @@ export function DuoLandingPricingSection() {
             Simple. Transparent.
           </h2>
           <p className="mt-4 text-lg font-semibold text-muted-foreground">
-            Try the diagnostic free. Upgrade when you want the full path and unlimited practice.
+            The diagnostic and snapshot map are always free. Pro unlocks the full subject map,
+            unlimited missions, and deeper progress—for students or families who want the
+            complete path.
           </p>
         </ScrollReveal>
 

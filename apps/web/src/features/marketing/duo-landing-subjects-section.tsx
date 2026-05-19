@@ -31,8 +31,9 @@ const SUBJECTS: readonly {
 export function DuoLandingSubjectsSection() {
   return (
     <section
+      id="subjects"
       aria-label="Subjects"
-      className="border-b border-border/60 bg-gradient-to-b from-background to-secondary/25 py-12 sm:py-16"
+      className="scroll-mt-24 border-b border-border/60 bg-gradient-to-b from-background to-secondary/25 py-12 sm:py-16"
     >
       <div className="container mx-auto px-4">
         <ScrollReveal className="mx-auto max-w-2xl text-center">
@@ -41,7 +42,7 @@ export function DuoLandingSubjectsSection() {
             Pick your class—your mastery map updates as you go.
           </h2>
           <p className="mt-3 text-sm font-semibold text-muted-foreground sm:text-base">
-            Algebra, bio, chem, and more—built for everyone.
+            Start with the class you&apos;re in now—each subject has its own map and diagnostic.
           </p>
         </ScrollReveal>
 

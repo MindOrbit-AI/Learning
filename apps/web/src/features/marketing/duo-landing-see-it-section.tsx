@@ -46,7 +46,7 @@ export function DuoLandingSeeItSection() {
 
         <ScrollReveal className="mx-auto mt-10 flex justify-center" delay={0.12}>
           <DuoPrimaryLink href="/try-diagnostic">
-            Run Free Diagnostic
+            Run free diagnostic
             <ArrowRight className="h-4 w-4" />
           </DuoPrimaryLink>
         </ScrollReveal>
