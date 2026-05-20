@@ -10,14 +10,15 @@ export function DuoLandingFinalCta() {
         <div className="pointer-events-none absolute -left-16 -top-16 h-48 w-48 rounded-full bg-[hsl(var(--duo-gold)_/_0.35)] blur-2xl" />
         <div className="pointer-events-none absolute -bottom-12 -right-12 h-40 w-40 rounded-full bg-primary/20 blur-2xl" />
         <h2 className="relative text-2xl font-extrabold tracking-tight sm:text-3xl md:text-4xl">
-          Find your gaps in 5 minutes.
+          Ready to see your gaps?
         </h2>
         <p className="relative mx-auto mt-4 max-w-lg text-base font-semibold text-muted-foreground sm:text-lg">
-          Run the free diagnostic and get a mastery map with the smartest order to study.
+          ~5 minutes · ~15 questions · mastery map on the next screen. No signup on the try
+          flow.
         </p>
         <div className="relative mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <DuoPrimaryLink href="/try-diagnostic">
-            Run Free Diagnostic
+            GET STARTED
             <ArrowRight className="h-4 w-4" />
           </DuoPrimaryLink>
           <Link

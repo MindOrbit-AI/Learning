@@ -18,14 +18,15 @@ export function DuoLandingHero() {
               Learning Platform
             </p>
             <h1 className="mt-6 text-4xl font-extrabold leading-[1.08] tracking-tight text-foreground sm:text-5xl md:text-6xl">
-              Transform Your Learning
+              Find the gap before the test does
             </h1>
             <p className="mt-6 max-w-xl text-lg font-semibold leading-relaxed text-muted-foreground sm:text-xl">
-              Discover gaps, strengthen your foundation, and build real mastery in just 5 minutes.
+              Take a free diagnostic (~5 min, ~15 questions). Get a mastery map that shows
+              what&apos;s weak, what depends on it, and what to study first—no signup.
             </p>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
               <DuoPrimaryLink href="/try-diagnostic">
-                Run FREE Diagnostic
+                GET STARTED
                 <ArrowRight className="h-4 w-4" />
               </DuoPrimaryLink>
               <a
@@ -36,7 +37,7 @@ export function DuoLandingHero() {
               </a>
             </div>
             <p className="mt-4 text-sm font-semibold text-muted-foreground">
-              No account required · Results in minutes
+              No account required · Results on the next screen
             </p>
           </ScrollReveal>
 

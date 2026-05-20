@@ -16,20 +16,20 @@ export function DuoLandingHeader() {
           </span>
           MindOrbit
         </Link>
-        {/* <nav className="hidden items-center gap-8 text-sm font-bold text-muted-foreground md:flex">
-          <a href="/#struggling" className="transition-colors hover:text-foreground">
+        <nav className="hidden items-center gap-6 text-sm font-bold text-muted-foreground lg:flex lg:gap-8">
+          {/* <a href="/#struggling" className="transition-colors hover:text-foreground">
             Why it&apos;s hard
-          </a>
-          <a href="/#outcomes" className="transition-colors hover:text-foreground">
-            Outcomes
           </a>
           <a href="/#how" className="transition-colors hover:text-foreground">
             How it works
           </a>
+          <a href="/#subjects" className="transition-colors hover:text-foreground">
+            Subjects
+          </a>
           <a href="/#pricing" className="transition-colors hover:text-foreground">
             Pricing
-          </a>
-        </nav> */}
+          </a> */}
+        </nav>
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
             href="/auth/signin"
@@ -39,7 +39,7 @@ export function DuoLandingHeader() {
           </Link>
           <div className="hidden sm:block">
             <DuoPrimaryLink href="/try-diagnostic">
-              Free diagnostic
+              GET STARTED
               <ArrowRight className="h-4 w-4" />
             </DuoPrimaryLink>
           </div>
@@ -48,7 +48,7 @@ export function DuoLandingHeader() {
               size="sm"
               className="h-11 rounded-2xl border-b-4 border-[#43a005] bg-[#58cc02] px-4 text-xs font-extrabold uppercase text-white hover:bg-[#58cc02] hover:brightness-105"
             >
-              Start
+              GET STARTED
             </Button>
           </Link>
         </div>

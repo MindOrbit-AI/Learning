@@ -13,37 +13,37 @@ const OUTCOMES: readonly {
   label: string;
   detail: string;
   icon: LucideIcon;
-  sample: string;
+  tag: string;
 }[] = [
   {
     label: "Mastery growth",
     detail: "Watch topics go from shaky to solid on your map.",
     icon: BarChart3,
-    sample: "+24% this month",
+    tag: "On your map",
   },
   {
     label: "Retention improvement",
     detail: "Review hits what you're about to forget—not what you already know.",
     icon: Brain,
-    sample: "87% recall at 30 days",
+    tag: "Spaced review",
   },
   {
     label: "Confidence score",
     detail: "See where test stress hits—even when homework answers look fine.",
     icon: Sparkles,
-    sample: "↑ in 4 of 5 zones",
+    tag: "Per topic",
   },
   {
     label: "Weak node elimination",
     detail: "Red weak spots on your map turn green as you fix the basics.",
     icon: Target,
-    sample: "3 gaps closed",
+    tag: "Gap-first",
   },
   {
     label: "Topics stabilized",
     detail: "Skills that hold up on quizzes and finals—not just homework.",
     icon: ShieldCheck,
-    sample: "12 topics locked",
+    tag: "Exam-ready",
   },
 ];
 
@@ -68,7 +68,7 @@ export function DuoLandingOutcomesSection() {
         </ScrollReveal>
 
         <div className="mx-auto mt-12 grid max-w-5xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {OUTCOMES.map(({ label, detail, icon: Icon, sample }, i) => (
+          {OUTCOMES.map(({ label, detail, icon: Icon, tag }, i) => (
             <ScrollReveal
               key={label}
               delay={0.05 * i}
@@ -79,8 +79,8 @@ export function DuoLandingOutcomesSection() {
                   <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary">
                     <Icon className="h-6 w-6" strokeWidth={2.25} />
                   </span>
-                  <span className="rounded-full bg-primary/10 px-3 py-1 font-mono text-[11px] font-bold text-primary">
-                    {sample}
+                  <span className="rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold text-primary">
+                    {tag}
                   </span>
                 </div>
                 <p className="mt-4 text-lg font-extrabold text-foreground">{label}</p>
