@@ -17,6 +17,9 @@ export function DuoLandingHeader() {
           MindOrbit
         </Link>
         <nav className="hidden items-center gap-6 text-sm font-bold text-muted-foreground sm:flex lg:gap-8">
+          <Link href="/parents" className="transition-colors hover:text-foreground">
+            For parents
+          </Link>
           <Link href="/blog" className="transition-colors hover:text-foreground">
             Blog
           </Link>

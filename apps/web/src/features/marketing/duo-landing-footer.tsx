@@ -80,6 +80,9 @@ export function DuoLandingFooter() {
             <Link href="/our-vision" className="hover:text-foreground">
               Our vision
             </Link>
+            <Link href="/parents" className="hover:text-foreground">
+              For parents
+            </Link>
             <Link href="/blog" className="hover:text-foreground">
               Blog
             </Link>
