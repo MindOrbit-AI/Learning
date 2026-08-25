@@ -16,7 +16,10 @@ export function DuoLandingHeader() {
           </span>
           MindOrbit
         </Link>
-        <nav className="hidden items-center gap-6 text-sm font-bold text-muted-foreground lg:flex lg:gap-8">
+        <nav className="hidden items-center gap-6 text-sm font-bold text-muted-foreground sm:flex lg:gap-8">
+          <Link href="/blog" className="transition-colors hover:text-foreground">
+            Blog
+          </Link>
           {/* <a href="/#struggling" className="transition-colors hover:text-foreground">
             Why it&apos;s hard
           </a>
