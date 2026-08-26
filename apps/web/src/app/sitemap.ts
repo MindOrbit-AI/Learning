@@ -26,6 +26,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.8,
     },
+    {
+      url: `${base}/practice-lessons`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
     ...blogEntries,
     {
       url: `${base}/auth/signin`,

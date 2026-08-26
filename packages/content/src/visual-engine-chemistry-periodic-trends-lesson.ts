@@ -1,0 +1,150 @@
+/** Visual Problem Engine — periodic trends: radius, IE, electronegativity (chemistry). */
+export const CHEMISTRY_PERIODIC_TRENDS_LESSON_SEED = {
+  id: "lesson-periodic-trends-visual",
+  title: "Periodic trends on the table",
+  subject: "Chemistry",
+  topic: "Periodic trends",
+  level: "beginner" as const,
+  scenes: [
+    {
+      id: "chem-pt-1-radius-direction",
+      title: "Atomic radius across a period",
+      type: "segment_select" as const,
+      prompt: "Moving left → right across period 3, what generally happens to atomic radius?",
+      visualPrompt: "Same valence shell, but nuclear charge climbs.",
+      data: {
+        segments: [
+          { id: "shrinks", label: "Radius tends to decrease" },
+          { id: "grows", label: "Radius tends to increase" },
+          { id: "same", label: "Radius stays exactly the same" },
+          { id: "random", label: "No predictable pattern" },
+        ],
+      },
+      interaction: "select_choice" as const,
+      validation: { type: "choice_match" as const, expectedChoice: "shrinks" },
+      feedback: {
+        correct: "Left → right: more protons pull the same shell inward — radius shrinks.",
+        incorrect: "Nuclear charge increases across a period while electrons enter the same shell.",
+        hint: "More positive charge in the nucleus pulls electrons closer.",
+      },
+      masteryTarget: { conceptNodeId: "periodic-trends", skill: "radius_across_period" },
+    },
+    {
+      id: "chem-pt-2-group-trend",
+      title: "Down a group",
+      type: "drag_drop_sort" as const,
+      prompt: "Order these facts as you go down group 1 (alkali metals).",
+      visualPrompt: "Each step down adds a new electron shell.",
+      data: {
+        items: [
+          "A new principal energy level (shell) is added",
+          "Valence electron is farther from the nucleus on average",
+          "Atomic radius increases down the group",
+        ],
+      },
+      interaction: "reorder" as const,
+      validation: {
+        type: "ordered_sequence" as const,
+        expectedOrder: [
+          "A new principal energy level (shell) is added",
+          "Valence electron is farther from the nucleus on average",
+          "Atomic radius increases down the group",
+        ],
+      },
+      feedback: {
+        correct: "New shell → farther valence electron → larger radius. That's the group trend.",
+        incorrect: "Start with what changes structurally before you state the size outcome.",
+        hint: "What gets added when you move from Li to Na to K?",
+      },
+      masteryTarget: { conceptNodeId: "periodic-trends", skill: "radius_down_group" },
+    },
+    {
+      id: "chem-pt-3-ie-number-line",
+      title: "Ionization energy scale",
+      type: "number_line" as const,
+      prompt: "Element X has first ionization energy ~800 kJ/mol. Element Y (farther right in the same period) has higher IE. Mark ~950 on this scale (500–1200, step 100).",
+      visualPrompt: "Higher IE = harder to remove the outer electron.",
+      data: { min: 500, max: 1200, step: 100 },
+      interaction: "place_point" as const,
+      validation: {
+        type: "point_match" as const,
+        expectedPoint: { x: 950, y: 0 },
+        tolerance: 55,
+      },
+      feedback: {
+        correct: "950 kJ/mol — a plausible step up from 800 as nuclear attraction strengthens.",
+        incorrect: "Slide toward 900–1000: higher than 800 but still on this scale.",
+        hint: "Four and a half steps of 100 above 500 lands near 950.",
+      },
+      masteryTarget: { conceptNodeId: "periodic-trends", skill: "ionization_energy_compare" },
+    },
+    {
+      id: "chem-pt-4-electroneg-grid",
+      title: "Electronegativity ladder",
+      type: "grid_model" as const,
+      prompt: "A 1×5 grid models period 3. Shade exactly 3 cells to show 'electronegativity rises toward the right' (3 of 5 steps rightward).",
+      visualPrompt: "Three shaded cells = three steps toward higher EN.",
+      data: { rows: 1, columns: 5 },
+      interaction: "tap_to_fill" as const,
+      validation: { type: "count_match" as const, expectedCount: 3 },
+      feedback: {
+        correct: "Three of five — a visual stand-in for climbing electronegativity across the row.",
+        incorrect: "Shade exactly three of the five equal cells.",
+        hint: "Pick any three adjacent or scattered cells — count matters, not position.",
+      },
+      masteryTarget: { conceptNodeId: "periodic-trends", skill: "electronegativity_direction" },
+    },
+    {
+      id: "chem-pt-5-metal-nonmetal",
+      title: "Metal → nonmetal",
+      type: "drag_drop_sort" as const,
+      prompt: "Order these properties as you move from left (metal) to right (nonmetal) in a period.",
+      visualPrompt: "Think conductivity and how electrons are held.",
+      data: {
+        items: [
+          "Metallic character decreases",
+          "Tendency to lose valence electrons decreases",
+          "Tendency to gain/share electrons increases",
+        ],
+      },
+      interaction: "reorder" as const,
+      validation: {
+        type: "ordered_sequence" as const,
+        expectedOrder: [
+          "Metallic character decreases",
+          "Tendency to lose valence electrons decreases",
+          "Tendency to gain/share electrons increases",
+        ],
+      },
+      feedback: {
+        correct: "Less metal → less electron loss → more gain/share — the period story left to right.",
+        incorrect: "Metallic character fades before you flip to nonmetal behavior.",
+        hint: "What happens to 'being a metal' first?",
+      },
+      masteryTarget: { conceptNodeId: "periodic-trends", skill: "metal_nonmetal_period" },
+    },
+  ],
+  finalMasteryCheck: {
+    id: "chem-pt-final-compare",
+    title: "Compare two elements",
+    type: "segment_select" as const,
+    prompt: "Na is left of Cl in period 3. Which statement is most accurate?",
+    visualPrompt: "Same period — compare radius and electronegativity.",
+    data: {
+      segments: [
+        { id: "correct", label: "Na has larger radius; Cl has higher electronegativity" },
+        { id: "swap", label: "Cl has larger radius; Na has higher electronegativity" },
+        { id: "same", label: "Both radius and EN are identical" },
+        { id: "wrong", label: "Na has higher EN because it is a metal" },
+      ],
+    },
+    interaction: "select_choice" as const,
+    validation: { type: "choice_match" as const, expectedChoice: "correct" },
+    feedback: {
+      correct: "Na (left) is bigger; Cl (right) pulls electrons more strongly — classic period-3 pair.",
+      incorrect: "Left = larger radius; right = higher electronegativity for period neighbors.",
+      hint: "Metals sit left; halogens sit right in the same row.",
+    },
+    masteryTarget: { conceptNodeId: "periodic-trends", skill: "na_cl_compare" },
+  },
+} as const;

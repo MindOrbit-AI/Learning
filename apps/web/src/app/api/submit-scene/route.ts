@@ -17,10 +17,7 @@ const bodySchema = z.object({
 
 export async function POST(req: Request) {
   const session = await getServerSession();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  const userId = session.user.id;
+  const userId = session?.user?.id ?? null;
 
   let json: unknown;
   try {
@@ -55,33 +52,43 @@ export async function POST(req: Request) {
   const idx = sceneIndexById(lesson, sceneId);
   const isLast = idx >= 0 && idx === mergedScenes(lesson).length - 1;
 
-  if (row) {
-    await prisma.sceneAttempt.create({
-      data: {
-        userId,
-        sceneLessonId: row.id,
-        sceneId,
-        userInputJson: userInput as Prisma.InputJsonValue,
-        isCorrect: fb.isCorrect,
-        feedback: fb.feedback,
-        misconception: fb.misconception,
-      },
-    });
-  }
-
   const masteryUpdate = computeMasteryUpdate(fb.isCorrect);
 
-  const subjectIdForMastery =
-    row?.subjectId ?? (await resolveSubjectIdForCatalogLabel(prisma, lesson.subject));
+  if (userId && row) {
+    try {
+      await prisma.sceneAttempt.create({
+        data: {
+          userId,
+          sceneLessonId: row.id,
+          sceneId,
+          userInputJson: userInput as Prisma.InputJsonValue,
+          isCorrect: fb.isCorrect,
+          feedback: fb.feedback,
+          misconception: fb.misconception,
+        },
+      });
+    } catch {
+      // Ignore when DB unavailable — validation feedback still returned below.
+    }
+  }
 
-  await persistMasterySideEffects(prisma, {
-    userId,
-    subjectId: subjectIdForMastery,
-    scene,
-    lesson,
-    isCorrect: fb.isCorrect,
-    misconceptionLabel: fb.misconception,
-  });
+  if (userId) {
+    try {
+      const subjectIdForMastery =
+        row?.subjectId ?? (await resolveSubjectIdForCatalogLabel(prisma, lesson.subject));
+
+      await persistMasterySideEffects(prisma, {
+        userId,
+        subjectId: subjectIdForMastery,
+        scene,
+        lesson,
+        isCorrect: fb.isCorrect,
+        misconceptionLabel: fb.misconception,
+      });
+    } catch {
+      // Ignore when DB unavailable — guest and offline-dev flows keep working.
+    }
+  }
 
   let nextScene = null;
   if (fb.isCorrect && !isLast) {
@@ -90,20 +97,24 @@ export async function POST(req: Request) {
     nextScene = buildEasierFollowUpScene(scene);
   }
 
-  if (fb.isCorrect && isLast && row) {
-    const prior = await prisma.lessonAttempt.findFirst({
-      where: { userId, sceneLessonId: row.id, completed: true },
-    });
-    if (!prior) {
-      await prisma.lessonAttempt.create({
-        data: {
-          userId,
-          sceneLessonId: row.id,
-          score: 1,
-          completed: true,
-          mistakesJson: [],
-        },
+  if (userId && fb.isCorrect && isLast && row) {
+    try {
+      const prior = await prisma.lessonAttempt.findFirst({
+        where: { userId, sceneLessonId: row.id, completed: true },
       });
+      if (!prior) {
+        await prisma.lessonAttempt.create({
+          data: {
+            userId,
+            sceneLessonId: row.id,
+            score: 1,
+            completed: true,
+            mistakesJson: [],
+          },
+        });
+      }
+    } catch {
+      // Ignore when DB unavailable.
     }
   }
 

@@ -1,0 +1,146 @@
+/** Visual Problem Engine — DNA structure and base-pairing rules (biology). */
+export const BIOLOGY_DNA_LESSON_SEED = {
+  id: "lesson-dna-base-pairing",
+  title: "DNA base pairing",
+  subject: "Biology",
+  topic: "DNA structure",
+  level: "beginner" as const,
+  scenes: [
+    {
+      id: "bio-dna-1-pairing-rule",
+      title: "Complementary bases",
+      type: "segment_select" as const,
+      prompt: "Adenine (A) on one strand always pairs with which base on the opposite strand?",
+      visualPrompt: "Remember the classic A–T and G–C pairing rules.",
+      data: {
+        segments: [
+          { id: "T", label: "Thymine (T)" },
+          { id: "G", label: "Guanine (G)" },
+          { id: "C", label: "Cytosine (C)" },
+          { id: "A", label: "Adenine (A)" },
+        ],
+      },
+      interaction: "select_choice" as const,
+      validation: { type: "choice_match" as const, expectedChoice: "T" },
+      feedback: {
+        correct: "A pairs with T — two hydrogen bonds. G pairs with C — three hydrogen bonds.",
+        incorrect: "A and T are the purine–pyrimidine pair with two hydrogen bonds.",
+        hint: "The pair that starts with T matches A.",
+      },
+      masteryTarget: { conceptNodeId: "dna-structure", skill: "base_pairing_at" },
+    },
+    {
+      id: "bio-dna-2-pair-order",
+      title: "Build the ladder rung",
+      type: "drag_drop_sort" as const,
+      prompt: "Order these steps for finding the complementary strand of 5′-ATGC-3′.",
+      visualPrompt: "Match each base, then read the new strand 5′ to 3′.",
+      data: {
+        items: [
+          "Read the template left to right: A, T, G, C",
+          "Write complements: T, A, C, G",
+          "The complementary strand reads 5′-TACG-3′",
+        ],
+      },
+      interaction: "reorder" as const,
+      validation: {
+        type: "ordered_sequence" as const,
+        expectedOrder: [
+          "Read the template left to right: A, T, G, C",
+          "Write complements: T, A, C, G",
+          "The complementary strand reads 5′-TACG-3′",
+        ],
+      },
+      feedback: {
+        correct: "Read → complement → assemble — that's how you build the opposite strand.",
+        incorrect: "You cannot write the final strand before you know each complementary base.",
+        hint: "Start by listing the template bases in order.",
+      },
+      masteryTarget: { conceptNodeId: "dna-structure", skill: "complement_sequence" },
+    },
+    {
+      id: "bio-dna-3-double-helix-grid",
+      title: "Two strands, one helix",
+      type: "grid_model" as const,
+      prompt: "A 2×2 grid models one 'rung' of the helix. Shade exactly 2 cells to show one base pair (one rung = two bases).",
+      visualPrompt: "Each rung connects one base on each strand.",
+      data: { rows: 2, columns: 2 },
+      interaction: "tap_to_fill" as const,
+      validation: { type: "count_match" as const, expectedCount: 2 },
+      feedback: {
+        correct: "Two bases — one on each strand — form a single rung of the DNA ladder.",
+        incorrect: "One rung = exactly two complementary bases.",
+        hint: "Shade one cell on each row, or both in one column.",
+      },
+      masteryTarget: { conceptNodeId: "dna-structure", skill: "helix_rung_model" },
+    },
+    {
+      id: "bio-dna-4-chargaff",
+      title: "Chargaff's ratios",
+      type: "fraction_bar" as const,
+      prompt: "In double-stranded DNA, A equals T. If a sample is 30% A, the combined A+T fraction is 60%. Shade 3 of 5 parts to model 60%.",
+      visualPrompt: "Three shaded slices out of five equal parts.",
+      data: { totalParts: 5 },
+      interaction: "tap_to_fill" as const,
+      validation: { type: "count_match" as const, expectedCount: 3 },
+      feedback: {
+        correct: "3/5 = 60% — A plus its partner T together make up three fifths of the bases.",
+        incorrect: "You need exactly three of the five parts shaded for 60%.",
+        hint: "A (30%) + T (30%) = 60% → three of five parts.",
+      },
+      masteryTarget: { conceptNodeId: "dna-structure", skill: "chargaff_ratio" },
+    },
+    {
+      id: "bio-dna-5-antiparallel",
+      title: "Antiparallel strands",
+      type: "drag_drop_sort" as const,
+      prompt: "Order these facts about DNA strand orientation.",
+      visualPrompt: "Earliest concept at the top.",
+      data: {
+        items: [
+          "The two strands run in opposite 5′ → 3′ directions",
+          "Each strand is a polymer of nucleotides",
+          "Sugar–phosphate backbones are on the outside of the helix",
+        ],
+      },
+      interaction: "reorder" as const,
+      validation: {
+        type: "ordered_sequence" as const,
+        expectedOrder: [
+          "Each strand is a polymer of nucleotides",
+          "The two strands run in opposite 5′ → 3′ directions",
+          "Sugar–phosphate backbones are on the outside of the helix",
+        ],
+      },
+      feedback: {
+        correct: "Nucleotide chain → antiparallel → backbone outside — the standard textbook picture.",
+        incorrect: "Start with what a strand is made of, then how two strands relate.",
+        hint: "What is a DNA strand built from?",
+      },
+      masteryTarget: { conceptNodeId: "dna-structure", skill: "antiparallel_order" },
+    },
+  ],
+  finalMasteryCheck: {
+    id: "bio-dna-final-gc",
+    title: "G–C pair checkpoint",
+    type: "segment_select" as const,
+    prompt: "Guanine (G) pairs with which base, and how many hydrogen bonds hold that pair?",
+    visualPrompt: "Pick the correct partner and bond count.",
+    data: {
+      segments: [
+        { id: "gc3", label: "Cytosine — 3 hydrogen bonds" },
+        { id: "gc2", label: "Cytosine — 2 hydrogen bonds" },
+        { id: "gt3", label: "Thymine — 3 hydrogen bonds" },
+        { id: "gt2", label: "Thymine — 2 hydrogen bonds" },
+      ],
+    },
+    interaction: "select_choice" as const,
+    validation: { type: "choice_match" as const, expectedChoice: "gc3" },
+    feedback: {
+      correct: "G–C with three hydrogen bonds — stronger than A–T's two.",
+      incorrect: "G pairs with C (not T), and that pair has three hydrogen bonds.",
+      hint: "The stronger pair has three bonds, not two.",
+    },
+    masteryTarget: { conceptNodeId: "dna-structure", skill: "gc_bond_count" },
+  },
+} as const;

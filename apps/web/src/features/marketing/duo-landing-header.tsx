@@ -23,6 +23,9 @@ export function DuoLandingHeader() {
           <Link href="/blog" className="transition-colors hover:text-foreground">
             Blog
           </Link>
+          <Link href="/practice-lessons" className="transition-colors hover:text-foreground">
+            Practice lessons
+          </Link>
           {/* <a href="/#struggling" className="transition-colors hover:text-foreground">
             Why it&apos;s hard
           </a>

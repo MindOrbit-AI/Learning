@@ -9,6 +9,16 @@ import { CHEMISTRY_LAB_SAFETY_LESSON_SEED } from "./visual-engine-chemistry-lab-
 import { CHEMISTRY_BALANCING_LESSON_SEED } from "./visual-engine-chemistry-balancing-lesson";
 import { CHEMISTRY_LIMITING_LESSON_SEED } from "./visual-engine-chemistry-limiting-lesson";
 import { CHEMISTRY_THERMO_LESSON_SEED } from "./visual-engine-chemistry-thermo-lesson";
+import { PHYSICS_FORCES_LESSON_SEED } from "./visual-engine-physics-forces-lesson";
+import { BIOLOGY_DNA_LESSON_SEED } from "./visual-engine-biology-dna-lesson";
+import { MATH_LINEAR_EQUATIONS_LESSON_SEED } from "./visual-engine-math-linear-equations-lesson";
+import { BIOLOGY_PUNNETT_LESSON_SEED } from "./visual-engine-biology-punnett-lesson";
+import { PHYSICS_CIRCUITS_LESSON_SEED } from "./visual-engine-physics-circuits-lesson";
+import { CHEMISTRY_PERIODIC_TRENDS_LESSON_SEED } from "./visual-engine-chemistry-periodic-trends-lesson";
+import { CHEMISTRY_BONDING_LESSON_SEED } from "./visual-engine-chemistry-bonding-lesson";
+import { MATH_PYTHAGOREAN_LESSON_SEED } from "./visual-engine-math-pythagorean-lesson";
+import { BIOLOGY_NATURAL_SELECTION_LESSON_SEED } from "./visual-engine-biology-natural-selection-lesson";
+import { PHYSICS_WORK_ENERGY_LESSON_SEED } from "./visual-engine-physics-work-energy-lesson";
 
 /** All built-in Visual Problem Engine lessons (canonical JSON for DB + app). */
 export const VISUAL_ENGINE_LESSON_SEEDS = [
@@ -23,6 +33,16 @@ export const VISUAL_ENGINE_LESSON_SEEDS = [
   CHEMISTRY_BALANCING_LESSON_SEED,
   CHEMISTRY_LIMITING_LESSON_SEED,
   CHEMISTRY_THERMO_LESSON_SEED,
+  PHYSICS_FORCES_LESSON_SEED,
+  BIOLOGY_DNA_LESSON_SEED,
+  MATH_LINEAR_EQUATIONS_LESSON_SEED,
+  BIOLOGY_PUNNETT_LESSON_SEED,
+  PHYSICS_CIRCUITS_LESSON_SEED,
+  CHEMISTRY_PERIODIC_TRENDS_LESSON_SEED,
+  CHEMISTRY_BONDING_LESSON_SEED,
+  MATH_PYTHAGOREAN_LESSON_SEED,
+  BIOLOGY_NATURAL_SELECTION_LESSON_SEED,
+  PHYSICS_WORK_ENERGY_LESSON_SEED,
 ] as const;
 
 /** Map catalog `subject` label to an existing `Subject.slug` row for FK + mastery resolution. */

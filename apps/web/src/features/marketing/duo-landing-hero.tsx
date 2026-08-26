@@ -30,14 +30,21 @@ export function DuoLandingHero() {
                 <ArrowRight className="h-4 w-4" />
               </DuoPrimaryLink>
               <a
-                href="#struggling"
+                href="/practice-lessons"
                 className="inline-flex h-14 items-center justify-center rounded-2xl border-[3px] border-[hsl(var(--duo-blue))] bg-background px-8 text-sm font-extrabold uppercase tracking-wide text-[hsl(var(--duo-blue))] shadow-sm transition hover:bg-[hsl(var(--duo-blue)_/_0.08)] sm:text-base"
               >
-                See why topics stack
+                Try practice lessons
               </a>
             </div>
             <p className="mt-4 text-sm font-semibold text-muted-foreground">
-              No account required · Results on the next screen
+              No account required · Results on the next screen ·{" "}
+              <a href="/practice-lessons" className="font-bold text-[hsl(var(--duo-blue))] underline decoration-2 underline-offset-2 hover:opacity-90">
+                10 free interactive lessons
+              </a>
+              {" · "}
+              <a href="#struggling" className="font-bold text-[hsl(var(--duo-blue))] underline decoration-2 underline-offset-2 hover:opacity-90">
+                See why topics stack
+              </a>
             </p>
           </ScrollReveal>
 

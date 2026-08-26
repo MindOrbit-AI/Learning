@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import {
+  ArrowRight,
   Atom,
   BarChart3,
   Calculator,
@@ -75,6 +76,29 @@ export function DuoLandingSubjectsSection() {
             );
           })}
         </ul>
+
+        <ScrollReveal className="mx-auto mt-10 max-w-3xl" delay={0.2}>
+          <Link
+            href="/practice-lessons"
+            className="flex flex-col items-center gap-3 rounded-2xl border-2 border-primary/25 bg-primary/5 px-6 py-6 text-center transition hover:border-primary/40 hover:bg-primary/10 sm:flex-row sm:justify-between sm:text-left"
+          >
+            <div>
+              <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-primary">
+                New — hands-on learning
+              </p>
+              <p className="mt-1 text-base font-extrabold text-foreground sm:text-lg">
+                10 interactive practice lessons — drag, plot, and master
+              </p>
+              <p className="mt-1 text-sm font-semibold text-muted-foreground">
+                Physics, biology, and math · ~10 min each · Free to try
+              </p>
+            </div>
+            <span className="inline-flex shrink-0 items-center gap-2 rounded-2xl bg-[#58cc02] px-5 py-3 text-sm font-extrabold uppercase tracking-wide text-white">
+              Explore lessons
+              <ArrowRight className="h-4 w-4" />
+            </span>
+          </Link>
+        </ScrollReveal>
       </div>
     </section>
   );

@@ -1,0 +1,150 @@
+/** Visual Problem Engine — series vs parallel circuits (physics). */
+export const PHYSICS_CIRCUITS_LESSON_SEED = {
+  id: "lesson-circuits-series-parallel",
+  title: "Series vs parallel circuits",
+  subject: "Physics",
+  topic: "Electric circuits",
+  level: "beginner" as const,
+  scenes: [
+    {
+      id: "phy-circ-1-series-def",
+      title: "One path",
+      type: "segment_select" as const,
+      prompt: "In a series circuit, how many paths does current have from the battery through all components back to the battery?",
+      visualPrompt: "Picture bulbs on a single loop.",
+      data: {
+        segments: [
+          { id: "one", label: "One path" },
+          { id: "two", label: "Two paths" },
+          { id: "many", label: "Many independent paths" },
+          { id: "zero", label: "No closed path" },
+        ],
+      },
+      interaction: "select_choice" as const,
+      validation: { type: "choice_match" as const, expectedChoice: "one" },
+      feedback: {
+        correct: "One path — if any component breaks, the whole series loop opens.",
+        incorrect: "Series means components are chained on a single loop.",
+        hint: "Think of one string of lights: one break kills them all.",
+      },
+      masteryTarget: { conceptNodeId: "electric-circuits", skill: "series_single_path" },
+    },
+    {
+      id: "phy-circ-2-current-order",
+      title: "Current is the same",
+      type: "drag_drop_sort" as const,
+      prompt: "Order these facts about current in a series circuit.",
+      visualPrompt: "Conservation of charge → same current everywhere.",
+      data: {
+        items: [
+          "Charge cannot pile up at a junction (there is no junction in pure series)",
+          "Current is the same through every component in series",
+          "If one bulb burns out, current stops for all bulbs",
+        ],
+      },
+      interaction: "reorder" as const,
+      validation: {
+        type: "ordered_sequence" as const,
+        expectedOrder: [
+          "Charge cannot pile up at a junction (there is no junction in pure series)",
+          "Current is the same through every component in series",
+          "If one bulb burns out, current stops for all bulbs",
+        ],
+      },
+      feedback: {
+        correct: "No pile-up → equal current → one break stops all — the series story.",
+        incorrect: "Start with charge conservation, then what that means for current.",
+        hint: "Why must current be the same at every point?",
+      },
+      masteryTarget: { conceptNodeId: "electric-circuits", skill: "series_current_order" },
+    },
+    {
+      id: "phy-circ-3-parallel-grid",
+      title: "Parallel branches",
+      type: "grid_model" as const,
+      prompt: "A 1×3 grid models three parallel branches. Shade exactly 3 cells to show each branch gets its own path.",
+      visualPrompt: "All three branches active.",
+      data: { rows: 1, columns: 3 },
+      interaction: "tap_to_fill" as const,
+      validation: { type: "count_match" as const, expectedCount: 3 },
+      feedback: {
+        correct: "Three parallel paths — each branch can carry current independently.",
+        incorrect: "Three branches means all three cells shaded.",
+        hint: "Tap every cell in the row.",
+      },
+      masteryTarget: { conceptNodeId: "electric-circuits", skill: "parallel_branch_model" },
+    },
+    {
+      id: "phy-circ-4-voltage-line",
+      title: "Voltage in parallel",
+      type: "number_line" as const,
+      prompt: "In parallel, each branch gets the full battery voltage. If the battery is 6 V, mark 6 on this scale (0–12 V, step 2).",
+      visualPrompt: "Each branch sees the same potential difference.",
+      data: { min: 0, max: 12, step: 2 },
+      interaction: "place_point" as const,
+      validation: {
+        type: "point_match" as const,
+        expectedPoint: { x: 6, y: 0 },
+        tolerance: 0.5,
+      },
+      feedback: {
+        correct: "6 V across each parallel branch — voltage is the same, current splits.",
+        incorrect: "The third tick at step 2 lands on 6 volts.",
+        hint: "Three steps of 2 from zero.",
+      },
+      masteryTarget: { conceptNodeId: "electric-circuits", skill: "parallel_voltage_equal" },
+    },
+    {
+      id: "phy-circ-5-resistance-compare",
+      title: "Compare arrangements",
+      type: "drag_drop_sort" as const,
+      prompt: "Order these statements from series to parallel behavior.",
+      visualPrompt: "Series adds resistance; parallel gives more paths.",
+      data: {
+        items: [
+          "Total resistance increases when resistors are added in series",
+          "Each parallel branch has the full source voltage",
+          "Total resistance decreases when resistors are added in parallel",
+        ],
+      },
+      interaction: "reorder" as const,
+      validation: {
+        type: "ordered_sequence" as const,
+        expectedOrder: [
+          "Total resistance increases when resistors are added in series",
+          "Each parallel branch has the full source voltage",
+          "Total resistance decreases when resistors are added in parallel",
+        ],
+      },
+      feedback: {
+        correct: "Series R adds up → parallel V is shared equally → parallel R drops — the contrast you need.",
+        incorrect: "Start with what happens to resistance in series, then parallel voltage, then parallel resistance.",
+        hint: "Series resistance first — it's the simpler single-path case.",
+      },
+      masteryTarget: { conceptNodeId: "electric-circuits", skill: "series_parallel_contrast" },
+    },
+  ],
+  finalMasteryCheck: {
+    id: "phy-circ-final-compare",
+    title: "Household wiring",
+    type: "segment_select" as const,
+    prompt: "Home outlets are wired in parallel so each appliance gets full voltage. If one lamp burns out, what happens to the others?",
+    visualPrompt: "Think about independent branches.",
+    data: {
+      segments: [
+        { id: "stay", label: "Others keep working" },
+        { id: "all_off", label: "All go out" },
+        { id: "dimmer", label: "Others get dimmer" },
+        { id: "brighter", label: "Others get brighter" },
+      ],
+    },
+    interaction: "select_choice" as const,
+    validation: { type: "choice_match" as const, expectedChoice: "stay" },
+    feedback: {
+      correct: "Others keep working — parallel branches are independent.",
+      incorrect: "That's series behavior. Parallel means each device has its own path.",
+      hint: "Would your fridge stop if one bedroom lamp broke?",
+    },
+    masteryTarget: { conceptNodeId: "electric-circuits", skill: "household_parallel" },
+  },
+} as const;

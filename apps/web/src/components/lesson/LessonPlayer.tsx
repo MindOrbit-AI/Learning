@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useCallback } from "react";
+import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import type { VisualLesson } from "@/types/lesson";
 import type { SceneUserInput } from "@/types/scene";
@@ -16,10 +17,10 @@ import { Button } from "@/components/ui/Button";
 type Props = {
   lesson: VisualLesson;
   dbLessonId?: string | null;
-  userId: string;
+  userId?: string | null;
 };
 
-export function LessonPlayer({ lesson, dbLessonId = null, userId }: Props) {
+export function LessonPlayer({ lesson, dbLessonId = null, userId = null }: Props) {
   const {
     sceneIndex,
     inputsBySceneId,
@@ -117,22 +118,42 @@ export function LessonPlayer({ lesson, dbLessonId = null, userId }: Props) {
           <div className="text-5xl">🌟</div>
           <h2 className="mt-4 text-2xl font-bold text-white">Lesson complete</h2>
           <p className="mt-2 text-sm text-zinc-300">
-            You finished <span className="font-semibold text-amber-200">{lesson.title}</span>. Mastery updated — keep
-            the streak going.
+            You finished <span className="font-semibold text-amber-200">{lesson.title}</span>.
+            {userId
+              ? " Mastery updated — keep the streak going."
+              : " Create a free account to save progress and unlock your mastery path."}
           </p>
-          <Button
-            type="button"
-            className="mt-8 w-full"
-            variant="success"
-            onClick={() => {
-              setCompleted(false);
-              setSceneIndex(0);
-              setFeedback(false, "", null);
-              loadLesson(lesson, dbLessonId);
-            }}
-          >
-            Practice again
-          </Button>
+          <div className="mt-8 flex flex-col gap-3">
+            {!userId ? (
+              <Link
+                href={`/auth/signup?callbackUrl=${encodeURIComponent(`/lesson/${lesson.id}`)}`}
+                className="inline-flex h-12 w-full items-center justify-center rounded-2xl border-b-[3px] border-[#43a005] bg-[#58cc02] text-sm font-extrabold uppercase tracking-wide text-white transition hover:brightness-105"
+              >
+                Sign up free
+              </Link>
+            ) : null}
+            <Button
+              type="button"
+              className="w-full"
+              variant={userId ? "success" : "secondary"}
+              onClick={() => {
+                setCompleted(false);
+                setSceneIndex(0);
+                setFeedback(false, "", null);
+                loadLesson(lesson, dbLessonId);
+              }}
+            >
+              Practice again
+            </Button>
+            {!userId ? (
+              <Link
+                href="/practice-lessons"
+                className="text-sm font-bold text-violet-300 underline decoration-2 underline-offset-4 hover:text-violet-200"
+              >
+                Try another lesson
+              </Link>
+            ) : null}
+          </div>
         </Card>
       </motion.div>
     );

@@ -83,6 +83,9 @@ export function DuoLandingFooter() {
             <Link href="/parents" className="hover:text-foreground">
               For parents
             </Link>
+            <Link href="/practice-lessons" className="hover:text-foreground">
+              Practice lessons
+            </Link>
             <Link href="/blog" className="hover:text-foreground">
               Blog
             </Link>
