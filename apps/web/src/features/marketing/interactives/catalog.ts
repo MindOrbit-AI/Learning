@@ -17,6 +17,9 @@ import {
 import type { SceneCategory } from "@/types/scene";
 import type { EnginePrimitive } from "@/types/interactive-engine";
 import { ENGINE_PRIMITIVE_COUNT } from "./engine-catalog";
+import { MATH_FRACTIONS_CURRICULUM_SEEDS, MATH_ALGEBRA_CURRICULUM_SEEDS } from "@mindorbit/content";
+import { buildFractionsCatalogItems } from "./fractions-catalog";
+import { buildAlgebraCatalogItems } from "./algebra-catalog";
 
 export type { EnginePrimitive };
 export { ENGINE_PRIMITIVE_COUNT, ENGINE_PRIMITIVE_META, engineLabel } from "./engine-catalog";
@@ -114,10 +117,10 @@ export const INTERACTIVE_CATALOG: InteractiveCatalogItem[] = [
     topic: "Quadratic equations",
     level: "Beginner",
     description:
-      "Reorder factoring steps, match roots and factors, plot the vertex, and map ax² + bx + c — all by dragging.",
-    primitives: ["drag", "drop_zone", "sequence_builder", "graph", "coordinate_plane"],
-    sceneCategories: ["construction", "spatial"],
-    durationMin: 14,
+      "Factor, complete the square, and use the discriminant — reorder steps, match roots, plot vertices, and drag coefficients.",
+    primitives: ["drag", "drop_zone", "sequence_builder", "graph", "coordinate_plane", "multiple_choice"],
+    sceneCategories: ["construction", "spatial", "selection"],
+    durationMin: 18,
     icon: GitBranch,
     accent: "from-rose-400/20 to-pink-500/10",
     badge: "bg-rose-500/15 text-rose-700 dark:text-rose-300",
@@ -178,6 +181,8 @@ export const INTERACTIVE_CATALOG: InteractiveCatalogItem[] = [
     accent: "from-sky-400/20 to-blue-500/10",
     badge: "bg-sky-500/15 text-sky-700 dark:text-sky-300",
   },
+  ...buildFractionsCatalogItems(MATH_FRACTIONS_CURRICULUM_SEEDS),
+  ...buildAlgebraCatalogItems(MATH_ALGEBRA_CURRICULUM_SEEDS),
   {
     id: "lesson-decimals-on-the-line",
     title: "Decimals on the number line",
@@ -461,6 +466,22 @@ export const INTERACTIVE_CATALOG: InteractiveCatalogItem[] = [
 ];
 
 export type SubjectFilter = "All" | InteractiveSubject;
+
+export type FractionLevelFilter = "All" | 1 | 2 | 3 | 4 | 5;
+
+export function interactivesForFractionLevel(level: FractionLevelFilter) {
+  const fractionItems = INTERACTIVE_CATALOG.filter((i) => i.topic.startsWith("Fractions (Level"));
+  if (level === "All") return fractionItems;
+  return fractionItems.filter((i) => i.topic === `Fractions (Level ${level})`);
+}
+
+export type AlgebraLevelFilter = "All" | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;
+
+export function interactivesForAlgebraLevel(level: AlgebraLevelFilter) {
+  const algebraItems = INTERACTIVE_CATALOG.filter((i) => i.topic.startsWith("Algebra (Level"));
+  if (level === "All") return algebraItems;
+  return algebraItems.filter((i) => i.topic === `Algebra (Level ${level})`);
+}
 
 export function lessonHref(lessonId: string) {
   return `/lesson/${lessonId}`;

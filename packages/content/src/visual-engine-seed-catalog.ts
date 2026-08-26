@@ -23,6 +23,8 @@ import { MATH_BALANCE_FRACTIONS_LESSON_SEED } from "./visual-engine-math-balance
 import { MATH_GEAR_RATIOS_LESSON_SEED } from "./visual-engine-math-gear-ratios-lesson";
 import { MATH_GEAR_ALGEBRA_LESSON_SEED } from "./visual-engine-math-gear-algebra-lesson";
 import { MATH_QUADRATIC_EQUATIONS_LESSON_SEED } from "./visual-engine-math-quadratic-equations-lesson";
+import { MATH_FRACTIONS_CURRICULUM_SEEDS } from "./math-fractions";
+import { MATH_ALGEBRA_CURRICULUM_SEEDS } from "./math-algebra";
 import { BIOLOGY_NATURAL_SELECTION_LESSON_SEED } from "./visual-engine-biology-natural-selection-lesson";
 import { PHYSICS_WORK_ENERGY_LESSON_SEED } from "./visual-engine-physics-work-energy-lesson";
 
@@ -53,6 +55,8 @@ export const VISUAL_ENGINE_LESSON_SEEDS = [
   MATH_GEAR_RATIOS_LESSON_SEED,
   MATH_GEAR_ALGEBRA_LESSON_SEED,
   MATH_QUADRATIC_EQUATIONS_LESSON_SEED,
+  ...MATH_FRACTIONS_CURRICULUM_SEEDS,
+  ...MATH_ALGEBRA_CURRICULUM_SEEDS,
   BIOLOGY_NATURAL_SELECTION_LESSON_SEED,
   PHYSICS_WORK_ENERGY_LESSON_SEED,
 ] as const;

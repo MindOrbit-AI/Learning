@@ -22,7 +22,11 @@ import {
   countBySubject,
   engineLabel,
   interactivesForSubject,
+  interactivesForFractionLevel,
+  interactivesForAlgebraLevel,
   lessonHref,
+  type AlgebraLevelFilter,
+  type FractionLevelFilter,
   type InteractiveSubject,
   type SubjectFilter,
 } from "./catalog";
@@ -145,17 +149,44 @@ function SubjectSection({
   );
 }
 
+const FRACTION_LEVEL_TABS: { id: FractionLevelFilter; label: string }[] = [
+  { id: "All", label: "All fraction levels" },
+  { id: 1, label: "Level 1" },
+  { id: 2, label: "Level 2" },
+  { id: 3, label: "Level 3" },
+  { id: 4, label: "Level 4" },
+  { id: 5, label: "Level 5" },
+];
+
+const ALGEBRA_LEVEL_TABS: { id: AlgebraLevelFilter; label: string }[] = [
+  { id: "All", label: "All algebra levels" },
+  ...([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] as const).map((n) => ({
+    id: n as AlgebraLevelFilter,
+    label: `Level ${n}`,
+  })),
+];
+
 export function InteractivesLanding() {
   const [subjectFilter, setSubjectFilter] = useState<SubjectFilter>("All");
   const [engineFilter, setEngineFilter] = useState<EnginePrimitive | "All">("All");
+  const [fractionLevelFilter, setFractionLevelFilter] = useState<FractionLevelFilter>("All");
+  const [algebraLevelFilter, setAlgebraLevelFilter] = useState<AlgebraLevelFilter>("All");
 
   const filtered = useMemo(() => {
     let items = interactivesForSubject(subjectFilter);
     if (engineFilter !== "All") {
       items = items.filter((item) => item.primitives.includes(engineFilter));
     }
+    if (subjectFilter === "Math" && fractionLevelFilter !== "All") {
+      const fractionIds = new Set(interactivesForFractionLevel(fractionLevelFilter).map((i) => i.id));
+      items = items.filter((item) => fractionIds.has(item.id));
+    }
+    if (subjectFilter === "Math" && algebraLevelFilter !== "All") {
+      const algebraIds = new Set(interactivesForAlgebraLevel(algebraLevelFilter).map((i) => i.id));
+      items = items.filter((item) => algebraIds.has(item.id));
+    }
     return items;
-  }, [subjectFilter, engineFilter]);
+  }, [subjectFilter, engineFilter, fractionLevelFilter, algebraLevelFilter]);
 
   const groupedBySubject = useMemo(() => {
     const subjects = subjectFilter === "All"
@@ -352,7 +383,13 @@ LESSON JSON ────►├─ Balance Scale
                 <button
                   key={tab.id}
                   type="button"
-                  onClick={() => setSubjectFilter(tab.id)}
+                  onClick={() => {
+                    setSubjectFilter(tab.id);
+                    if (tab.id !== "Math") {
+                      setFractionLevelFilter("All");
+                      setAlgebraLevelFilter("All");
+                    }
+                  }}
                   className={cn(
                     "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-extrabold transition",
                     subjectFilter === tab.id
@@ -366,6 +403,71 @@ LESSON JSON ────►├─ Balance Scale
               );
             })}
           </div>
+
+          {subjectFilter === "Math" ? (
+            <div className="mb-8 space-y-3">
+              <p className="text-center text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                Fractions track
+              </p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {FRACTION_LEVEL_TABS.map((tab) => {
+                  const count =
+                    tab.id === "All"
+                      ? interactivesForFractionLevel("All").length
+                      : interactivesForFractionLevel(tab.id).length;
+                  return (
+                    <button
+                      key={`frac-${String(tab.id)}`}
+                      type="button"
+                      onClick={() => {
+                        setFractionLevelFilter(tab.id);
+                        setAlgebraLevelFilter("All");
+                      }}
+                      className={cn(
+                        "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-extrabold transition",
+                        fractionLevelFilter === tab.id
+                          ? "border-sky-500 bg-sky-500/10 text-sky-700 dark:text-sky-300"
+                          : "border-border/80 bg-card text-muted-foreground hover:border-sky-400/40 hover:text-foreground",
+                      )}
+                    >
+                      {tab.label}
+                      <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] tabular-nums">{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-center text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                Algebra &amp; unknowns track
+              </p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {ALGEBRA_LEVEL_TABS.map((tab) => {
+                  const count =
+                    tab.id === "All"
+                      ? interactivesForAlgebraLevel("All").length
+                      : interactivesForAlgebraLevel(tab.id).length;
+                  return (
+                    <button
+                      key={`alg-${String(tab.id)}`}
+                      type="button"
+                      onClick={() => {
+                        setAlgebraLevelFilter(tab.id);
+                        setFractionLevelFilter("All");
+                      }}
+                      className={cn(
+                        "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-extrabold transition",
+                        algebraLevelFilter === tab.id
+                          ? "border-indigo-500 bg-indigo-500/10 text-indigo-700 dark:text-indigo-300"
+                          : "border-border/80 bg-card text-muted-foreground hover:border-indigo-400/40 hover:text-foreground",
+                      )}
+                    >
+                      {tab.label}
+                      <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] tabular-nums">{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
 
           <div className="space-y-14">
             {groupedBySubject.map(({ subject, items }) => (

@@ -1,0 +1,118 @@
+import { distributeLesson, lesson, matchScene, mcScene, sortScene } from "./_helpers";
+
+export const MATH_ALGEBRA_LEVEL_4_SEEDS = [
+  distributeLesson(4, "packing-boxes", "Packing Boxes", 2, 3, 1),
+  lesson(
+    4,
+    "factoring",
+    "Factoring",
+    "intermediate",
+    [
+      matchScene(
+        "l4-fac-1",
+        "Reverse distribute",
+        "Factor 6x + 9 — match the common factor.",
+        [
+          { id: "g3", label: "3" },
+          { id: "g2", label: "2" },
+          { id: "inner", label: "(2x + 3)" },
+          { id: "wrong", label: "(x + 9)" },
+        ],
+        [
+          { id: "cf", label: "Common factor" },
+          { id: "grp", label: "Grouped form" },
+        ],
+        { cf: "g3", grp: "inner" },
+        "factor_gcf",
+        {
+          correct: "6x + 9 = 3(2x + 3).",
+          incorrect: "3 divides both 6 and 9.",
+          hint: "GCF is 3.",
+        },
+      ),
+      mcScene(
+        "l4-fac-2",
+        "Check by expand",
+        "3(2x + 3) expands to?",
+        ["6x + 9", "6x + 3", "5x + 9", "2x + 9"],
+        "6x + 9",
+        "factor_check",
+        {
+          correct: "Factoring and distributing are inverses.",
+          incorrect: "3 × 2x + 3 × 3.",
+          hint: "Distribute to verify.",
+        },
+      ),
+      sortScene(
+        "l4-fac-3",
+        "Factor steps",
+        "Order: find GCF → factor out → write grouped form.",
+        ["Write 3(2x + 3)", "GCF of 6 and 9 is 3", "Divide each term by 3", "Start: 6x + 9"],
+        ["Start: 6x + 9", "GCF of 6 and 9 is 3", "Divide each term by 3", "Write 3(2x + 3)"],
+        "factor_steps",
+        {
+          correct: "Pack the box — factor out the GCF.",
+          incorrect: "Find common factor first.",
+          hint: "GCF before grouping.",
+        },
+      ),
+    ],
+    mcScene(
+      "l4-fac-final",
+      "Mastery check",
+      "Factor 4x + 8.",
+      ["4(x + 2)", "2(x + 4)", "4(x + 8)", "(4x)(8)"],
+      "4(x + 2)",
+      "factor_mastery",
+      { correct: "4(x + 2).", incorrect: "GCF 4.", hint: "4 divides both terms." },
+    ),
+  ),
+  lesson(
+    4,
+    "strategic-moves",
+    "Strategic Moves",
+    "intermediate",
+    [
+      mcScene(
+        "l4-str-1",
+        "When to factor",
+        "4x + 4 = 20. Fastest first move?",
+        ["Factor 4(x + 1) = 20", "Add 4 to both sides", "Divide by 4x", "Guess x"],
+        "Factor 4(x + 1) = 20",
+        "strategic_factor",
+        {
+          correct: "Factoring can simplify before dividing.",
+          incorrect: "Or divide both sides by 4 directly.",
+          hint: "Common factor 4.",
+        },
+      ),
+      mcScene(
+        "l4-str-2",
+        "Or divide",
+        "4x + 4 = 20 → divide all terms by 4 → x + 1 = ?",
+        ["5", "4", "20", "1"],
+        "5",
+        "strategic_divide",
+        { correct: "x + 1 = 5.", incorrect: "20 ÷ 4 = 5.", hint: "Right side becomes 5." },
+      ),
+      mcScene(
+        "l4-str-3",
+        "Solution",
+        "x + 1 = 5 → x = ?",
+        ["4", "5", "6", "1"],
+        "4",
+        "strategic_x",
+        { correct: "x = 4.", incorrect: "Subtract 1.", hint: "5 − 1." },
+      ),
+    ],
+    mcScene(
+      "l4-str-final",
+      "Mastery check",
+      "5(x − 2) = 15 → x = ?",
+      ["5", "3", "7", "2"],
+      "5",
+      "strategic_mastery",
+      { correct: "x = 5.", incorrect: "Divide by 5 first: x − 2 = 3.", hint: "x − 2 = 3." },
+    ),
+  ),
+] as const;

@@ -36,5 +36,7 @@ export * from "./visual-engine-math-balance-fractions-lesson";
 export * from "./visual-engine-math-gear-ratios-lesson";
 export * from "./visual-engine-math-gear-algebra-lesson";
 export * from "./visual-engine-math-quadratic-equations-lesson";
+export * from "./math-fractions";
+export * from "./math-algebra";
 export * from "./visual-engine-biology-natural-selection-lesson";
 export * from "./visual-engine-physics-work-energy-lesson";
