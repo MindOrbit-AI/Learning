@@ -12,6 +12,8 @@ import {
 } from "@mindorbit/ui";
 import { Lightbulb, Map, Target } from "lucide-react";
 import { DiagnosticPostPaywall } from "@/features/diagnostics/diagnostic-post-paywall";
+import { WhyPanel } from "@/features/learning-loop/why-panel";
+import { buildWhyPanel } from "@/services/why-panel-service";
 import { effectivePlanTier } from "@mindorbit/lib";
 import { isPracticePriorityNodeState } from "@/services/learning-state-engine";
 
@@ -77,6 +79,10 @@ export default async function DiagnosticResultsPage({
   const mastered = nodeStates.filter((n) => n.state === "mastered");
   const insight = diagnosticInsight(attempt.subject.title, weakMissing);
 
+  const topWeakWhy = weakMissing[0]
+    ? await buildWhyPanel(session.user.id, weakMissing[0].nodeId, attempt.subjectId)
+    : null;
+
   return (
     <div className="mx-auto max-w-2xl space-y-8">
       <div className="text-center">
@@ -113,6 +119,8 @@ export default async function DiagnosticResultsPage({
           <p className="text-pretty leading-relaxed text-foreground">{insight}</p>
         </CardContent>
       </Card>
+
+      {topWeakWhy && <WhyPanel data={topWeakWhy} />}
 
       {weakMissing.length > 0 && (
         <Card>

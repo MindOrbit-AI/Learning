@@ -42,12 +42,13 @@ const navItems = [
   { href: "/missions", label: "Missions", icon: Target },
   { href: "/puzzles", label: "Puzzles", icon: Puzzle },
   { href: "/community", label: "Community", icon: Users },
-  { href: "/review", label: "Review", icon: ClipboardList },
+  { href: "/review", label: "Review", icon: ClipboardList, badgeKey: "review" as const },
 ];
 
 export function AppShell({
   children,
   user,
+  dueReviewCount = 0,
 }: {
   children: React.ReactNode;
   user: {
@@ -58,8 +59,10 @@ export function AppShell({
     level?: number;
     streakCount?: number;
     bestMissionStreak?: number;
+    reviewStreakCount?: number;
     planTier?: "FREE" | "PRO";
   };
+  dueReviewCount?: number;
 }) {
   const pathname = usePathname() ?? "";
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -89,7 +92,10 @@ export function AppShell({
           </Button>
         </div>
         <nav className="space-y-1 p-4">
-          {navItems.map(({ href, label, icon: Icon }) => (
+          {navItems.map(({ href, label, icon: Icon, badgeKey }) => {
+            const badge =
+              badgeKey === "review" && dueReviewCount > 0 ? dueReviewCount : null;
+            return (
             <Link
               key={href}
               href={href}
@@ -101,9 +107,15 @@ export function AppShell({
               }`}
             >
               <Icon className="h-5 w-5" />
-              {label}
+              <span className="flex-1">{label}</span>
+              {badge != null && (
+                <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">
+                  {badge}
+                </span>
+              )}
             </Link>
-          ))}
+            );
+          })}
         </nav>
       </aside>
 

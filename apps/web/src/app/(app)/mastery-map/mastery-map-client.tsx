@@ -25,6 +25,8 @@ import { GenerateMissionButton } from "./generate-mission-button";
 import { RegenerateMissionButton } from "./regenerate-mission-button";
 import { masteryMapQuestHeadline } from "@/lib/mission-flavor";
 import type { NodeState } from "@mindorbit/types";
+import { WhyPanel } from "@/features/learning-loop/why-panel";
+import type { WhyPanelData } from "@/services/why-panel-service";
 
 type ChainSuggestion = { nodeId: string; title: string; state: string };
 type SidebarNodeDetail = {
@@ -37,6 +39,7 @@ type SidebarNodeDetail = {
   subjectTitle?: string;
   subjectIcon?: string;
   chainSuggestions?: ChainSuggestion[];
+  whyPanel?: WhyPanelData;
 };
 
 const nodeColors: Record<string, string> = {
@@ -360,6 +363,9 @@ export function MasteryMapClient() {
                     <p className="text-xs font-semibold text-muted-foreground">Mastery</p>
                     <p className="text-xl font-extrabold text-primary">{details.mastery}%</p>
                   </div>
+                )}
+                {details.whyPanel && (
+                  <WhyPanel data={details.whyPanel} compact />
                 )}
                 {(() => {
                   const chain = details.chainSuggestions ?? [];

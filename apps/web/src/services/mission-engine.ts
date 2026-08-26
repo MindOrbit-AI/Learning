@@ -13,6 +13,8 @@ import { LearningStateEngine } from "./learning-state-engine";
 import { AnalyticsService, EVENT_TYPES } from "./analytics-service";
 import { awardMissionCompletionBadges } from "./mission-badges";
 import { applyMissionCompletionStreak } from "./mission-streak";
+import { ReviewScheduler } from "./review-scheduler";
+import { logInterventionOutcome } from "./intervention-log-service";
 
 /** Save partial progress (completed indices, answers) for resume */
 export async function savePartialProgress(
@@ -104,7 +106,17 @@ export async function completeSceneMission(
     mistakeCategory?: MistakeCategory | null;
     masterySkill?: string | null;
   }>
-): Promise<{ xpEarned: number; stars: number }> {
+): Promise<{
+  xpEarned: number;
+  stars: number;
+  masteryBefore: number;
+  masteryAfter: number;
+  stateBefore: string;
+  stateAfter: string;
+  nodeId: string;
+  subjectId: string;
+  nodeTitle: string;
+}> {
   const mission = await prisma.mission.findUnique({
     where: { id: missionId },
     include: { node: true },
@@ -191,7 +203,9 @@ export async function completeSceneMission(
       },
     },
   });
-  const newMastery = (existing?.mastery ?? 0) + masteryDelta;
+  const masteryBefore = existing?.mastery ?? 0;
+  const stateBefore = existing?.state ?? "untouched";
+  const newMastery = masteryBefore + masteryDelta;
   const newState = LearningStateEngine.assignNodeState(newMastery);
 
   await prisma.userNodeState.upsert({
@@ -239,5 +253,31 @@ export async function completeSceneMission(
     stars,
   });
 
-  return { xpEarned, stars };
+  await logInterventionOutcome(userId, mission.subjectId, mission.nodeId, "mission", {
+    missionType: mission.missionType,
+    masteryBefore,
+    masteryAfter: newMastery,
+    stateBefore,
+    stateAfter: newState,
+  });
+
+  if (newState === "mastered" || accuracy >= 0.7) {
+    await ReviewScheduler.scheduleReview(userId, mission.subjectId, mission.nodeId, {
+      intervalIndex: 1,
+      mastery: newMastery,
+      stability: (existing?.stability ?? 7) + stabilityDelta,
+    });
+  }
+
+  return {
+    xpEarned,
+    stars,
+    masteryBefore,
+    masteryAfter: newMastery,
+    stateBefore,
+    stateAfter: newState,
+    nodeId: mission.nodeId,
+    subjectId: mission.subjectId,
+    nodeTitle: mission.node.title,
+  };
 }

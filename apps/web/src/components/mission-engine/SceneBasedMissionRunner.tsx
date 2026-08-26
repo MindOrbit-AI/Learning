@@ -166,6 +166,14 @@ export function SceneBasedMissionRunner({
   const [showSummary, setShowSummary] = useState(status === "completed");
   const [showTryAgain, setShowTryAgain] = useState(false);
   const [completeError, setCompleteError] = useState<string | null>(null);
+  const [completionResult, setCompletionResult] = useState<{
+    masteryBefore?: number;
+    masteryAfter?: number;
+    stateBefore?: string;
+    stateAfter?: string;
+    unlockedNodes?: Array<{ nodeId: string; title: string; state: string }>;
+    nextAction?: { nodeTitle: string; subjectTitle: string; reason: string; href: string } | null;
+  } | null>(null);
 
   const total = scenes.length;
   const scene = scenes[currentIndex];
@@ -263,6 +271,12 @@ export function SceneBasedMissionRunner({
         xpEarned={xpReward}
         practiceSummary={{ correct: correctCount, total }}
         onBack={() => router.push("/missions")}
+        masteryBefore={completionResult?.masteryBefore}
+        masteryAfter={completionResult?.masteryAfter}
+        stateBefore={completionResult?.stateBefore}
+        stateAfter={completionResult?.stateAfter}
+        unlockedNodes={completionResult?.unlockedNodes}
+        nextAction={completionResult?.nextAction ?? null}
       />
     );
   }
@@ -306,6 +320,15 @@ export function SceneBasedMissionRunner({
         setCompleteError("Failed to save completion. Please try again.");
         return;
       }
+      const data = (await res.json()) as {
+        masteryBefore?: number;
+        masteryAfter?: number;
+        stateBefore?: string;
+        stateAfter?: string;
+        unlockedNodes?: Array<{ nodeId: string; title: string; state: string }>;
+        nextAction?: { nodeTitle: string; subjectTitle: string; reason: string; href: string } | null;
+      };
+      setCompletionResult(data);
       router.refresh();
       setShowSummary(true);
     } else {
@@ -351,6 +374,15 @@ export function SceneBasedMissionRunner({
       setCompleteError("Failed to save completion. Please try again.");
       return;
     }
+    const data = (await res.json()) as {
+      masteryBefore?: number;
+      masteryAfter?: number;
+      stateBefore?: string;
+      stateAfter?: string;
+      unlockedNodes?: Array<{ nodeId: string; title: string; state: string }>;
+      nextAction?: { nodeTitle: string; subjectTitle: string; reason: string; href: string } | null;
+    };
+    setCompletionResult(data);
     router.refresh();
     setShowSummary(true);
   }

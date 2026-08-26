@@ -13,6 +13,8 @@ import { LearningStateEngine } from "./learning-state-engine";
 import { AnalyticsService, EVENT_TYPES } from "./analytics-service";
 import { awardMissionCompletionBadges } from "./mission-badges";
 import { applyMissionCompletionStreak } from "./mission-streak";
+import { ReviewScheduler } from "./review-scheduler";
+import { logInterventionOutcome } from "./intervention-log-service";
 
 export const missionsService = {
   /**
@@ -138,7 +140,17 @@ export const missionsService = {
       taskResponses: Array<{ taskId: string; selectedAnswer: string }>;
       taskCheckCounts?: Record<string, number>;
     }
-  ): Promise<{ xpEarned: number; stars: number }> {
+  ): Promise<{
+    xpEarned: number;
+    stars: number;
+    masteryBefore: number;
+    masteryAfter: number;
+    stateBefore: string;
+    stateAfter: string;
+    nodeId: string;
+    subjectId: string;
+    nodeTitle: string;
+  }> {
     const mission = await prisma.mission.findUnique({
       where: { id: missionId },
       include: { tasks: { orderBy: { orderIndex: "asc" } } },
@@ -216,7 +228,9 @@ export const missionsService = {
         },
       },
     });
-    const newMastery = (existing?.mastery ?? 0) + MASTERY_DELTA;
+    const masteryBefore = existing?.mastery ?? 0;
+    const stateBefore = existing?.state ?? "untouched";
+    const newMastery = masteryBefore + MASTERY_DELTA;
     const newState = LearningStateEngine.assignNodeState(newMastery);
 
     await prisma.userNodeState.upsert({
@@ -253,6 +267,34 @@ export const missionsService = {
       stars,
     });
 
-    return { xpEarned, stars };
+    await logInterventionOutcome(userId, mission.subjectId, mission.nodeId, "mission", {
+      missionType: mission.missionType,
+      masteryBefore,
+      masteryAfter: newMastery,
+      stateBefore,
+      stateAfter: newState,
+    });
+
+    if (newState === "mastered" || accuracy >= 0.7) {
+      await ReviewScheduler.scheduleReview(userId, mission.subjectId, mission.nodeId, {
+        intervalIndex: 1,
+        mastery: newMastery,
+        stability: existing?.stability ?? 7,
+      });
+    }
+
+    const node = await prisma.conceptNode.findUnique({ where: { id: mission.nodeId } });
+
+    return {
+      xpEarned,
+      stars,
+      masteryBefore,
+      masteryAfter: newMastery,
+      stateBefore,
+      stateAfter: newState,
+      nodeId: mission.nodeId,
+      subjectId: mission.subjectId,
+      nodeTitle: node?.title ?? "Concept",
+    };
   },
 };

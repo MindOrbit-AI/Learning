@@ -5,6 +5,7 @@ import type { MistakeCategory } from "@mindorbit/types";
 import { missionsService } from "@/services/missions-service";
 import { completeSceneMission } from "@/services/mission-engine";
 import { maybeQualifyReferralAfterMission } from "@/services/referral-service";
+import { getMissionCompletionExpand } from "@/services/learning-path-service";
 
 export async function POST(
   req: Request,
@@ -28,11 +29,25 @@ export async function POST(
 
     let xpEarned = 0;
     let stars = 2;
+    let nodeId = "";
+    let subjectId = "";
+    let nodeTitle = "";
+    let masteryBefore = 0;
+    let masteryAfter = 0;
+    let stateBefore = "untouched";
+    let stateAfter = "learning";
 
     if (sceneResponses && Array.isArray(sceneResponses) && sceneResponses.length > 0) {
       const result = await completeSceneMission(id, session.user.id, sceneResponses);
       xpEarned = result.xpEarned;
       stars = result.stars;
+      nodeId = result.nodeId;
+      subjectId = result.subjectId;
+      nodeTitle = result.nodeTitle;
+      masteryBefore = result.masteryBefore;
+      masteryAfter = result.masteryAfter;
+      stateBefore = result.stateBefore;
+      stateAfter = result.stateAfter;
     } else {
       const taskResponses = body.responses as
         | Array<{ taskId: string; selectedAnswer: string }>
@@ -44,12 +59,36 @@ export async function POST(
       });
       xpEarned = result.xpEarned;
       stars = result.stars;
+      nodeId = result.nodeId;
+      subjectId = result.subjectId;
+      nodeTitle = result.nodeTitle;
+      masteryBefore = result.masteryBefore;
+      masteryAfter = result.masteryAfter;
+      stateBefore = result.stateBefore;
+      stateAfter = result.stateAfter;
     }
     await maybeQualifyReferralAfterMission(session.user.id, id);
 
+    const expand =
+      nodeId && subjectId
+        ? await getMissionCompletionExpand(session.user.id, nodeId, subjectId)
+        : null;
+
     revalidatePath("/missions");
     revalidatePath(`/missions/${id}`);
-    return NextResponse.json({ ok: true, xpEarned, stars });
+    revalidatePath("/dashboard");
+    return NextResponse.json({
+      ok: true,
+      xpEarned,
+      stars,
+      nodeTitle,
+      masteryBefore,
+      masteryAfter,
+      stateBefore,
+      stateAfter,
+      unlockedNodes: expand?.unlockedNodes ?? [],
+      nextAction: expand?.nextAction ?? null,
+    });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "";
     if (msg.includes("Task responses required")) {

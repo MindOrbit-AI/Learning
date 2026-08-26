@@ -1,19 +1,32 @@
 "use client";
 
+import Link from "next/link";
 import { Card, CardContent, Button, cn } from "@mindorbit/ui";
 import { starRatingLabel } from "@mindorbit/lib";
-import { BookOpen, Sparkles, Star, Trophy, Target } from "lucide-react";
+import { BookOpen, Sparkles, Star, Trophy, Target, GitBranch, ArrowRight } from "lucide-react";
+import { MasteryStateChange } from "@/features/learning-loop/mastery-state-change";
+
+interface NextAction {
+  nodeTitle: string;
+  subjectTitle: string;
+  reason: string;
+  href: string;
+}
 
 interface CompletionSummaryCardProps {
   xpEarned: number;
-  /** 1–3 from performance; omitted for older completions */
   stars?: number | null;
-  /** When omitted, the score row is hidden (e.g. legacy completed mission). */
   practiceSummary?: { correct: number; total: number };
   onBack: () => void;
   missionTitle?: string;
   nodeTitle?: string;
   missionTypeLabel?: string;
+  masteryBefore?: number;
+  masteryAfter?: number;
+  stateBefore?: string;
+  stateAfter?: string;
+  unlockedNodes?: Array<{ nodeId: string; title: string; state: string }>;
+  nextAction?: NextAction | null;
 }
 
 export function CompletionSummaryCard({
@@ -24,6 +37,12 @@ export function CompletionSummaryCard({
   missionTitle,
   nodeTitle,
   missionTypeLabel,
+  masteryBefore,
+  masteryAfter,
+  stateBefore,
+  stateAfter,
+  unlockedNodes,
+  nextAction,
 }: CompletionSummaryCardProps) {
   const correctCount = practiceSummary?.correct ?? 0;
   const totalCount = practiceSummary?.total ?? 0;
@@ -107,9 +126,56 @@ export function CompletionSummaryCard({
             </div>
           </div>
 
-          <Button className="mt-8" size="lg" onClick={onBack}>
-            Back to Missions
-          </Button>
+          {nodeTitle && masteryBefore != null && masteryAfter != null && stateBefore && stateAfter && (
+            <div className="mt-6 w-full max-w-md">
+              <MasteryStateChange
+                nodeTitle={nodeTitle}
+                masteryBefore={masteryBefore}
+                masteryAfter={masteryAfter}
+                stateBefore={stateBefore}
+                stateAfter={stateAfter}
+              />
+            </div>
+          )}
+
+          {unlockedNodes && unlockedNodes.length > 0 && (
+            <div className="mt-6 w-full max-w-md rounded-xl border bg-card/60 p-4 text-left">
+              <p className="flex items-center gap-2 text-sm font-bold text-primary">
+                <GitBranch className="h-4 w-4" />
+                What this unlocks
+              </p>
+              <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+                {unlockedNodes.map((n) => (
+                  <li key={n.nodeId}>{n.title}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {nextAction && (
+            <Link
+              href={nextAction.href}
+              className="mt-6 flex w-full max-w-md items-center justify-between rounded-xl border-2 border-primary/30 bg-primary/5 p-4 text-left transition-colors hover:bg-primary/10"
+            >
+              <div>
+                <p className="text-xs font-extrabold uppercase tracking-wide text-primary">Up next</p>
+                <p className="mt-1 font-semibold">{nextAction.nodeTitle || nextAction.subjectTitle}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">{nextAction.reason}</p>
+              </div>
+              <ArrowRight className="h-5 w-5 shrink-0 text-primary" />
+            </Link>
+          )}
+
+          <div className="mt-8 flex flex-col gap-2 sm:flex-row">
+            {nextAction && (
+              <Button asChild size="lg" className="flex-1">
+                <Link href={nextAction.href}>Continue path</Link>
+              </Button>
+            )}
+            <Button className="flex-1" size="lg" variant={nextAction ? "outline" : "default"} onClick={onBack}>
+              Back to Missions
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

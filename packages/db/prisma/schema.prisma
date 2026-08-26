@@ -210,6 +210,11 @@ model User {
   streakCount              Int                @default(0)
   bestMissionStreak        Int                @default(0)
   lastMissionCompletedAt   DateTime?
+  reviewStreakCount        Int                @default(0)
+  bestReviewStreak         Int                @default(0)
+  lastReviewCompletedAt    DateTime?
+  lastProgressDigestAt     DateTime?
+  masterySnapshotJson      Json?
   xp                       Int                @default(0)
   onboardingCompleted    Boolean            @default(false)
   role                   UserRole           @default(STUDENT)
@@ -238,6 +243,7 @@ model User {
   userBadges             UserBadge[]
   reviewQueueItems       ReviewQueueItem[]
   notifications          Notification[]
+  nodeInterventionLogs   NodeInterventionLog[]
   userEvents             UserEvent[]
   uploadedSources        UploadedSource[]
   featureUsages          FeatureUsage[]
@@ -435,6 +441,13 @@ model DiagnosticQuestion {
   difficulty    String        @default("medium")
   status        QuestionStatus @default(draft)
   tagsJson      String?
+  /// Human-reviewed anchor item for pre/post measurement (P3).
+  isCalibrated  Boolean       @default(false)
+  /// Part of a fixed efficacy panel for a subject wedge (P3).
+  isEfficacyPanel Boolean     @default(false)
+  panelOrder    Int?
+  /// Scene type for cross-context review checks.
+  sceneType     String?
   subject       Subject       @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   node          ConceptNode   @relation(fields: [nodeId], references: [id], onDelete: Cascade)
   responses     DiagnosticResponse[]
@@ -754,6 +767,27 @@ model UserEvent {
   payload   String?
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/// Tracks intervention outcomes for moat data (P3).
+model NodeInterventionLog {
+  id                    String    @id @default(cuid())
+  userId                String
+  subjectId             String
+  nodeId                String
+  interventionType      String
+  missionType           String?
+  misconceptionCategory String?
+  masteryBefore         Float
+  masteryAfter          Float?
+  stateBefore           String
+  stateAfter            String?
+  completedAt           DateTime?
+  createdAt             DateTime  @default(now())
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, nodeId])
+  @@index([userId, createdAt])
 }
 
 model UploadedSource {

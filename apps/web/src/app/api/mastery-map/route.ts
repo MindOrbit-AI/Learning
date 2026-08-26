@@ -14,6 +14,8 @@ import {
 } from "@mindorbit/content";
 import type { Node, Edge } from "reactflow";
 import { resolveDisplayNodeState } from "@/services/learning-state-engine";
+import { buildWhyPanel } from "@/services/why-panel-service";
+import type { WhyPanelData } from "@/services/why-panel-service";
 
 const CONTENT_EDGES: Record<string, Array<{ source: string; target: string }>> = {
   algebra: algebraEdges,
@@ -263,6 +265,25 @@ export async function GET(req: Request) {
       .sort((a, b) => (stateOrder[a.state] ?? 9) - (stateOrder[b.state] ?? 9))
       .slice(0, 4);
     (nodeDetails[nodeId] as { chainSuggestions?: typeof picks }).chainSuggestions = picks;
+  }
+
+  if (session?.user?.id) {
+    const weakNodeEntries = Object.entries(nodeDetails).filter(([, d]) => {
+      const state = (d as { state?: string }).state;
+      return state === "weak" || state === "learning";
+    });
+    await Promise.all(
+      weakNodeEntries.slice(0, 12).map(async ([nodeId, detail]) => {
+        const subjectId = subjects.find((s) =>
+          s.conceptNodes.some((n) => n.id === nodeId)
+        )?.id;
+        if (!subjectId) return;
+        const why = await buildWhyPanel(session.user!.id!, nodeId, subjectId);
+        if (why) {
+          (detail as { whyPanel?: WhyPanelData }).whyPanel = why;
+        }
+      })
+    );
   }
 
   return NextResponse.json({
