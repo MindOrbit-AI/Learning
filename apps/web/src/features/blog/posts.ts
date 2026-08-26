@@ -2,6 +2,65 @@ import type { BlogPost } from "./types";
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: "one-next-step-beats-content-library",
+    title: "Why one next step beats a content library",
+    excerpt:
+      "More resources rarely fix the wrong problem. The highest-leverage move is almost always singular—and it comes from knowing where you are on the map.",
+    publishedAt: "2026-08-26",
+    author: { name: "MindOrbit Team", role: "Product & pedagogy" },
+    tags: ["Study systems", "Mastery maps", "Habit"],
+    readingTimeMinutes: 5,
+    sections: [
+      {
+        type: "paragraph",
+        text: "Open any learning app and you face a paradox of choice: hundreds of lessons, infinite practice sets, and a dashboard that treats every topic as equally urgent. Students respond the way humans always do—they pick what feels manageable, what a friend mentioned, or what aligns with tomorrow's homework. None of that requires knowing what actually needs fixing.",
+      },
+      {
+        type: "heading",
+        text: "Libraries optimize for coverage; learners need sequence",
+        level: 2,
+      },
+      {
+        type: "paragraph",
+        text: "Content libraries are built for completeness. A curriculum team maps standards to units; an engineering team maps units to screens. The result is breadth—every node exists somewhere—but not ordering. Ordering is the hard part, because it depends on what you already hold and what upstream idea never landed.",
+      },
+      {
+        type: "list",
+        items: [
+          "A weak fraction foundation makes every ratio problem feel like bad luck",
+          "Reviewing chapter twelve while chapter four is fragile wastes retrieval reps",
+          "Studying \"more\" without a target node produces busy work, not compounding progress",
+        ],
+      },
+      {
+        type: "heading",
+        text: "The loop: diagnose, map, one mission, retain",
+        level: 2,
+      },
+      {
+        type: "paragraph",
+        text: "Durable learning systems close a loop instead of opening a catalog. You start with a short diagnostic—not to produce a score, but to locate weak nodes on a dependency graph. The map makes prerequisites visible. The next step is deliberately singular: one mission on the highest-leverage cluster, then spaced review to prove the gain survived a day.",
+      },
+      {
+        type: "paragraph",
+        text: "That constraint is a feature. When the app recommends exactly one move, decision fatigue drops and completion rates rise. Parents see clarity too: not \"they practiced algebra for forty minutes,\" but \"they repaired the slope prerequisite that was blocking linear systems.\"",
+      },
+      {
+        type: "heading",
+        text: "What to do when everything feels urgent",
+        level: 2,
+      },
+      {
+        type: "paragraph",
+        text: "Exam season amplifies the urge to touch every topic. Resist the scatter. Use the map to find the node whose repair unlocks the most downstream work—often an idea three chapters back, not on tonight's worksheet. Fix that one thing, schedule a review, then let the map update before you choose again.",
+      },
+      {
+        type: "paragraph",
+        text: "MindOrbit is built around this loop: see what's missing, understand why it's missing, take one constrained action, and watch the graph change. The goal is not to consume more content—it is to move the right node from fragile to durable, one step at a time.",
+      },
+    ],
+  },
+  {
     slug: "diagnostics-before-exam-season",
     title: "Why diagnostics beat guesswork before exam season",
     excerpt:
