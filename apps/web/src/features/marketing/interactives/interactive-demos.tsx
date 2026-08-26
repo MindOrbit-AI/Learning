@@ -341,17 +341,26 @@ const MATCH_PAIRS = [
   { id: "d", term: "Cytosine", def: "Pairs with G" },
 ];
 
+type MatchCard = { key: string; pairId: string; text: string };
+
+/** Fixed order so SSR and client hydration match; reset shuffles randomly. */
+const MATCHING_DECK_ORDER = ["c-d", "a-t", "b-d", "d-t", "a-d", "c-t", "b-t", "d-d"] as const;
+
+function buildMatchDeck(shuffle: boolean): MatchCard[] {
+  const deck = MATCH_PAIRS.flatMap((p) => [
+    { key: `${p.id}-t`, pairId: p.id, text: p.term },
+    { key: `${p.id}-d`, pairId: p.id, text: p.def },
+  ]);
+  if (shuffle) {
+    return [...deck].sort(() => Math.random() - 0.5);
+  }
+  return MATCHING_DECK_ORDER.map((key) => deck.find((c) => c.key === key)!);
+}
+
 function MatchingDemo() {
   const [selected, setSelected] = useState<string | null>(null);
   const [matched, setMatched] = useState<Set<string>>(new Set());
-
-  const makeDeck = () =>
-    MATCH_PAIRS.flatMap((p) => [
-      { key: `${p.id}-t`, pairId: p.id, text: p.term },
-      { key: `${p.id}-d`, pairId: p.id, text: p.def },
-    ]).sort(() => Math.random() - 0.5);
-
-  const [deck, setDeck] = useState(makeDeck);
+  const [deck, setDeck] = useState(() => buildMatchDeck(false));
 
   const onCard = (key: string, pairId: string) => {
     if (matched.has(pairId)) return;
@@ -376,7 +385,7 @@ function MatchingDemo() {
       onReset={() => {
         setMatched(new Set());
         setSelected(null);
-        setDeck(makeDeck());
+        setDeck(buildMatchDeck(true));
       }}
     >
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -410,8 +419,11 @@ const PHASES = [
   "Telophase — nuclei reform",
 ];
 
+/** Fixed shuffle indices — stable for SSR hydration; reset re-shuffles randomly. */
+const SHUFFLED_PHASES_ORDER = [2, 0, 3, 1] as const;
+
 function SequenceBuilderDemo() {
-  const [items, setItems] = useState(() => [...PHASES].sort(() => Math.random() - 0.5));
+  const [items, setItems] = useState(() => SHUFFLED_PHASES_ORDER.map((i) => PHASES[i]!));
   const success = items.every((item, i) => item === PHASES[i]);
 
   return (

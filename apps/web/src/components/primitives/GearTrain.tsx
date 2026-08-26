@@ -24,6 +24,11 @@ export type GearTrainProps = {
   className?: string;
 };
 
+/** Stable decimal formatting so SSR and client SVG paths match. */
+function svgNum(n: number): number {
+  return Number(n.toFixed(3));
+}
+
 function gearPath(teeth: number, outerR: number, innerR: number): string {
   const points: string[] = [];
   const step = (Math.PI * 2) / teeth;
@@ -33,7 +38,9 @@ function gearPath(teeth: number, outerR: number, innerR: number): string {
     const a2 = a0 + step * 0.75;
     const a3 = a0 + step;
     const push = (a: number, r: number) => {
-      points.push(`${r * Math.cos(a - Math.PI / 2)},${r * Math.sin(a - Math.PI / 2)}`);
+      points.push(
+        `${svgNum(r * Math.cos(a - Math.PI / 2))},${svgNum(r * Math.sin(a - Math.PI / 2))}`,
+      );
     };
     push(a0, innerR);
     push(a1, outerR);
@@ -60,13 +67,13 @@ function GearSvg({
   label: string;
   accent: string;
 }) {
-  const outerR = size / 2;
-  const innerR = outerR * 0.72;
-  const holeR = outerR * 0.22;
+  const outerR = svgNum(size / 2);
+  const innerR = svgNum(outerR * 0.72);
+  const holeR = svgNum(outerR * 0.22);
   const d = gearPath(teeth, outerR, innerR);
 
   return (
-    <g transform={`translate(${cx}, ${cy}) rotate(${angle})`}>
+    <g transform={`translate(${svgNum(cx)}, ${svgNum(cy)}) rotate(${svgNum(angle)})`}>
       <path d={d} fill={accent} stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" />
       <circle r={holeR} fill="#18181b" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
       <text
@@ -96,11 +103,11 @@ export function GearTrain({
 }: GearTrainProps) {
   const gid = useId().replace(/:/g, "");
   const ratio = drivenTeeth / driverTeeth;
-  const drivenAngle = (-driverAngle * driverTeeth) / drivenTeeth;
+  const drivenAngle = svgNum((-driverAngle * driverTeeth) / drivenTeeth);
 
-  const driverSize = Math.min(88, 28 + driverTeeth * 2.2);
-  const drivenSize = Math.min(100, 28 + drivenTeeth * 2.2);
-  const gap = (driverSize + drivenSize) / 2 - 4;
+  const driverSize = svgNum(Math.min(88, 28 + driverTeeth * 2.2));
+  const drivenSize = svgNum(Math.min(100, 28 + drivenTeeth * 2.2));
+  const gap = svgNum((driverSize + drivenSize) / 2 - 4);
 
   return (
     <div className={cn("mx-auto w-full max-w-lg space-y-5", className)}>
