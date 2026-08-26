@@ -54,44 +54,9 @@ export function DuoLandingFooter() {
     <footer className="border-t-2 border-border bg-secondary/30 py-10">
       <div className="container mx-auto flex flex-col gap-8 px-4">
         <div className="flex flex-col items-center justify-between gap-6 text-center sm:flex-row sm:text-left">
-          <div className="flex items-center gap-2 font-extrabold text-foreground">
+          <div className="flex shrink-0 items-center gap-2 font-extrabold text-foreground">
             <Brain className="h-5 w-5 text-primary" strokeWidth={2.5} />
             MindOrbit
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm font-semibold text-muted-foreground">
-            <a href="/#struggling" className="hover:text-foreground">
-              Why it&apos;s hard
-            </a>
-            <a href="/#how" className="hover:text-foreground">
-              How it works
-            </a>
-            <a href="/#subjects" className="hover:text-foreground">
-              Subjects
-            </a>
-            <a href="/#pricing" className="hover:text-foreground">
-              Pricing
-            </a>
-            <a href="/#faq" className="hover:text-foreground">
-              FAQ
-            </a>
-            <Link href="/who-we-are" className="hover:text-foreground">
-              Who we are
-            </Link>
-            <Link href="/our-vision" className="hover:text-foreground">
-              Our vision
-            </Link>
-            <Link href="/parents" className="hover:text-foreground">
-              For parents
-            </Link>
-            <Link href="/practice-lessons" className="hover:text-foreground">
-              Practice lessons
-            </Link>
-            <Link href="/blog" className="hover:text-foreground">
-              Blog
-            </Link>
-            <Link href="/auth/signin" className="hover:text-foreground">
-              Sign in
-            </Link>
           </div>
           <div className="flex max-w-full flex-wrap items-center justify-center gap-3 sm:justify-end">
             {SOCIAL_LINKS.map(({ href, label, Icon }) => (
@@ -108,6 +73,44 @@ export function DuoLandingFooter() {
             ))}
           </div>
         </div>
+        <nav
+          aria-label="Footer"
+          className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm font-semibold text-muted-foreground sm:justify-start lg:justify-center"
+        >
+          <a href="/#struggling" className="hover:text-foreground">
+            Why it&apos;s hard
+          </a>
+          <a href="/#how" className="hover:text-foreground">
+            How it works
+          </a>
+          <a href="/#subjects" className="hover:text-foreground">
+            Subjects
+          </a>
+          <a href="/#pricing" className="hover:text-foreground">
+            Pricing
+          </a>
+          <a href="/#faq" className="hover:text-foreground">
+            FAQ
+          </a>
+          <Link href="/who-we-are" className="hover:text-foreground">
+            Who we are
+          </Link>
+          <Link href="/our-vision" className="hover:text-foreground">
+            Our vision
+          </Link>
+          <Link href="/parents" className="hover:text-foreground">
+            For parents
+          </Link>
+          <Link href="/practice-lessons" className="hover:text-foreground">
+            Practice lessons
+          </Link>
+          <Link href="/blog" className="hover:text-foreground">
+            Blog
+          </Link>
+          <Link href="/auth/signin" className="hover:text-foreground">
+            Sign in
+          </Link>
+        </nav>
         <div className="flex flex-col items-center justify-between gap-3 border-t border-border/80 pt-6 text-xs font-semibold text-muted-foreground sm:flex-row">
           <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 sm:justify-start">
             <Link href="/privacy" className="hover:text-foreground">

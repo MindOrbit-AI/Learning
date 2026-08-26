@@ -1,8 +1,95 @@
-import { BookOpen, Compass, Layers, LineChart, Orbit, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpen,
+  Compass,
+  GitBranch,
+  Layers,
+  LineChart,
+  Map,
+  Orbit,
+  RefreshCw,
+  ScanSearch,
+  Sparkles,
+  Target,
+  Trophy,
+} from "lucide-react";
 import { DuoLandingFinalCta } from "./duo-landing-final-cta";
 import { DuoLandingFooter } from "./duo-landing-footer";
 import { DuoLandingHeader } from "./duo-landing-header";
+import { DuoPrimaryLink } from "./duo-primary-link";
 import { ScrollReveal } from "./scroll-reveal";
+
+const LEARNING_LOOP = [
+  {
+    stage: "Diagnose",
+    body: "Find what's missing in minutes — before the test does.",
+    icon: ScanSearch,
+    iconClass: "bg-[hsl(var(--duo-blue)_/_0.15)] text-[hsl(var(--duo-blue))]",
+  },
+  {
+    stage: "Map",
+    body: "See the whole subject as a living graph of strengths, gaps, and prerequisites.",
+    icon: Map,
+    iconClass: "bg-[hsl(var(--duo-gold)_/_0.2)] text-[hsl(var(--duo-gold))]",
+  },
+  {
+    stage: "Learn",
+    body: "Get targeted instruction on the exact concept that needs work — not a random lesson.",
+    icon: BookOpen,
+    iconClass: "bg-primary/10 text-primary",
+  },
+  {
+    stage: "Practice",
+    body: "Build competence with missions, visual problems, and reps on weak spots.",
+    icon: Target,
+    iconClass: "bg-[hsl(var(--duo-orange)_/_0.18)] text-[hsl(var(--duo-orange))]",
+  },
+  {
+    stage: "Master",
+    body: "Watch nodes move from weak to mastered — visible proof, not guesswork.",
+    icon: Trophy,
+    iconClass: "bg-[hsl(var(--duo-blue)_/_0.15)] text-[hsl(var(--duo-blue))]",
+  },
+  {
+    stage: "Retain",
+    body: "Review on a schedule so knowledge survives quizzes, finals, and summer.",
+    icon: RefreshCw,
+    iconClass: "bg-primary/10 text-primary",
+  },
+  {
+    stage: "Expand",
+    body: "Unlock the next concept, subject, or challenge — guided by what the map says is ready.",
+    icon: GitBranch,
+    iconClass: "bg-[hsl(var(--duo-gold)_/_0.2)] text-[hsl(var(--duo-gold))]",
+  },
+] as const;
+
+const FOUR_PROMISES = [
+  {
+    title: "Know",
+    body: "A live model of what your child has actually mastered — not just which lesson they finished.",
+  },
+  {
+    title: "Gap",
+    body: "What's missing, with dependency context: weak here because a prerequisite never solidified.",
+  },
+  {
+    title: "Why",
+    body: "Misconception patterns, not just wrong or right — so practice fixes the root cause.",
+  },
+  {
+    title: "Next",
+    body: "One clear action now — not an endless content library to wander through.",
+  },
+] as const;
+
+const COMPETITOR_GAPS = [
+  { name: "IXL", strength: "Practice volume", gap: "No map of reasoning or why errors happen" },
+  { name: "Khan Academy", strength: "Content breadth", gap: "Linear paths, no live per-child gap model" },
+  { name: "Brilliant", strength: "Visual learn-by-doing", gap: "No longitudinal mastery graph" },
+  { name: "Duolingo", strength: "Habit and spaced review", gap: "No subject depth or diagnostic depth" },
+  { name: "AI tutors", strength: "Answers anything", gap: "No guaranteed progression or standards alignment" },
+] as const;
 
 const LEARNING_GAPS = [
   "Students memorize content rather than develop durable understanding",
@@ -103,17 +190,113 @@ export function DuoOurVision() {
                 Our vision
               </p>
               <h1 className="mt-6 text-4xl font-extrabold leading-[1.08] tracking-tight text-foreground sm:text-5xl md:text-6xl">
-                Help humanity think better in the age of AI
+                See what&apos;s missing. Fix that — not everything.
               </h1>
               <p className="mx-auto mt-6 max-w-2xl text-lg font-semibold leading-relaxed text-muted-foreground sm:text-xl">
-                MindOrbit exists to help people think more clearly, reason more rigorously, and learn with lasting depth as AI reshapes how
-                information is accessed and applied.
+                Five minutes to see what your child knows, what they&apos;re missing, why they&apos;re struggling, and exactly what to
+                practice next — with a map that updates every time they learn.
               </p>
               <p className="mx-auto mt-6 max-w-2xl text-base font-semibold leading-relaxed text-muted-foreground sm:text-lg">
-                We are building a Cognitive Operating System for the next generation: a platform that maps how individuals understand the
-                world, surfaces gaps in reasoning, and develops durable intelligence over time. Where most AI systems generate answers,
-                MindOrbit is designed to develop capability.
+                MindOrbit combines the best parts of diagnostic practice, visual learning, spaced review, and AI — into one closed loop
+                none of them fully provides on their own. AI lives inside the graph, not as a blank chat tutor.
               </p>
+              <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                <DuoPrimaryLink href="/try-diagnostic">
+                  Try the free diagnostic
+                  <ArrowRight className="h-5 w-5" aria-hidden />
+                </DuoPrimaryLink>
+              </div>
+            </ScrollReveal>
+          </div>
+        </section>
+
+        <section className="border-b border-border/60 bg-secondary/20 py-16 sm:py-20">
+          <div className="container mx-auto px-4">
+            <ScrollReveal className="mx-auto max-w-2xl text-center">
+              <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary">The product loop</p>
+              <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-balance sm:text-4xl">
+                Seven stages. One continuously updating map.
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-base font-semibold leading-relaxed text-muted-foreground sm:text-lg">
+                Every session feeds the map. The map tells you what to do next. That&apos;s the habit — and the moat.
+              </p>
+            </ScrollReveal>
+
+            <div className="mx-auto mt-12 grid max-w-5xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {LEARNING_LOOP.map((step, i) => {
+                const Icon = step.icon;
+                return (
+                  <ScrollReveal key={step.stage} delay={0.05 * i}>
+                    <div className="flex h-full flex-col rounded-[1.5rem] border-2 border-border bg-card p-6 shadow-[0_8px_0_0_rgba(0,0,0,0.05)]">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${step.iconClass}`}
+                        >
+                          <Icon className="h-5 w-5" strokeWidth={2.25} />
+                        </div>
+                        <span className="font-mono text-sm font-extrabold tabular-nums text-primary/40">{String(i + 1).padStart(2, "0")}</span>
+                      </div>
+                      <p className="mt-4 text-lg font-extrabold text-foreground">{step.stage}</p>
+                      <p className="mt-2 flex-1 text-sm font-semibold leading-relaxed text-muted-foreground">{step.body}</p>
+                    </div>
+                  </ScrollReveal>
+                );
+              })}
+            </div>
+
+            <ScrollReveal delay={0.2} className="mx-auto mt-10 max-w-2xl text-center">
+              <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-muted-foreground">Then the loop repeats</p>
+              <p className="mt-2 text-base font-semibold text-muted-foreground">
+                Expand leads back to Diagnose — the map stays live as your child grows.
+              </p>
+            </ScrollReveal>
+          </div>
+        </section>
+
+        <section className="border-b border-border/60 py-16 sm:py-20">
+          <div className="container mx-auto px-4">
+            <ScrollReveal className="mx-auto max-w-3xl text-center">
+              <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary">What none of them fully provide</p>
+              <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-balance sm:text-4xl">
+                IXL + Khan + Brilliant + Duolingo + an AI tutor — without the gaps
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-base font-semibold leading-relaxed text-muted-foreground sm:text-lg">
+                Each platform excels at one piece. MindOrbit&apos;s job is to close the loop between them.
+              </p>
+            </ScrollReveal>
+
+            <div className="mx-auto mt-12 grid max-w-4xl gap-4 sm:grid-cols-2">
+              {FOUR_PROMISES.map((promise, i) => (
+                <ScrollReveal key={promise.title} delay={0.05 * i}>
+                  <div className="rounded-[1.5rem] border-2 border-primary/20 bg-primary/5 p-6">
+                    <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-primary">{promise.title}</p>
+                    <p className="mt-3 text-sm font-semibold leading-relaxed text-foreground">{promise.body}</p>
+                  </div>
+                </ScrollReveal>
+              ))}
+            </div>
+
+            <ScrollReveal delay={0.15} className="mx-auto mt-12 max-w-3xl overflow-hidden rounded-[2rem] border-2 border-border bg-card shadow-[0_8px_0_0_rgba(0,0,0,0.06)]">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[32rem] text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-border bg-secondary/40">
+                      <th className="px-5 py-4 font-extrabold text-foreground">Platform</th>
+                      <th className="px-5 py-4 font-extrabold text-foreground">Strength</th>
+                      <th className="px-5 py-4 font-extrabold text-foreground">What MindOrbit adds</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {COMPETITOR_GAPS.map((row) => (
+                      <tr key={row.name} className="border-b border-border/60 last:border-0">
+                        <td className="px-5 py-4 font-extrabold text-foreground">{row.name}</td>
+                        <td className="px-5 py-4 font-semibold text-muted-foreground">{row.strength}</td>
+                        <td className="px-5 py-4 font-semibold text-muted-foreground">{row.gap}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </ScrollReveal>
           </div>
         </section>
