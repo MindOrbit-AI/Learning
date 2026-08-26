@@ -59,6 +59,27 @@ function readPoints(input: SceneUserInput): { x: number; y: number }[] {
   return [];
 }
 
+function sortedWeights(a: number[]): number[] {
+  return [...a].sort((x, y) => x - y);
+}
+
+function weightsEqual(a: number[], b: number[]): boolean {
+  if (a.length !== b.length) return false;
+  const sa = sortedWeights(a);
+  const sb = sortedWeights(b);
+  return sa.every((v, i) => Math.abs(v - (sb[i] ?? NaN)) < 1e-9);
+}
+
+function readBalanceSides(input: SceneUserInput): { left: number[]; right: number[] } {
+  const left = readNumberArray(input, ["leftWeights", "left"]) ?? [];
+  const right = readNumberArray(input, ["rightWeights", "right"]) ?? [];
+  return { left, right };
+}
+
+function sumWeights(weights: number[]) {
+  return weights.reduce((a, b) => a + b, 0);
+}
+
 export function validateRule(rule: ValidationRule, input: SceneUserInput): ValidationResult {
   switch (rule.type) {
     case "exact_selection": {
@@ -105,6 +126,68 @@ export function validateRule(rule: ValidationRule, input: SceneUserInput): Valid
       if (!c) return { isCorrect: false, rule, detail: "no choice selected" };
       const ok = c === rule.expectedChoice;
       return { isCorrect: ok, rule, detail: ok ? undefined : `selected “${c}”` };
+    }
+    case "balance_match": {
+      const { left, right } = readBalanceSides(input);
+      const ok = weightsEqual(left, rule.left) && weightsEqual(right, rule.right);
+      return {
+        isCorrect: ok,
+        rule,
+        detail: ok ? undefined : `left [${left.join(",")}] vs right [${right.join(",")}]`,
+      };
+    }
+    case "balance_sum": {
+      const { left, right } = readBalanceSides(input);
+      const leftSum = sumWeights(left);
+      const rightSum = sumWeights(right);
+      const ok = leftSum === rule.targetSum && rightSum === rule.targetSum && leftSum === rightSum;
+      return {
+        isCorrect: ok,
+        rule,
+        detail: ok ? undefined : `sums ${leftSum} and ${rightSum}, need ${rule.targetSum} each`,
+      };
+    }
+    case "gear_match": {
+      const driver =
+        typeof input.driverTeeth === "number" ? input.driverTeeth : rule.driverTeeth;
+      const driven =
+        typeof input.drivenTeeth === "number"
+          ? input.drivenTeeth
+          : typeof input.teeth === "number"
+            ? input.teeth
+            : null;
+      if (driven === null) {
+        return { isCorrect: false, rule, detail: "no driven gear selected" };
+      }
+      const ok = driver === rule.driverTeeth && driven === rule.drivenTeeth;
+      return {
+        isCorrect: ok,
+        rule,
+        detail: ok
+          ? undefined
+          : driver !== rule.driverTeeth
+            ? `selected ${driver}T driver, need ${rule.driverTeeth}T`
+            : `selected ${driven}T driven, need ${rule.drivenTeeth}T`,
+      };
+    }
+    case "slot_match": {
+      const slots =
+        input.slots && typeof input.slots === "object" && !Array.isArray(input.slots)
+          ? (input.slots as Record<string, string>)
+          : {};
+      const keys = Object.keys(rule.expected);
+      if (keys.length === 0) {
+        return { isCorrect: false, rule, detail: "no slots configured" };
+      }
+      const missing = keys.filter((k) => !slots[k]);
+      if (missing.length > 0) {
+        return { isCorrect: false, rule, detail: `fill all slots (${missing.join(", ")})` };
+      }
+      const wrong = keys.find((k) => slots[k] !== rule.expected[k]);
+      if (wrong) {
+        return { isCorrect: false, rule, detail: `slot “${wrong}” has the wrong card` };
+      }
+      return { isCorrect: true, rule };
     }
     default: {
       const _exhaustive: never = rule;

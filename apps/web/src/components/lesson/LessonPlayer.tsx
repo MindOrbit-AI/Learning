@@ -54,10 +54,31 @@ export function LessonPlayer({ lesson, dbLessonId = null, userId = null }: Props
       const items = (active.data.items as string[]) ?? [];
       setUserInput(active.id, { order: [...items] });
     }
+    if (active.type === "drag_drop_match") {
+      setUserInput(active.id, { slots: {} });
+    }
     if (active.type === "number_line") {
       const min = typeof active.data.min === "number" ? active.data.min : 0;
       const max = typeof active.data.max === "number" ? active.data.max : 1;
       setUserInput(active.id, { values: [(min + max) / 2] });
+    }
+    if (active.type === "balance_scale") {
+      const fixedLeft = (active.data.fixedLeft as number[]) ?? [];
+      const fixedRight = (active.data.fixedRight as number[]) ?? [];
+      setUserInput(active.id, { leftWeights: [...fixedLeft], rightWeights: [...fixedRight] });
+    }
+    if (active.type === "gear") {
+      const drivenOptions = (active.data.drivenOptions as number[]) ?? [24, 36, 48];
+      const driverOptions = (active.data.driverOptions as number[]) ?? undefined;
+      const fixedDriven =
+        typeof active.data.fixedDrivenTeeth === "number" ? active.data.fixedDrivenTeeth : undefined;
+      const fixedDriver =
+        typeof active.data.driverTeeth === "number" ? active.data.driverTeeth : undefined;
+      setUserInput(active.id, {
+        driverTeeth: fixedDriver ?? driverOptions?.[0],
+        drivenTeeth: fixedDriven ?? drivenOptions[0],
+        driverAngle: 0,
+      });
     }
   }, [active, inputsBySceneId, setUserInput]);
 

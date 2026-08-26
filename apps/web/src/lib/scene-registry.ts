@@ -5,6 +5,7 @@ const DEFAULT_INTERACTION: Record<SceneType, SceneInteraction> = {
   number_line: "place_point",
   grid_model: "tap_to_fill",
   drag_drop_sort: "reorder",
+  drag_drop_match: "drag_to_place",
   graph_plot: "place_point",
   concept_map: "connect_nodes",
   multiple_choice: "select_choice",
@@ -12,6 +13,8 @@ const DEFAULT_INTERACTION: Record<SceneType, SceneInteraction> = {
   venn_two: "select_choice",
   true_false: "select_choice",
   segment_select: "select_choice",
+  balance_scale: "drag_to_place",
+  gear: "drag_to_place",
 };
 
 export function defaultInteractionForSceneType(type: SceneType): SceneInteraction {
@@ -23,11 +26,14 @@ export const VISUAL_SCENE_TYPES: SceneType[] = [
   "number_line",
   "grid_model",
   "drag_drop_sort",
+  "drag_drop_match",
   "graph_plot",
   "concept_map",
   "slider",
   "venn_two",
   "segment_select",
+  "balance_scale",
+  "gear",
 ];
 
 /** Text-only choice steps (count toward the 30% non-manipulation cap). */

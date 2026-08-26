@@ -3,13 +3,16 @@ export type SceneType =
   | "number_line"
   | "grid_model"
   | "drag_drop_sort"
+  | "drag_drop_match"
   | "graph_plot"
   | "concept_map"
   | "multiple_choice"
   | "slider"
   | "venn_two"
   | "true_false"
-  | "segment_select";
+  | "segment_select"
+  | "balance_scale"
+  | "gear";
 
 /**
  * Product taxonomy for curriculum design and analytics (not stored on `Scene` JSON).
@@ -26,7 +29,7 @@ export type SceneCategory =
 /** Maps each implemented `SceneType` to its primary category (implemented kinds only). */
 export function sceneCategoryForType(
   type: SceneType,
-): Extract<SceneCategory, "selection" | "construction" | "spatial"> {
+): Extract<SceneCategory, "selection" | "construction" | "spatial" | "simulation"> {
   switch (type) {
     case "multiple_choice":
     case "true_false":
@@ -36,9 +39,14 @@ export function sceneCategoryForType(
     case "fraction_bar":
     case "grid_model":
     case "drag_drop_sort":
+    case "drag_drop_match":
     case "concept_map":
     case "slider":
       return "construction";
+    case "balance_scale":
+      return "construction";
+    case "gear":
+      return "simulation";
     case "number_line":
     case "graph_plot":
       return "spatial";
@@ -79,6 +87,25 @@ export type ValidationRule =
   | {
       type: "choice_match";
       expectedChoice: string;
+    }
+  | {
+      type: "balance_match";
+      left: number[];
+      right: number[];
+    }
+  | {
+      type: "balance_sum";
+      targetSum: number;
+    }
+  | {
+      type: "gear_match";
+      driverTeeth: number;
+      drivenTeeth: number;
+    }
+  | {
+      type: "slot_match";
+      /** slotId → itemId */
+      expected: Record<string, string>;
     };
 
 export type SceneFeedback = {

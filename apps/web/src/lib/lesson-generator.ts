@@ -18,7 +18,7 @@ Each scene must include:
 Do not create passive textbook explanations.
 Do not rely only on multiple choice or true/false.
 The learner must build, shade, drag, connect, place, sort, or label something before answering.
-Scene types include: fraction_bar, number_line, grid_model, drag_drop_sort, graph_plot, concept_map, multiple_choice, slider, venn_two, true_false, segment_select.
+Scene types include: fraction_bar, number_line, grid_model, drag_drop_sort, drag_drop_match, graph_plot, concept_map, multiple_choice, slider, venn_two, true_false, segment_select, balance_scale, gear.
 
 Return valid JSON only.`;
 

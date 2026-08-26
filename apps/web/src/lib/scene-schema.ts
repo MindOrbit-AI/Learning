@@ -12,6 +12,17 @@ const validationRuleSchema: z.ZodType<import("@/types/scene").ValidationRule> = 
       tolerance: z.number().optional(),
     }),
     z.object({ type: z.literal("choice_match"), expectedChoice: z.string() }),
+    z.object({ type: z.literal("balance_match"), left: z.array(z.number()), right: z.array(z.number()) }),
+    z.object({ type: z.literal("balance_sum"), targetSum: z.number() }),
+    z.object({
+      type: z.literal("gear_match"),
+      driverTeeth: z.number(),
+      drivenTeeth: z.number(),
+    }),
+    z.object({
+      type: z.literal("slot_match"),
+      expected: z.record(z.string()),
+    }),
   ],
 );
 
@@ -23,6 +34,7 @@ export const sceneSchema = z.object({
     "number_line",
     "grid_model",
     "drag_drop_sort",
+    "drag_drop_match",
     "graph_plot",
     "concept_map",
     "multiple_choice",
@@ -30,6 +42,8 @@ export const sceneSchema = z.object({
     "venn_two",
     "true_false",
     "segment_select",
+    "balance_scale",
+    "gear",
   ]),
   prompt: z.string(),
   visualPrompt: z.string(),

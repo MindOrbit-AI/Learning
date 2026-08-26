@@ -50,6 +50,14 @@ function describeVisualAction(scene: Scene, input: SceneUserInput): string {
         ? `Your order starts with: ${order.slice(0, 3).join(" → ")}${order.length > 3 ? " …" : ""}`
         : "Nothing has been reordered yet";
     }
+    case "drag_drop_match": {
+      const slots =
+        input.slots && typeof input.slots === "object" && !Array.isArray(input.slots)
+          ? (input.slots as Record<string, string>)
+          : {};
+      const filled = Object.keys(slots).length;
+      return filled ? `You placed ${filled} card${filled === 1 ? "" : "s"} in slots` : "No cards placed yet";
+    }
     case "graph_plot": {
       const pts = Array.isArray(input.points) ? (input.points as { x: number; y: number }[]) : [];
       if (!pts.length) return "No point is on the graph yet";
@@ -74,6 +82,18 @@ function describeVisualAction(scene: Scene, input: SceneUserInput): string {
     case "true_false": {
       const c = typeof input.choice === "string" ? input.choice : String(input.selectedChoice ?? "");
       return c ? `You answered “${c}”` : "You have not chosen True or False yet";
+    }
+    case "balance_scale": {
+      const left = (input.leftWeights as number[]) ?? [];
+      const right = (input.rightWeights as number[]) ?? [];
+      const ls = left.reduce((a, b) => a + b, 0);
+      const rs = right.reduce((a, b) => a + b, 0);
+      return `Your scale reads ${ls} on the left and ${rs} on the right`;
+    }
+    case "gear": {
+      const driven = typeof input.drivenTeeth === "number" ? input.drivenTeeth : "?";
+      const angle = typeof input.driverAngle === "number" ? input.driverAngle : 0;
+      return `Driven gear ${driven}T with driver at ${Math.round(angle)}°`;
     }
     default:
       return "Here is how your work compares to the goal";

@@ -17,6 +17,12 @@ import { PHYSICS_CIRCUITS_LESSON_SEED } from "./visual-engine-physics-circuits-l
 import { CHEMISTRY_PERIODIC_TRENDS_LESSON_SEED } from "./visual-engine-chemistry-periodic-trends-lesson";
 import { CHEMISTRY_BONDING_LESSON_SEED } from "./visual-engine-chemistry-bonding-lesson";
 import { MATH_PYTHAGOREAN_LESSON_SEED } from "./visual-engine-math-pythagorean-lesson";
+import { MATH_BALANCE_EQUALITY_LESSON_SEED } from "./visual-engine-math-balance-equality-lesson";
+import { MATH_BALANCE_EQUATIONS_LESSON_SEED } from "./visual-engine-math-balance-equations-lesson";
+import { MATH_BALANCE_FRACTIONS_LESSON_SEED } from "./visual-engine-math-balance-fractions-lesson";
+import { MATH_GEAR_RATIOS_LESSON_SEED } from "./visual-engine-math-gear-ratios-lesson";
+import { MATH_GEAR_ALGEBRA_LESSON_SEED } from "./visual-engine-math-gear-algebra-lesson";
+import { MATH_QUADRATIC_EQUATIONS_LESSON_SEED } from "./visual-engine-math-quadratic-equations-lesson";
 import { BIOLOGY_NATURAL_SELECTION_LESSON_SEED } from "./visual-engine-biology-natural-selection-lesson";
 import { PHYSICS_WORK_ENERGY_LESSON_SEED } from "./visual-engine-physics-work-energy-lesson";
 
@@ -41,6 +47,12 @@ export const VISUAL_ENGINE_LESSON_SEEDS = [
   CHEMISTRY_PERIODIC_TRENDS_LESSON_SEED,
   CHEMISTRY_BONDING_LESSON_SEED,
   MATH_PYTHAGOREAN_LESSON_SEED,
+  MATH_BALANCE_EQUALITY_LESSON_SEED,
+  MATH_BALANCE_EQUATIONS_LESSON_SEED,
+  MATH_BALANCE_FRACTIONS_LESSON_SEED,
+  MATH_GEAR_RATIOS_LESSON_SEED,
+  MATH_GEAR_ALGEBRA_LESSON_SEED,
+  MATH_QUADRATIC_EQUATIONS_LESSON_SEED,
   BIOLOGY_NATURAL_SELECTION_LESSON_SEED,
   PHYSICS_WORK_ENERGY_LESSON_SEED,
 ] as const;
