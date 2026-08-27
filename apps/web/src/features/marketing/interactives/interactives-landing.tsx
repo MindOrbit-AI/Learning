@@ -562,9 +562,6 @@ export function InteractivesLanding() {
       <DuoLandingHeader />
 
       <main>
-
-
-        Live demos
         <section id="try-demo" className="scroll-mt-24 border-y border-border/60 bg-zinc-950 py-14 sm:py-18">
           <div className="container mx-auto px-4">
             <ScrollReveal>
