@@ -2,6 +2,66 @@ import type { BlogPost } from "./types";
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: "retrieval-practice-beats-rereading",
+    title: "Why retrieval practice beats re-reading (and how to do it in 10 minutes)",
+    excerpt:
+      "Highlighting notes feels productive because it is easy. Recall is harder—and that difficulty is exactly why it sticks.",
+    publishedAt: "2026-08-27",
+    author: { name: "MindOrbit Team", role: "Learning science" },
+    tags: ["Retrieval practice", "Study strategy", "Memory"],
+    readingTimeMinutes: 5,
+    sections: [
+      {
+        type: "paragraph",
+        text: "Most study sessions follow a comfortable loop: open the chapter, skim the summary, highlight a few lines, and call it review. The material feels familiar by the end—which is precisely the trap. Familiarity is not recall. Recognition on the page is not retrieval under pressure.",
+      },
+      {
+        type: "heading",
+        text: "The testing effect is not about tests",
+        level: 2,
+      },
+      {
+        type: "paragraph",
+        text: "Decades of research on the testing effect show that actively pulling information from memory strengthens retention more than passive re-exposure. The label sounds punitive, but the mechanism is simple: effortful recall forces your brain to reconstruct the pathway, not just recognize it when you see it again.",
+      },
+      {
+        type: "list",
+        items: [
+          "Re-reading creates fluency illusions—you think you know it because the page looks familiar",
+          "Self-quizzing surfaces what is actually retrievable versus what only feels learned",
+          "Failed recall followed by correction produces stronger encoding than uninterrupted review",
+          "Short, distributed retrieval beats one long re-read session every time",
+        ],
+      },
+      {
+        type: "heading",
+        text: "A ten-minute retrieval loop",
+        level: 2,
+      },
+      {
+        type: "paragraph",
+        text: "You do not need flashcards for every topic. A minimal loop works: close the notes, write or say three things you remember about the concept, check what you missed, then immediately retry the gaps. Ten minutes of honest recall outperforms thirty minutes of passive review for most students.",
+      },
+      {
+        type: "paragraph",
+        text: "The hard part is tolerating the discomfort. Blank moments feel like failure; they are actually the signal that learning is happening. If everything comes easily, you are probably not retrieving—you are recognizing.",
+      },
+      {
+        type: "heading",
+        text: "Where diagnostics and missions fit",
+        level: 2,
+      },
+      {
+        type: "paragraph",
+        text: "Retrieval practice works best when it is targeted. A diagnostic tells you which nodes are fragile; a focused mission turns that list into structured recall—not random self-quizzing on whatever feels urgent. MindOrbit builds this into the loop: diagnose what is weak, practice retrieval on that cluster, then schedule review before the gain fades.",
+      },
+      {
+        type: "paragraph",
+        text: "Stop measuring study time by pages turned. Measure it by what you can produce with the book closed. That shift alone can reorder an entire prep plan.",
+      },
+    ],
+  },
+  {
     slug: "one-next-step-beats-content-library",
     title: "Why one next step beats a content library",
     excerpt:
