@@ -6,51 +6,6 @@ This document describes the implementation in **MindOrbit Learn** (Next.js app +
 
 ---
 
-## MindOrbit Interactive Engine
-
-Every visual lesson is **LESSON JSON**. Each scene selects one of **15 engine primitives**; the runtime renders the primitive, validates learner input, and returns feedback.
-
-```text
-                 ┌─ Drag
-                 ├─ Drop Zone
-                 ├─ Slider
-                 ├─ Number Line
-                 ├─ Graph
-                 ├─ Coordinate Plane
-                 ├─ Tiles
-LESSON JSON ────►├─ Balance Scale
-                 ├─ Geometry Canvas
-                 ├─ Simulation
-                 ├─ Matching
-                 ├─ Sequence Builder
-                 ├─ Math Input
-                 ├─ Multiple Choice
-                 └─ Gear
-```
-
-| Primitive | Role | Implemented `SceneType` today |
-|-----------|------|-------------------------------|
-| **Drag** | Move objects on canvas | `drag_drop_sort`, `concept_map` |
-| **Drop Zone** | Classify into labeled slots | `drag_drop_match` |
-| **Slider** | Variable along a range | `slider` |
-| **Number Line** | Marker on axis | `number_line` |
-| **Graph** | Plot points | `graph_plot` |
-| **Coordinate Plane** | Full xy grid | `graph_plot` |
-| **Tiles** | Tap/shade grid cells | `fraction_bar`, `grid_model` |
-| **Balance Scale** | Weight pans | `balance_scale` |
-| **Geometry Canvas** | Shapes & constructions | *planned* |
-| **Simulation** | Live system response | `slider` (+ mission `simulation`) |
-| **Matching** | Pair terms | `venn_two`, mission matching |
-| **Sequence Builder** | Reorder steps | `drag_drop_sort` |
-| **Math Input** | Typed answer | *planned* |
-| **Multiple Choice** | Select option | `multiple_choice`, `true_false`, `segment_select` |
-| **Gear** | Meshing gear trains | `gear` |
-
-Types: `apps/web/src/types/interactive-engine.ts`  
-Catalog + demos: `/interactives` (`apps/web/src/features/marketing/interactives/`)
-
----
-
 ## Product rules
 
 1. **Visual-first** — Each scene has a workspace, interaction, validation, and feedback that references what the learner did.

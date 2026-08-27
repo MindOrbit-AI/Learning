@@ -70,13 +70,13 @@ const ENGINE_TABS: { id: EnginePrimitive | "All"; label: string }[] = [
 const HOW_IT_WORKS = [
   {
     icon: MousePointerClick,
-    title: "LESSON JSON drives scenes",
-    body: "Each scene in a lesson picks an engine primitive — Drag, Tiles, Graph, and 11 more — with validation and feedback.",
+    title: "Manipulate first",
+    body: "Each scene puts you in control — drag, shade, plot, and reorder until the idea makes sense.",
   },
   {
     icon: Grid3X3,
     title: "Instant feedback",
-    body: "Every primitive validates your work on screen so you know exactly where the gap is.",
+    body: "Your work is checked on screen so you know exactly where the gap is.",
   },
   {
     icon: Sparkles,
@@ -562,113 +562,9 @@ export function InteractivesLanding() {
       <DuoLandingHeader />
 
       <main>
-        {/* Hero — Brilliant-style "learn by doing" */}
-        <section className="container mx-auto px-4 pb-10 pt-10 sm:pt-16">
-          <ScrollReveal>
-            <div className="mx-auto max-w-3xl text-center">
-              <span className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-bold text-primary">
-                <Sparkles className="h-4 w-4" />
-                MindOrbit Interactive Engine
-              </span>
-              <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-                LESSON JSON drives {ENGINE_PRIMITIVE_COUNT} interactive primitives
-              </h1>
-              <p className="mt-5 text-lg font-medium text-muted-foreground sm:text-xl">
-                {totalCount} hands-on lessons across {subjectCount} subjects — each scene picks Drag, Tiles,
-                Graph, or another engine primitive. No login required.
-              </p>
-              <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <DuoPrimaryLink href="#try-demo">
-                  TRY A DEMO
-                  <ArrowRight className="h-4 w-4" />
-                </DuoPrimaryLink>
-                <Link
-                  href="#catalog"
-                  className="text-sm font-bold text-[hsl(var(--duo-blue))] underline decoration-2 underline-offset-4 hover:opacity-90"
-                >
-                  BROWSE BY SUBJECT
-                </Link>
-              </div>
-            </div>
-          </ScrollReveal>
-        </section>
 
-        {/* Stats */}
-        <section className="border-y border-border/60 bg-muted/30">
-          <div className="container mx-auto grid grid-cols-2 gap-6 px-4 py-8 sm:grid-cols-4 sm:py-10">
-            {[
-              { value: String(totalCount), label: "Interactives" },
-              { value: "120+", label: "Hands-on scenes" },
-              { value: String(subjectCount), label: "Subjects" },
-              { value: String(ENGINE_PRIMITIVE_COUNT), label: "Engine primitives" },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <p className="text-3xl font-extrabold text-foreground sm:text-4xl">{stat.value}</p>
-                <p className="mt-1 text-sm font-bold text-muted-foreground">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </section>
 
-        {/* Engine architecture */}
-        <section id="engine" className="container mx-auto px-4 pb-14">
-          <ScrollReveal>
-            <div className="mx-auto max-w-3xl">
-              <h2 className="text-center text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-                MindOrbit Interactive Engine
-              </h2>
-              <p className="mt-3 text-center text-muted-foreground">
-                Every visual lesson is JSON. Each scene selects a primitive — the runtime renders it,
-                validates input, and returns feedback.
-              </p>
-              <pre className="mt-8 overflow-x-auto rounded-2xl border border-border/80 bg-zinc-950 p-5 text-left text-xs leading-relaxed text-zinc-300 sm:text-sm">
-                <code>{`                 ┌─ Drag
-                 ├─ Drop Zone
-                 ├─ Slider
-                 ├─ Number Line
-                 ├─ Graph
-                 ├─ Coordinate Plane
-                 ├─ Tiles
-LESSON JSON ────►├─ Balance Scale
-                 ├─ Geometry Canvas
-                 ├─ Simulation
-                 ├─ Matching
-                 ├─ Sequence Builder
-                 ├─ Math Input
-                 ├─ Multiple Choice
-                 └─ Gear`}</code>
-              </pre>
-            </div>
-          </ScrollReveal>
-        </section>
-
-        {/* How it works */}
-        <section className="container mx-auto px-4 py-14 sm:py-18">
-          <ScrollReveal>
-            <h2 className="text-center text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              How the engine works
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-center text-muted-foreground">
-              Every lesson is visual and interactive. You manipulate concepts until they click, with
-              feedback at every step.
-            </p>
-          </ScrollReveal>
-          <div className="mt-10 grid gap-6 sm:grid-cols-3">
-            {HOW_IT_WORKS.map((step, i) => (
-              <ScrollReveal key={step.title} delay={i * 0.08}>
-                <div className="rounded-3xl border border-border/80 bg-card p-6 shadow-sm">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/15 text-primary">
-                    <step.icon className="h-6 w-6" strokeWidth={2.5} />
-                  </span>
-                  <h3 className="mt-4 text-lg font-extrabold text-foreground">{step.title}</h3>
-                  <p className="mt-2 text-sm font-medium leading-relaxed text-muted-foreground">{step.body}</p>
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
-        </section>
-
-        {/* Live demos */}
+        Live demos
         <section id="try-demo" className="scroll-mt-24 border-y border-border/60 bg-zinc-950 py-14 sm:py-18">
           <div className="container mx-auto px-4">
             <ScrollReveal>
@@ -873,37 +769,7 @@ LESSON JSON ────►├─ Balance Scale
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="border-t border-border/60 bg-muted/20">
-          <div className="container mx-auto px-4 py-16 sm:py-20">
-            <ScrollReveal>
-              <div className="mx-auto max-w-2xl rounded-3xl border border-border/80 bg-card p-8 text-center shadow-sm sm:p-12">
-                <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/15">
-                  <Brain className="h-8 w-8 text-primary" strokeWidth={2.5} />
-                </span>
-                <h2 className="mt-6 text-2xl font-extrabold text-foreground sm:text-3xl">
-                  Ready for your personalized path?
-                </h2>
-                <p className="mt-3 text-muted-foreground">
-                  Start any interactive above, or take our free diagnostic to find gaps and get a
-                  mastery map tailored to you.
-                </p>
-                <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                  <DuoPrimaryLink href={lessonHref(INTERACTIVE_CATALOG[0]?.id ?? "lesson-fractions-parts-of-whole")}>
-                    START LEARNING FREE
-                    <ArrowRight className="h-4 w-4" />
-                  </DuoPrimaryLink>
-                  <Link
-                    href="/try-diagnostic"
-                    className="text-sm font-bold text-[hsl(var(--duo-blue))] underline decoration-2 underline-offset-4 hover:opacity-90"
-                  >
-                    TAKE THE GAP SCAN
-                  </Link>
-                </div>
-              </div>
-            </ScrollReveal>
-          </div>
-        </section>
+        
       </main>
 
       <DuoLandingFooter />
