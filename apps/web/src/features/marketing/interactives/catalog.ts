@@ -17,9 +17,13 @@ import {
 import type { SceneCategory } from "@/types/scene";
 import type { EnginePrimitive } from "@/types/interactive-engine";
 import { ENGINE_PRIMITIVE_COUNT } from "./engine-catalog";
-import { MATH_FRACTIONS_CURRICULUM_SEEDS, MATH_ALGEBRA_CURRICULUM_SEEDS } from "@mindorbit/content";
+import { MATH_FRACTIONS_CURRICULUM_SEEDS, MATH_ALGEBRA_CURRICULUM_SEEDS, MATH_INTEGERS_CURRICULUM_SEEDS, MATH_COORDINATE_PLANE_CURRICULUM_SEEDS, MATH_PERCENTS_CURRICULUM_SEEDS, MATH_PROPORTIONAL_REASONING_CURRICULUM_SEEDS } from "@mindorbit/content";
 import { buildFractionsCatalogItems } from "./fractions-catalog";
 import { buildAlgebraCatalogItems } from "./algebra-catalog";
+import { buildIntegersCatalogItems } from "./integers-catalog";
+import { buildCoordinatePlaneCatalogItems } from "./coordinate-plane-catalog";
+import { buildPercentsCatalogItems } from "./percents-catalog";
+import { buildProportionalReasoningCatalogItems } from "./proportional-reasoning-catalog";
 
 export type { EnginePrimitive };
 export { ENGINE_PRIMITIVE_COUNT, ENGINE_PRIMITIVE_META, engineLabel } from "./engine-catalog";
@@ -183,6 +187,10 @@ export const INTERACTIVE_CATALOG: InteractiveCatalogItem[] = [
   },
   ...buildFractionsCatalogItems(MATH_FRACTIONS_CURRICULUM_SEEDS),
   ...buildAlgebraCatalogItems(MATH_ALGEBRA_CURRICULUM_SEEDS),
+  ...buildIntegersCatalogItems(MATH_INTEGERS_CURRICULUM_SEEDS),
+  ...buildCoordinatePlaneCatalogItems(MATH_COORDINATE_PLANE_CURRICULUM_SEEDS),
+  ...buildPercentsCatalogItems(MATH_PERCENTS_CURRICULUM_SEEDS),
+  ...buildProportionalReasoningCatalogItems(MATH_PROPORTIONAL_REASONING_CURRICULUM_SEEDS),
   {
     id: "lesson-decimals-on-the-line",
     title: "Decimals on the number line",
@@ -504,4 +512,312 @@ export function interactivesBySubject() {
 
 export function countBySubject(subject: InteractiveSubject) {
   return INTERACTIVE_CATALOG.filter((i) => i.subject === subject).length;
+}
+
+export type MathTrackFilter = "All" | "Fractions" | "Algebra" | "NegativeNumbers" | "CoordinatePlane" | "Percents" | "ProportionalReasoning" | "Featured";
+
+export type CurriculumLevelFilter = "All" | number;
+
+export const MATH_TRACK_META: Record<
+  Exclude<MathTrackFilter, "All">,
+  { label: string; description: string; accent: string; border: string }
+> = {
+  Fractions: {
+    label: "Fractions",
+    description: "Parts of a whole through comparing, adding, and multiplying fractions.",
+    accent: "from-sky-400/20 to-blue-500/10",
+    border: "border-sky-400/50",
+  },
+  Algebra: {
+    label: "Algebra & unknowns",
+    description: "Balance scales, substitution, inequalities, systems, and scale reasoning.",
+    accent: "from-indigo-400/20 to-violet-500/10",
+    border: "border-indigo-400/50",
+  },
+  NegativeNumbers: {
+    label: "Negative numbers",
+    description: "Positives, negatives, operations, absolute value, distance, and expression order.",
+    accent: "from-rose-400/20 to-orange-500/10",
+    border: "border-rose-400/50",
+  },
+  CoordinatePlane: {
+    label: "Coordinate plane",
+    description: "Plot points, quadrants, lines, inequalities, and distance on the xy-plane.",
+    accent: "from-blue-400/20 to-indigo-500/10",
+    border: "border-blue-400/50",
+  },
+  Percents: {
+    label: "Percents",
+    description: "Percent of a number, increase/decrease, decimals, reversing, and compound change.",
+    accent: "from-emerald-400/20 to-teal-500/10",
+    border: "border-emerald-400/50",
+  },
+  ProportionalReasoning: {
+    label: "Proportional reasoning",
+    description: "Ratios, scaling, unit rates, proportional graphs, and equations through the origin.",
+    accent: "from-orange-400/20 to-amber-500/10",
+    border: "border-orange-400/50",
+  },
+  Featured: {
+    label: "Featured math",
+    description: "Gears, quadratics, balance puzzles, graphing, and geometry — standalone lessons.",
+    accent: "from-violet-400/20 to-purple-500/10",
+    border: "border-violet-400/50",
+  },
+};
+
+export const FRACTION_LEVEL_THEMES: Record<1 | 2 | 3 | 4 | 5, string> = {
+  1: "Parts of a whole",
+  2: "Equivalent fractions",
+  3: "Comparing fractions",
+  4: "Adding fractions",
+  5: "Multiplying fractions",
+};
+
+export const ALGEBRA_LEVEL_THEMES: Record<
+  1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13,
+  string
+> = {
+  1: "Finding unknowns",
+  2: "Substitution",
+  3: "Distributing",
+  4: "Factoring",
+  5: "Combining terms",
+  6: "Inequalities",
+  7: "Solving inequalities",
+  8: "Systems & substitution",
+  9: "Elimination",
+  10: "Balancing reasoning",
+  11: "Weight reasoning",
+  12: "Groups & boxes",
+  13: "Constraints",
+};
+
+export const NEGATIVE_NUMBERS_LEVEL_THEMES: Record<1 | 2 | 3 | 4 | 5 | 6 | 7 | 8, string> = {
+  1: "Positives & negatives",
+  2: "Opposites & zero",
+  3: "Subtracting integers",
+  4: "Subtraction & addition",
+  5: "The number line",
+  6: "Order & absolute value",
+  7: "Distance",
+  8: "Order in expressions",
+};
+
+export const COORDINATE_PLANE_LEVEL_THEMES: Record<1 | 2 | 3 | 4 | 5, string> = {
+  1: "Coordinates",
+  2: "The 4 quadrants",
+  3: "Lines",
+  4: "Inequalities",
+  5: "Distance",
+};
+
+export const PERCENTS_LEVEL_THEMES: Record<1 | 2 | 3 | 4 | 5, string> = {
+  1: "Intro to percentages",
+  2: "Percent increase",
+  3: "Tenths & decimals",
+  4: "Percent decrease",
+  5: "Compound changes",
+};
+
+export const PROPORTIONAL_REASONING_LEVEL_THEMES: Record<1 | 2 | 3 | 4 | 5 | 6 | 7, string> = {
+  1: "Setting up ratios",
+  2: "Equivalent ratios",
+  3: "Scaling ratios",
+  4: "Unit rates",
+  5: "Proportional relationships",
+  6: "Graphing proportional relationships",
+  7: "Writing equations",
+};
+
+export function isFractionCurriculumItem(item: InteractiveCatalogItem) {
+  return item.topic.startsWith("Fractions (Level");
+}
+
+export function isAlgebraCurriculumItem(item: InteractiveCatalogItem) {
+  return item.topic.startsWith("Algebra (Level");
+}
+
+export function isNegativeNumbersCurriculumItem(item: InteractiveCatalogItem) {
+  return item.topic.startsWith("Negative Numbers (Level");
+}
+
+export function isCoordinatePlaneCurriculumItem(item: InteractiveCatalogItem) {
+  return item.topic.startsWith("Coordinate Plane (Level");
+}
+
+export function isPercentsCurriculumItem(item: InteractiveCatalogItem) {
+  return item.topic.startsWith("Percents (Level");
+}
+
+export function isProportionalReasoningCurriculumItem(item: InteractiveCatalogItem) {
+  return item.topic.startsWith("Proportional Reasoning (Level");
+}
+
+export function isFeaturedMathItem(item: InteractiveCatalogItem) {
+  return (
+    item.subject === "Math" &&
+    !isFractionCurriculumItem(item) &&
+    !isAlgebraCurriculumItem(item) &&
+    !isNegativeNumbersCurriculumItem(item) &&
+    !isCoordinatePlaneCurriculumItem(item) &&
+    !isPercentsCurriculumItem(item) &&
+    !isProportionalReasoningCurriculumItem(item)
+  );
+}
+
+export function interactivesForMathTrack(track: MathTrackFilter) {
+  const mathItems = INTERACTIVE_CATALOG.filter((i) => i.subject === "Math");
+  if (track === "All") return mathItems;
+  if (track === "Fractions") return mathItems.filter(isFractionCurriculumItem);
+  if (track === "Algebra") return mathItems.filter(isAlgebraCurriculumItem);
+  if (track === "NegativeNumbers") return mathItems.filter(isNegativeNumbersCurriculumItem);
+  if (track === "CoordinatePlane") return mathItems.filter(isCoordinatePlaneCurriculumItem);
+  if (track === "Percents") return mathItems.filter(isPercentsCurriculumItem);
+  if (track === "ProportionalReasoning") return mathItems.filter(isProportionalReasoningCurriculumItem);
+  return mathItems.filter(isFeaturedMathItem);
+}
+
+export function curriculumLevelFromTopic(topic: string): number | null {
+  const match = topic.match(
+    /^(?:Fractions|Algebra|Negative Numbers|Coordinate Plane|Percents|Proportional Reasoning) \(Level (\d+)\)$/,
+  );
+  return match ? Number(match[1]) : null;
+}
+
+export type CurriculumTrack =
+  | "Fractions"
+  | "Algebra"
+  | "NegativeNumbers"
+  | "CoordinatePlane"
+  | "Percents"
+  | "ProportionalReasoning";
+
+export function filterByCurriculumLevel(
+  items: InteractiveCatalogItem[],
+  track: CurriculumTrack,
+  level: CurriculumLevelFilter,
+) {
+  if (level === "All") return items;
+  const prefix =
+    track === "Fractions"
+      ? "Fractions"
+      : track === "Algebra"
+        ? "Algebra"
+        : track === "NegativeNumbers"
+          ? "Negative Numbers"
+          : track === "CoordinatePlane"
+            ? "Coordinate Plane"
+            : track === "Percents"
+              ? "Percents"
+              : "Proportional Reasoning";
+  return items.filter((i) => i.topic === `${prefix} (Level ${level})`);
+}
+
+export function interactivesForNegativeNumbersLevel(level: "All" | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8) {
+  const items = INTERACTIVE_CATALOG.filter(isNegativeNumbersCurriculumItem);
+  if (level === "All") return items;
+  return items.filter((i) => i.topic === `Negative Numbers (Level ${level})`);
+}
+
+export function levelThemeForItem(item: InteractiveCatalogItem): string | null {
+  const level = curriculumLevelFromTopic(item.topic);
+  if (level === null) return null;
+  if (item.topic.startsWith("Fractions")) {
+    return FRACTION_LEVEL_THEMES[level as 1 | 2 | 3 | 4 | 5] ?? null;
+  }
+  if (item.topic.startsWith("Algebra")) {
+    return ALGEBRA_LEVEL_THEMES[level as keyof typeof ALGEBRA_LEVEL_THEMES] ?? null;
+  }
+  if (item.topic.startsWith("Negative Numbers")) {
+    return NEGATIVE_NUMBERS_LEVEL_THEMES[level as keyof typeof NEGATIVE_NUMBERS_LEVEL_THEMES] ?? null;
+  }
+  if (item.topic.startsWith("Coordinate Plane")) {
+    return COORDINATE_PLANE_LEVEL_THEMES[level as keyof typeof COORDINATE_PLANE_LEVEL_THEMES] ?? null;
+  }
+  if (item.topic.startsWith("Percents")) {
+    return PERCENTS_LEVEL_THEMES[level as keyof typeof PERCENTS_LEVEL_THEMES] ?? null;
+  }
+  if (item.topic.startsWith("Proportional Reasoning")) {
+    return PROPORTIONAL_REASONING_LEVEL_THEMES[level as keyof typeof PROPORTIONAL_REASONING_LEVEL_THEMES] ?? null;
+  }
+  return null;
+}
+
+export function groupCatalogByCurriculumLevel(items: InteractiveCatalogItem[]) {
+  const groups = new Map<number, InteractiveCatalogItem[]>();
+  for (const item of items) {
+    const level = curriculumLevelFromTopic(item.topic);
+    if (level === null) continue;
+    const list = groups.get(level) ?? [];
+    list.push(item);
+    groups.set(level, list);
+  }
+  return [...groups.entries()].sort(([a], [b]) => a - b);
+}
+
+export function searchCatalogItems(items: InteractiveCatalogItem[], query: string) {
+  const q = query.trim().toLowerCase();
+  if (!q) return items;
+  return items.filter(
+    (item) =>
+      item.title.toLowerCase().includes(q) ||
+      item.description.toLowerCase().includes(q) ||
+      item.topic.toLowerCase().includes(q),
+  );
+}
+
+export function levelOptionsForTrack(track: CurriculumTrack): { value: number; label: string }[] {
+  if (track === "Fractions") {
+    return ([1, 2, 3, 4, 5] as const).map((n) => ({
+      value: n,
+      label: `Level ${n} · ${FRACTION_LEVEL_THEMES[n]}`,
+    }));
+  }
+  if (track === "NegativeNumbers") {
+    return ([1, 2, 3, 4, 5, 6, 7, 8] as const).map((n) => ({
+      value: n,
+      label: `Level ${n} · ${NEGATIVE_NUMBERS_LEVEL_THEMES[n]}`,
+    }));
+  }
+  if (track === "CoordinatePlane") {
+    return ([1, 2, 3, 4, 5] as const).map((n) => ({
+      value: n,
+      label: `Level ${n} · ${COORDINATE_PLANE_LEVEL_THEMES[n]}`,
+    }));
+  }
+  if (track === "Percents") {
+    return ([1, 2, 3, 4, 5] as const).map((n) => ({
+      value: n,
+      label: `Level ${n} · ${PERCENTS_LEVEL_THEMES[n]}`,
+    }));
+  }
+  if (track === "ProportionalReasoning") {
+    return ([1, 2, 3, 4, 5, 6, 7] as const).map((n) => ({
+      value: n,
+      label: `Level ${n} · ${PROPORTIONAL_REASONING_LEVEL_THEMES[n]}`,
+    }));
+  }
+  return ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] as const).map((n) => ({
+    value: n,
+    label: `Level ${n} · ${ALGEBRA_LEVEL_THEMES[n]}`,
+  }));
+}
+
+export function curriculumThemesForTrack(track: CurriculumTrack): Record<number, string> {
+  if (track === "Fractions") return FRACTION_LEVEL_THEMES;
+  if (track === "NegativeNumbers") return NEGATIVE_NUMBERS_LEVEL_THEMES;
+  if (track === "CoordinatePlane") return COORDINATE_PLANE_LEVEL_THEMES;
+  if (track === "Percents") return PERCENTS_LEVEL_THEMES;
+  if (track === "ProportionalReasoning") return PROPORTIONAL_REASONING_LEVEL_THEMES;
+  return ALGEBRA_LEVEL_THEMES;
+}
+
+export function curriculumTrackBadge(track: CurriculumTrack): string {
+  if (track === "Fractions") return "bg-sky-500/15 text-sky-700 dark:text-sky-300";
+  if (track === "NegativeNumbers") return "bg-rose-500/15 text-rose-700 dark:text-rose-300";
+  if (track === "CoordinatePlane") return "bg-blue-500/15 text-blue-700 dark:text-blue-300";
+  if (track === "Percents") return "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300";
+  if (track === "ProportionalReasoning") return "bg-orange-500/15 text-orange-700 dark:text-orange-300";
+  return "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300";
 }

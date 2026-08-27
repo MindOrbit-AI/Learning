@@ -9,6 +9,9 @@ import {
   Sparkles,
   Grid3X3,
   Play,
+  Search,
+  X,
+  ChevronRight,
 } from "lucide-react";
 import { cn } from "@mindorbit/lib";
 import { DuoLandingFooter } from "../duo-landing-footer";
@@ -22,12 +25,26 @@ import {
   countBySubject,
   engineLabel,
   interactivesForSubject,
-  interactivesForFractionLevel,
-  interactivesForAlgebraLevel,
+  interactivesForMathTrack,
+  filterByCurriculumLevel,
+  groupCatalogByCurriculumLevel,
+  searchCatalogItems,
+  levelOptionsForTrack,
+  MATH_TRACK_META,
+  FRACTION_LEVEL_THEMES,
+  ALGEBRA_LEVEL_THEMES,
+  NEGATIVE_NUMBERS_LEVEL_THEMES,
+  COORDINATE_PLANE_LEVEL_THEMES,
+  PERCENTS_LEVEL_THEMES,
+  PROPORTIONAL_REASONING_LEVEL_THEMES,
+  curriculumThemesForTrack,
+  curriculumTrackBadge,
   lessonHref,
-  type AlgebraLevelFilter,
-  type FractionLevelFilter,
+  type CurriculumTrack,
+  type CurriculumLevelFilter,
+  type MathTrackFilter,
   type InteractiveSubject,
+  type InteractiveCatalogItem,
   type SubjectFilter,
 } from "./catalog";
 import { ENGINE_PRIMITIVE_META } from "./engine-catalog";
@@ -68,12 +85,67 @@ const HOW_IT_WORKS = [
   },
 ] as const;
 
+function InteractiveCard({ item }: { item: InteractiveCatalogItem }) {
+  return (
+    <article
+      className={cn(
+        "group flex flex-col rounded-2xl border border-border/80 bg-gradient-to-br bg-card p-5 shadow-sm transition hover:shadow-md",
+        item.accent,
+      )}
+    >
+      <div className="flex items-start gap-3">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-background/80 ring-1 ring-border/50">
+          <item.icon className="h-5 w-5 text-primary" strokeWidth={2.5} />
+        </span>
+        <div className="min-w-0">
+          <p className="text-xs font-bold text-muted-foreground">{item.topic}</p>
+          <h3 className="mt-0.5 text-base font-extrabold leading-snug text-foreground">{item.title}</h3>
+        </div>
+      </div>
+
+      <p className="mt-3 flex-1 text-sm font-medium leading-relaxed text-foreground/85">{item.description}</p>
+
+      <ul className="mt-3 flex flex-wrap gap-1.5">
+        {item.primitives.slice(0, 3).map((tag) => (
+          <li
+            key={tag}
+            className="rounded-lg bg-background/60 px-2 py-0.5 text-[11px] font-bold text-muted-foreground ring-1 ring-border/40"
+          >
+            {engineLabel(tag)}
+          </li>
+        ))}
+      </ul>
+
+      <div className="mt-4 flex items-center justify-between gap-3">
+        <span className="text-xs font-bold text-muted-foreground">~{item.durationMin} min</span>
+        <Link
+          href={lessonHref(item.id)}
+          className="inline-flex h-10 items-center gap-1.5 rounded-xl border-b-[3px] border-[#43a005] bg-[#58cc02] px-4 text-xs font-extrabold uppercase tracking-wide text-white transition hover:brightness-105 active:translate-y-px"
+        >
+          <Play className="h-3.5 w-3.5 fill-current" />
+          Try it
+        </Link>
+      </div>
+    </article>
+  );
+}
+
+function LessonGrid({ items }: { items: InteractiveCatalogItem[] }) {
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      {items.map((item) => (
+        <InteractiveCard key={item.id} item={item} />
+      ))}
+    </div>
+  );
+}
+
 function SubjectSection({
   subject,
   items,
 }: {
   subject: InteractiveSubject;
-  items: typeof INTERACTIVE_CATALOG;
+  items: InteractiveCatalogItem[];
 }) {
   const meta = SUBJECT_META[subject];
   const SubjectIcon = meta.icon;
@@ -100,105 +172,381 @@ function SubjectSection({
         </span>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {items.map((item) => (
-          <article
-            key={item.id}
-            className={cn(
-              "group flex flex-col rounded-2xl border border-border/80 bg-gradient-to-br bg-card p-5 shadow-sm transition hover:shadow-md",
-              item.accent,
-            )}
-          >
-            <div className="flex items-start gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-background/80 ring-1 ring-border/50">
-                <item.icon className="h-5 w-5 text-primary" strokeWidth={2.5} />
-              </span>
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-muted-foreground">{item.topic}</p>
-                <h3 className="mt-0.5 text-base font-extrabold leading-snug text-foreground">{item.title}</h3>
-              </div>
-            </div>
-
-            <p className="mt-3 flex-1 text-sm font-medium leading-relaxed text-foreground/85">{item.description}</p>
-
-            <ul className="mt-3 flex flex-wrap gap-1.5">
-              {item.primitives.slice(0, 3).map((tag) => (
-                <li
-                  key={tag}
-                  className="rounded-lg bg-background/60 px-2 py-0.5 text-[11px] font-bold text-muted-foreground ring-1 ring-border/40"
-                >
-                  {engineLabel(tag)}
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-4 flex items-center justify-between gap-3">
-              <span className="text-xs font-bold text-muted-foreground">~{item.durationMin} min</span>
-              <Link
-                href={lessonHref(item.id)}
-                className="inline-flex h-10 items-center gap-1.5 rounded-xl border-b-[3px] border-[#43a005] bg-[#58cc02] px-4 text-xs font-extrabold uppercase tracking-wide text-white transition hover:brightness-105 active:translate-y-px"
-              >
-                <Play className="h-3.5 w-3.5 fill-current" />
-                Try it
-              </Link>
-            </div>
-          </article>
-        ))}
-      </div>
+      <LessonGrid items={items} />
     </section>
   );
 }
 
-const FRACTION_LEVEL_TABS: { id: FractionLevelFilter; label: string }[] = [
-  { id: "All", label: "All fraction levels" },
-  { id: 1, label: "Level 1" },
-  { id: 2, label: "Level 2" },
-  { id: 3, label: "Level 3" },
-  { id: 4, label: "Level 4" },
-  { id: 5, label: "Level 5" },
-];
+function LevelGroupSection({
+  level,
+  theme,
+  items,
+  trackAccent,
+}: {
+  level: number;
+  theme: string;
+  items: InteractiveCatalogItem[];
+  trackAccent: string;
+}) {
+  return (
+    <div className="scroll-mt-28" id={`level-${level}`}>
+      <div className="mb-4 flex items-baseline justify-between gap-3 border-b border-border/60 pb-3">
+        <div>
+          <h3 className="text-lg font-extrabold text-foreground sm:text-xl">
+            Level {level}
+            <span className="ml-2 font-bold text-muted-foreground">· {theme}</span>
+          </h3>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            {items.length} lesson{items.length === 1 ? "" : "s"}
+          </p>
+        </div>
+        <span
+          className={cn(
+            "hidden shrink-0 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase sm:inline-flex",
+            trackAccent,
+          )}
+        >
+          Level {level}
+        </span>
+      </div>
+      <LessonGrid items={items} />
+    </div>
+  );
+}
 
-const ALGEBRA_LEVEL_TABS: { id: AlgebraLevelFilter; label: string }[] = [
-  { id: "All", label: "All algebra levels" },
-  ...([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] as const).map((n) => ({
-    id: n as AlgebraLevelFilter,
-    label: `Level ${n}`,
-  })),
-];
+function MathTrackPicker({
+  active,
+  onChange,
+}: {
+  active: MathTrackFilter;
+  onChange: (track: MathTrackFilter) => void;
+}) {
+  const tracks: { id: MathTrackFilter; label: string; description: string; count: number }[] = [
+    {
+      id: "All",
+      label: "All math",
+      description: "Browse every math lesson — tracks and featured picks.",
+      count: interactivesForMathTrack("All").length,
+    },
+    {
+      id: "Fractions",
+      label: MATH_TRACK_META.Fractions.label,
+      description: MATH_TRACK_META.Fractions.description,
+      count: interactivesForMathTrack("Fractions").length,
+    },
+    {
+      id: "Algebra",
+      label: MATH_TRACK_META.Algebra.label,
+      description: MATH_TRACK_META.Algebra.description,
+      count: interactivesForMathTrack("Algebra").length,
+    },
+    {
+      id: "NegativeNumbers",
+      label: MATH_TRACK_META.NegativeNumbers.label,
+      description: MATH_TRACK_META.NegativeNumbers.description,
+      count: interactivesForMathTrack("NegativeNumbers").length,
+    },
+    {
+      id: "CoordinatePlane",
+      label: MATH_TRACK_META.CoordinatePlane.label,
+      description: MATH_TRACK_META.CoordinatePlane.description,
+      count: interactivesForMathTrack("CoordinatePlane").length,
+    },
+    {
+      id: "Percents",
+      label: MATH_TRACK_META.Percents.label,
+      description: MATH_TRACK_META.Percents.description,
+      count: interactivesForMathTrack("Percents").length,
+    },
+    {
+      id: "ProportionalReasoning",
+      label: MATH_TRACK_META.ProportionalReasoning.label,
+      description: MATH_TRACK_META.ProportionalReasoning.description,
+      count: interactivesForMathTrack("ProportionalReasoning").length,
+    },
+    {
+      id: "Featured",
+      label: MATH_TRACK_META.Featured.label,
+      description: MATH_TRACK_META.Featured.description,
+      count: interactivesForMathTrack("Featured").length,
+    },
+  ];
+
+  return (
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-8">
+      {tracks.map((track) => {
+        const selected = active === track.id;
+        const style =
+          track.id === "All"
+            ? { accent: "from-blue-400/15 to-indigo-500/5", border: "border-primary" }
+            : {
+                accent: MATH_TRACK_META[track.id as Exclude<MathTrackFilter, "All">].accent,
+                border: MATH_TRACK_META[track.id as Exclude<MathTrackFilter, "All">].border,
+              };
+
+        return (
+          <button
+            key={track.id}
+            type="button"
+            onClick={() => onChange(track.id)}
+            className={cn(
+              "flex flex-col rounded-2xl border bg-gradient-to-br p-4 text-left transition hover:shadow-md",
+              style.accent,
+              selected ? cn("ring-2 ring-primary/30 shadow-sm", style.border) : "border-border/80 hover:border-primary/30",
+            )}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <span className="text-sm font-extrabold text-foreground">{track.label}</span>
+              <span className="shrink-0 rounded-full bg-background/80 px-2 py-0.5 text-[11px] font-bold tabular-nums text-muted-foreground ring-1 ring-border/50">
+                {track.count}
+              </span>
+            </div>
+            <p className="mt-1.5 flex-1 text-xs font-medium leading-relaxed text-muted-foreground">
+              {track.description}
+            </p>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function MathTrackOverview({
+  onSelectTrack,
+}: {
+  onSelectTrack: (track: Exclude<MathTrackFilter, "All">) => void;
+}) {
+  const previews: {
+    track: Exclude<MathTrackFilter, "All">;
+    levels: number;
+    themeSample: string;
+  }[] = [
+    { track: "Fractions", levels: 5, themeSample: FRACTION_LEVEL_THEMES[1] },
+    { track: "Algebra", levels: 13, themeSample: ALGEBRA_LEVEL_THEMES[1] },
+    { track: "NegativeNumbers", levels: 8, themeSample: NEGATIVE_NUMBERS_LEVEL_THEMES[1] },
+    { track: "CoordinatePlane", levels: 5, themeSample: COORDINATE_PLANE_LEVEL_THEMES[1] },
+    { track: "Percents", levels: 5, themeSample: PERCENTS_LEVEL_THEMES[1] },
+    { track: "ProportionalReasoning", levels: 7, themeSample: PROPORTIONAL_REASONING_LEVEL_THEMES[1] },
+    { track: "Featured", levels: 0, themeSample: "Gears, quadratics & more" },
+  ];
+
+  return (
+    <div className="space-y-10">
+      {previews.map(({ track, levels, themeSample }) => {
+        const meta = MATH_TRACK_META[track];
+        const items = interactivesForMathTrack(track);
+        const preview = items.slice(0, 3);
+
+        return (
+          <div key={track} className="rounded-3xl border border-border/80 bg-muted/20 p-5 sm:p-6">
+            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h3 className="text-xl font-extrabold text-foreground">{meta.label}</h3>
+                <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{meta.description}</p>
+                {levels > 0 ? (
+                  <p className="mt-2 text-xs font-bold text-muted-foreground">
+                    {levels} levels · starts with {themeSample}
+                  </p>
+                ) : null}
+              </div>
+              <button
+                type="button"
+                onClick={() => onSelectTrack(track)}
+                className="inline-flex w-fit items-center gap-1 rounded-xl border border-border/80 bg-card px-4 py-2 text-sm font-extrabold text-primary transition hover:border-primary/40 hover:bg-primary/5"
+              >
+                View all {items.length}
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+            <LessonGrid items={preview} />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function MathBrowseContent({
+  items,
+  mathTrack,
+  curriculumLevel,
+  onSelectTrack,
+}: {
+  items: InteractiveCatalogItem[];
+  mathTrack: MathTrackFilter;
+  curriculumLevel: CurriculumLevelFilter;
+  onSelectTrack: (track: Exclude<MathTrackFilter, "All">) => void;
+}) {
+  if (items.length === 0) return null;
+
+  if (mathTrack === "All") {
+    return <MathTrackOverview onSelectTrack={onSelectTrack} />;
+  }
+
+  if (mathTrack === "Featured") {
+    return <LessonGrid items={items} />;
+  }
+
+  const track = mathTrack as CurriculumTrack;
+  const levelGroups = groupCatalogByCurriculumLevel(items);
+
+  if (curriculumLevel !== "All" || levelGroups.length <= 1) {
+    return <LessonGrid items={items} />;
+  }
+
+  const themes = curriculumThemesForTrack(track);
+  const trackBadge = curriculumTrackBadge(track);
+
+  return (
+    <div className="space-y-10">
+      {levelGroups.map(([level, levelItems]) => (
+        <LevelGroupSection
+          key={level}
+          level={level}
+          theme={themes[level as keyof typeof themes] ?? ""}
+          items={levelItems}
+          trackAccent={trackBadge}
+        />
+      ))}
+    </div>
+  );
+}
+
+function CatalogSearch({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="relative mx-auto max-w-xl">
+      <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <input
+        type="search"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="Search lessons by title or topic…"
+        className="w-full rounded-2xl border border-border/80 bg-card py-3 pl-10 pr-10 text-sm font-medium text-foreground shadow-sm placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20"
+      />
+      {value ? (
+        <button
+          type="button"
+          onClick={() => onChange("")}
+          className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
+          aria-label="Clear search"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      ) : null}
+    </div>
+  );
+}
 
 export function InteractivesLanding() {
   const [subjectFilter, setSubjectFilter] = useState<SubjectFilter>("All");
   const [engineFilter, setEngineFilter] = useState<EnginePrimitive | "All">("All");
-  const [fractionLevelFilter, setFractionLevelFilter] = useState<FractionLevelFilter>("All");
-  const [algebraLevelFilter, setAlgebraLevelFilter] = useState<AlgebraLevelFilter>("All");
+  const [mathTrackFilter, setMathTrackFilter] = useState<MathTrackFilter>("All");
+  const [curriculumLevelFilter, setCurriculumLevelFilter] = useState<CurriculumLevelFilter>("All");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const filtered = useMemo(() => {
     let items = interactivesForSubject(subjectFilter);
-    if (engineFilter !== "All") {
-      items = items.filter((item) => item.primitives.includes(engineFilter));
+
+    if (subjectFilter === "All" || subjectFilter === "Math") {
+      if (mathTrackFilter !== "All") {
+        items = interactivesForMathTrack(mathTrackFilter).filter((item) =>
+          subjectFilter === "All" ? true : item.subject === "Math",
+        );
+      }
+      if (
+        (mathTrackFilter === "Fractions" ||
+          mathTrackFilter === "Algebra" ||
+          mathTrackFilter === "NegativeNumbers" ||
+          mathTrackFilter === "CoordinatePlane" ||
+          mathTrackFilter === "Percents" ||
+          mathTrackFilter === "ProportionalReasoning") &&
+        curriculumLevelFilter !== "All"
+      ) {
+        items = filterByCurriculumLevel(items, mathTrackFilter, curriculumLevelFilter);
+      }
     }
-    if (subjectFilter === "Math" && fractionLevelFilter !== "All") {
-      const fractionIds = new Set(interactivesForFractionLevel(fractionLevelFilter).map((i) => i.id));
-      items = items.filter((item) => fractionIds.has(item.id));
-    }
-    if (subjectFilter === "Math" && algebraLevelFilter !== "All") {
-      const algebraIds = new Set(interactivesForAlgebraLevel(algebraLevelFilter).map((i) => i.id));
-      items = items.filter((item) => algebraIds.has(item.id));
-    }
-    return items;
-  }, [subjectFilter, engineFilter, fractionLevelFilter, algebraLevelFilter]);
+
+    return searchCatalogItems(items, searchQuery);
+  }, [subjectFilter, mathTrackFilter, curriculumLevelFilter, searchQuery]);
+
+  const isSearchMode = searchQuery.trim().length > 0;
+  const isMathBrowse = subjectFilter === "All" || subjectFilter === "Math";
+  const showMathTracks = isMathBrowse && !isSearchMode;
+  const showLevelSelect =
+    showMathTracks &&
+    (mathTrackFilter === "Fractions" ||
+      mathTrackFilter === "Algebra" ||
+      mathTrackFilter === "NegativeNumbers" ||
+      mathTrackFilter === "CoordinatePlane" ||
+      mathTrackFilter === "Percents" ||
+      mathTrackFilter === "ProportionalReasoning");
 
   const groupedBySubject = useMemo(() => {
-    const subjects = subjectFilter === "All"
-      ? (["Math", "Physics", "Biology", "Chemistry"] as InteractiveSubject[])
-      : [subjectFilter];
+    if (isSearchMode) {
+      const subjects =
+        subjectFilter === "All"
+          ? (["Math", "Physics", "Biology", "Chemistry"] as InteractiveSubject[])
+          : [subjectFilter];
+      return subjects
+        .map((subject) => ({
+          subject,
+          items: filtered.filter((i) => i.subject === subject),
+        }))
+        .filter((g) => g.items.length > 0);
+    }
+
+    if (isMathBrowse && subjectFilter === "Math") {
+      return [];
+    }
+
+    const subjects =
+      subjectFilter === "All"
+        ? (["Math", "Physics", "Biology", "Chemistry"] as InteractiveSubject[])
+        : [subjectFilter];
     return subjects
       .map((subject) => ({
         subject,
         items: filtered.filter((i) => i.subject === subject),
       }))
-      .filter((g) => g.items.length > 0);
-  }, [subjectFilter, filtered]);
+      .filter((g) => g.items.length > 0 && g.subject !== "Math");
+  }, [subjectFilter, filtered, isSearchMode, isMathBrowse]);
+
+  const mathItems = useMemo(() => {
+    if (!isMathBrowse || isSearchMode) return [];
+    return filtered.filter((i) => i.subject === "Math");
+  }, [filtered, isMathBrowse, isSearchMode]);
+
+  const hasActiveFilters =
+    subjectFilter !== "All" ||
+    mathTrackFilter !== "All" ||
+    curriculumLevelFilter !== "All" ||
+    searchQuery.trim().length > 0;
+
+  const clearFilters = () => {
+    setSubjectFilter("All");
+    setMathTrackFilter("All");
+    setCurriculumLevelFilter("All");
+    setSearchQuery("");
+  };
+
+  const handleSubjectChange = (id: SubjectFilter) => {
+    setSubjectFilter(id);
+    if (id !== "Math" && id !== "All") {
+      setMathTrackFilter("All");
+      setCurriculumLevelFilter("All");
+    }
+  };
+
+  const handleMathTrackChange = (track: MathTrackFilter) => {
+    setMathTrackFilter(track);
+    setCurriculumLevelFilter("All");
+  };
 
   const totalCount = INTERACTIVE_CATALOG.length;
   const subjectCount = Object.keys(SUBJECT_META).length;
@@ -369,27 +717,24 @@ LESSON JSON ────►├─ Balance Scale
                 Browse by subject
               </h2>
               <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-                Like Brilliant&apos;s course catalog — organized by discipline so you can jump straight to
-                what you want to master.
+                Pick a subject, explore a math track, or search — jump straight to what you want to master.
               </p>
             </div>
           </ScrollReveal>
 
+          <div className="mb-6">
+            <CatalogSearch value={searchQuery} onChange={setSearchQuery} />
+          </div>
+
           {/* Subject tabs */}
-          <div className="mb-8 flex flex-wrap justify-center gap-2">
+          <div className="mb-6 flex flex-wrap justify-center gap-2">
             {SUBJECT_TABS.map((tab) => {
               const count = tab.id === "All" ? totalCount : countBySubject(tab.id);
               return (
                 <button
                   key={tab.id}
                   type="button"
-                  onClick={() => {
-                    setSubjectFilter(tab.id);
-                    if (tab.id !== "Math") {
-                      setFractionLevelFilter("All");
-                      setAlgebraLevelFilter("All");
-                    }
-                  }}
+                  onClick={() => handleSubjectChange(tab.id)}
                   className={cn(
                     "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-extrabold transition",
                     subjectFilter === tab.id
@@ -404,69 +749,119 @@ LESSON JSON ────►├─ Balance Scale
             })}
           </div>
 
-          {subjectFilter === "Math" ? (
-            <div className="mb-8 space-y-3">
-              <p className="text-center text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                Fractions track
-              </p>
-              <div className="flex flex-wrap justify-center gap-2">
-                {FRACTION_LEVEL_TABS.map((tab) => {
-                  const count =
-                    tab.id === "All"
-                      ? interactivesForFractionLevel("All").length
-                      : interactivesForFractionLevel(tab.id).length;
-                  return (
-                    <button
-                      key={`frac-${String(tab.id)}`}
-                      type="button"
-                      onClick={() => {
-                        setFractionLevelFilter(tab.id);
-                        setAlgebraLevelFilter("All");
-                      }}
-                      className={cn(
-                        "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-extrabold transition",
-                        fractionLevelFilter === tab.id
-                          ? "border-sky-500 bg-sky-500/10 text-sky-700 dark:text-sky-300"
-                          : "border-border/80 bg-card text-muted-foreground hover:border-sky-400/40 hover:text-foreground",
-                      )}
-                    >
-                      {tab.label}
-                      <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] tabular-nums">{count}</span>
-                    </button>
-                  );
-                })}
-              </div>
-              <p className="text-center text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                Algebra &amp; unknowns track
-              </p>
-              <div className="flex flex-wrap justify-center gap-2">
-                {ALGEBRA_LEVEL_TABS.map((tab) => {
-                  const count =
-                    tab.id === "All"
-                      ? interactivesForAlgebraLevel("All").length
-                      : interactivesForAlgebraLevel(tab.id).length;
-                  return (
-                    <button
-                      key={`alg-${String(tab.id)}`}
-                      type="button"
-                      onClick={() => {
-                        setAlgebraLevelFilter(tab.id);
-                        setFractionLevelFilter("All");
-                      }}
-                      className={cn(
-                        "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-extrabold transition",
-                        algebraLevelFilter === tab.id
-                          ? "border-indigo-500 bg-indigo-500/10 text-indigo-700 dark:text-indigo-300"
-                          : "border-border/80 bg-card text-muted-foreground hover:border-indigo-400/40 hover:text-foreground",
-                      )}
-                    >
-                      {tab.label}
-                      <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] tabular-nums">{count}</span>
-                    </button>
-                  );
-                })}
-              </div>
+          {showMathTracks ? (
+            <div className="mb-8 space-y-4">
+              <p className="text-center text-sm font-bold text-muted-foreground">Math tracks</p>
+              <MathTrackPicker active={mathTrackFilter} onChange={handleMathTrackChange} />
+
+              {showLevelSelect ? (
+                <div className="mx-auto flex max-w-md flex-col gap-2 pt-2">
+                  <label htmlFor="curriculum-level" className="text-center text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                    Filter by level
+                  </label>
+                  <select
+                    id="curriculum-level"
+                    value={curriculumLevelFilter === "All" ? "All" : String(curriculumLevelFilter)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setCurriculumLevelFilter(val === "All" ? "All" : Number(val));
+                    }}
+                    className="w-full rounded-xl border border-border/80 bg-card px-4 py-2.5 text-sm font-bold text-foreground shadow-sm focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  >
+                    <option value="All">
+                      All levels ({interactivesForMathTrack(mathTrackFilter).length} lessons)
+                    </option>
+                    {levelOptionsForTrack(mathTrackFilter as CurriculumTrack).map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : null}
             </div>
+          ) : null}
+
+          {hasActiveFilters ? (
+            <div className="mb-8 flex flex-wrap items-center justify-center gap-2 text-sm">
+              <span className="font-bold text-muted-foreground">
+                {filtered.length} result{filtered.length === 1 ? "" : "s"}
+              </span>
+              {searchQuery.trim() ? (
+                <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-bold text-foreground">
+                  “{searchQuery.trim()}”
+                </span>
+              ) : null}
+              {subjectFilter !== "All" ? (
+                <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-bold text-foreground">
+                  {subjectFilter}
+                </span>
+              ) : null}
+              {mathTrackFilter !== "All" ? (
+                <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-bold text-foreground">
+                  {MATH_TRACK_META[mathTrackFilter as Exclude<MathTrackFilter, "All">].label}
+                </span>
+              ) : null}
+              {curriculumLevelFilter !== "All" ? (
+                <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-bold text-foreground">
+                  Level {curriculumLevelFilter}
+                </span>
+              ) : null}
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="text-xs font-extrabold text-primary underline underline-offset-2 hover:opacity-80"
+              >
+                Clear filters
+              </button>
+            </div>
+          ) : null}
+
+          {filtered.length === 0 ? (
+            <p className="py-12 text-center text-muted-foreground">
+              No lessons match your search. Try different keywords or clear filters.
+            </p>
+          ) : null}
+
+          {isMathBrowse && mathItems.length > 0 ? (
+            <ScrollReveal>
+              {subjectFilter === "All" ? (
+                <section id="math" className="scroll-mt-24 mb-14">
+                  <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                    <div className="flex items-start gap-4">
+                      <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-400/20 to-indigo-500/10 shadow-sm ring-1 ring-border/60">
+                        <SUBJECT_META.Math.icon className="h-7 w-7 text-primary" strokeWidth={2.5} />
+                      </span>
+                      <div>
+                        <h2 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">Math</h2>
+                        <p className="mt-1 max-w-xl text-sm font-medium text-muted-foreground">
+                          {SUBJECT_META.Math.description}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="inline-flex w-fit rounded-full bg-blue-500/15 px-3 py-1 text-xs font-extrabold uppercase text-blue-700 dark:text-blue-300">
+                      {mathItems.length} shown
+                    </span>
+                  </div>
+                  <MathBrowseContent
+                    items={mathItems}
+                    mathTrack={mathTrackFilter}
+                    curriculumLevel={curriculumLevelFilter}
+                    onSelectTrack={(track) => {
+                      handleMathTrackChange(track);
+                      document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" });
+                    }}
+                  />
+                </section>
+              ) : (
+                <MathBrowseContent
+                  items={mathItems}
+                  mathTrack={mathTrackFilter}
+                  curriculumLevel={curriculumLevelFilter}
+                  onSelectTrack={handleMathTrackChange}
+                />
+              )}
+            </ScrollReveal>
           ) : null}
 
           <div className="space-y-14">
@@ -476,12 +871,6 @@ LESSON JSON ────►├─ Balance Scale
               </ScrollReveal>
             ))}
           </div>
-
-          {filtered.length === 0 ? (
-            <p className="py-12 text-center text-muted-foreground">
-              No interactives match this filter. Try a different subject or engine primitive.
-            </p>
-          ) : null}
         </section>
 
         {/* CTA */}

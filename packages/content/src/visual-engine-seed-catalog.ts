@@ -25,6 +25,10 @@ import { MATH_GEAR_ALGEBRA_LESSON_SEED } from "./visual-engine-math-gear-algebra
 import { MATH_QUADRATIC_EQUATIONS_LESSON_SEED } from "./visual-engine-math-quadratic-equations-lesson";
 import { MATH_FRACTIONS_CURRICULUM_SEEDS } from "./math-fractions";
 import { MATH_ALGEBRA_CURRICULUM_SEEDS } from "./math-algebra";
+import { MATH_INTEGERS_CURRICULUM_SEEDS } from "./math-integers";
+import { MATH_COORDINATE_PLANE_CURRICULUM_SEEDS } from "./math-coordinate-plane";
+import { MATH_PERCENTS_CURRICULUM_SEEDS } from "./math-percents";
+import { MATH_PROPORTIONAL_REASONING_CURRICULUM_SEEDS } from "./math-proportional-reasoning";
 import { BIOLOGY_NATURAL_SELECTION_LESSON_SEED } from "./visual-engine-biology-natural-selection-lesson";
 import { PHYSICS_WORK_ENERGY_LESSON_SEED } from "./visual-engine-physics-work-energy-lesson";
 
@@ -57,6 +61,10 @@ export const VISUAL_ENGINE_LESSON_SEEDS = [
   MATH_QUADRATIC_EQUATIONS_LESSON_SEED,
   ...MATH_FRACTIONS_CURRICULUM_SEEDS,
   ...MATH_ALGEBRA_CURRICULUM_SEEDS,
+  ...MATH_INTEGERS_CURRICULUM_SEEDS,
+  ...MATH_COORDINATE_PLANE_CURRICULUM_SEEDS,
+  ...MATH_PERCENTS_CURRICULUM_SEEDS,
+  ...MATH_PROPORTIONAL_REASONING_CURRICULUM_SEEDS,
   BIOLOGY_NATURAL_SELECTION_LESSON_SEED,
   PHYSICS_WORK_ENERGY_LESSON_SEED,
 ] as const;

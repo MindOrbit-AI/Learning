@@ -38,5 +38,13 @@ export * from "./visual-engine-math-gear-algebra-lesson";
 export * from "./visual-engine-math-quadratic-equations-lesson";
 export * from "./math-fractions";
 export * from "./math-algebra";
+export * from "./math-integers";
+export * from "./math-coordinate-plane";
+export { MATH_PERCENTS_CURRICULUM_SEEDS, MATH_PERCENTS_CURRICULUM_COUNT } from "./math-percents";
+export {
+  MATH_PROPORTIONAL_REASONING_CURRICULUM_SEEDS,
+  MATH_PROPORTIONAL_REASONING_CURRICULUM_COUNT,
+} from "./math-proportional-reasoning";
+export type { PropLessonSeed } from "./math-proportional-reasoning/_helpers";
 export * from "./visual-engine-biology-natural-selection-lesson";
 export * from "./visual-engine-physics-work-energy-lesson";

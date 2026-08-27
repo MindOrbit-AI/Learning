@@ -1,0 +1,168 @@
+import { addIntegersLesson, lesson, levelReviewLesson, matchScene, mcScene, nlScene } from "./_helpers";
+
+/** Level 1 — Positives and Negatives: intro to signed numbers. */
+export const MATH_INTEGERS_LEVEL_1_SEEDS = [
+  lesson(
+    1,
+    "positives-and-negatives",
+    "Positives and Negatives",
+    "beginner",
+    [
+      mcScene(
+        "l1-pos-1",
+        "Above and below zero",
+        "Numbers greater than zero are called…",
+        ["Positive", "Negative", "Neutral", "Opposite"],
+        "Positive",
+        "l1_positive_label",
+        {
+          correct: "Positive numbers are to the right of 0 on the number line.",
+          incorrect: "Greater than zero → positive.",
+          hint: "Think +1, +2, +3…",
+        },
+      ),
+      mcScene(
+        "l1-pos-2",
+        "Below zero",
+        "Numbers less than zero are called…",
+        ["Negative", "Positive", "Fractions", "Whole numbers"],
+        "Negative",
+        "l1_negative_label",
+        {
+          correct: "Negative numbers sit left of 0.",
+          incorrect: "Less than zero → negative.",
+          hint: "−1, −2, −3…",
+        },
+      ),
+      nlScene(
+        "l1-pos-3",
+        "Plot +3",
+        "Place +3 on the number line.",
+        3,
+        "l1_plot_positive",
+        {
+          correct: "+3 is three units right of 0.",
+          incorrect: "Move right from zero.",
+          hint: "Three ticks to the right.",
+        },
+      ),
+    ],
+    nlScene(
+      "l1-pos-final",
+      "Mastery check",
+      "Place −2 on the number line.",
+      -2,
+      "l1_pos_mastery",
+      { correct: "−2 is two left of 0.", incorrect: "Left of zero for negatives.", hint: "Two ticks left." },
+    ),
+  ),
+  lesson(
+    1,
+    "negative-numbers",
+    "Negative Numbers",
+    "beginner",
+    [
+      mcScene(
+        "l1-neg-1",
+        "Reading negatives",
+        "Which integer is negative?",
+        ["−4", "4", "0", "2"],
+        "−4",
+        "l1_read_negative",
+        { correct: "−4 < 0.", incorrect: "Negative means a minus sign.", hint: "Look for −." },
+      ),
+      nlScene("l1-neg-2", "Plot −5", "Place −5 on the number line.", -5, "l1_plot_neg5", {
+        correct: "Five units left of 0.",
+        incorrect: "Left side for negatives.",
+        hint: "−5.",
+      }),
+      mcScene(
+        "l1-neg-3",
+        "Temperature drop",
+        "It was 3° and dropped 5°. The new temperature is…",
+        ["−2", "2", "8", "−8"],
+        "−2",
+        "l1_temp_context",
+        { correct: "3 − 5 = −2.", incorrect: "Subtract the drop.", hint: "3 + (−5)." },
+      ),
+    ],
+    mcScene(
+      "l1-neg-final",
+      "Mastery check",
+      "Which is farther below zero: −3 or −7?",
+      ["−7", "−3", "Equal", "3"],
+      "−7",
+      "l1_neg_mastery",
+      { correct: "−7 is left of −3 — farther below zero.", incorrect: "More negative = farther left.", hint: "−7 < −3." },
+    ),
+  ),
+  lesson(
+    1,
+    "making-integers",
+    "Making Integers",
+    "beginner",
+    [
+      matchScene(
+        "l1-make-1",
+        "Sign pairs",
+        "Match each description to the correct integer.",
+        [
+          { id: "p3", label: "+3" },
+          { id: "n3", label: "−3" },
+          { id: "z", label: "0" },
+          { id: "p1", label: "+1" },
+        ],
+        [
+          { id: "above", label: "3 above zero" },
+          { id: "below", label: "3 below zero" },
+          { id: "origin", label: "At zero" },
+        ],
+        { above: "p3", below: "n3", origin: "z" },
+        "l1_make_match",
+        {
+          correct: "Above → +3, below → −3, origin → 0.",
+          incorrect: "Match direction to sign.",
+          hint: "Above zero is positive.",
+        },
+      ),
+      mcScene(
+        "l1-make-2",
+        "Debt model",
+        "Owing $5 can be written as…",
+        ["−5", "+5", "0", "5 − 5"],
+        "−5",
+        "l1_debt",
+        { correct: "Debt is negative asset.", incorrect: "Owing is below zero.", hint: "−5 dollars." },
+      ),
+      nlScene("l1-make-3", "Build −4", "Place −4 on the number line.", -4, "l1_make_nl", {
+        correct: "−4 made.",
+        incorrect: "Four left of 0.",
+        hint: "−4.",
+      }),
+    ],
+    matchScene(
+      "l1-make-final",
+      "Mastery check",
+      "Match +2 and −2 to their positions.",
+      [
+        { id: "p2", label: "+2" },
+        { id: "n2", label: "−2" },
+        { id: "p5", label: "+5" },
+      ],
+      [
+        { id: "right", label: "2 right of 0" },
+        { id: "left", label: "2 left of 0" },
+      ],
+      { right: "p2", left: "n2" },
+      "l1_make_mastery",
+      { correct: "+2 right, −2 left.", incorrect: "Sign tells direction.", hint: "Mirror across 0." },
+    ),
+  ),
+  addIntegersLesson(1, "addition", "Addition", 3, -2),
+  levelReviewLesson(1, "level-review", "Level Review", [
+    { prompt: "Which is negative?", choices: ["−1", "1", "0", "2"], answer: "−1" },
+    { prompt: "3 + (−1) = ?", choices: ["2", "4", "−2", "−4"], answer: "2" },
+    { prompt: "Place −3: which direction from 0?", choices: ["Left", "Right", "Up", "No move"], answer: "Left" },
+    { prompt: "−2 + 5 = ?", choices: ["3", "−3", "7", "−7"], answer: "3" },
+  ]),
+];
