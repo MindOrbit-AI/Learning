@@ -179,6 +179,8 @@ Zod mirrors TS in `apps/web/src/lib/scene-schema.ts` and `lesson-schema.ts`.
 
 ## Adding a new seed lesson
 
+For a **single standalone lesson**, follow the steps below. For a **full multi-level math track** (Fractions-style curriculum with dozens of lessons), see **[adding-math-curriculum.md](./adding-math-curriculum.md)**.
+
 1. Add a new file under **`packages/content/src/`** (e.g. `visual-engine-mytopic-lesson.ts`) exporting a `*LESSON_SEED` object matching the Zod/`VisualLesson` shape.
 2. Register it in **`packages/content/src/visual-engine-seed-catalog.ts`** (`VISUAL_ENGINE_LESSON_SEEDS`).
 3. Re-export from **`packages/content/src/index.ts`** if you want a direct package export (optional; catalog re-export is enough for seeds).
