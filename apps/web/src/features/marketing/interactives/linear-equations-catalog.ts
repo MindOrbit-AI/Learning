@@ -1,10 +1,10 @@
-import { Scale } from "lucide-react";
+import { GitBranch } from "lucide-react";
 import type { InteractiveCatalogItem } from "./catalog";
-import type { AlgebraLessonSeed } from "@mindorbit/content";
+import type { LineqLessonSeed } from "@mindorbit/content";
 
 const LEVEL_ACCENT: Record<number, { accent: string; badge: string }> = {
   1: { accent: "from-sky-400/20 to-blue-500/10", badge: "bg-sky-500/15 text-sky-700 dark:text-sky-300" },
-  2: { accent: "from-cyan-400/20 to-teal-500/10", badge: "bg-cyan-500/15 text-cyan-700 dark:text-cyan-300" },
+  2: { accent: "from-cyan-400/20 to-teal-500/10", badge: "bg-teal-500/15 text-teal-700 dark:text-teal-300" },
   3: { accent: "from-emerald-400/20 to-green-500/10", badge: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300" },
   4: { accent: "from-lime-400/20 to-green-500/10", badge: "bg-lime-600/15 text-lime-800 dark:text-lime-300" },
   5: { accent: "from-amber-400/20 to-orange-500/10", badge: "bg-amber-500/15 text-amber-700 dark:text-amber-300" },
@@ -18,7 +18,7 @@ const LEVEL_ACCENT: Record<number, { accent: string; badge: string }> = {
   13: { accent: "from-zinc-400/20 to-slate-500/10", badge: "bg-zinc-500/15 text-zinc-700 dark:text-zinc-300" },
 };
 
-function primitivesForSeed(seed: AlgebraLessonSeed): InteractiveCatalogItem["primitives"] {
+function primitivesForSeed(seed: LineqLessonSeed): InteractiveCatalogItem["primitives"] {
   const set = new Set<InteractiveCatalogItem["primitives"][number]>();
   for (const scene of [...seed.scenes, seed.finalMasteryCheck]) {
     switch (scene.type) {
@@ -54,7 +54,7 @@ function primitivesForSeed(seed: AlgebraLessonSeed): InteractiveCatalogItem["pri
   return [...set];
 }
 
-function sceneCategoriesForSeed(seed: AlgebraLessonSeed): InteractiveCatalogItem["sceneCategories"] {
+function sceneCategoriesForSeed(seed: LineqLessonSeed): InteractiveCatalogItem["sceneCategories"] {
   const set = new Set<InteractiveCatalogItem["sceneCategories"][number]>();
   for (const scene of [...seed.scenes, seed.finalMasteryCheck]) {
     if (scene.type === "number_line" || scene.type === "graph_plot") set.add("spatial");
@@ -65,8 +65,8 @@ function sceneCategoriesForSeed(seed: AlgebraLessonSeed): InteractiveCatalogItem
   return [...set];
 }
 
-export function algebraLessonToCatalogItem(seed: AlgebraLessonSeed): InteractiveCatalogItem {
-  const style = LEVEL_ACCENT[seed.algebraTrackLevel] ?? LEVEL_ACCENT[1]!;
+export function lineqLessonToCatalogItem(seed: LineqLessonSeed): InteractiveCatalogItem {
+  const style = LEVEL_ACCENT[seed.lineqTrackLevel] ?? LEVEL_ACCENT[1]!;
   return {
     id: seed.id,
     title: seed.title,
@@ -77,12 +77,12 @@ export function algebraLessonToCatalogItem(seed: AlgebraLessonSeed): Interactive
     primitives: primitivesForSeed(seed),
     sceneCategories: sceneCategoriesForSeed(seed),
     durationMin: 8 + seed.scenes.length * 2,
-    icon: Scale,
+    icon: GitBranch,
     accent: style.accent,
     badge: style.badge,
   };
 }
 
-export function buildAlgebraCatalogItems(seeds: AlgebraLessonSeed[]): InteractiveCatalogItem[] {
-  return seeds.map(algebraLessonToCatalogItem);
+export function buildLinearEquationsCatalogItems(seeds: LineqLessonSeed[]): InteractiveCatalogItem[] {
+  return seeds.map(lineqLessonToCatalogItem);
 }

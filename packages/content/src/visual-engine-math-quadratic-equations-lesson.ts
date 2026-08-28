@@ -2,7 +2,7 @@
 export const MATH_QUADRATIC_EQUATIONS_LESSON_SEED = {
   id: "lesson-quadratic-equations-drag",
   title: "Quadratic equations by drag & drop",
-  subject: "Math",
+  subject: "Algebra",
   topic: "Quadratic equations",
   level: "beginner" as const,
   scenes: [

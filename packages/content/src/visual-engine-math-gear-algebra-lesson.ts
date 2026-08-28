@@ -2,7 +2,7 @@
 export const MATH_GEAR_ALGEBRA_LESSON_SEED = {
   id: "lesson-gear-algebra",
   title: "Algebra with gears",
-  subject: "Math",
+  subject: "Algebra",
   topic: "Linear equations",
   level: "beginner" as const,
   scenes: [

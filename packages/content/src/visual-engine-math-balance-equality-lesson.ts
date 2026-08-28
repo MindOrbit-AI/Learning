@@ -2,7 +2,7 @@
 export const MATH_BALANCE_EQUALITY_LESSON_SEED = {
   id: "lesson-balance-scale-equality",
   title: "Balance scale & equality",
-  subject: "Math",
+  subject: "Algebra",
   topic: "Equality & operations",
   level: "beginner" as const,
   scenes: [

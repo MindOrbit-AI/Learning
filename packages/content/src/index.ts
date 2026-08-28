@@ -46,5 +46,15 @@ export {
   MATH_PROPORTIONAL_REASONING_CURRICULUM_COUNT,
 } from "./math-proportional-reasoning";
 export type { PropLessonSeed } from "./math-proportional-reasoning/_helpers";
+export {
+  ALGEBRA_LINEAR_EQUATIONS_CURRICULUM_SEEDS,
+  ALGEBRA_LINEAR_EQUATIONS_CURRICULUM_COUNT,
+} from "./algebra-linear-equations";
+export type { LineqLessonSeed } from "./algebra-linear-equations/_helpers";
+export {
+  ALGEBRA_COORDINATE_GEOMETRY_CURRICULUM_SEEDS,
+  ALGEBRA_COORDINATE_GEOMETRY_CURRICULUM_COUNT,
+} from "./algebra-coordinate-geometry";
+export type { CgeoLessonSeed } from "./algebra-coordinate-geometry/_helpers";
 export * from "./visual-engine-biology-natural-selection-lesson";
 export * from "./visual-engine-physics-work-energy-lesson";

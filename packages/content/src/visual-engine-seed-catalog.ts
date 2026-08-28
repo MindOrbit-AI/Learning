@@ -29,6 +29,8 @@ import { MATH_INTEGERS_CURRICULUM_SEEDS } from "./math-integers";
 import { MATH_COORDINATE_PLANE_CURRICULUM_SEEDS } from "./math-coordinate-plane";
 import { MATH_PERCENTS_CURRICULUM_SEEDS } from "./math-percents";
 import { MATH_PROPORTIONAL_REASONING_CURRICULUM_SEEDS } from "./math-proportional-reasoning";
+import { ALGEBRA_LINEAR_EQUATIONS_CURRICULUM_SEEDS } from "./algebra-linear-equations";
+import { ALGEBRA_COORDINATE_GEOMETRY_CURRICULUM_SEEDS } from "./algebra-coordinate-geometry";
 import { BIOLOGY_NATURAL_SELECTION_LESSON_SEED } from "./visual-engine-biology-natural-selection-lesson";
 import { PHYSICS_WORK_ENERGY_LESSON_SEED } from "./visual-engine-physics-work-energy-lesson";
 
@@ -65,6 +67,8 @@ export const VISUAL_ENGINE_LESSON_SEEDS = [
   ...MATH_COORDINATE_PLANE_CURRICULUM_SEEDS,
   ...MATH_PERCENTS_CURRICULUM_SEEDS,
   ...MATH_PROPORTIONAL_REASONING_CURRICULUM_SEEDS,
+  ...ALGEBRA_LINEAR_EQUATIONS_CURRICULUM_SEEDS,
+  ...ALGEBRA_COORDINATE_GEOMETRY_CURRICULUM_SEEDS,
   BIOLOGY_NATURAL_SELECTION_LESSON_SEED,
   PHYSICS_WORK_ENERGY_LESSON_SEED,
 ] as const;
@@ -75,5 +79,6 @@ export function subjectSlugForVisualLessonSeed(seed: { subject: string }): strin
   if (s === "physics") return "physics";
   if (s === "biology") return "biology";
   if (s === "chemistry") return "chemistry";
+  if (s === "algebra") return "algebra";
   return "algebra";
 }

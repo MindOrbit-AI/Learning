@@ -17,19 +17,21 @@ import {
 import type { SceneCategory } from "@/types/scene";
 import type { EnginePrimitive } from "@/types/interactive-engine";
 import { ENGINE_PRIMITIVE_COUNT } from "./engine-catalog";
-import { MATH_FRACTIONS_CURRICULUM_SEEDS, MATH_ALGEBRA_CURRICULUM_SEEDS, MATH_INTEGERS_CURRICULUM_SEEDS, MATH_COORDINATE_PLANE_CURRICULUM_SEEDS, MATH_PERCENTS_CURRICULUM_SEEDS, MATH_PROPORTIONAL_REASONING_CURRICULUM_SEEDS } from "@mindorbit/content";
+import { MATH_FRACTIONS_CURRICULUM_SEEDS, MATH_ALGEBRA_CURRICULUM_SEEDS, MATH_INTEGERS_CURRICULUM_SEEDS, MATH_COORDINATE_PLANE_CURRICULUM_SEEDS, MATH_PERCENTS_CURRICULUM_SEEDS, MATH_PROPORTIONAL_REASONING_CURRICULUM_SEEDS, ALGEBRA_LINEAR_EQUATIONS_CURRICULUM_SEEDS, ALGEBRA_COORDINATE_GEOMETRY_CURRICULUM_SEEDS } from "@mindorbit/content";
 import { buildFractionsCatalogItems } from "./fractions-catalog";
 import { buildAlgebraCatalogItems } from "./algebra-catalog";
 import { buildIntegersCatalogItems } from "./integers-catalog";
 import { buildCoordinatePlaneCatalogItems } from "./coordinate-plane-catalog";
 import { buildPercentsCatalogItems } from "./percents-catalog";
 import { buildProportionalReasoningCatalogItems } from "./proportional-reasoning-catalog";
+import { buildLinearEquationsCatalogItems } from "./linear-equations-catalog";
+import { buildCoordinateGeometryCatalogItems } from "./coordinate-geometry-catalog";
 
 export type { EnginePrimitive };
 export { ENGINE_PRIMITIVE_COUNT, ENGINE_PRIMITIVE_META, engineLabel } from "./engine-catalog";
 export type { EngineFilter } from "./engine-catalog";
 
-export type InteractiveSubject = "Math" | "Physics" | "Biology" | "Chemistry";
+export type InteractiveSubject = "Math" | "Algebra" | "Physics" | "Biology" | "Chemistry";
 
 export type InteractiveCatalogItem = {
   id: string;
@@ -58,6 +60,14 @@ export const SUBJECT_META: Record<
     icon: Calculator,
     accent: "from-blue-400/20 to-indigo-500/10",
     badge: "bg-blue-500/15 text-blue-700 dark:text-blue-300",
+  },
+  Algebra: {
+    slug: "algebra",
+    description:
+      "Balance scales, solve for unknowns, graph lines, and work through equations step by step.",
+    icon: Scale,
+    accent: "from-indigo-400/20 to-violet-500/10",
+    badge: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300",
   },
   Physics: {
     slug: "physics",
@@ -103,7 +113,7 @@ export const INTERACTIVE_CATALOG: InteractiveCatalogItem[] = [
   {
     id: "lesson-gear-algebra",
     title: "Algebra with gears",
-    subject: "Math",
+    subject: "Algebra",
     topic: "Linear equations",
     level: "Beginner",
     description: "Treat tooth counts as variables — solve d = 3g, g + 18 = d, and proportions by meshing gears.",
@@ -117,7 +127,7 @@ export const INTERACTIVE_CATALOG: InteractiveCatalogItem[] = [
   {
     id: "lesson-quadratic-equations-drag",
     title: "Quadratic equations by drag & drop",
-    subject: "Math",
+    subject: "Algebra",
     topic: "Quadratic equations",
     level: "Beginner",
     description:
@@ -132,7 +142,7 @@ export const INTERACTIVE_CATALOG: InteractiveCatalogItem[] = [
   {
     id: "lesson-balance-scale-equality",
     title: "Balance scale & equality",
-    subject: "Math",
+    subject: "Algebra",
     topic: "Equality & operations",
     level: "Beginner",
     description: "Level the scale with equal totals — 2 + 3 = 5 and the balance property of equality.",
@@ -146,7 +156,7 @@ export const INTERACTIVE_CATALOG: InteractiveCatalogItem[] = [
   {
     id: "lesson-balance-one-step-equations",
     title: "One-step equations on a balance",
-    subject: "Math",
+    subject: "Algebra",
     topic: "Linear equations",
     level: "Beginner",
     description: "Solve x + 3 = 7 and 2x = 8 by placing weights on a balance — algebra you can see.",
@@ -187,6 +197,8 @@ export const INTERACTIVE_CATALOG: InteractiveCatalogItem[] = [
   },
   ...buildFractionsCatalogItems(MATH_FRACTIONS_CURRICULUM_SEEDS),
   ...buildAlgebraCatalogItems(MATH_ALGEBRA_CURRICULUM_SEEDS),
+  ...buildLinearEquationsCatalogItems(ALGEBRA_LINEAR_EQUATIONS_CURRICULUM_SEEDS),
+  ...buildCoordinateGeometryCatalogItems(ALGEBRA_COORDINATE_GEOMETRY_CURRICULUM_SEEDS),
   ...buildIntegersCatalogItems(MATH_INTEGERS_CURRICULUM_SEEDS),
   ...buildCoordinatePlaneCatalogItems(MATH_COORDINATE_PLANE_CURRICULUM_SEEDS),
   ...buildPercentsCatalogItems(MATH_PERCENTS_CURRICULUM_SEEDS),
@@ -208,7 +220,7 @@ export const INTERACTIVE_CATALOG: InteractiveCatalogItem[] = [
   {
     id: "lesson-slope-from-points",
     title: "Slope from two points",
-    subject: "Math",
+    subject: "Algebra",
     topic: "Linear functions",
     level: "Beginner",
     description: "Plot rise and run, read slope from graphs, and connect to rate of change.",
@@ -222,7 +234,7 @@ export const INTERACTIVE_CATALOG: InteractiveCatalogItem[] = [
   {
     id: "lesson-linear-equations-graph",
     title: "Linear equations from graphs",
-    subject: "Math",
+    subject: "Algebra",
     topic: "Linear equations",
     level: "Beginner",
     description: "Place intercepts and slope points, then write y = mx + b from what you see.",
@@ -514,7 +526,7 @@ export function countBySubject(subject: InteractiveSubject) {
   return INTERACTIVE_CATALOG.filter((i) => i.subject === subject).length;
 }
 
-export type MathTrackFilter = "All" | "Fractions" | "Algebra" | "NegativeNumbers" | "CoordinatePlane" | "Percents" | "ProportionalReasoning" | "Featured";
+export type MathTrackFilter = "All" | "Fractions" | "NegativeNumbers" | "CoordinatePlane" | "Percents" | "ProportionalReasoning" | "Featured";
 
 export type CurriculumLevelFilter = "All" | number;
 
@@ -527,12 +539,6 @@ export const MATH_TRACK_META: Record<
     description: "Parts of a whole through comparing, adding, and multiplying fractions.",
     accent: "from-sky-400/20 to-blue-500/10",
     border: "border-sky-400/50",
-  },
-  Algebra: {
-    label: "Algebra & unknowns",
-    description: "Balance scales, substitution, inequalities, systems, and scale reasoning.",
-    accent: "from-indigo-400/20 to-violet-500/10",
-    border: "border-indigo-400/50",
   },
   NegativeNumbers: {
     label: "Negative numbers",
@@ -574,7 +580,7 @@ export const FRACTION_LEVEL_THEMES: Record<1 | 2 | 3 | 4 | 5, string> = {
   5: "Multiplying fractions",
 };
 
-export const ALGEBRA_LEVEL_THEMES: Record<
+export const ALGEBRA_SKILLS_LEVEL_THEMES: Record<
   1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13,
   string
 > = {
@@ -591,6 +597,44 @@ export const ALGEBRA_LEVEL_THEMES: Record<
   11: "Weight reasoning",
   12: "Groups & boxes",
   13: "Constraints",
+};
+
+/** @deprecated Use ALGEBRA_SKILLS_LEVEL_THEMES */
+export const ALGEBRA_LEVEL_THEMES = ALGEBRA_SKILLS_LEVEL_THEMES;
+
+export const LINEAR_EQUATIONS_LEVEL_THEMES: Record<
+  1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13,
+  string
+> = {
+  1: "Variables",
+  2: "Solving equations",
+  3: "Solving inequalities",
+  4: "Combining terms",
+  5: "Negative values",
+  6: "Solving with negatives",
+  7: "Inequalities with negatives",
+  8: "Distributing",
+  9: "Factoring",
+  10: "No or many solutions",
+  11: "Working with fractions",
+  12: "Working with decimals",
+  13: "Multiple inequalities",
+};
+
+export const COORDINATE_GEOMETRY_LEVEL_THEMES: Record<
+  1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10,
+  string
+> = {
+  1: "Distance between points",
+  2: "Estimating distance",
+  3: "Measuring area",
+  4: "Unknown values",
+  5: "Selecting shapes",
+  6: "Pythagoras",
+  7: "Using Pythagoras",
+  8: "Radial distance",
+  9: "Circles",
+  10: "Leaving the origin",
 };
 
 export const NEGATIVE_NUMBERS_LEVEL_THEMES: Record<1 | 2 | 3 | 4 | 5 | 6 | 7 | 8, string> = {
@@ -634,8 +678,128 @@ export function isFractionCurriculumItem(item: InteractiveCatalogItem) {
   return item.topic.startsWith("Fractions (Level");
 }
 
+export type AlgebraTrackFilter = "All" | "LinearEquations" | "CoordinateGeometry" | "AlgebraSkills" | "Featured";
+
+export type AlgebraCurriculumTrack = "LinearEquations" | "CoordinateGeometry" | "AlgebraSkills";
+
+export const ALGEBRA_TRACK_META: Record<
+  Exclude<AlgebraTrackFilter, "All">,
+  { label: string; description: string; accent: string; border: string }
+> = {
+  LinearEquations: {
+    label: "Linear equations",
+    description: "Variables, solving, inequalities, distributing, factoring, fractions, and compound inequalities.",
+    accent: "from-indigo-400/20 to-violet-500/10",
+    border: "border-indigo-400/50",
+  },
+  CoordinateGeometry: {
+    label: "Coordinate geometry",
+    description: "Distance, area, Pythagoras, circles, and equations on the coordinate plane.",
+    accent: "from-teal-400/20 to-cyan-500/10",
+    border: "border-teal-400/50",
+  },
+  AlgebraSkills: {
+    label: "Algebra skills",
+    description: "Balance scales, substitution, systems, elimination, and constraint reasoning.",
+    accent: "from-violet-400/20 to-purple-500/10",
+    border: "border-violet-400/50",
+  },
+  Featured: {
+    label: "Featured algebra",
+    description: "Quadratics, gears, graphing lines, and balance puzzles — standalone lessons.",
+    accent: "from-sky-400/20 to-blue-500/10",
+    border: "border-sky-400/50",
+  },
+};
+
+export function isAlgebraSkillsCurriculumItem(item: InteractiveCatalogItem) {
+  return item.subject === "Algebra" && item.topic.startsWith("Algebra Skills (Level");
+}
+
+export function isLinearEquationsCurriculumItem(item: InteractiveCatalogItem) {
+  return item.subject === "Algebra" && item.topic.startsWith("Linear Equations (Level");
+}
+
+export function isCoordinateGeometryCurriculumItem(item: InteractiveCatalogItem) {
+  return item.subject === "Algebra" && item.topic.startsWith("Coordinate Geometry (Level");
+}
+
+/** @deprecated Use isAlgebraSkillsCurriculumItem */
 export function isAlgebraCurriculumItem(item: InteractiveCatalogItem) {
-  return item.topic.startsWith("Algebra (Level");
+  return isAlgebraSkillsCurriculumItem(item);
+}
+
+export function isFeaturedAlgebraItem(item: InteractiveCatalogItem) {
+  return (
+    item.subject === "Algebra" &&
+    !isAlgebraSkillsCurriculumItem(item) &&
+    !isLinearEquationsCurriculumItem(item) &&
+    !isCoordinateGeometryCurriculumItem(item)
+  );
+}
+
+export function interactivesForAlgebra() {
+  return INTERACTIVE_CATALOG.filter((i) => i.subject === "Algebra");
+}
+
+export function interactivesForAlgebraTrack(track: AlgebraTrackFilter) {
+  const items = interactivesForAlgebra();
+  if (track === "All") return items;
+  if (track === "LinearEquations") return items.filter(isLinearEquationsCurriculumItem);
+  if (track === "CoordinateGeometry") return items.filter(isCoordinateGeometryCurriculumItem);
+  if (track === "AlgebraSkills") return items.filter(isAlgebraSkillsCurriculumItem);
+  return items.filter(isFeaturedAlgebraItem);
+}
+
+const ALGEBRA_CURRICULUM_LEVEL_COUNTS: Record<AlgebraCurriculumTrack, number> = {
+  LinearEquations: 13,
+  CoordinateGeometry: 10,
+  AlgebraSkills: 13,
+};
+
+function algebraTopicPrefix(track: AlgebraCurriculumTrack) {
+  if (track === "LinearEquations") return "Linear Equations";
+  if (track === "CoordinateGeometry") return "Coordinate Geometry";
+  return "Algebra Skills";
+}
+
+export function filterAlgebraByLevel(
+  items: InteractiveCatalogItem[],
+  track: AlgebraCurriculumTrack,
+  level: CurriculumLevelFilter,
+) {
+  if (level === "All") return items;
+  return items.filter((i) => i.topic === `${algebraTopicPrefix(track)} (Level ${level})`);
+}
+
+export function algebraLevelOptions(track: AlgebraCurriculumTrack): { value: number; label: string }[] {
+  const themes =
+    track === "LinearEquations"
+      ? LINEAR_EQUATIONS_LEVEL_THEMES
+      : track === "CoordinateGeometry"
+        ? COORDINATE_GEOMETRY_LEVEL_THEMES
+        : ALGEBRA_SKILLS_LEVEL_THEMES;
+  const count = ALGEBRA_CURRICULUM_LEVEL_COUNTS[track];
+  return (Array.from({ length: count }, (_, i) => i + 1) as number[]).map((n) => ({
+    value: n,
+    label: `Level ${n} · ${themes[n as keyof typeof themes]}`,
+  }));
+}
+
+export function algebraThemesForTrack(track: AlgebraCurriculumTrack): Record<number, string> {
+  if (track === "LinearEquations") return LINEAR_EQUATIONS_LEVEL_THEMES;
+  if (track === "CoordinateGeometry") return COORDINATE_GEOMETRY_LEVEL_THEMES;
+  return ALGEBRA_SKILLS_LEVEL_THEMES;
+}
+
+export function algebraTrackBadge(track: AlgebraCurriculumTrack): string {
+  if (track === "LinearEquations") {
+    return "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300";
+  }
+  if (track === "CoordinateGeometry") {
+    return "bg-teal-500/15 text-teal-700 dark:text-teal-300";
+  }
+  return "bg-violet-500/15 text-violet-700 dark:text-violet-300";
 }
 
 export function isNegativeNumbersCurriculumItem(item: InteractiveCatalogItem) {
@@ -658,7 +822,6 @@ export function isFeaturedMathItem(item: InteractiveCatalogItem) {
   return (
     item.subject === "Math" &&
     !isFractionCurriculumItem(item) &&
-    !isAlgebraCurriculumItem(item) &&
     !isNegativeNumbersCurriculumItem(item) &&
     !isCoordinatePlaneCurriculumItem(item) &&
     !isPercentsCurriculumItem(item) &&
@@ -670,7 +833,6 @@ export function interactivesForMathTrack(track: MathTrackFilter) {
   const mathItems = INTERACTIVE_CATALOG.filter((i) => i.subject === "Math");
   if (track === "All") return mathItems;
   if (track === "Fractions") return mathItems.filter(isFractionCurriculumItem);
-  if (track === "Algebra") return mathItems.filter(isAlgebraCurriculumItem);
   if (track === "NegativeNumbers") return mathItems.filter(isNegativeNumbersCurriculumItem);
   if (track === "CoordinatePlane") return mathItems.filter(isCoordinatePlaneCurriculumItem);
   if (track === "Percents") return mathItems.filter(isPercentsCurriculumItem);
@@ -680,14 +842,13 @@ export function interactivesForMathTrack(track: MathTrackFilter) {
 
 export function curriculumLevelFromTopic(topic: string): number | null {
   const match = topic.match(
-    /^(?:Fractions|Algebra|Negative Numbers|Coordinate Plane|Percents|Proportional Reasoning) \(Level (\d+)\)$/,
+    /^(?:Fractions|Algebra Skills|Linear Equations|Coordinate Geometry|Negative Numbers|Coordinate Plane|Percents|Proportional Reasoning) \(Level (\d+)\)$/,
   );
   return match ? Number(match[1]) : null;
 }
 
 export type CurriculumTrack =
   | "Fractions"
-  | "Algebra"
   | "NegativeNumbers"
   | "CoordinatePlane"
   | "Percents"
@@ -702,15 +863,13 @@ export function filterByCurriculumLevel(
   const prefix =
     track === "Fractions"
       ? "Fractions"
-      : track === "Algebra"
-        ? "Algebra"
-        : track === "NegativeNumbers"
-          ? "Negative Numbers"
-          : track === "CoordinatePlane"
-            ? "Coordinate Plane"
-            : track === "Percents"
-              ? "Percents"
-              : "Proportional Reasoning";
+      : track === "NegativeNumbers"
+        ? "Negative Numbers"
+        : track === "CoordinatePlane"
+          ? "Coordinate Plane"
+          : track === "Percents"
+            ? "Percents"
+            : "Proportional Reasoning";
   return items.filter((i) => i.topic === `${prefix} (Level ${level})`);
 }
 
@@ -726,8 +885,14 @@ export function levelThemeForItem(item: InteractiveCatalogItem): string | null {
   if (item.topic.startsWith("Fractions")) {
     return FRACTION_LEVEL_THEMES[level as 1 | 2 | 3 | 4 | 5] ?? null;
   }
-  if (item.topic.startsWith("Algebra")) {
-    return ALGEBRA_LEVEL_THEMES[level as keyof typeof ALGEBRA_LEVEL_THEMES] ?? null;
+  if (item.topic.startsWith("Linear Equations")) {
+    return LINEAR_EQUATIONS_LEVEL_THEMES[level as keyof typeof LINEAR_EQUATIONS_LEVEL_THEMES] ?? null;
+  }
+  if (item.topic.startsWith("Coordinate Geometry")) {
+    return COORDINATE_GEOMETRY_LEVEL_THEMES[level as keyof typeof COORDINATE_GEOMETRY_LEVEL_THEMES] ?? null;
+  }
+  if (item.topic.startsWith("Algebra Skills")) {
+    return ALGEBRA_SKILLS_LEVEL_THEMES[level as keyof typeof ALGEBRA_SKILLS_LEVEL_THEMES] ?? null;
   }
   if (item.topic.startsWith("Negative Numbers")) {
     return NEGATIVE_NUMBERS_LEVEL_THEMES[level as keyof typeof NEGATIVE_NUMBERS_LEVEL_THEMES] ?? null;
@@ -798,9 +963,9 @@ export function levelOptionsForTrack(track: CurriculumTrack): { value: number; l
       label: `Level ${n} · ${PROPORTIONAL_REASONING_LEVEL_THEMES[n]}`,
     }));
   }
-  return ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] as const).map((n) => ({
+  return ([1, 2, 3, 4, 5] as const).map((n) => ({
     value: n,
-    label: `Level ${n} · ${ALGEBRA_LEVEL_THEMES[n]}`,
+    label: `Level ${n} · ${FRACTION_LEVEL_THEMES[n]}`,
   }));
 }
 
@@ -810,7 +975,7 @@ export function curriculumThemesForTrack(track: CurriculumTrack): Record<number,
   if (track === "CoordinatePlane") return COORDINATE_PLANE_LEVEL_THEMES;
   if (track === "Percents") return PERCENTS_LEVEL_THEMES;
   if (track === "ProportionalReasoning") return PROPORTIONAL_REASONING_LEVEL_THEMES;
-  return ALGEBRA_LEVEL_THEMES;
+  return FRACTION_LEVEL_THEMES;
 }
 
 export function curriculumTrackBadge(track: CurriculumTrack): string {

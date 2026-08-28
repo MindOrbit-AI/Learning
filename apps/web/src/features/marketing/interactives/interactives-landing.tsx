@@ -26,13 +26,21 @@ import {
   engineLabel,
   interactivesForSubject,
   interactivesForMathTrack,
+  interactivesForAlgebraTrack,
   filterByCurriculumLevel,
+  filterAlgebraByLevel,
   groupCatalogByCurriculumLevel,
   searchCatalogItems,
   levelOptionsForTrack,
+  algebraLevelOptions,
+  algebraThemesForTrack,
+  algebraTrackBadge,
   MATH_TRACK_META,
+  ALGEBRA_TRACK_META,
   FRACTION_LEVEL_THEMES,
-  ALGEBRA_LEVEL_THEMES,
+  ALGEBRA_SKILLS_LEVEL_THEMES,
+  LINEAR_EQUATIONS_LEVEL_THEMES,
+  COORDINATE_GEOMETRY_LEVEL_THEMES,
   NEGATIVE_NUMBERS_LEVEL_THEMES,
   COORDINATE_PLANE_LEVEL_THEMES,
   PERCENTS_LEVEL_THEMES,
@@ -41,8 +49,10 @@ import {
   curriculumTrackBadge,
   lessonHref,
   type CurriculumTrack,
+  type AlgebraCurriculumTrack,
   type CurriculumLevelFilter,
   type MathTrackFilter,
+  type AlgebraTrackFilter,
   type InteractiveSubject,
   type InteractiveCatalogItem,
   type SubjectFilter,
@@ -54,6 +64,7 @@ import { ENGINE_PRIMITIVES, type EnginePrimitive } from "@/types/interactive-eng
 const SUBJECT_TABS: { id: SubjectFilter; label: string }[] = [
   { id: "All", label: "All subjects" },
   { id: "Math", label: "Math" },
+  { id: "Algebra", label: "Algebra" },
   { id: "Physics", label: "Physics" },
   { id: "Biology", label: "Biology" },
   { id: "Chemistry", label: "Chemistry" },
@@ -235,12 +246,6 @@ function MathTrackPicker({
       count: interactivesForMathTrack("Fractions").length,
     },
     {
-      id: "Algebra",
-      label: MATH_TRACK_META.Algebra.label,
-      description: MATH_TRACK_META.Algebra.description,
-      count: interactivesForMathTrack("Algebra").length,
-    },
-    {
       id: "NegativeNumbers",
       label: MATH_TRACK_META.NegativeNumbers.label,
       description: MATH_TRACK_META.NegativeNumbers.description,
@@ -273,7 +278,7 @@ function MathTrackPicker({
   ];
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-8">
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7">
       {tracks.map((track) => {
         const selected = active === track.id;
         const style =
@@ -322,7 +327,6 @@ function MathTrackOverview({
     themeSample: string;
   }[] = [
     { track: "Fractions", levels: 5, themeSample: FRACTION_LEVEL_THEMES[1] },
-    { track: "Algebra", levels: 13, themeSample: ALGEBRA_LEVEL_THEMES[1] },
     { track: "NegativeNumbers", levels: 8, themeSample: NEGATIVE_NUMBERS_LEVEL_THEMES[1] },
     { track: "CoordinatePlane", levels: 5, themeSample: COORDINATE_PLANE_LEVEL_THEMES[1] },
     { track: "Percents", levels: 5, themeSample: PERCENTS_LEVEL_THEMES[1] },
@@ -362,6 +366,183 @@ function MathTrackOverview({
           </div>
         );
       })}
+    </div>
+  );
+}
+
+function AlgebraTrackPicker({
+  active,
+  onChange,
+}: {
+  active: AlgebraTrackFilter;
+  onChange: (track: AlgebraTrackFilter) => void;
+}) {
+  const tracks: { id: AlgebraTrackFilter; label: string; description: string; count: number }[] = [
+    {
+      id: "All",
+      label: "All algebra",
+      description: "Linear equations, coordinate geometry, algebra skills, and featured lessons.",
+      count: interactivesForAlgebraTrack("All").length,
+    },
+    {
+      id: "LinearEquations",
+      label: ALGEBRA_TRACK_META.LinearEquations.label,
+      description: ALGEBRA_TRACK_META.LinearEquations.description,
+      count: interactivesForAlgebraTrack("LinearEquations").length,
+    },
+    {
+      id: "CoordinateGeometry",
+      label: ALGEBRA_TRACK_META.CoordinateGeometry.label,
+      description: ALGEBRA_TRACK_META.CoordinateGeometry.description,
+      count: interactivesForAlgebraTrack("CoordinateGeometry").length,
+    },
+    {
+      id: "AlgebraSkills",
+      label: ALGEBRA_TRACK_META.AlgebraSkills.label,
+      description: ALGEBRA_TRACK_META.AlgebraSkills.description,
+      count: interactivesForAlgebraTrack("AlgebraSkills").length,
+    },
+    {
+      id: "Featured",
+      label: ALGEBRA_TRACK_META.Featured.label,
+      description: ALGEBRA_TRACK_META.Featured.description,
+      count: interactivesForAlgebraTrack("Featured").length,
+    },
+  ];
+
+  return (
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      {tracks.map((track) => {
+        const selected = active === track.id;
+        const style =
+          track.id === "All"
+            ? { accent: "from-indigo-400/15 to-violet-500/5", border: "border-primary" }
+            : {
+                accent: ALGEBRA_TRACK_META[track.id as Exclude<AlgebraTrackFilter, "All">].accent,
+                border: ALGEBRA_TRACK_META[track.id as Exclude<AlgebraTrackFilter, "All">].border,
+              };
+
+        return (
+          <button
+            key={track.id}
+            type="button"
+            onClick={() => onChange(track.id)}
+            className={cn(
+              "flex flex-col rounded-2xl border bg-gradient-to-br p-4 text-left transition hover:shadow-md",
+              style.accent,
+              selected ? cn("ring-2 ring-primary/30 shadow-sm", style.border) : "border-border/80 hover:border-primary/30",
+            )}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <span className="text-sm font-extrabold text-foreground">{track.label}</span>
+              <span className="shrink-0 rounded-full bg-background/80 px-2 py-0.5 text-[11px] font-bold tabular-nums text-muted-foreground ring-1 ring-border/50">
+                {track.count}
+              </span>
+            </div>
+            <p className="mt-1.5 flex-1 text-xs font-medium leading-relaxed text-muted-foreground">
+              {track.description}
+            </p>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function AlgebraTrackOverview({
+  onSelectTrack,
+}: {
+  onSelectTrack: (track: Exclude<AlgebraTrackFilter, "All">) => void;
+}) {
+  const previews: {
+    track: Exclude<AlgebraTrackFilter, "All">;
+    levels: number;
+    themeSample: string;
+  }[] = [
+    { track: "LinearEquations", levels: 13, themeSample: LINEAR_EQUATIONS_LEVEL_THEMES[1] },
+    { track: "CoordinateGeometry", levels: 10, themeSample: COORDINATE_GEOMETRY_LEVEL_THEMES[1] },
+    { track: "AlgebraSkills", levels: 13, themeSample: ALGEBRA_SKILLS_LEVEL_THEMES[1] },
+    { track: "Featured", levels: 0, themeSample: "Quadratics & graphing" },
+  ];
+
+  return (
+    <div className="space-y-10">
+      {previews.map(({ track, levels, themeSample }) => {
+        const meta = ALGEBRA_TRACK_META[track];
+        const items = interactivesForAlgebraTrack(track);
+        const preview = items.slice(0, 3);
+
+        return (
+          <div key={track} className="rounded-3xl border border-border/80 bg-muted/20 p-5 sm:p-6">
+            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h3 className="text-xl font-extrabold text-foreground">{meta.label}</h3>
+                <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{meta.description}</p>
+                {levels > 0 ? (
+                  <p className="mt-2 text-xs font-bold text-muted-foreground">
+                    {levels} levels · starts with {themeSample}
+                  </p>
+                ) : null}
+              </div>
+              <button
+                type="button"
+                onClick={() => onSelectTrack(track)}
+                className="inline-flex w-fit items-center gap-1 rounded-xl border border-border/80 bg-card px-4 py-2 text-sm font-extrabold text-primary transition hover:border-primary/40 hover:bg-primary/5"
+              >
+                View all {items.length}
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+            <LessonGrid items={preview} />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function AlgebraBrowseContent({
+  items,
+  algebraTrack,
+  curriculumLevel,
+  onSelectTrack,
+}: {
+  items: InteractiveCatalogItem[];
+  algebraTrack: AlgebraTrackFilter;
+  curriculumLevel: CurriculumLevelFilter;
+  onSelectTrack: (track: Exclude<AlgebraTrackFilter, "All">) => void;
+}) {
+  if (items.length === 0) return null;
+
+  if (algebraTrack === "All") {
+    return <AlgebraTrackOverview onSelectTrack={onSelectTrack} />;
+  }
+
+  if (algebraTrack === "Featured") {
+    return <LessonGrid items={items} />;
+  }
+
+  const track = algebraTrack as AlgebraCurriculumTrack;
+  const levelGroups = groupCatalogByCurriculumLevel(items);
+
+  if (curriculumLevel !== "All" || levelGroups.length <= 1) {
+    return <LessonGrid items={items} />;
+  }
+
+  const themes = algebraThemesForTrack(track);
+  const trackBadge = algebraTrackBadge(track);
+
+  return (
+    <div className="space-y-10">
+      {levelGroups.map(([level, levelItems]) => (
+        <LevelGroupSection
+          key={level}
+          level={level}
+          theme={themes[level as keyof typeof themes] ?? ""}
+          items={levelItems}
+          trackAccent={trackBadge}
+        />
+      ))}
     </div>
   );
 }
@@ -447,6 +628,7 @@ export function InteractivesLanding() {
   const [subjectFilter, setSubjectFilter] = useState<SubjectFilter>("All");
   const [engineFilter, setEngineFilter] = useState<EnginePrimitive | "All">("All");
   const [mathTrackFilter, setMathTrackFilter] = useState<MathTrackFilter>("All");
+  const [algebraTrackFilter, setAlgebraTrackFilter] = useState<AlgebraTrackFilter>("All");
   const [curriculumLevelFilter, setCurriculumLevelFilter] = useState<CurriculumLevelFilter>("All");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -461,7 +643,6 @@ export function InteractivesLanding() {
       }
       if (
         (mathTrackFilter === "Fractions" ||
-          mathTrackFilter === "Algebra" ||
           mathTrackFilter === "NegativeNumbers" ||
           mathTrackFilter === "CoordinatePlane" ||
           mathTrackFilter === "Percents" ||
@@ -472,16 +653,39 @@ export function InteractivesLanding() {
       }
     }
 
+    if (subjectFilter === "All" || subjectFilter === "Algebra") {
+      if (algebraTrackFilter !== "All") {
+        items = interactivesForAlgebraTrack(algebraTrackFilter).filter((item) =>
+          subjectFilter === "All" ? true : item.subject === "Algebra",
+        );
+      }
+      if (
+        (algebraTrackFilter === "LinearEquations" ||
+          algebraTrackFilter === "CoordinateGeometry" ||
+          algebraTrackFilter === "AlgebraSkills") &&
+        curriculumLevelFilter !== "All"
+      ) {
+        items = filterAlgebraByLevel(items, algebraTrackFilter, curriculumLevelFilter);
+      }
+    }
+
     return searchCatalogItems(items, searchQuery);
-  }, [subjectFilter, mathTrackFilter, curriculumLevelFilter, searchQuery]);
+  }, [subjectFilter, mathTrackFilter, algebraTrackFilter, curriculumLevelFilter, searchQuery]);
 
   const isSearchMode = searchQuery.trim().length > 0;
   const isMathBrowse = subjectFilter === "All" || subjectFilter === "Math";
+  const isAlgebraBrowse = subjectFilter === "All" || subjectFilter === "Algebra";
   const showMathTracks = isMathBrowse && !isSearchMode;
+  const showAlgebraTracks = isAlgebraBrowse && !isSearchMode;
+  const showAlgebraLevelSelect =
+    showAlgebraTracks &&
+    subjectFilter === "Algebra" &&
+    (algebraTrackFilter === "LinearEquations" ||
+      algebraTrackFilter === "CoordinateGeometry" ||
+      algebraTrackFilter === "AlgebraSkills");
   const showLevelSelect =
     showMathTracks &&
     (mathTrackFilter === "Fractions" ||
-      mathTrackFilter === "Algebra" ||
       mathTrackFilter === "NegativeNumbers" ||
       mathTrackFilter === "CoordinatePlane" ||
       mathTrackFilter === "Percents" ||
@@ -491,7 +695,7 @@ export function InteractivesLanding() {
     if (isSearchMode) {
       const subjects =
         subjectFilter === "All"
-          ? (["Math", "Physics", "Biology", "Chemistry"] as InteractiveSubject[])
+          ? (["Math", "Algebra", "Physics", "Biology", "Chemistry"] as InteractiveSubject[])
           : [subjectFilter];
       return subjects
         .map((subject) => ({
@@ -505,46 +709,61 @@ export function InteractivesLanding() {
       return [];
     }
 
+    if (isAlgebraBrowse && subjectFilter === "Algebra") {
+      return [];
+    }
+
     const subjects =
       subjectFilter === "All"
-        ? (["Math", "Physics", "Biology", "Chemistry"] as InteractiveSubject[])
+        ? (["Math", "Algebra", "Physics", "Biology", "Chemistry"] as InteractiveSubject[])
         : [subjectFilter];
     return subjects
       .map((subject) => ({
         subject,
         items: filtered.filter((i) => i.subject === subject),
       }))
-      .filter((g) => g.items.length > 0 && g.subject !== "Math");
-  }, [subjectFilter, filtered, isSearchMode, isMathBrowse]);
+      .filter((g) => g.items.length > 0 && g.subject !== "Math" && g.subject !== "Algebra");
+  }, [subjectFilter, filtered, isSearchMode, isMathBrowse, isAlgebraBrowse]);
 
   const mathItems = useMemo(() => {
     if (!isMathBrowse || isSearchMode) return [];
     return filtered.filter((i) => i.subject === "Math");
   }, [filtered, isMathBrowse, isSearchMode]);
 
+  const algebraItems = useMemo(() => {
+    if (!isAlgebraBrowse || isSearchMode) return [];
+    return filtered.filter((i) => i.subject === "Algebra");
+  }, [filtered, isAlgebraBrowse, isSearchMode]);
+
   const hasActiveFilters =
     subjectFilter !== "All" ||
     mathTrackFilter !== "All" ||
+    algebraTrackFilter !== "All" ||
     curriculumLevelFilter !== "All" ||
     searchQuery.trim().length > 0;
 
   const clearFilters = () => {
     setSubjectFilter("All");
     setMathTrackFilter("All");
+    setAlgebraTrackFilter("All");
     setCurriculumLevelFilter("All");
     setSearchQuery("");
   };
 
   const handleSubjectChange = (id: SubjectFilter) => {
     setSubjectFilter(id);
-    if (id !== "Math" && id !== "All") {
-      setMathTrackFilter("All");
-      setCurriculumLevelFilter("All");
-    }
+    setMathTrackFilter("All");
+    setAlgebraTrackFilter("All");
+    setCurriculumLevelFilter("All");
   };
 
   const handleMathTrackChange = (track: MathTrackFilter) => {
     setMathTrackFilter(track);
+    setCurriculumLevelFilter("All");
+  };
+
+  const handleAlgebraTrackChange = (track: AlgebraTrackFilter) => {
+    setAlgebraTrackFilter(track);
     setCurriculumLevelFilter("All");
   };
 
@@ -610,7 +829,7 @@ export function InteractivesLanding() {
                 Browse by subject
               </h2>
               <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-                Pick a subject, explore a math track, or search — jump straight to what you want to master.
+                Pick a subject, explore levels and tracks, or search — jump straight to what you want to master.
               </p>
             </div>
           </ScrollReveal>
@@ -675,6 +894,39 @@ export function InteractivesLanding() {
             </div>
           ) : null}
 
+          {showAlgebraTracks && subjectFilter === "Algebra" ? (
+            <div className="mb-8 space-y-4">
+              <p className="text-center text-sm font-bold text-muted-foreground">Algebra tracks</p>
+              <AlgebraTrackPicker active={algebraTrackFilter} onChange={handleAlgebraTrackChange} />
+
+              {showAlgebraLevelSelect ? (
+                <div className="mx-auto flex max-w-md flex-col gap-2 pt-2">
+                  <label htmlFor="algebra-level" className="text-center text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                    Filter by level
+                  </label>
+                  <select
+                    id="algebra-level"
+                    value={curriculumLevelFilter === "All" ? "All" : String(curriculumLevelFilter)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setCurriculumLevelFilter(val === "All" ? "All" : Number(val));
+                    }}
+                    className="w-full rounded-xl border border-border/80 bg-card px-4 py-2.5 text-sm font-bold text-foreground shadow-sm focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  >
+                    <option value="All">
+                      All levels ({interactivesForAlgebraTrack(algebraTrackFilter).length} lessons)
+                    </option>
+                    {algebraLevelOptions(algebraTrackFilter as AlgebraCurriculumTrack).map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
           {hasActiveFilters ? (
             <div className="mb-8 flex flex-wrap items-center justify-center gap-2 text-sm">
               <span className="font-bold text-muted-foreground">
@@ -693,6 +945,11 @@ export function InteractivesLanding() {
               {mathTrackFilter !== "All" ? (
                 <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-bold text-foreground">
                   {MATH_TRACK_META[mathTrackFilter as Exclude<MathTrackFilter, "All">].label}
+                </span>
+              ) : null}
+              {algebraTrackFilter !== "All" ? (
+                <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-bold text-foreground">
+                  {ALGEBRA_TRACK_META[algebraTrackFilter as Exclude<AlgebraTrackFilter, "All">].label}
                 </span>
               ) : null}
               {curriculumLevelFilter !== "All" ? (
@@ -752,6 +1009,47 @@ export function InteractivesLanding() {
                   mathTrack={mathTrackFilter}
                   curriculumLevel={curriculumLevelFilter}
                   onSelectTrack={handleMathTrackChange}
+                />
+              )}
+            </ScrollReveal>
+          ) : null}
+
+          {isAlgebraBrowse && algebraItems.length > 0 ? (
+            <ScrollReveal>
+              {subjectFilter === "All" ? (
+                <section id="algebra" className="scroll-mt-24 mb-14">
+                  <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                    <div className="flex items-start gap-4">
+                      <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-400/20 to-violet-500/10 shadow-sm ring-1 ring-border/60">
+                        <SUBJECT_META.Algebra.icon className="h-7 w-7 text-primary" strokeWidth={2.5} />
+                      </span>
+                      <div>
+                        <h2 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">Algebra</h2>
+                        <p className="mt-1 max-w-xl text-sm font-medium text-muted-foreground">
+                          {SUBJECT_META.Algebra.description}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="inline-flex w-fit rounded-full bg-indigo-500/15 px-3 py-1 text-xs font-extrabold uppercase text-indigo-700 dark:text-indigo-300">
+                      {algebraItems.length} shown
+                    </span>
+                  </div>
+                  <AlgebraBrowseContent
+                    items={algebraItems}
+                    algebraTrack={algebraTrackFilter}
+                    curriculumLevel={curriculumLevelFilter}
+                    onSelectTrack={(track) => {
+                      handleAlgebraTrackChange(track);
+                      document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" });
+                    }}
+                  />
+                </section>
+              ) : (
+                <AlgebraBrowseContent
+                  items={algebraItems}
+                  algebraTrack={algebraTrackFilter}
+                  curriculumLevel={curriculumLevelFilter}
+                  onSelectTrack={handleAlgebraTrackChange}
                 />
               )}
             </ScrollReveal>

@@ -29,7 +29,7 @@ export type AlgebraTrackLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
 export type AlgebraLessonSeed = {
   id: string;
   title: string;
-  subject: "Math";
+  subject: "Algebra";
   topic: string;
   level: AlgebraDifficulty;
   algebraTrackLevel: AlgebraTrackLevel;
@@ -40,7 +40,7 @@ export type AlgebraLessonSeed = {
 export const ALGEBRA_CONCEPT = "linear-equations";
 
 export function topicForAlgebraLevel(n: AlgebraTrackLevel) {
-  return `Algebra (Level ${n})`;
+  return `Algebra Skills (Level ${n})`;
 }
 
 export function lessonId(level: AlgebraTrackLevel, slug: string) {
@@ -58,7 +58,7 @@ export function lesson(
   return {
     id: lessonId(level, slug),
     title,
-    subject: "Math",
+    subject: "Algebra",
     topic: topicForAlgebraLevel(level),
     level: difficulty,
     algebraTrackLevel: level,

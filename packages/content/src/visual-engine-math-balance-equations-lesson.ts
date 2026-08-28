@@ -2,7 +2,7 @@
 export const MATH_BALANCE_EQUATIONS_LESSON_SEED = {
   id: "lesson-balance-one-step-equations",
   title: "One-step equations on a balance",
-  subject: "Math",
+  subject: "Algebra",
   topic: "Linear equations",
   level: "beginner" as const,
   scenes: [

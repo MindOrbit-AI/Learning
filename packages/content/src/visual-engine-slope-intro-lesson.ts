@@ -2,7 +2,7 @@
 export const SLOPE_INTRO_VISUAL_LESSON_SEED = {
   id: "lesson-slope-from-points",
   title: "Slope from points on a grid",
-  subject: "Math",
+  subject: "Algebra",
   topic: "Linear functions",
   level: "beginner" as const,
   scenes: [

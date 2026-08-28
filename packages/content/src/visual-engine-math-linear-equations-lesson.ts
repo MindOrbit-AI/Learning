@@ -2,7 +2,7 @@
 export const MATH_LINEAR_EQUATIONS_LESSON_SEED = {
   id: "lesson-linear-equations-graph",
   title: "Linear equations from graphs",
-  subject: "Math",
+  subject: "Algebra",
   topic: "Linear equations",
   level: "beginner" as const,
   scenes: [

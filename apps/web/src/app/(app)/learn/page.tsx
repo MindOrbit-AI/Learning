@@ -24,12 +24,13 @@ type CatalogItem = {
 function subjectGroupFromDb(subject: { title: string; slug: string } | null | undefined): string {
   if (!subject) return "Other";
   const slug = subject.slug.toLowerCase();
-  if (slug === "algebra" || slug === "geometry" || slug === "sat-math") return "Math";
+  if (slug === "algebra") return "Algebra";
+  if (slug === "geometry" || slug === "sat-math") return "Math";
   return subject.title;
 }
 
 function sortSubjectGroups(keys: string[]): string[] {
-  const priority = ["Math", "Biology", "Chemistry", "Physics", "Computer Science", "World History"];
+  const priority = ["Math", "Algebra", "Biology", "Chemistry", "Physics", "Computer Science", "World History"];
   const seen = new Set<string>();
   const ordered: string[] = [];
   for (const p of priority) {
